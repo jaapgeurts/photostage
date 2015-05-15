@@ -5,7 +5,7 @@
 #include <QFileSystemModel>
 #include "imagefilesystemmodel.h"
 
-#include "cellflowview.h"
+#include "widgets/cellflowview.h"
 
 #include "importinfo.h"
 
@@ -23,18 +23,22 @@ public:
 
     ImportInfo getImportInfo();
 
+
 private slots:
     void onSourceDirClicked(const QModelIndex& index);
     void onDestinationDirClicked(const QModelIndex& index);
+    void onImportModeCopy();
 
-
+    void onImportModeMove();
+    void onImportModeAdd();
 private:
     Ui::ImportDialog *ui;
     QFileSystemModel *mSourceDrivesModel;
     QFileSystemModel *mDestinationDrivesModel;
     QModelIndex mDestinationModelIndex;
     ImageFileSystemModel *mFilesModel;
-    CellFlowView * flvFiles;
+    CellFlowView * mCfvPhotos;
+    ImportInfo::ImportMode mImportMode;
 
 };
 

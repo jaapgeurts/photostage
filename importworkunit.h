@@ -2,6 +2,7 @@
 #define IMPORTWORKUNIT_H
 
 #include <QObject>
+#include <QtSql>
 
 #include "importinfo.h"
 
@@ -16,6 +17,11 @@ public:
 signals:
 
 public slots:
+
+private:
+    int createPaths(QStringList &paths);
+    int insertPath(QSqlQuery &q, const QStringList &path, int pos, int parentid);
+    int importPhoto(const QFileInfo &file, int pathkey);
 };
 
 #endif // IMPORTWORKUNIT_H

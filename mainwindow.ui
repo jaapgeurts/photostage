@@ -6,15 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>588</width>
-    <height>442</height>
+    <width>1213</width>
+    <height>892</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>PhotoStage</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/appicon.png</normaloff>:/appicon.png</iconset>
+  </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
     <property name="spacing">
      <number>0</number>
     </property>
@@ -198,152 +202,107 @@
     </item>
     <item>
      <widget class="QFrame" name="frame_3">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
       </property>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="spacing">
-        <number>0</number>
-       </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0">
        <item>
         <widget class="QSplitter" name="splitter">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="orientation">
           <enum>Qt::Vertical</enum>
          </property>
          <widget class="QFrame" name="mainContent">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
           <property name="frameShadow">
            <enum>QFrame::Raised</enum>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0">
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
-            <widget class="QFrame" name="frame">
-             <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
+            <widget class="QSplitter" name="splitter_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
              </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_3">
-              <property name="leftMargin">
-               <number>0</number>
+             <widget class="QScrollArea" name="scrollArea">
+              <property name="widgetResizable">
+               <bool>true</bool>
               </property>
-              <property name="topMargin">
-               <number>0</number>
+              <widget class="ModulePanel" name="ModulePanel_1">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>76</width>
+                 <height>589</height>
+                </rect>
+               </property>
+              </widget>
+             </widget>
+             <widget class="CellFlowView" name="mClvPhotos" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+                <horstretch>1</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
               </property>
-              <property name="rightMargin">
-               <number>0</number>
+             </widget>
+             <widget class="QScrollArea" name="scrollArea_2">
+              <property name="widgetResizable">
+               <bool>true</bool>
               </property>
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QTreeView" name="treeView"/>
-              </item>
-             </layout>
-            </widget>
-           </item>
-           <item>
-            <widget class="QTableView" name="tableView"/>
-           </item>
-           <item>
-            <widget class="QFrame" name="frame_2">
-             <property name="frameShape">
-              <enum>QFrame::StyledPanel</enum>
-             </property>
-             <property name="frameShadow">
-              <enum>QFrame::Raised</enum>
-             </property>
-             <layout class="QVBoxLayout" name="verticalLayout_4">
-              <property name="leftMargin">
-               <number>0</number>
-              </property>
-              <property name="topMargin">
-               <number>0</number>
-              </property>
-              <property name="rightMargin">
-               <number>0</number>
-              </property>
-              <property name="bottomMargin">
-               <number>0</number>
-              </property>
-              <item>
-               <widget class="QTreeView" name="treeView_2"/>
-              </item>
-             </layout>
+              <widget class="ModulePanel" name="ModulePanel_2">
+               <property name="geometry">
+                <rect>
+                 <x>0</x>
+                 <y>0</y>
+                 <width>76</width>
+                 <height>589</height>
+                </rect>
+               </property>
+              </widget>
+             </widget>
             </widget>
            </item>
           </layout>
          </widget>
-         <widget class="QFrame" name="frame_4">
+         <widget class="QListView" name="listView_3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_7">
-           <property name="spacing">
-            <number>0</number>
-           </property>
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
-            <number>0</number>
-           </property>
-           <item>
-            <widget class="QListView" name="listView_3">
-             <property name="frameShape">
-              <enum>QFrame::NoFrame</enum>
-             </property>
-             <property name="verticalScrollBarPolicy">
-              <enum>Qt::ScrollBarAlwaysOff</enum>
-             </property>
-             <property name="flow">
-              <enum>QListView::LeftToRight</enum>
-             </property>
-            </widget>
-           </item>
-          </layout>
+          <property name="flow">
+           <enum>QListView::LeftToRight</enum>
+          </property>
          </widget>
         </widget>
        </item>
@@ -360,7 +319,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>588</width>
+     <width>1213</width>
      <height>22</height>
     </rect>
    </property>
@@ -369,6 +328,8 @@
      <string>File</string>
     </property>
     <addaction name="actionImport"/>
+    <addaction name="separator"/>
+    <addaction name="actionClose_Window"/>
     <addaction name="actionExport"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
@@ -462,8 +423,10 @@
      <addaction name="actionPrint"/>
     </widget>
     <addaction name="actionMinimize"/>
+    <addaction name="actionZoom"/>
     <addaction name="menuWindow_Mode"/>
     <addaction name="menuModules"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -481,6 +444,12 @@
     <property name="title">
      <string>Metadata</string>
     </property>
+    <addaction name="actionEdit_Capture_Time"/>
+    <addaction name="separator"/>
+    <addaction name="actionImport_Keywords"/>
+    <addaction name="actionExport_Keywords"/>
+    <addaction name="actionRemove_Unused_Keywords"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -740,9 +709,63 @@
     <string>Orange</string>
    </property>
   </action>
+  <action name="actionClose_Window">
+   <property name="text">
+    <string>Close Window</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
+   </property>
+  </action>
+  <action name="actionZoom">
+   <property name="text">
+    <string>Zoom</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit...</string>
+   </property>
+  </action>
+  <action name="actionEdit_Capture_Time">
+   <property name="text">
+    <string>Edit Capture Time...</string>
+   </property>
+  </action>
+  <action name="actionImport_Keywords">
+   <property name="text">
+    <string>Import Keywords...</string>
+   </property>
+  </action>
+  <action name="actionExport_Keywords">
+   <property name="text">
+    <string>Export Keywords...</string>
+   </property>
+  </action>
+  <action name="actionRemove_Unused_Keywords">
+   <property name="text">
+    <string>Remove Unused Keywords</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <customwidgets>
+  <customwidget>
+   <class>CellFlowView</class>
+   <extends>QWidget</extends>
+   <header>widgets/cellflowview.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ModulePanel</class>
+   <extends>QWidget</extends>
+   <header>widgets/modulepanel.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="resources.qrc"/>
+ </resources>
  <connections>
   <connection>
    <sender>actionImport</sender>
@@ -760,9 +783,43 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionAbout</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onActionAboutTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionEdit_Capture_Time</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onActionEditTimeTriggered()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onActionImportTriggered()</slot>
+  <slot>onActionAboutTriggered()</slot>
+  <slot>onActionEditTimeTriggered()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="moduleNavGroup"/>

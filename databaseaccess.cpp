@@ -7,29 +7,42 @@ DatabaseAccess::DatabaseAccess(QObject *parent) : QObject(parent)
 {
 
     mDB = QSqlDatabase::addDatabase("QSQLITE");
-    mDB.setDatabaseName("photostage.db");
+    QString dbfile =  QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)+QDir::separator()+"photostage.db";
+    qDebug() << "Saving database to" << dbfile;
+    mDB.setDatabaseName(dbfile);
 
     if (!mDB.open())
-        qDebug() << mDB.lastError().text();
+        qDebug() << mDB.lastError();
 
     QStringList tables = mDB.tables();
-    if (tables.contains("photos", Qt::CaseInsensitive)
-            && tables.contains("paths", Qt::CaseInsensitive))
+    if (tables.contains("photo", Qt::CaseInsensitive)
+            && tables.contains("path", Qt::CaseInsensitive)
+            && tables.contains("keyword", Qt::CaseInsensitive)
+            && tables.contains("photo_keyword", Qt::CaseInsensitive))
         qDebug() << "Tables already exist.";
-     else
+    else
     {
         initDb();
     }
 
 }
 
+const QSqlDatabase& DatabaseAccess::getDb()
+{
+    return mDB;
+}
+
 void DatabaseAccess::initDb()
 {
     QSqlQuery q;
-    q.exec(QLatin1String("create table photo (id integer primary key, path integer, filename varchar, iso integer, shutter_speed float, float focal_length, datetime_taken text, hash varchar, rating integer, color integer, flag integer"));
-    q.exec(QLatin1String("create table path (id integer primary key, directory varchar, parent integer"));
-    q.exec(QLatin1String("create table keyword (id integer primary key, keyword varchar, parent integer"));
-    q.exec(QLatin1String("create table photo_keyword (photo_id integer, keyword_id integer)"));
+    if (!q.exec(QLatin1String("create table path (id integer primary key AUTOINCREMENT, directory varchar, parent_id integer)")))
+        qDebug() << "Failed to create table" << q.lastError();
+    if(!q.exec(QLatin1String("create table photo (id integer primary key AUTOINCREMENT, path_id integer, filename varchar, iso integer, shutter_speed float, float focal_length, datetime_taken text, hash varchar, rating integer, color integer, flag integer)")))
+        qDebug() << "Failed to create table" << q.lastError();
+    if(!q.exec(QLatin1String("create table keyword (id integer primary key AUTOINCREMENT, keyword varchar, parent_id integer)")))
+        qDebug() << "Failed to create table" << q.lastError();
+    if(!q.exec(QLatin1String("create table photo_keyword (photo_id integer, keyword_id integer)")))
+        qDebug() << "Failed to create table" << q.lastError();
 
 }
 

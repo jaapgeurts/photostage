@@ -1,2 +1,6 @@
-<RCC/>
-
+<RCC>
+    <qresource prefix="/">
+        <file alias="appicon.png">appicon.iconset/icon_512x512.png</file>
+        <file alias="appicon_small.png">appicon.iconset/icon_128x128.png</file>
+    </qresource>
+</RCC>

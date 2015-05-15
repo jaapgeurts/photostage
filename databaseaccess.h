@@ -10,6 +10,8 @@ public:
     explicit DatabaseAccess(QObject *parent = 0);
 
 
+    const QSqlDatabase &getDb();
+
 signals:
 
 public slots:

@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-#include "importdialog.h"
+#include "databaseaccess.h"
 
 namespace Ui {
 class MainWindow;
@@ -19,11 +19,14 @@ public:
 
 private slots:
     void onActionImportTriggered();
-//    void onDialogImportFinished(int resultCode);
+    void onActionAboutTriggered();
+    void onActionEditTimeTriggered();
+
 
 private:
     Ui::MainWindow *ui;
-//    ImportDialog* mImportDialog;
+    DatabaseAccess * mDatabaseAccess;
+
 };
 
 #endif // MAINWINDOW_H

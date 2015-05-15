@@ -20,6 +20,7 @@ void ImageFileLoader::run()
    // qDebug() << "worker thread " << mModelIndex.row() <<" started";
 
     // TODO: catch errors and emit error(QString)
+    //qDebug() << "Reading image:" << mPath;
     QImage pixmap = QImage(mPath);
     QImage image = pixmap.scaled(QSize(256,256),Qt::KeepAspectRatio);
     emit dataReady(mModelIndex,image);

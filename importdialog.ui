@@ -24,6 +24,68 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>394</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="rbCopy">
+        <property name="text">
+         <string>Copy</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="rbMove">
+        <property name="text">
+         <string>Move</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="rbAdd">
+        <property name="text">
+         <string>Add</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>394</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
     <widget class="QFrame" name="frmMain">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -41,6 +103,16 @@
          <enum>QFrame::Raised</enum>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QCheckBox" name="checkBox">
+           <property name="text">
+            <string>Include subdirectories</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QTreeView" name="trvwSource"/>
          </item>
@@ -187,9 +259,60 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>rbCopy</sender>
+   <signal>clicked()</signal>
+   <receiver>ImportDialog</receiver>
+   <slot>onImportModeCopy()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>465</x>
+     <y>39</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>573</x>
+     <y>9</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbMove</sender>
+   <signal>clicked()</signal>
+   <receiver>ImportDialog</receiver>
+   <slot>onImportModeMove()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>532</x>
+     <y>39</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>746</x>
+     <y>6</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbAdd</sender>
+   <signal>clicked()</signal>
+   <receiver>ImportDialog</receiver>
+   <slot>onImportModeAdd()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>596</x>
+     <y>40</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>411</x>
+     <y>8</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onSourceDirClicked(QModelIndex)</slot>
   <slot>onDestinationDirClicked(QModelIndex)</slot>
+  <slot>onImportModeCopy()</slot>
+  <slot>onImportModeMove()</slot>
+  <slot>onImportModeAdd()</slot>
  </slots>
 </ui>

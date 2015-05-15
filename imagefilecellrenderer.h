@@ -1,7 +1,7 @@
 #ifndef IMAGEFILECELLRENDERER_H
 #define IMAGEFILECELLRENDERER_H
 
-#include "abstractcellrenderer.h"
+#include "widgets/abstractcellrenderer.h"
 
 class ImageFileCellRenderer : public AbstractCellRenderer
 {

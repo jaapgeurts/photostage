@@ -15,9 +15,8 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     importdialog.cpp \
-    qphotomodel.cpp \
-    cellflowview.cpp \
-    abstractcellrenderer.cpp \
+    widgets/cellflowview.cpp \
+    widgets/abstractcellrenderer.cpp \
     imagefilecellrenderer.cpp \
     imagefilesystemmodel.cpp \
     imagefileloader.cpp \
@@ -25,14 +24,21 @@ SOURCES += main.cpp\
     databaseaccess.cpp \
     importworkunit.cpp \
     importinfo.cpp \
-    volumediscoverer.cpp \
-    volumediscovererimpl.cpp
+    sqlphotomodel.cpp \
+    imagedbcellrenderer.cpp \
+    sqlpathmodel.cpp \
+    sqlkeywordmodel.cpp \
+    widgets/modulepanel.cpp \
+    aboutdialog.cpp \
+    widgets/fixedtreeview.cpp \
+    librarymodules/keywordingmodule.cpp \
+    timeadjustdialog.cpp \
+    sqlphotoinfo.cpp
 
 HEADERS  += mainwindow.h \
     importdialog.h \
-    qphotomodel.h \
-    cellflowview.h \
-    abstractcellrenderer.h \
+    widgets/cellflowview.h \
+    widgets/abstractcellrenderer.h \
     imagefilecellrenderer.h \
     imagefilesystemmodel.h \
     imagefileloader.h \
@@ -40,24 +46,36 @@ HEADERS  += mainwindow.h \
     databaseaccess.h \
     importworkunit.h \
     importinfo.h \
-    volumediscoverer.h \
-    volumediscovererimpl.h \
-    volumediscovererplatform.h
+    sqlphotomodel.h \
+    imagedbcellrenderer.h \
+    sqlpathmodel.h \
+    sqlkeywordmodel.h \
+    widgets/modulepanel.h \
+    aboutdialog.h \
+    widgets/fixedtreeview.h \
+    librarymodules/keywordingmodule.h \
+    timeadjustdialog.h \
+    sqlphotoinfo.h
 
 FORMS    += mainwindow.ui \
     importdialog.ui \
-    preferencesdialog.ui
+    preferencesdialog.ui \
+    aboutdialog.ui \
+    timeadjustdialog.ui
 
 DISTFILES +=
 
+
 mac {
-    HEADERS +=  \
-            volumediscoverermac.h \
-            cocoainitializer.h
-    OBJECTIVE_SOURCES += \
-            volumediscoverermac.mm \
-            cocoainitializer.mm
+    #QMAKE_INFO_PLIST = Info.plist
+    ICON = appicon.icns
+    HEADERS +=
+    OBJECTIVE_SOURCES +=
     LIBS += \
             -framework AppKit
 }
+
+RESOURCES += \
+    qdarkstyle/style.qrc \
+    resources.qrc
 

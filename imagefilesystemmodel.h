@@ -7,13 +7,13 @@
 #include <QModelIndex>
 #include <QThreadPool>
 
+
 class ImageFileSystemModel : public QFileSystemModel
 {
     Q_OBJECT
 
 public:
 
-    enum Roles { FileImageRole = Qt::UserRole + 1 };
     ImageFileSystemModel(QObject* parent = 0);
     ~ImageFileSystemModel();
 

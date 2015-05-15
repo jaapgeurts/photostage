@@ -2,19 +2,38 @@
 #define QPHOTOMODEL_H
 
 #include <QAbstractListModel>
+#include <QtSql>
+#include <QHash>
 
-class QPhotoModel : QAbstractListModel
+#include "sqlphotoinfo.h"
+
+
+class SqlPhotoModel : public QAbstractListModel
 {
 public:
-    QPhotoModel();
-    ~QPhotoModel();
-
-    Qt::ItemFlags flags(const QModelIndex &index) const;
-    QVariant data(const QModelIndex &index, int role) const;
-
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    SqlPhotoModel(QObject* parent = 0);
+    ~SqlPhotoModel();
 
     int rowCount(const QModelIndex &parent) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    QVariant data(const QModelIndex &index, int role) const;
+
+    /*
+    // these methods are for editing
+    Qt::ItemFlags flags(const QModelIndex &index) const;
+    bool setData(const QModelIndex &index, const QVariant &value, int role);
+
+    // these methods are for updating(add/remove)
+    bool insertRows(int row, int count, const QModelIndex &parent);
+    bool removeRows(int row, int count, const QModelIndex &parent);
+    */
+
+private slots:
+    void imageLoaded(const QModelIndex &index, const QImage &pixmap);
+private:
+    QSqlQuery* mMainQuery;
+    QHash<QModelIndex,SqlPhotoInfo> *mPixmapCache;
+    QThreadPool *mThreadPool;
 
 };
 

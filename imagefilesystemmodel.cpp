@@ -18,8 +18,11 @@ ImageFileSystemModel::~ImageFileSystemModel()
 
 QVariant ImageFileSystemModel::data(const QModelIndex &index, int role) const
 {
-    QVariant data = QFileSystemModel::data(index,role);
-    if ( role == ImageFileSystemModel::FileImageRole)
+
+    if (!index.isValid())
+        return QVariant();
+    QVariant data = QFileSystemModel::data(index,QFileSystemModel::FilePathRole);
+    if ( role == Qt::DisplayRole)
     {
         // TODO: allocate on heap or stack?
         const QString path = data.toString();
@@ -61,7 +64,7 @@ void ImageFileSystemModel::imageLoaded(const QModelIndex &index, const QImage& p
 
     mPixmapCache->insert(index,pixmap);
     QVector<int> roles;
-    roles.append(ImageFileSystemModel::FileImageRole);
+    roles.append(Qt::DisplayRole);
     emit dataChanged(index,index,roles);
 }
 
