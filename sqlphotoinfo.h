@@ -1,0 +1,5 @@
+#ifndef SQLPHOTOINFO
+#define SQLPHOTOINFO
+
+#endif // SQLPHOTOINFO
+
