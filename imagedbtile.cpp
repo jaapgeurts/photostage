@@ -1,7 +1,6 @@
 #include <QMenu>
 #include <QDebug>
 #include <QStyle>
-#include <QStyleOptionButton>
 
 #include "imagedbtile.h"
 #include "widgets/tileview.h"
@@ -13,7 +12,7 @@ ImageDbTile::ImageDbTile(TileView *parent) : AbstractTile(parent)
     mFontAwesome = QFont("FontAwesome",15);
 }
 
-void ImageDbTile::render(QPainter &painter, TileInfo& tileInfo, const QVariant &data)
+void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVariant &data)
 {
     int w = painter.window().width();
     int h = painter.window().height();
@@ -30,9 +29,12 @@ void ImageDbTile::render(QPainter &painter, TileInfo& tileInfo, const QVariant &
     if (!data.isNull())
     {
 
+        if (tileInfo.tileState & TileInfo::TileStateSelected == TileInfo::TileStateSelected)
+            painter.setBrush(QBrush(QColor(Qt::darkGray).lighter(180),Qt::SolidPattern));
+        else
+            painter.setBrush(QBrush(QColor(Qt::darkGray),Qt::SolidPattern));
         // draw the tile
         painter.setPen(QColor(Qt::darkGray));
-        painter.setBrush(QBrush(QColor(Qt::darkGray),Qt::SolidPattern));
         painter.drawRect(1,1,w-2,h-2);
         painter.setBrush(Qt::NoBrush);
 
@@ -78,23 +80,14 @@ void ImageDbTile::render(QPainter &painter, TileInfo& tileInfo, const QVariant &
             painter.setPen(QColor(Qt::darkGray).lighter(110));
         painter.setFont(mFontAwesome);
         painter.drawText(5,h-1-10,QString("%1").arg(QChar(0xf01e))); // rotate right
+        if (mRightHover.contains(tileInfo.index))
+            painter.setPen(QColor(Qt::darkGray).lighter(180));
+        else
+            painter.setPen(QColor(Qt::darkGray).lighter(110));
         painter.drawText(w-1-20,h-1-10,QString("%1").arg(QChar(0xf0e2))); // rotate left
 
 
         painter.restore();
-
-        // draw checkbox
-        if (tileInfo.tileState & (TileInfo::TileStateChecked | TileInfo::TileStateUnchecked))
-        {
-            QStyleOptionButton option;
-
-            option.initFrom(parent());
-            option.state = QStyle::State_Enabled;
-            option.state |= tileInfo.tileState & TileInfo::TileStateChecked ? QStyle::State_On : QStyle::State_Off;
-            option.rect.setRect(5,5,25,25);
-
-            parent()->style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,&option,&painter,parent());
-        }
 
         // draw border around image
         // TODO: check if the rectange is on or outside the image
@@ -109,18 +102,17 @@ void ImageDbTile::render(QPainter &painter, TileInfo& tileInfo, const QVariant &
     }
 }
 
-bool ImageDbTile::mouseMoveEvent(QMouseEvent*event,TileInfo& info)
+void ImageDbTile::mouseMoveEvent(QMouseEvent*event, const TileInfo& info)
 {
     int x = event->pos().x();
     int y = event->pos().y();
-
-    qDebug () << "Cell mouse ("<<x<<","<<y<<")";
 
     if (x < 30 && y > info.height - 30)
     {
         if (!mLeftHover.contains(info.index))
         {
             mLeftHover.insert(info.index,true);
+            event->accept();
             update();
         }
     }
@@ -129,9 +121,45 @@ bool ImageDbTile::mouseMoveEvent(QMouseEvent*event,TileInfo& info)
         if (mLeftHover.contains(info.index))
         {
             mLeftHover.remove(info.index);
+            event->accept();
             update();
         }
     }
+
+    if (x>info.width-30 && y > info.height - 30)
+    {
+        if (!mRightHover.contains(info.index))
+        {
+            mRightHover.insert(info.index,true);
+            update();
+        }
+    }
+    else
+    {
+        if (mRightHover.contains(info.index))
+        {
+            mRightHover.remove(info.index);
+            update();
+        }
+    }
+}
+
+void ImageDbTile::mouseReleaseEvent(QMouseEvent *event, const TileInfo &info)
+{
+    int x = event->pos().x();
+    int y = event->pos().y();
+
+    //TODO: Check the the "faux" button was also pressed first.
+    if (x < 30 && y > info.height - 30)
+      emit rotateRightClicked(info.modelIndex);
+    else
+        event->ignore();
+
+    if (x>info.width-30 && y > info.height - 30)
+        emit rotateLeftClicked(info.modelIndex);
+    else
+        event->ignore();
+
 }
 
 QRect ImageDbTile::resizeToFrameKeepAspectRatio(const QSize& src, const QSize& destFrame)

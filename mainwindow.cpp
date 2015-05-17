@@ -40,9 +40,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mDatabaseAccess = new DatabaseAccess();
 
-    // add our own CellFlowView
-    //mClvPhotos = new CellFlowView(ui->mainContent);
-    ui->mClvPhotos->setCellRenderer(new ImageDbTile(ui->mClvPhotos));
+    ImageDbTile * tile = new ImageDbTile(ui->mClvPhotos);
+    connect(tile,&ImageDbTile::rotateLeftClicked, this, &MainWindow::rotateLeftClicked);
+    connect(tile,&ImageDbTile::rotateRightClicked, this, &MainWindow::rotateRightClicked);
+
+    ui->mClvPhotos->setCellRenderer(tile);
     ui->mClvPhotos->setMinimumCellWidth(150);
     ui->mClvPhotos->setMaximumCellWidth(200);
     ui->mClvPhotos->setCheckBoxMode(false);
@@ -123,4 +125,16 @@ void MainWindow::customContextMenu(const QPoint &pos)
     QMenu *m = ui->menuPhoto;
     m->popup(ui->mClvPhotos->mapToGlobal(pos));
     m->exec();
+}
+
+void MainWindow::rotateLeftClicked(const QModelIndex &index)
+{
+    // todo: must check if there is a selection in the view.
+    qDebug() << "Left Clicked";
+}
+
+void MainWindow::rotateRightClicked(const QModelIndex &index)
+{
+    // todo: must check if there is a selection in the view.
+    qDebug() << "Right clicked";
 }

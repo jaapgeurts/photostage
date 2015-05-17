@@ -260,7 +260,7 @@
                </property>
               </widget>
              </widget>
-             <widget class="CellFlowView" name="mClvPhotos" native="true">
+             <widget class="TileView" name="mClvPhotos" native="true">
               <property name="sizePolicy">
                <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
                 <horstretch>1</horstretch>
@@ -751,9 +751,9 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>CellFlowView</class>
+   <class>TileView</class>
    <extends>QWidget</extends>
-   <header>widgets/cellflowview.h</header>
+   <header>widgets/tileview.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

@@ -50,6 +50,7 @@ public:
     QList<QModelIndex> & getCheckedItems() const;
 
 
+    TileInfo tileInfoForPosition(const QPoint &coords);
 signals:
 
 public slots:

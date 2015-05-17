@@ -2,15 +2,11 @@
 
 #include "tileview.h"
 
-
-
-
-AbstractTile::AbstractTile(TileView *parent)
+AbstractTile::AbstractTile(TileView *parent) :QObject(parent)
 {
-    mParent = parent;
 }
 
 void AbstractTile::update()
 {
-    mParent->update();
+    (dynamic_cast<TileView*>(parent()))->update();
 }

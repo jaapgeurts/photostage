@@ -7,7 +7,7 @@ ImageFileTile::ImageFileTile(TileView *parent) : AbstractTile(parent)
 }
 
 
-void ImageFileTile::render(QPainter& painter, TileInfo& info, const QVariant& data)
+void ImageFileTile::render(QPainter& painter,const TileInfo& info, const QVariant& data)
 {
     int w = painter.window().width();
     int h = painter.window().height();

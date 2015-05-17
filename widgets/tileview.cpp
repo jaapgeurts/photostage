@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QApplication>
 #include <QScroller>
+#include <QStyleOptionButton>
 #include <QStyle>
 
 #include <QWheelEvent>
@@ -198,6 +199,7 @@ void TileView::paintEvent(QPaintEvent */*event*/)
         tileInfo.column = col;
         tileInfo.row = row;
         tileInfo.index = i;
+        tileInfo.modelIndex = itemIndex;
         if (mSelection->contains(itemIndex))
             tileInfo.tileState = (TileInfo::TileState)(tileInfo.tileState | TileInfo::TileStateSelected);
 
@@ -224,6 +226,20 @@ void TileView::paintEvent(QPaintEvent */*event*/)
         mTile->render(painter,tileInfo,item);
 
         painter.restore();
+
+        // render the checkbox
+
+        if (mIsCheckBoxMode)
+        {
+                QStyleOptionButton option;
+
+                option.initFrom(this);
+                option.state = QStyle::State_Enabled;
+                option.state |= mCheckedList->contains(itemIndex) ? QStyle::State_On : QStyle::State_Off;
+                option.rect.setRect(5,5,25,25);
+
+                style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,&option,&painter,this);
+        }
 
         col++;
     }
@@ -271,13 +287,15 @@ void TileView::wheelEvent(QWheelEvent * event)
 void TileView::mouseReleaseEvent(QMouseEvent* event)
 {
 
+    TileInfo info = tileInfoForPosition(event->pos());
     // translate the coordinates to the tile
-    //    if ( mTile->mouseReleaseEvent(event,))
-    // the tile swallowed the event
-    return;
+    mTile->mouseReleaseEvent(event,info);
+    if (event->isAccepted())
+        // the tile swallowed the event
+        return;
 
     // Get the modelindex of the item that was clicked
-    QModelIndex index = posToModelIndex(event->pos());
+    QModelIndex index = info.modelIndex;
 
     if (index.isValid())
     {
@@ -358,20 +376,29 @@ void TileView::mouseMoveEvent(QMouseEvent *event)
 
     QMouseEvent event2 = QMouseEvent(event->type(),local,event->screenPos(),event->globalPos(),event->button(),event->buttons(),event->modifiers());
 
-    int index = posToIndex(pos);
+    TileInfo info = tileInfoForPosition(pos);
+
+    mTile->mouseMoveEvent(&event2,info);
+
+}
+
+TileInfo TileView::tileInfoForPosition(const QPoint & coords)
+{
+    int index = posToIndex(coords);
     TileInfo info;
-    info.index = index;
+    info.index = -1;
     if (mColumns != 0)
     {
+        info.index = index;
         info.row = index / mColumns;
         info.column = index % mColumns;
         info.x = info.column * mComputedCellWidth;
         info.y = info.row * mComputedCellHeight;
         info.width = mComputedCellWidth;
         info.height = mComputedCellHeight;
-
-        mTile->mouseMoveEvent(&event2,info);
+        info.modelIndex = posToModelIndex(coords);
     }
+    return info;
 }
 
 

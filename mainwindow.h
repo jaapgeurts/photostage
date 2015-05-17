@@ -26,6 +26,10 @@ private slots:
 
     void customContextMenu(const QPoint& pos);
 
+    // For clicks on the tile
+    void rotateLeftClicked(const QModelIndex& index);
+    void rotateRightClicked(const QModelIndex& index);
+
 private:
     Ui::MainWindow *ui;
     DatabaseAccess * mDatabaseAccess;

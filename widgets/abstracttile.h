@@ -1,9 +1,11 @@
 #ifndef ABSTRACTCELLRENDERER_H
 #define ABSTRACTCELLRENDERER_H
 
+#include <QObject>
 #include <QPainter>
 #include <QVariant>
 #include <QMouseEvent>
+#include <QModelIndex>
 
 class TileView;
 
@@ -17,7 +19,7 @@ struct TileInfo
         TileStateUnchecked = 0x008
     };
 
-    TileInfo() { userdata = NULL; tileState = TileStateNone; }
+    TileInfo() { tileState = TileStateNone; }
 
     // the ordinal number in the list
     int index;
@@ -30,34 +32,34 @@ struct TileInfo
     int width;
     int height;
 
-    TileState tileState;
+    QModelIndex modelIndex;
 
-    void * userdata;
+    TileState tileState;
 
 };
 
-class AbstractTile
+class AbstractTile : public QObject
 {
+    Q_OBJECT
+
 public:
 
     AbstractTile(TileView* parent=0);
-    virtual ~AbstractTile() {};
+    virtual ~AbstractTile() {}
 
     void setSize(const QSize& size) { mSize = size; }
     QSize size() { return mSize; }
 
-    virtual void render(QPainter& painter,  TileInfo& info, const QVariant& data) = 0;
-    virtual bool mouseMoveEvent(QMouseEvent*,  TileInfo&) { return false; }
-    virtual bool mousePressEvent(QMouseEvent*,  TileInfo&) { return false; }
-    virtual bool mouseReleaseEvent(QMouseEvent*,  TileInfo&) { return false; }
+    virtual void render(QPainter& painter,  const TileInfo& info, const QVariant& data) = 0;
+    virtual void mouseMoveEvent(QMouseEvent*, const  TileInfo&) {  }
+    virtual void mousePressEvent(QMouseEvent*, const  TileInfo&) {  }
+    virtual void mouseReleaseEvent(QMouseEvent*, const  TileInfo&) { }
 
 
 protected:
-    const TileView* parent() const { return mParent; }
     void update();
 
 private:
-    TileView* mParent;
     QSize mSize;
 
 };
