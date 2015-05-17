@@ -15,9 +15,6 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     importdialog.cpp \
-    widgets/cellflowview.cpp \
-    widgets/abstractcellrenderer.cpp \
-    imagefilecellrenderer.cpp \
     imagefilesystemmodel.cpp \
     imagefileloader.cpp \
     preferencesdialog.cpp \
@@ -25,7 +22,6 @@ SOURCES += main.cpp\
     importworkunit.cpp \
     importinfo.cpp \
     sqlphotomodel.cpp \
-    imagedbcellrenderer.cpp \
     sqlpathmodel.cpp \
     sqlkeywordmodel.cpp \
     widgets/modulepanel.cpp \
@@ -33,13 +29,14 @@ SOURCES += main.cpp\
     widgets/fixedtreeview.cpp \
     librarymodules/keywordingmodule.cpp \
     timeadjustdialog.cpp \
-    sqlphotoinfo.cpp
+    sqlphotoinfo.cpp \
+    widgets/abstracttile.cpp \
+    imagedbtile.cpp \
+    imagefiletile.cpp \
+    widgets/tileview.cpp
 
 HEADERS  += mainwindow.h \
     importdialog.h \
-    widgets/cellflowview.h \
-    widgets/abstractcellrenderer.h \
-    imagefilecellrenderer.h \
     imagefilesystemmodel.h \
     imagefileloader.h \
     preferencesdialog.h \
@@ -47,7 +44,6 @@ HEADERS  += mainwindow.h \
     importworkunit.h \
     importinfo.h \
     sqlphotomodel.h \
-    imagedbcellrenderer.h \
     sqlpathmodel.h \
     sqlkeywordmodel.h \
     widgets/modulepanel.h \
@@ -55,7 +51,11 @@ HEADERS  += mainwindow.h \
     widgets/fixedtreeview.h \
     librarymodules/keywordingmodule.h \
     timeadjustdialog.h \
-    sqlphotoinfo.h
+    sqlphotoinfo.h \
+    widgets/abstracttile.h \
+    imagedbtile.h \
+    imagefiletile.h \
+    widgets/tileview.h
 
 FORMS    += mainwindow.ui \
     importdialog.ui \
@@ -68,7 +68,7 @@ DISTFILES +=
 
 mac {
     #QMAKE_INFO_PLIST = Info.plist
-    ICON = appicon.icns
+    ICON = resources/appicon.icns
     HEADERS +=
     OBJECTIVE_SOURCES +=
     LIBS += \

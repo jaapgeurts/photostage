@@ -6,7 +6,7 @@
 #include "importdialog.h"
 #include "ui_importdialog.h"
 
-#include "imagefilecellrenderer.h"
+#include "imagefiletile.h"
 
 
 using namespace std;
@@ -18,8 +18,8 @@ ImportDialog::ImportDialog(QWidget *parent) :
     ui->setupUi(this);
 
     // add our own CellFlowView
-    mCfvPhotos = new CellFlowView(ui->frmMain);
-    mCfvPhotos->setCellRenderer(new ImageFileCellRenderer());
+    mCfvPhotos = new TileView(ui->frmMain);
+    mCfvPhotos->setCellRenderer(new ImageFileTile());
     mCfvPhotos->setMinimumCellWidth(125);
     mCfvPhotos->setMaximumCellWidth(175);
     mCfvPhotos->setCheckBoxMode(true);

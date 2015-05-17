@@ -1,11 +1,19 @@
 #include "mainwindow.h"
 #include <QApplication>
+#include <QFontDatabase>
 
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    // TODO consider doing this
+//    a.setQuitOnLastWindowClosed(false);
+
+    // Load extra fonts
+    int id = QFontDatabase::addApplicationFont(":/fonts/font-awesome.ttf");
+
+    // Load the dark style
     QFile f (":qdarkstyle/style.qss");
     if (!f.exists())
     {

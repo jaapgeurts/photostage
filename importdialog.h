@@ -5,7 +5,7 @@
 #include <QFileSystemModel>
 #include "imagefilesystemmodel.h"
 
-#include "widgets/cellflowview.h"
+#include "widgets/tileview.h"
 
 #include "importinfo.h"
 
@@ -37,7 +37,7 @@ private:
     QFileSystemModel *mDestinationDrivesModel;
     QModelIndex mDestinationModelIndex;
     ImageFileSystemModel *mFilesModel;
-    CellFlowView * mCfvPhotos;
+    TileView * mCfvPhotos;
     ImportInfo::ImportMode mImportMode;
 
 };

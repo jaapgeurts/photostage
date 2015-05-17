@@ -2,8 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QPoint>
 
 #include "databaseaccess.h"
+#include "sqlphotomodel.h"
 
 namespace Ui {
 class MainWindow;
@@ -22,10 +24,12 @@ private slots:
     void onActionAboutTriggered();
     void onActionEditTimeTriggered();
 
+    void customContextMenu(const QPoint& pos);
 
 private:
     Ui::MainWindow *ui;
     DatabaseAccess * mDatabaseAccess;
+    SqlPhotoModel * mPhotoModel;
 
 };
 

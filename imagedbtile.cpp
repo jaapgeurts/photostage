@@ -1,29 +1,31 @@
 #include <QMenu>
+#include <QDebug>
+#include <QStyle>
+#include <QStyleOptionButton>
 
-#include "imagedbcellrenderer.h"
-
+#include "imagedbtile.h"
+#include "widgets/tileview.h"
 #include "sqlphotoinfo.h"
 
-ImageDbCellRenderer::ImageDbCellRenderer()
+ImageDbTile::ImageDbTile(TileView *parent) : AbstractTile(parent)
 {
 
+    mFontAwesome = QFont("FontAwesome",15);
 }
 
-void ImageDbCellRenderer::render(QPainter &painter, const QVariant &data)
+void ImageDbTile::render(QPainter &painter, TileInfo& tileInfo, const QVariant &data)
 {
     int w = painter.window().width();
     int h = painter.window().height();
     //   painter.drawLine(0,0,w-1,h-1);
     //   painter.drawLine(0,h,w-1,0);
 
-    float ratio = 0.80f;
+    float ratio = 0.70f;
     int wf = (int)(w * ratio); // width frame
     int hf = (int)(h * ratio); // height frame
 
+    // TODO: Load fonts in advance??
     painter.setFont(QFont("helvetica",18));
-
-
-
 
     if (!data.isNull())
     {
@@ -47,10 +49,10 @@ void ImageDbCellRenderer::render(QPainter &painter, const QVariant &data)
 
         // draw the id text
         painter.save();
-        painter.setPen(QColor(Qt::darkGray).lighter());
+        painter.setPen(QColor(Qt::darkGray).lighter(110));
         painter.setFont(QFont(QString("Verdana"),24,QFont::Bold));
         int fontHeight = painter.fontMetrics().height();
-        painter.drawText(5,fontHeight,QString::number(info.id));
+        painter.drawText(5,fontHeight-5,QString::number(info.id));
 
         painter.restore();
 
@@ -65,6 +67,35 @@ void ImageDbCellRenderer::render(QPainter &painter, const QVariant &data)
         newSize.translate((w-wf)/2,(h-hf)/2);
 
         painter.drawImage(newSize,image);
+
+        painter.save();
+
+
+        // Draw the rotate handles
+        if (mLeftHover.contains(tileInfo.index))
+            painter.setPen(QColor(Qt::darkGray).lighter(180));
+        else
+            painter.setPen(QColor(Qt::darkGray).lighter(110));
+        painter.setFont(mFontAwesome);
+        painter.drawText(5,h-1-10,QString("%1").arg(QChar(0xf01e))); // rotate right
+        painter.drawText(w-1-20,h-1-10,QString("%1").arg(QChar(0xf0e2))); // rotate left
+
+
+        painter.restore();
+
+        // draw checkbox
+        if (tileInfo.tileState & (TileInfo::TileStateChecked | TileInfo::TileStateUnchecked))
+        {
+            QStyleOptionButton option;
+
+            option.initFrom(parent());
+            option.state = QStyle::State_Enabled;
+            option.state |= tileInfo.tileState & TileInfo::TileStateChecked ? QStyle::State_On : QStyle::State_Off;
+            option.rect.setRect(5,5,25,25);
+
+            parent()->style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,&option,&painter,parent());
+        }
+
         // draw border around image
         // TODO: check if the rectange is on or outside the image
         painter.setPen(QColor(Qt::black));
@@ -78,14 +109,32 @@ void ImageDbCellRenderer::render(QPainter &painter, const QVariant &data)
     }
 }
 
-void ImageDbCellRenderer::mouseReleaseEvent(QMouseEvent*event)
+bool ImageDbTile::mouseMoveEvent(QMouseEvent*event,TileInfo& info)
 {
-    QMenu m;;
-    m.addAction("Awesome photo");
-    m.exec();
+    int x = event->pos().x();
+    int y = event->pos().y();
+
+    qDebug () << "Cell mouse ("<<x<<","<<y<<")";
+
+    if (x < 30 && y > info.height - 30)
+    {
+        if (!mLeftHover.contains(info.index))
+        {
+            mLeftHover.insert(info.index,true);
+            update();
+        }
+    }
+    else
+    {
+        if (mLeftHover.contains(info.index))
+        {
+            mLeftHover.remove(info.index);
+            update();
+        }
+    }
 }
 
-QRect ImageDbCellRenderer::resizeToFrameKeepAspectRatio(const QSize& src, const QSize& destFrame)
+QRect ImageDbTile::resizeToFrameKeepAspectRatio(const QSize& src, const QSize& destFrame)
 {
 
     int ws = src.width(); // width source;

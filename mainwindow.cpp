@@ -9,7 +9,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "importworkunit.h"
-#include "imagedbcellrenderer.h"
+#include "imagedbtile.h"
 
 // Models
 #include "sqlphotomodel.h"
@@ -42,14 +42,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // add our own CellFlowView
     //mClvPhotos = new CellFlowView(ui->mainContent);
-    ui->mClvPhotos->setCellRenderer(new ImageDbCellRenderer());
-    ui->mClvPhotos->setMinimumCellWidth(125);
-    ui->mClvPhotos->setMaximumCellWidth(175);
+    ui->mClvPhotos->setCellRenderer(new ImageDbTile(ui->mClvPhotos));
+    ui->mClvPhotos->setMinimumCellWidth(150);
+    ui->mClvPhotos->setMaximumCellWidth(200);
     ui->mClvPhotos->setCheckBoxMode(false);
 
+    ui->mClvPhotos->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->mClvPhotos,&TileView::customContextMenuRequested,this,&MainWindow::customContextMenu);
+
     // These models are auto deleted by the QObject hierarchy
-    SqlPhotoModel *photoModel = new SqlPhotoModel(this);
-    ui->mClvPhotos->setModel(photoModel);
+    mPhotoModel = new SqlPhotoModel(this);
+    ui->mClvPhotos->setModel(mPhotoModel);
 
     ui->scrollArea->setWidgetResizable(true);
     ui->scrollArea_2->setWidgetResizable(true);
@@ -74,7 +77,6 @@ MainWindow::MainWindow(QWidget *parent) :
     trvwKeywords->setModel(keywordModel);
     trvwKeywords->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->ModulePanel_2->addPanel("Keyword List",trvwKeywords);
-
 
 }
 
@@ -110,4 +112,15 @@ void MainWindow::onActionEditTimeTriggered()
     TimeAdjustDialog* timeAdjustDialog = new TimeAdjustDialog(this);
     int code = timeAdjustDialog->exec();
     delete timeAdjustDialog;
+}
+
+void MainWindow::customContextMenu(const QPoint &pos)
+{
+    QModelIndex index = ui->mClvPhotos->posToModelIndex(pos);
+    // check if there is a single selection or a list.
+    SqlPhotoInfo info = mPhotoModel->data(index,Qt::DisplayRole).value<SqlPhotoInfo>();
+
+    QMenu *m = ui->menuPhoto;
+    m->popup(ui->mClvPhotos->mapToGlobal(pos));
+    m->exec();
 }

@@ -1,6 +1,10 @@
 <RCC>
     <qresource prefix="/">
-        <file alias="appicon.png">appicon.iconset/icon_512x512.png</file>
-        <file alias="appicon_small.png">appicon.iconset/icon_128x128.png</file>
+        <file alias="appicon.png">resources/appicon.iconset/icon_512x512.png</file>
+        <file alias="appicon_small.png">resources/appicon.iconset/icon_128x128.png</file>
     </qresource>
+    <qresource prefix="/fonts">
+        <file alias="font-awesome.ttf">resources/fontawesome-webfont.ttf</file>
+    </qresource>
+    <qresource prefix="/icons"/>
 </RCC>

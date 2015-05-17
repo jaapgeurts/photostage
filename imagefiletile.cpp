@@ -1,13 +1,13 @@
 
-#include "imagefilecellrenderer.h"
+#include "imagefiletile.h"
 
-ImageFileCellRenderer::ImageFileCellRenderer()
+ImageFileTile::ImageFileTile(TileView *parent) : AbstractTile(parent)
 {
 
 }
 
 
-void ImageFileCellRenderer::render(QPainter& painter, const QVariant& data)
+void ImageFileTile::render(QPainter& painter, TileInfo& info, const QVariant& data)
 {
     int w = painter.window().width();
     int h = painter.window().height();
@@ -49,3 +49,4 @@ void ImageFileCellRenderer::render(QPainter& painter, const QVariant& data)
         painter.drawLine(0,h-1,w-1,0);
     }
 }
+

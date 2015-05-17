@@ -7,21 +7,24 @@
 #include <QAbstractItemModel>
 #include <QVariant>
 
-#include "abstractcellrenderer.h"
+#include "abstracttile.h"
 
-class CellFlowView : public QWidget
+class TileView : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit CellFlowView(QWidget *parent = 0);
-    ~CellFlowView();
+    explicit TileView(QWidget *parent = 0);
+    ~TileView();
 
     void setModel(QAbstractItemModel* model);
 
     void setRootIndex(const QModelIndex& index);
 
-    void setCellRenderer(AbstractCellRenderer * const renderer);
+    /*! set the celrenderer for this view
+     * the CellFlowView will take ownership of the renderer and delete it upon destruction
+     */
+    void setCellRenderer(AbstractTile * const renderer);
 
     void setMinimumCellWidth(int minWidth);
     void setMaximumCellWidth(int maxWidth);
@@ -37,19 +40,23 @@ public:
     QSize minimumSizeHint() const;
     QSize minimumSize() const;
 
-    QModelIndex coordsToModelIndex(const QPoint & coords);
-    void computeScrollBarValues(int count);
+    QModelIndex posToModelIndex(const QPoint & pos);
+    QPoint mapToTile(const QPoint &coords);
+    int posToIndex(const QPoint &pos);
 
     void setCheckBoxMode(bool mode);
     bool pointInCheckBox(const QPoint & coords);
 
     QList<QModelIndex> & getCheckedItems() const;
 
+
 signals:
 
 public slots:
     void newRowsAvailable(const QModelIndex & parent, int first, int last);
     void updateCellContents(const QModelIndex & topleft, const QModelIndex& bottomright,const QVector<int> & roles);
+
+private slots:
 
     // slots for slider events
     void sliderValueChanged(int newValue);
@@ -60,6 +67,7 @@ protected:
     void wheelEvent(QWheelEvent * event) Q_DECL_OVERRIDE;
     void resizeEvent(QResizeEvent* event) Q_DECL_OVERRIDE;
     void mouseReleaseEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
+    void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
 
 private:
     QAbstractItemModel *mListModel;
@@ -68,8 +76,11 @@ private:
     int mComputedCellWidth;
     int mComputedCellHeight;
     float mCellHeightRatio;
+    // number of columns in a row
+    int mColumns;
+
     QMargins mCellMargins;
-    AbstractCellRenderer *mCellRenderer;
+    AbstractTile *mTile;
     QModelIndex mRootIndex;
     QModelIndex mLastSelection;
     QScrollBar *mHScrollBar;
@@ -78,6 +89,9 @@ private:
     QList<QModelIndex> *mSelection;
     bool mIsCheckBoxMode;
     int mViewportXPosition; // contains the top x position of the scroll area
+
+    void computeScrollBarValues(int count);
+
 };
 
 #endif // CELLFLOWVIEW_H
