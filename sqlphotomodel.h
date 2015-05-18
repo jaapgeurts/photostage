@@ -28,11 +28,14 @@ public:
     bool removeRows(int row, int count, const QModelIndex &parent);
     */
 
+    void updateData(const QModelIndex &index);
+
 private slots:
     void imageLoaded(const QModelIndex &index, const QImage &pixmap);
+
 private:
     QSqlQuery* mMainQuery;
-    QHash<QModelIndex,SqlPhotoInfo> *mPixmapCache;
+    QHash<QModelIndex,SqlPhotoInfo> *mPhotoInfoCache;
     QThreadPool *mThreadPool;
 
 };

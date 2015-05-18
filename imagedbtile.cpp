@@ -70,10 +70,8 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
 
         painter.drawImage(newSize,image);
 
-        painter.save();
-
-
         // Draw the rotate handles
+        painter.save();
         if (mLeftHover.contains(tileInfo.index))
             painter.setPen(QColor(Qt::darkGray).lighter(180));
         else
@@ -86,6 +84,20 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
             painter.setPen(QColor(Qt::darkGray).lighter(110));
         painter.drawText(w-1-20,h-1-10,QString("%1").arg(QChar(0xf0e2))); // rotate left
 
+        // draw the rating stars
+        painter.setPen(QColor(Qt::darkGray).darker(110));
+        painter.drawText(30,h-1-10,"·····");
+        QString rating;
+        rating.fill(QChar(CHAR_STAR),info.rating());
+        painter.setPen(QColor(Qt::black));
+        painter.drawText(30,h-1-10,rating);
+        if (mRatingHover.contains(tileInfo.index))
+        {
+            int hoverRate = mRatingHover.value(tileInfo.index);
+            painter.setPen(QColor(Qt::black));
+            rating.fill(QChar(CHAR_STAR),hoverRate);
+            painter.drawText(30,h-1-10,rating);
+        }
 
         painter.restore();
 
@@ -142,24 +154,67 @@ void ImageDbTile::mouseMoveEvent(QMouseEvent*event, const TileInfo& info)
             update();
         }
     }
+
+    if (x>30 && x<info.width-30 && y > info.height-30)
+    {
+        int rating = (x-30) / 20;
+        mRatingHover.insert(info.index,rating);
+        update();
+    }
+    else
+    {
+        if (mRatingHover.contains(info.index))
+        {
+            mRatingHover.remove(info.index);
+            update();
+        }
+    }
+
 }
 
 void ImageDbTile::mouseReleaseEvent(QMouseEvent *event, const TileInfo &info)
 {
+    bool accept = false;
     int x = event->pos().x();
     int y = event->pos().y();
 
     //TODO: Check the the "faux" button was also pressed first.
-    if (x < 30 && y > info.height - 30)
-      emit rotateRightClicked(info.modelIndex);
-    else
-        event->ignore();
+    // rotate buttons
+    if (x < 30 && y > info.height - 30) {
+        emit rotateRightClicked(info.modelIndex);
+        accept = true;
+    }
 
-    if (x>info.width-30 && y > info.height - 30)
+    if (x>info.width-30 && y > info.height - 30) {
         emit rotateLeftClicked(info.modelIndex);
-    else
-        event->ignore();
+        accept = true;
+    }
 
+    // rating
+    if (x>30 && x<info.width-30 && y > info.height-30)
+    {
+        int rating = (x-30) / 20;
+        emit ratingClicked(info.modelIndex,rating);
+        accept = true;
+    }
+    if (!accept)
+        event->ignore();
+    else
+        event->accept();
+
+}
+
+void ImageDbTile::mouseEnterEvent(const TileInfo &info)
+{
+
+}
+
+void ImageDbTile::mouseLeaveEvent(const TileInfo &info)
+{
+    mLeftHover.clear();
+    mRightHover.clear();
+    mRatingHover.clear();
+    update();
 }
 
 QRect ImageDbTile::resizeToFrameKeepAspectRatio(const QSize& src, const QSize& destFrame)

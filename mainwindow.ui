@@ -340,6 +340,9 @@
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
     <addaction name="separator"/>
+    <addaction name="actionSelect_All"/>
+    <addaction name="actionSelect_None"/>
+    <addaction name="separator"/>
     <addaction name="actionPreferences"/>
    </widget>
    <widget class="QMenu" name="menuPhoto">
@@ -747,6 +750,22 @@
     <string>Remove Unused Keywords</string>
    </property>
   </action>
+  <action name="actionSelect_All">
+   <property name="text">
+    <string>Select All</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionSelect_None">
+   <property name="text">
+    <string>Select None</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -755,6 +774,10 @@
    <extends>QWidget</extends>
    <header>widgets/tileview.h</header>
    <container>1</container>
+   <slots>
+    <slot>selectAll()</slot>
+    <slot>clearSelection()</slot>
+   </slots>
   </customwidget>
   <customwidget>
    <class>ModulePanel</class>
@@ -812,6 +835,38 @@
     <hint type="destinationlabel">
      <x>606</x>
      <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSelect_All</sender>
+   <signal>triggered()</signal>
+   <receiver>mClvPhotos</receiver>
+   <slot>selectAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>373</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSelect_None</sender>
+   <signal>triggered()</signal>
+   <receiver>mClvPhotos</receiver>
+   <slot>clearSelection()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>373</y>
     </hint>
    </hints>
   </connection>

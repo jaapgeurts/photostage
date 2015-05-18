@@ -23,18 +23,18 @@ public:
     long long id;
 
     void setRating(int rating);
-    int getRating();
+    int rating();
 
     void setColorLabel(ColorLabel label);
-    ColorLabel getColorLabel();
+    ColorLabel colorLabel();
 
     void setFlag(Flag flag);
-    Flag getFlag();
+    Flag flag();
 
 private:
-    int rating;
-    ColorLabel color;
-    Flag flag;
+    int mRating;
+    ColorLabel mColorLabel;
+    Flag mFlag;
 
 };
 

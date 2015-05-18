@@ -30,7 +30,7 @@ SqlPhotoModel::SqlPhotoModel(QObject *parent): QAbstractListModel(parent)
                             select t.id as id , cte.directory || :separator || t.directory as directory \
                             from cte, path t \
                             where cte.id = t.parent_id \
-            ) select p.id, p.filename, c.directory \
+            ) select p.id, p.filename, c.directory,p.rating,p.color,p.flag \
             from cte c, photo p \
             where c.id = p.path_id \
             order by p.id");
@@ -46,14 +46,15 @@ SqlPhotoModel::SqlPhotoModel(QObject *parent): QAbstractListModel(parent)
 
     //   mPathDict = new QHash<int, QString>();
 
-    mPixmapCache = new QHash<QModelIndex,SqlPhotoInfo>();
+    mPhotoInfoCache = new QHash<QModelIndex,SqlPhotoInfo>();
     mThreadPool = new QThreadPool(this);
+
 }
 
 SqlPhotoModel::~SqlPhotoModel()
 {
-    mPixmapCache->clear();
-    delete mPixmapCache;
+    mPhotoInfoCache->clear();
+    delete mPhotoInfoCache;
     delete mMainQuery;
 }
 
@@ -76,10 +77,10 @@ QVariant SqlPhotoModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    if (mPixmapCache->contains(index))
+    if (mPhotoInfoCache->contains(index))
     {
         // return cached image
-        info = mPixmapCache->value(index);
+        info = mPhotoInfoCache->value(index);
     }
     else
     {
@@ -87,6 +88,12 @@ QVariant SqlPhotoModel::data(const QModelIndex &index, int role) const
         QString filename = mMainQuery->value(1).toString();
         QString path = mMainQuery->value(2).toString();
         info.fileName = path + QDir::separator() + filename;
+        if (mMainQuery->value(3).isNull())
+            info.setRating(0);
+        else
+          info.setRating(mMainQuery->value(3).toInt());
+        info.setColorLabel((SqlPhotoInfo::ColorLabel)mMainQuery->value(4).toInt());
+        info.setFlag((SqlPhotoInfo::Flag)mMainQuery->value(5).toInt());
 
         // load image in background thread
         ImageFileLoader* loader = new ImageFileLoader(info.fileName,index);
@@ -94,7 +101,7 @@ QVariant SqlPhotoModel::data(const QModelIndex &index, int role) const
         mThreadPool->start(loader);
 
         // Insert the dummy image here so that the we know the loader thread has been started
-        mPixmapCache->insert(index,info);
+        mPhotoInfoCache->insert(index,info);
 
         return QVariant();
     }
@@ -108,11 +115,22 @@ QVariant SqlPhotoModel::data(const QModelIndex &index, int role) const
 void SqlPhotoModel::imageLoaded(const QModelIndex &index, const QImage& pixmap)
 {
 
-    SqlPhotoInfo info = mPixmapCache->value(index);
+    SqlPhotoInfo info = mPhotoInfoCache->value(index);
     info.image = pixmap;
-    mPixmapCache->insert(index,info);
+    mPhotoInfoCache->insert(index,info);
     QVector<int> roles;
     //roles.append(ImageFileSystemModel::FileImageRole);
+    emit dataChanged(index,index,roles);
+}
+
+void SqlPhotoModel::updateData(const QModelIndex& index )
+{
+    mMainQuery->exec();
+
+    // remove value from the cache
+    mPhotoInfoCache->remove(index);
+
+    QVector<int> roles;
     emit dataChanged(index,index,roles);
 }
 

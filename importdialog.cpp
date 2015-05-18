@@ -19,7 +19,7 @@ ImportDialog::ImportDialog(QWidget *parent) :
 
     // add our own CellFlowView
     mCfvPhotos = new TileView(ui->frmMain);
-    mCfvPhotos->setCellRenderer(new ImageFileTile());
+    mCfvPhotos->setTileFlyweight(new ImageFileTile());
     mCfvPhotos->setMinimumCellWidth(125);
     mCfvPhotos->setMaximumCellWidth(175);
     mCfvPhotos->setCheckBoxMode(true);
@@ -93,7 +93,7 @@ void ImportDialog::onDestinationDirClicked(const QModelIndex& index)
 ImportInfo ImportDialog::getImportInfo()
 {
     QList<QFileInfo> list;
-    foreach(QModelIndex index, mCfvPhotos->getCheckedItems())
+    foreach(QModelIndex index, mCfvPhotos->checkedItems())
     {
         list.append(mFilesModel->fileInfo(index));
     }

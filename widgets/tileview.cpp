@@ -20,6 +20,8 @@ TileView::TileView(QWidget *parent) : QWidget(parent)
     mTile = NULL;
     mListModel = NULL;
 
+    mHighlightedTile = -1;
+
     mHScrollBar = new QScrollBar(Qt::Vertical,this);
     mHScrollBar->setMinimum(0);
     mHScrollBar->setMaximum(0);
@@ -40,7 +42,6 @@ TileView::TileView(QWidget *parent) : QWidget(parent)
     mCheckedList = new QList<QModelIndex>();
     mSelection = new QList<QModelIndex>();
     mLastSelection = QModelIndex();
-
 
     connect(mHScrollBar,&QScrollBar::valueChanged,this,&TileView::sliderValueChanged);
 
@@ -89,7 +90,7 @@ void TileView::setRootIndex(const QModelIndex& index)
 }
 
 
-void TileView::setCellRenderer(AbstractTile * const renderer)
+void TileView::setTileFlyweight(AbstractTile * const renderer)
 {
     mTile = renderer;
 }
@@ -200,6 +201,7 @@ void TileView::paintEvent(QPaintEvent */*event*/)
         tileInfo.row = row;
         tileInfo.index = i;
         tileInfo.modelIndex = itemIndex;
+        tileInfo.tileState = TileInfo::TileStateNone;
         if (mSelection->contains(itemIndex))
             tileInfo.tileState = (TileInfo::TileState)(tileInfo.tileState | TileInfo::TileStateSelected);
 
@@ -231,14 +233,14 @@ void TileView::paintEvent(QPaintEvent */*event*/)
 
         if (mIsCheckBoxMode)
         {
-                QStyleOptionButton option;
+            QStyleOptionButton option;
 
-                option.initFrom(this);
-                option.state = QStyle::State_Enabled;
-                option.state |= mCheckedList->contains(itemIndex) ? QStyle::State_On : QStyle::State_Off;
-                option.rect.setRect(5,5,25,25);
+            option.initFrom(this);
+            option.state = QStyle::State_Enabled;
+            option.state |= mCheckedList->contains(itemIndex) ? QStyle::State_On : QStyle::State_Off;
+            option.rect.setRect(5,5,25,25);
 
-                style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,&option,&painter,this);
+            style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,&option,&painter,this);
         }
 
         col++;
@@ -287,12 +289,20 @@ void TileView::wheelEvent(QWheelEvent * event)
 void TileView::mouseReleaseEvent(QMouseEvent* event)
 {
 
-    TileInfo info = tileInfoForPosition(event->pos());
+    QPoint pos = event->pos();
+    int idx = posToIndex(pos);
+    TileInfo info = createTileInfo(idx);
+
     // translate the coordinates to the tile
-    mTile->mouseReleaseEvent(event,info);
-    if (event->isAccepted())
+    QPoint local = mapToTile(pos);
+    QMouseEvent event2 = QMouseEvent(event->type(),local,event->screenPos(),event->globalPos(),event->button(),event->buttons(),event->modifiers());
+
+    mTile->mouseReleaseEvent(&event2,info);
+    if (event2.isAccepted())
         // the tile swallowed the event
         return;
+
+    mLastSelection = info.modelIndex;
 
     // Get the modelindex of the item that was clicked
     QModelIndex index = info.modelIndex;
@@ -362,9 +372,10 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
                     //  qDebug() << "Control/Command";
                     mSelection->append(index);
                 }
+                emit selectionChanged();
+                mLastSelection = index;
             }
         }
-        mLastSelection = index;
         update();
     }
 }
@@ -376,15 +387,65 @@ void TileView::mouseMoveEvent(QMouseEvent *event)
 
     QMouseEvent event2 = QMouseEvent(event->type(),local,event->screenPos(),event->globalPos(),event->button(),event->buttons(),event->modifiers());
 
-    TileInfo info = tileInfoForPosition(pos);
+    int index = posToIndex(pos);
+    TileInfo info = createTileInfo(index);
+
+    if(mHighlightedTile != info.index)
+    {
+        if (mHighlightedTile != -1)
+        {
+            TileInfo oldInfo = createTileInfo(mHighlightedTile);
+            mTile->mouseLeaveEvent(oldInfo);
+        }
+        mTile->mouseEnterEvent(info);
+        mHighlightedTile = info.index;
+    }
 
     mTile->mouseMoveEvent(&event2,info);
 
+    // check for transition from one tile to another and send mouseEnter and mouseLeave events
+
+
 }
 
-TileInfo TileView::tileInfoForPosition(const QPoint & coords)
+void TileView::keyPressEvent(QKeyEvent *event)
 {
-    int index = posToIndex(coords);
+
+    int oldIndex = mLastSelection.row();
+    int newIndex = oldIndex;
+
+    switch (event->key())
+    {
+    case Qt::Key_Up:
+        if (oldIndex > mColumns)
+            newIndex = oldIndex - mColumns;
+        break;
+    case Qt::Key_Down:
+        if (oldIndex < mListModel->rowCount(mRootIndex) - mColumns)
+            newIndex = oldIndex + mColumns;
+        break;
+    case Qt::Key_Left:
+        if (oldIndex > 0)
+            newIndex = oldIndex - 1;
+        break;
+    case Qt::Key_Right:
+        if (oldIndex < mListModel->rowCount(mRootIndex) - 1)
+            newIndex = oldIndex + 1;
+        break;
+    }
+
+    if (newIndex != oldIndex )
+    {
+        mSelection->clear();
+        mLastSelection = mListModel->index(newIndex,0,mRootIndex);
+        mSelection->insert(newIndex, mLastSelection);
+        emit selectionChanged();
+        update();
+    }
+}
+
+TileInfo TileView::createTileInfo(int index)
+{
     TileInfo info;
     info.index = -1;
     if (mColumns != 0)
@@ -396,13 +457,13 @@ TileInfo TileView::tileInfoForPosition(const QPoint & coords)
         info.y = info.row * mComputedCellHeight;
         info.width = mComputedCellWidth;
         info.height = mComputedCellHeight;
-        info.modelIndex = posToModelIndex(coords);
+        info.modelIndex = mListModel->index(index,0,mRootIndex);
     }
     return info;
 }
 
 
-bool TileView::pointInCheckBox(const QPoint & coords)
+bool TileView::pointInCheckBox(const QPoint & coords) const
 {
     QPoint rel = mapToTile(coords);
     // check if the coords fall within the checkbox.
@@ -410,7 +471,7 @@ bool TileView::pointInCheckBox(const QPoint & coords)
 
 }
 
-QPoint TileView::mapToTile(const QPoint& coords)
+QPoint TileView::mapToTile(const QPoint& coords) const
 {
     // part of row out of viewport (on the top)
     int yoff = mViewportXPosition %  mComputedCellHeight;
@@ -421,7 +482,7 @@ QPoint TileView::mapToTile(const QPoint& coords)
     return QPoint(relx,rely);
 }
 
-int TileView::posToIndex(const QPoint& pos)
+int TileView::posToIndex(const QPoint& pos) const
 {
     if (mListModel == NULL)
         return -1;
@@ -441,7 +502,7 @@ int TileView::posToIndex(const QPoint& pos)
 
 }
 
-QModelIndex TileView::posToModelIndex(const QPoint & pos)
+QModelIndex TileView::posToModelIndex(const QPoint & pos) const
 {
 
     return mListModel->index(posToIndex(pos),0,mRootIndex);
@@ -478,13 +539,33 @@ void TileView::newRowsAvailable(const QModelIndex & /*parent*/, int /*first*/, i
 
 void TileView::updateCellContents(const QModelIndex & /*topleft*/, const QModelIndex& /*bottomright*/,const QVector<int> & /*roles*/)
 {
-    // TODO: don't just just update all, only update the cell
+    // TODO: don't just just update all, only update the affected tile
     update();
 }
 
-QList<QModelIndex> & TileView::getCheckedItems() const
+void TileView::selectAll()
+{
+    int count = mListModel->rowCount(mRootIndex);
+    for(int i=0;i<count; i++)
+      mSelection->append(mListModel->index(i,0,mRootIndex));
+    update();
+}
+
+void TileView::clearSelection()
+{
+    qDebug() << "clear";
+    mSelection->clear();
+    update();
+}
+
+const QList<QModelIndex> & TileView::checkedItems() const
 {
     return *mCheckedList;
+}
+
+const QList<QModelIndex> &TileView::selection() const
+{
+    return *mSelection;
 }
 
 

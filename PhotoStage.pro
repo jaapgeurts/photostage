@@ -33,7 +33,9 @@ SOURCES += main.cpp\
     widgets/abstracttile.cpp \
     imagedbtile.cpp \
     imagefiletile.cpp \
-    widgets/tileview.cpp
+    widgets/tileview.cpp \
+    photoworkunit.cpp \
+    librarymodules/librarymodule.cpp
 
 HEADERS  += mainwindow.h \
     importdialog.h \
@@ -55,7 +57,9 @@ HEADERS  += mainwindow.h \
     widgets/abstracttile.h \
     imagedbtile.h \
     imagefiletile.h \
-    widgets/tileview.h
+    widgets/tileview.h \
+    photoworkunit.h \
+    librarymodules/librarymodule.h
 
 FORMS    += mainwindow.ui \
     importdialog.ui \

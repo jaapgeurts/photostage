@@ -31,35 +31,35 @@ void SqlPhotoInfo::setRating(int rating)
         qDebug() << "Invalid rating:" << rating;
         return;
     }
-    this->rating = rating;
+    mRating = rating;
 }
 
 
-int SqlPhotoInfo::getRating()
+int SqlPhotoInfo::rating()
 {
-    return rating;
+    return mRating;
 }
 
 
 void SqlPhotoInfo::setColorLabel(SqlPhotoInfo::ColorLabel label)
 {
-    this->color = label;
+    mColorLabel = label;
 }
 
 
-SqlPhotoInfo::ColorLabel SqlPhotoInfo::getColorLabel()
+SqlPhotoInfo::ColorLabel SqlPhotoInfo::colorLabel()
 {
-    return color;
+    return mColorLabel;
 }
 
 
 void SqlPhotoInfo::setFlag(SqlPhotoInfo::Flag flag)
 {
-    this->flag = flag;
+    mFlag = flag;
 }
 
 
-SqlPhotoInfo::Flag SqlPhotoInfo::getFlag()
+SqlPhotoInfo::Flag SqlPhotoInfo::flag()
 {
-    return flag;
+    return mFlag;
 }

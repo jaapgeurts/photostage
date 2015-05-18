@@ -6,6 +6,8 @@
 
 #include "widgets/abstracttile.h"
 
+#define CHAR_STAR (0x2605)
+
 
 class ImageDbTile : public AbstractTile
 {
@@ -18,12 +20,17 @@ public:
     void render(QPainter &painter,const TileInfo &tileInfo, const QVariant &data);
 
     void mouseMoveEvent(QMouseEvent *event, const TileInfo &info);
-    void mouseReleaseEvent(QMouseEvent *event,const TileInfo &info);
+    void mouseReleaseEvent(QMouseEvent *event, const TileInfo &info);
+
+    void mouseEnterEvent(const TileInfo &info);
+    void mouseLeaveEvent(const TileInfo &info);
 
 signals:
 
     void rotateLeftClicked(const QModelIndex & index);
     void rotateRightClicked(const QModelIndex & index);
+
+    void ratingClicked(const QModelIndex &index, int rating);
 
 private:
     QRect resizeToFrameKeepAspectRatio(const QSize &src, const QSize &destFrame);
@@ -31,6 +38,7 @@ private:
     // Hover states for rotate
     QHash<int,bool> mLeftHover;
     QHash<int,bool> mRightHover;
+    QHash<int,int> mRatingHover;
 };
 
 #endif // IMAGEDBCELLRENDERER_H

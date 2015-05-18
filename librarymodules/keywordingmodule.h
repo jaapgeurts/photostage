@@ -1,16 +1,20 @@
 #ifndef KEYWORDINGMODULE_H
 #define KEYWORDINGMODULE_H
 
-#include <QWidget>
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QVBoxLayout>
 
-class KeywordingModule : public QWidget
+#include "librarymodule.h"
+
+
+class KeywordingModule : public LibraryModule
 {
     Q_OBJECT
 public:
     explicit KeywordingModule(QWidget *parent = 0);
+
+    void setPhoto(const SqlPhotoInfo& info);
 
 signals:
 
@@ -21,6 +25,7 @@ private slots:
 
 private:
     QLineEdit* mAddKeywords;
+    QTextEdit* mTxtEdtKeywords;
 };
 
 #endif // KEYWORDINGMODULE_H

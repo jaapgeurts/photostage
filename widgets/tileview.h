@@ -6,6 +6,8 @@
 #include <QCheckBox>
 #include <QAbstractItemModel>
 #include <QVariant>
+#include <QKeyEvent>
+#include <QMouseEvent>
 
 #include "abstracttile.h"
 
@@ -14,6 +16,9 @@ class TileView : public QWidget
     Q_OBJECT
 
 public:
+
+    enum ModelRole { PhotoRole = Qt::UserRole + 1 };
+
     explicit TileView(QWidget *parent = 0);
     ~TileView();
 
@@ -24,7 +29,7 @@ public:
     /*! set the celrenderer for this view
      * the CellFlowView will take ownership of the renderer and delete it upon destruction
      */
-    void setCellRenderer(AbstractTile * const renderer);
+    void setTileFlyweight(AbstractTile * const renderer);
 
     void setMinimumCellWidth(int minWidth);
     void setMaximumCellWidth(int maxWidth);
@@ -40,22 +45,26 @@ public:
     QSize minimumSizeHint() const;
     QSize minimumSize() const;
 
-    QModelIndex posToModelIndex(const QPoint & pos);
-    QPoint mapToTile(const QPoint &coords);
-    int posToIndex(const QPoint &pos);
+    QModelIndex posToModelIndex(const QPoint & pos) const;
+    QPoint mapToTile(const QPoint &coords) const;
+    int posToIndex(const QPoint &pos) const;
 
     void setCheckBoxMode(bool mode);
-    bool pointInCheckBox(const QPoint & coords);
+    bool pointInCheckBox(const QPoint & coords) const;
 
-    QList<QModelIndex> & getCheckedItems() const;
+    const QList<QModelIndex>& checkedItems() const;
+    const QList<QModelIndex>& selection() const;
 
-
-    TileInfo tileInfoForPosition(const QPoint &coords);
 signals:
+
+    void selectionChanged();
 
 public slots:
     void newRowsAvailable(const QModelIndex & parent, int first, int last);
     void updateCellContents(const QModelIndex & topleft, const QModelIndex& bottomright,const QVector<int> & roles);
+    void selectAll();
+    void clearSelection();
+
 
 private slots:
 
@@ -69,9 +78,13 @@ protected:
     void resizeEvent(QResizeEvent* event) Q_DECL_OVERRIDE;
     void mouseReleaseEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
     void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
+    void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
+
+    TileInfo createTileInfo(int index);
 
 private:
-    QAbstractItemModel *mListModel;
+
+    // Tile Sizes
     int mMinimumCellWidth;
     int mMaximumCellWidth;
     int mComputedCellWidth;
@@ -80,15 +93,24 @@ private:
     // number of columns in a row
     int mColumns;
 
+    int mHighlightedTile;
+
     QMargins mCellMargins;
     AbstractTile *mTile;
+    QAbstractItemModel *mListModel;
     QModelIndex mRootIndex;
-    QModelIndex mLastSelection;
     QScrollBar *mHScrollBar;
-    QCheckBox *mCheckBox; // flyweight for selections
-    QList<QModelIndex> *mCheckedList;
+
+    // selections
     QList<QModelIndex> *mSelection;
+    QModelIndex mLastSelection;
+
+    // checkbox
     bool mIsCheckBoxMode;
+    QCheckBox *mCheckBox; // flyweight for checked lists
+    QList<QModelIndex> *mCheckedList;
+
+    // for scrolling
     int mViewportXPosition; // contains the top x position of the scroll area
 
     void computeScrollBarValues(int count);

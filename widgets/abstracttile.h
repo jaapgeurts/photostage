@@ -54,6 +54,8 @@ public:
     virtual void mouseMoveEvent(QMouseEvent*, const  TileInfo&) {  }
     virtual void mousePressEvent(QMouseEvent*, const  TileInfo&) {  }
     virtual void mouseReleaseEvent(QMouseEvent*, const  TileInfo&) { }
+    virtual void mouseEnterEvent(const TileInfo&) {}
+    virtual void mouseLeaveEvent(const TileInfo&) {}
 
 
 protected:

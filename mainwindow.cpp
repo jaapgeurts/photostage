@@ -15,6 +15,7 @@
 #include "sqlphotomodel.h"
 #include "sqlpathmodel.h"
 #include "sqlkeywordmodel.h"
+#include "sqlphotoinfo.h"
 
 // dialogs
 #include "aboutdialog.h"
@@ -43,8 +44,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ImageDbTile * tile = new ImageDbTile(ui->mClvPhotos);
     connect(tile,&ImageDbTile::rotateLeftClicked, this, &MainWindow::rotateLeftClicked);
     connect(tile,&ImageDbTile::rotateRightClicked, this, &MainWindow::rotateRightClicked);
+    connect(tile,&ImageDbTile::ratingClicked,this,&MainWindow::ratingClicked);
 
-    ui->mClvPhotos->setCellRenderer(tile);
+    ui->mClvPhotos->setTileFlyweight(tile);
     ui->mClvPhotos->setMinimumCellWidth(150);
     ui->mClvPhotos->setMaximumCellWidth(200);
     ui->mClvPhotos->setCheckBoxMode(false);
@@ -69,8 +71,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // **** MODULE
     // Keywording (editing keywords module)
-    KeywordingModule * frmKeywording = new KeywordingModule(this);
-    ui->ModulePanel_2->addPanel("Keywords",frmKeywording);
+    mKeywording = new KeywordingModule(ui->ModulePanel_2);
+    connect(ui->mClvPhotos,&TileView::selectionChanged,this,&MainWindow::selectionChanged);
+    ui->ModulePanel_2->addPanel("Keywords",mKeywording);
 
     // **** MODULE
     // Keyword list module
@@ -79,6 +82,8 @@ MainWindow::MainWindow(QWidget *parent) :
     trvwKeywords->setModel(keywordModel);
     trvwKeywords->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->ModulePanel_2->addPanel("Keyword List",trvwKeywords);
+
+    mPhotoWorkUnit = PhotoWorkUnit::instance();
 
 }
 
@@ -116,6 +121,7 @@ void MainWindow::onActionEditTimeTriggered()
     delete timeAdjustDialog;
 }
 
+
 void MainWindow::customContextMenu(const QPoint &pos)
 {
     QModelIndex index = ui->mClvPhotos->posToModelIndex(pos);
@@ -137,4 +143,26 @@ void MainWindow::rotateRightClicked(const QModelIndex &index)
 {
     // todo: must check if there is a selection in the view.
     qDebug() << "Right clicked";
+}
+
+void MainWindow::ratingClicked(const QModelIndex &index, int rating)
+{
+    // todo: must check if there is a selection in the view.
+    qDebug() << "Rating" << rating << "set for item" << index.row();
+    QVariant variant = mPhotoModel->data(index,Qt::DisplayRole);
+    SqlPhotoInfo info = variant.value<SqlPhotoInfo>();
+    mPhotoWorkUnit->setRating(info.id,rating);
+    QVector<int> roles;
+    roles.append(Qt::DisplayRole);
+    mPhotoModel->updateData(index);
+}
+
+// Called when the selection in the photo tile view changes.
+// get the new selectionlist and pass it to all the modules.
+void MainWindow::selectionChanged()
+{
+    qDebug() << "Selection changed";
+    QList<QModelIndex> list= ui->mClvPhotos->selection();
+    SqlPhotoInfo info = mPhotoModel->data(list.at(0),Qt::DisplayRole).value<SqlPhotoInfo>();
+    mKeywording->setPhoto(info);
 }

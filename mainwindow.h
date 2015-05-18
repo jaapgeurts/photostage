@@ -6,6 +6,8 @@
 
 #include "databaseaccess.h"
 #include "sqlphotomodel.h"
+#include "photoworkunit.h"
+#include "librarymodules/keywordingmodule.h"
 
 namespace Ui {
 class MainWindow;
@@ -29,11 +31,17 @@ private slots:
     // For clicks on the tile
     void rotateLeftClicked(const QModelIndex& index);
     void rotateRightClicked(const QModelIndex& index);
+    void ratingClicked(const QModelIndex& index, int rating);
+
+    // called when the selection in the photo tile view changes
+    void selectionChanged();
 
 private:
     Ui::MainWindow *ui;
     DatabaseAccess * mDatabaseAccess;
     SqlPhotoModel * mPhotoModel;
+    PhotoWorkUnit * mPhotoWorkUnit;
+    KeywordingModule *mKeywording;
 
 };
 
