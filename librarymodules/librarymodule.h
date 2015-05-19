@@ -15,11 +15,11 @@ public:
     void setTitle(const QString& title) { mTitle = title; }
     const QString& title() const { return mTitle; }
 
-    virtual void setPhoto(const SqlPhotoInfo& info) { mPhotoInfo = info; }
-    const SqlPhotoInfo& photoInfo() { return mPhotoInfo; }
+    virtual void setPhotos(const QList<SqlPhotoInfo>& list) { mPhotoInfoList = list; }
+    const QList<SqlPhotoInfo>& photos() const { return mPhotoInfoList; }
 
 protected:
-    SqlPhotoInfo mPhotoInfo;
+    QList<SqlPhotoInfo> mPhotoInfoList;
 
 private:
     QString mTitle;

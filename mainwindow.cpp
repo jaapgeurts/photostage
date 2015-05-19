@@ -4,6 +4,7 @@
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QApplication>
+#include <QDesktopWidget>
 
 
 #include "mainwindow.h"
@@ -84,12 +85,16 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->ModulePanel_2->addPanel("Keyword List",trvwKeywords);
 
     mPhotoWorkUnit = PhotoWorkUnit::instance();
+    QSettings settings;
+    move(settings.value("mainwindow/location").toPoint());
 
 }
 
-
 MainWindow::~MainWindow()
 {
+    //QDesktopWidget * desktop = QApplication::desktop();
+    QSettings settings;
+    settings.setValue("mainwindow/location",pos());
     delete ui;
     delete mDatabaseAccess;
 }
@@ -163,6 +168,11 @@ void MainWindow::selectionChanged()
 {
     qDebug() << "Selection changed";
     QList<QModelIndex> list= ui->mClvPhotos->selection();
-    SqlPhotoInfo info = mPhotoModel->data(list.at(0),Qt::DisplayRole).value<SqlPhotoInfo>();
-    mKeywording->setPhoto(info);
+    QList<SqlPhotoInfo> photos;
+    QModelIndex index;
+    foreach(index, list)
+    {
+       photos.append(mPhotoModel->data(index,Qt::DisplayRole).value<SqlPhotoInfo>());
+    }
+    mKeywording->setPhotos(photos);
 }

@@ -13,6 +13,11 @@ int main(int argc, char *argv[])
     // Load extra fonts
     int id = QFontDatabase::addApplicationFont(":/fonts/font-awesome.ttf");
 
+    // Setup application details
+    QCoreApplication::setOrganizationName("PhotoStage");
+    QCoreApplication::setOrganizationDomain("www.github.com/photostage");
+    QCoreApplication::setApplicationName("PhotoStage");
+
     // Load the dark style
     QFile f (":qdarkstyle/style.qss");
     if (!f.exists())

@@ -1,5 +1,7 @@
 #include <QStringList>
 #include <QDebug>
+#include <QEvent>
+#include <QKeyEvent>
 
 #include "keywordingmodule.h"
 #include "photoworkunit.h"
@@ -7,7 +9,7 @@
 KeywordingModule::KeywordingModule(QWidget *parent) : LibraryModule(parent)
 {
 
-    mTxtEdtKeywords = new QTextEdit(this);
+    mTxtEdtKeywords = new QPlainTextEdit(this);
     mTxtEdtKeywords->setContentsMargins(0,0,0,0);
     mAddKeywords = new QLineEdit(this);
     mAddKeywords->setContentsMargins(0,0,0,0);
@@ -19,6 +21,26 @@ KeywordingModule::KeywordingModule(QWidget *parent) : LibraryModule(parent)
     setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
 
     connect(mAddKeywords,&QLineEdit::returnPressed,this,&KeywordingModule::keywordsAdded);
+
+    mTxtEdtKeywords->installEventFilter(this);
+}
+
+bool KeywordingModule::eventFilter(QObject *object, QEvent *event)
+{
+    bool swallowed = false;
+    if (object == mTxtEdtKeywords && event->type() == QEvent::KeyPress)
+    {
+        QKeyEvent *keyEvent =  static_cast<QKeyEvent*>(event);
+        switch (keyEvent->key())
+        {
+        case Qt::Key_Enter:
+        case Qt::Key_Return:
+            keywordsChanged();
+            swallowed = true;
+            break;
+        }
+    }
+    return swallowed;
 }
 
 void KeywordingModule::keywordsAdded()
@@ -28,22 +50,72 @@ void KeywordingModule::keywordsAdded()
     words.replace(" ","");
     QStringList wordList = words.split(',');
 
+
     PhotoWorkUnit* workUnit = PhotoWorkUnit::instance();
 
     // add keywords not yet in the database
     workUnit->insertKeywords(wordList);
 
     // assign all keywords to the photo
-    workUnit->assignKeywords(wordList,mPhotoInfo);
+    workUnit->assignKeywords(wordList,mPhotoInfoList);
 }
 
-void KeywordingModule::setPhoto(const SqlPhotoInfo &info)
+void KeywordingModule::keywordsChanged()
 {
-    LibraryModule::setPhoto(info);
-    PhotoWorkUnit* workUnit = PhotoWorkUnit::instance();
-    QStringList list = workUnit->getPhotoKeywords(info);
+    QString words = mTxtEdtKeywords->document()->toPlainText();
+    words = words.simplified();
+    words.replace(" ","");
+    QStringList wordList = words.split(',');
 
-    mTxtEdtKeywords->setText(list.join(", "));
+    // ignore keywords with a * at the end.
+    QMutableStringListIterator iter(wordList);
+    QStringList exceptWords;
+    while (iter.hasNext())
+    {
+        QString word = iter.next();
+        if (word.at(word.size()-1) == '*')
+        {
+            word.chop(1);
+            exceptWords.append(word);
+            iter.remove();
+        }
+    }
+
+     PhotoWorkUnit* workUnit = PhotoWorkUnit::instance();
+
+    // add keywords not yet in the database
+    workUnit->insertKeywords(wordList);
+
+    // remove all keywords from all photos
+    workUnit->removeKeywordsExcept(exceptWords,mPhotoInfoList);
+
+    // reassign all keywords to the photo
+    workUnit->assignKeywords(wordList,mPhotoInfoList);
+
+}
+
+void KeywordingModule::setPhotos(const QList<SqlPhotoInfo>& list)
+{
+    LibraryModule::setPhotos(list);
+    PhotoWorkUnit* workUnit = PhotoWorkUnit::instance();
+
+    // <keyword,count>
+    QHash<QString,int> words = workUnit->getPhotoKeywords(list);
+
+    int count = list.size();
+
+    QString text;
+    QHashIterator<QString, int> i(words);
+    while (i.hasNext()) {
+        i.next();
+        if (i.value() < count)
+            text = text + i.key() + "*,";
+        else
+            text = text + i.key() + ",";
+    }
+    // remove the last ','
+    text.chop(1);
+    mTxtEdtKeywords->setPlainText(text);
 }
 
 

@@ -2,6 +2,8 @@
 #define PHOTOWORKUNIT_H
 
 #include <QStringList>
+#include <QHash>
+#include <QList>
 
 #include "sqlphotoinfo.h"
 
@@ -13,8 +15,9 @@ public:
     void setRating(long long id, int rating);
 
     void insertKeywords(const QStringList& words);
-    void assignKeywords(const QStringList& words, const SqlPhotoInfo& info);
-    QStringList getPhotoKeywords(const SqlPhotoInfo &info);
+    void assignKeywords(const QStringList& words, const QList<SqlPhotoInfo> &list);
+    void removeKeywordsExcept(const QStringList& words, const QList<SqlPhotoInfo> &list);
+    QHash<QString, int> getPhotoKeywords(const QList<SqlPhotoInfo> &list) const;
 
 protected:
     PhotoWorkUnit();
