@@ -15,7 +15,7 @@ public:
     ~SqlPhotoModel();
 
     int rowCount(const QModelIndex &parent) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    QVariant headerData(int, Qt::Orientation, int) const;
     QVariant data(const QModelIndex &index, int role) const;
 
     /*
@@ -28,7 +28,7 @@ public:
     bool removeRows(int row, int count, const QModelIndex &parent);
     */
 
-    void updateData(const QModelIndex &index);
+    void updateData(const QList<QModelIndex> &list);
 
 private slots:
     void imageLoaded(const QModelIndex &index, const QImage &pixmap);

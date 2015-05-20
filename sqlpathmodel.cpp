@@ -49,7 +49,7 @@ void SqlPathModel::createPathtemsRec(PathItem* root)
     query.bindValue(":parent_id",root->id);
     query.exec();
 
-    int total = 0;
+    //int total = 0;
     while(query.next())
     {
         item = new PathItem(query.value(0).toLongLong(),query.value(1).toString(), query.value(1).toLongLong());
@@ -115,7 +115,7 @@ int SqlPathModel::rowCount(const QModelIndex &parent) const
     return item->children.size();
 }
 
-int SqlPathModel::columnCount(const QModelIndex &parent) const
+int SqlPathModel::columnCount(const QModelIndex &/*parent*/) const
 {
     return 1;
 }
@@ -140,7 +140,7 @@ QVariant SqlPathModel::data(const QModelIndex &index, int role) const
 //}
 
 
-QVariant SqlPathModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant SqlPathModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const
 {
     if (role == Qt::DisplayRole)
         return QString("Location");

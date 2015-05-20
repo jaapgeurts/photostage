@@ -39,7 +39,7 @@ public:
     QVariant data(const QModelIndex &index, int role) const;
 
     // optional overrides
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    QVariant headerData(int, Qt::Orientation, int role) const;
 
 
     // implement when rowCount is expensive

@@ -47,7 +47,7 @@ ImportDialog::ImportDialog(QWidget *parent) :
 
     mDestinationDrivesModel =  new QFileSystemModel(this);
     mDestinationDrivesModel->setFilter(QDir::NoDotAndDotDot| QDir::Dirs);
-    QModelIndex destIndex = mDestinationDrivesModel->setRootPath("/Volumes");
+   /* QModelIndex destIndex = */mDestinationDrivesModel->setRootPath("/Volumes");
     ui->trvwDestination->setModel(mDestinationDrivesModel);
 
 #ifdef Q_OS_MAC
@@ -62,7 +62,9 @@ ImportDialog::ImportDialog(QWidget *parent) :
     mFilesModel = new ImageFileSystemModel(this);
     mFilesModel->setFilter(QDir::NoDotAndDotDot|QDir::Files);
     QStringList filters;
-    filters << "*.png" << "*.jpg";
+    // FIXME: add this as a list to the preferences
+    // or provide an option to ignore extensions
+    filters << "*.png" << "*.jpg" << "*.jpeg" << "*.cr2" << "*.crw" << "*.nef" << "*.dng";
     mFilesModel->setNameFilters(filters);
     mFilesModel->setNameFilterDisables(false);
     mFilesModel->setRootPath("/");

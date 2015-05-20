@@ -223,7 +223,7 @@ void TileView::paintEvent(QPaintEvent */*event*/)
 
         // qDebug() << "cell:" << i << "("<<xpos<<","<<ypos<<","<<mComputedCellWidth<<","<<mComputedCellHeight<<")";
 
-        QVariant item = mListModel->data(itemIndex,Qt::DisplayRole);
+        QVariant item = mListModel->data(itemIndex,TileView::PhotoRole);
 
         mTile->render(painter,tileInfo,item);
 
@@ -439,8 +439,8 @@ void TileView::keyPressEvent(QKeyEvent *event)
         mSelection->clear();
         mLastSelection = mListModel->index(newIndex,0,mRootIndex);
         mSelection->insert(newIndex, mLastSelection);
-        emit selectionChanged();
         update();
+        emit selectionChanged();
     }
 }
 
@@ -549,6 +549,7 @@ void TileView::selectAll()
     for(int i=0;i<count; i++)
       mSelection->append(mListModel->index(i,0,mRootIndex));
     update();
+    emit selectionChanged();
 }
 
 void TileView::clearSelection()
@@ -556,6 +557,7 @@ void TileView::clearSelection()
     qDebug() << "clear";
     mSelection->clear();
     update();
+    emit selectionChanged();
 }
 
 const QList<QModelIndex> & TileView::checkedItems() const

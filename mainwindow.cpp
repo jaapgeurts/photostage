@@ -23,7 +23,9 @@
 #include "timeadjustdialog.h"
 #include "importdialog.h"
 
+#include "widgets/translucentwindow.h"
 #include "widgets/fixedtreeview.h"
+
 #include "librarymodules/keywordingmodule.h"
 
 
@@ -34,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
 
+
     QApplication::setFont(QFont(QString("verdana"),10));
 
     ui->setupUi(this);
@@ -43,9 +46,9 @@ MainWindow::MainWindow(QWidget *parent) :
     mDatabaseAccess = new DatabaseAccess();
 
     ImageDbTile * tile = new ImageDbTile(ui->mClvPhotos);
-    connect(tile,&ImageDbTile::rotateLeftClicked, this, &MainWindow::rotateLeftClicked);
-    connect(tile,&ImageDbTile::rotateRightClicked, this, &MainWindow::rotateRightClicked);
-    connect(tile,&ImageDbTile::ratingClicked,this,&MainWindow::ratingClicked);
+    // connect(tile,&ImageDbTile::rotateLeftClicked, this, &MainWindow::rotateLeftClicked);
+    // connect(tile,&ImageDbTile::rotateRightClicked, this, &MainWindow::rotateRightClicked);
+    // connect(tile,&ImageDbTile::ratingClicked,this,&MainWindow::ratingClicked);
 
     ui->mClvPhotos->setTileFlyweight(tile);
     ui->mClvPhotos->setMinimumCellWidth(150);
@@ -115,30 +118,82 @@ void MainWindow::onActionImportTriggered()
 void MainWindow::onActionAboutTriggered()
 {
     AboutDialog * aboutDialog = new AboutDialog(this);
-    int code = aboutDialog->exec();
+    /*int code = */aboutDialog->exec();
     delete aboutDialog;
 }
 
 void MainWindow::onActionEditTimeTriggered()
 {
     TimeAdjustDialog* timeAdjustDialog = new TimeAdjustDialog(this);
-    int code = timeAdjustDialog->exec();
+    /*int code = */timeAdjustDialog->exec();
     delete timeAdjustDialog;
 }
 
+void MainWindow::onActionRating1()
+{
+    setRating(1);
+}
+
+void MainWindow::onActionRating2()
+{
+    setRating(2);
+}
+
+void MainWindow::onActionRating3()
+{
+    setRating(3);
+}
+
+void MainWindow::onActionRating4()
+{
+    setRating(4);
+}
+
+void MainWindow::onActionRating5()
+{
+    setRating(5);
+}
+
+void MainWindow::onActionRatingNone()
+{
+    setRating(0);
+}
+
+void MainWindow::onActionLightsOff()
+{
+
+    //w->showFullScreen();
+    QDesktopWidget * d = QApplication::desktop();
+    for(int i =0; i < d->screenCount(); i++)
+    {
+        qDebug() << "Lights off on screen:" << i;
+        TranslucentWindow* w = new TranslucentWindow();
+        QRect rect = d->screenGeometry(i);
+        qDebug() << "Window"<<i<<"size:"<<rect;
+        w->move(rect.topLeft());
+        w->resize(rect.size());
+        QPoint pos = ui->mClvPhotos->mapToGlobal(QPoint(0,0));
+        QRect gap = QRect(pos,ui->mClvPhotos->size());
+        w->setGapGeometry(gap);
+        w->show();
+
+        //w->showMaximized();
+        //w->showFullScreen();
+    }
+}
 
 void MainWindow::customContextMenu(const QPoint &pos)
 {
     QModelIndex index = ui->mClvPhotos->posToModelIndex(pos);
     // check if there is a single selection or a list.
-    SqlPhotoInfo info = mPhotoModel->data(index,Qt::DisplayRole).value<SqlPhotoInfo>();
+    SqlPhotoInfo info = mPhotoModel->data(index,TileView::PhotoRole).value<SqlPhotoInfo>();
 
     QMenu *m = ui->menuPhoto;
     m->popup(ui->mClvPhotos->mapToGlobal(pos));
     m->exec();
 }
 
-void MainWindow::rotateLeftClicked(const QModelIndex &index)
+/*void MainWindow::rotateLeftClicked(const QModelIndex &index)
 {
     // todo: must check if there is a selection in the view.
     qDebug() << "Left Clicked";
@@ -149,17 +204,42 @@ void MainWindow::rotateRightClicked(const QModelIndex &index)
     // todo: must check if there is a selection in the view.
     qDebug() << "Right clicked";
 }
-
+*/
+/*
 void MainWindow::ratingClicked(const QModelIndex &index, int rating)
 {
     // todo: must check if there is a selection in the view.
     qDebug() << "Rating" << rating << "set for item" << index.row();
-    QVariant variant = mPhotoModel->data(index,Qt::DisplayRole);
+    QVariant variant = mPhotoModel->data(index,TileView::PhotoRole);
     SqlPhotoInfo info = variant.value<SqlPhotoInfo>();
     mPhotoWorkUnit->setRating(info.id,rating);
     QVector<int> roles;
-    roles.append(Qt::DisplayRole);
+    roles.append(TileView::PhotoRole);
     mPhotoModel->updateData(index);
+}
+*/
+void MainWindow::setRating(int rating)
+{
+    qDebug() << "Setting rating to" << rating;
+    QList<QModelIndex> list= ui->mClvPhotos->selection();
+
+    if (list.size() > 0)
+    {
+        QModelIndex index;
+        QList<SqlPhotoInfo> infoList;
+        SqlPhotoInfo info;
+        foreach(index, list)
+        {
+            QVariant variant = mPhotoModel->data(index,TileView::PhotoRole);
+            info = variant.value<SqlPhotoInfo>();
+            infoList.append(info);
+        }
+        mPhotoWorkUnit->setRating(infoList,rating);
+        QVector<int> roles;
+        roles.append(TileView::PhotoRole);
+        mPhotoModel->updateData(list);
+
+    }
 }
 
 // Called when the selection in the photo tile view changes.
@@ -172,7 +252,7 @@ void MainWindow::selectionChanged()
     QModelIndex index;
     foreach(index, list)
     {
-       photos.append(mPhotoModel->data(index,Qt::DisplayRole).value<SqlPhotoInfo>());
+        photos.append(mPhotoModel->data(index,TileView::PhotoRole).value<SqlPhotoInfo>());
     }
     mKeywording->setPhotos(photos);
 }

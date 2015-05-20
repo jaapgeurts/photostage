@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
 //    a.setQuitOnLastWindowClosed(false);
 
     // Load extra fonts
-    int id = QFontDatabase::addApplicationFont(":/fonts/font-awesome.ttf");
+    /*int id =*/ QFontDatabase::addApplicationFont(":/fonts/font-awesome.ttf");
 
     // Setup application details
     QCoreApplication::setOrganizationName("PhotoStage");

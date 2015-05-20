@@ -65,7 +65,7 @@ void KeywordingModule::keywordsChanged()
     QString words = mTxtEdtKeywords->document()->toPlainText();
     words = words.simplified();
     words.replace(" ","");
-    QStringList wordList = words.split(',');
+    QStringList wordList = words.split(',',QString::SkipEmptyParts);
 
     // ignore keywords with a * at the end.
     QMutableStringListIterator iter(wordList);
@@ -100,12 +100,12 @@ void KeywordingModule::setPhotos(const QList<SqlPhotoInfo>& list)
     PhotoWorkUnit* workUnit = PhotoWorkUnit::instance();
 
     // <keyword,count>
-    QHash<QString,int> words = workUnit->getPhotoKeywords(list);
+    QMap<QString,int> words = workUnit->getPhotoKeywords(list);
 
     int count = list.size();
 
     QString text;
-    QHashIterator<QString, int> i(words);
+    QMapIterator<QString, int> i(words);
     while (i.hasNext()) {
         i.next();
         if (i.value() < count)

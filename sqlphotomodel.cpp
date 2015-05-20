@@ -63,7 +63,7 @@ SqlPhotoModel::~SqlPhotoModel()
 //  return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 //}
 
-QVariant SqlPhotoModel::data(const QModelIndex &index, int role) const
+QVariant SqlPhotoModel::data(const QModelIndex &index, int /*role*/) const
 {
 
     if (!index.isValid())
@@ -123,25 +123,35 @@ void SqlPhotoModel::imageLoaded(const QModelIndex &index, const QImage& pixmap)
     emit dataChanged(index,index,roles);
 }
 
-void SqlPhotoModel::updateData(const QModelIndex& index )
+void SqlPhotoModel::updateData(const QList<QModelIndex>& list )
 {
     mMainQuery->exec();
 
-    // remove value from the cache
-    mPhotoInfoCache->remove(index);
-
+    // remove values from the cache
+    QModelIndex start,end;
+    QModelIndex index;
+    start = index;
+    end = index;
+    foreach (index, list) {
+        if (index.row()<start.row())
+            start = index;
+        if (index.row()>end.row())
+            end = index;
+        mPhotoInfoCache->remove(index);
+    }
     QVector<int> roles;
-    emit dataChanged(index,index,roles);
+    emit dataChanged(start,end,roles);
+
 }
 
 
 
-QVariant SqlPhotoModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant SqlPhotoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int /*role*/) const
 {
-
+return QVariant();
 }
 
-int SqlPhotoModel::rowCount(const QModelIndex &parent) const
+int SqlPhotoModel::rowCount(const QModelIndex &/*parent*/) const
 {
     mMainQuery->last();
     int count = mMainQuery->at()+1;

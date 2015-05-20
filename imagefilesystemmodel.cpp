@@ -2,7 +2,8 @@
 #include <QDebug>
 
 #include "imagefilesystemmodel.h"
-#include "imagefileloader.h"
+#include "previewfileloader.h"
+#include "widgets/tileview.h"
 
 ImageFileSystemModel::ImageFileSystemModel(QObject* parent) : QFileSystemModel(parent)
 {
@@ -22,7 +23,8 @@ QVariant ImageFileSystemModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
     QVariant data = QFileSystemModel::data(index,QFileSystemModel::FilePathRole);
-    if ( role == Qt::DisplayRole)
+
+    if ( role == TileView::PhotoRole)
     {
         // TODO: allocate on heap or stack?
         const QString path = data.toString();
@@ -35,8 +37,8 @@ QVariant ImageFileSystemModel::data(const QModelIndex &index, int role) const
         else
         {
             // load image in background thread
-            ImageFileLoader* loader = new ImageFileLoader(path,index);
-            connect(loader,&ImageFileLoader::dataReady,this,&ImageFileSystemModel::imageLoaded);
+            PreviewFileLoader* loader = new PreviewFileLoader(path,index);
+            connect(loader,&PreviewFileLoader::dataReady,this,&ImageFileSystemModel::imageLoaded);
             mThreadPool->start(loader);
 
             // Insert the dummy image here so that the we know the loader thread has been started
@@ -64,7 +66,7 @@ void ImageFileSystemModel::imageLoaded(const QModelIndex &index, const QImage& p
 
     mPixmapCache->insert(index,pixmap);
     QVector<int> roles;
-    roles.append(Qt::DisplayRole);
+    roles.append(TileView::PhotoRole);
     emit dataChanged(index,index,roles);
 }
 

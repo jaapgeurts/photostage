@@ -29,7 +29,7 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
     if (!data.isNull())
     {
 
-        if (tileInfo.tileState & TileInfo::TileStateSelected == TileInfo::TileStateSelected)
+        if ((tileInfo.tileState & TileInfo::TileStateSelected) == TileInfo::TileStateSelected)
             painter.setBrush(QBrush(QColor(Qt::darkGray).lighter(180),Qt::SolidPattern));
         else
             painter.setBrush(QBrush(QColor(Qt::darkGray),Qt::SolidPattern));
@@ -72,7 +72,7 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
 
         // Draw the rotate handles
         painter.save();
-        if (mLeftHover.contains(tileInfo.index))
+/*        if (mLeftHover.contains(tileInfo.index))
             painter.setPen(QColor(Qt::darkGray).lighter(180));
         else
             painter.setPen(QColor(Qt::darkGray).lighter(110));
@@ -83,22 +83,26 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
         else
             painter.setPen(QColor(Qt::darkGray).lighter(110));
         painter.drawText(w-1-20,h-1-10,QString("%1").arg(QChar(0xf0e2))); // rotate left
-
+*/
         // draw the rating stars
-        painter.setPen(QColor(Qt::darkGray).darker(110));
+/*      painter.setPen(QColor(Qt::darkGray).darker(110));
         painter.drawText(30,h-1-10,"·····");
+*/
         QString rating;
+        QFont font = painter.font();
+        font.setPointSize(12);
+        painter.setFont(font);
         rating.fill(QChar(CHAR_STAR),info.rating());
         painter.setPen(QColor(Qt::black));
         painter.drawText(30,h-1-10,rating);
-        if (mRatingHover.contains(tileInfo.index))
+/*        if (mRatingHover.contains(tileInfo.index))
         {
             int hoverRate = mRatingHover.value(tileInfo.index);
             painter.setPen(QColor(Qt::black));
             rating.fill(QChar(CHAR_STAR),hoverRate);
             painter.drawText(30,h-1-10,rating);
         }
-
+*/
         painter.restore();
 
         // draw border around image
@@ -114,11 +118,13 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
     }
 }
 
-void ImageDbTile::mouseMoveEvent(QMouseEvent*event, const TileInfo& info)
+void ImageDbTile::mouseMoveEvent(QMouseEvent*/*event*/, const TileInfo& /*info*/)
 {
-    int x = event->pos().x();
-    int y = event->pos().y();
+    //int x = event->pos().x();
+   // int y = event->pos().y();
 
+    // Hovering for the rotate handles
+    /*
     if (x < 30 && y > info.height - 30)
     {
         if (!mLeftHover.contains(info.index))
@@ -155,6 +161,10 @@ void ImageDbTile::mouseMoveEvent(QMouseEvent*event, const TileInfo& info)
         }
     }
 
+    */
+
+    // hovering for the rating
+    /*
     if (x>30 && x<info.width-30 && y > info.height-30)
     {
         int rating = (x-30) / 20;
@@ -169,17 +179,18 @@ void ImageDbTile::mouseMoveEvent(QMouseEvent*event, const TileInfo& info)
             update();
         }
     }
-
+*/
 }
 
-void ImageDbTile::mouseReleaseEvent(QMouseEvent *event, const TileInfo &info)
+void ImageDbTile::mouseReleaseEvent(QMouseEvent *event, const TileInfo &/*info*/)
 {
-    bool accept = false;
-    int x = event->pos().x();
-    int y = event->pos().y();
+    //bool accept = false;
+   // int x = event->pos().x();
+   // int y = event->pos().y();
 
     //TODO: Check the the "faux" button was also pressed first.
     // rotate buttons
+    /*
     if (x < 30 && y > info.height - 30) {
         emit rotateRightClicked(info.modelIndex);
         accept = true;
@@ -189,9 +200,9 @@ void ImageDbTile::mouseReleaseEvent(QMouseEvent *event, const TileInfo &info)
         emit rotateLeftClicked(info.modelIndex);
         accept = true;
     }
-
+*/
     // rating
-    if (x>30 && x<info.width-30 && y > info.height-30)
+/*    if (x>30 && x<info.width-30 && y > info.height-30)
     {
         int rating = (x-30) / 20;
         emit ratingClicked(info.modelIndex,rating);
@@ -201,20 +212,21 @@ void ImageDbTile::mouseReleaseEvent(QMouseEvent *event, const TileInfo &info)
         event->ignore();
     else
         event->accept();
-
+*/
+    event->ignore();
 }
 
-void ImageDbTile::mouseEnterEvent(const TileInfo &info)
+void ImageDbTile::mouseEnterEvent(const TileInfo &/*info*/)
 {
 
 }
 
-void ImageDbTile::mouseLeaveEvent(const TileInfo &info)
+void ImageDbTile::mouseLeaveEvent(const TileInfo &/*info*/)
 {
-    mLeftHover.clear();
+/*    mLeftHover.clear();
     mRightHover.clear();
     mRatingHover.clear();
-    update();
+    update(); */
 }
 
 QRect ImageDbTile::resizeToFrameKeepAspectRatio(const QSize& src, const QSize& destFrame)

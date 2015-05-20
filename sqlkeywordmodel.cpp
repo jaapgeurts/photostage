@@ -121,7 +121,7 @@ int SqlKeywordModel::rowCount(const QModelIndex &parent) const
     return item->children.size();
 }
 
-int SqlKeywordModel::columnCount(const QModelIndex &parent) const
+int SqlKeywordModel::columnCount(const QModelIndex &/*parent*/) const
 {
     return 1;
 }
@@ -146,7 +146,7 @@ QVariant SqlKeywordModel::data(const QModelIndex &index, int role) const
 //}
 
 
-QVariant SqlKeywordModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant SqlKeywordModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const
 {
     if (role == Qt::DisplayRole)
         return QString("Keywords");

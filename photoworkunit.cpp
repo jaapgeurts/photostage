@@ -20,18 +20,27 @@ PhotoWorkUnit::PhotoWorkUnit()
 
 }
 
-void PhotoWorkUnit::setRating(long long id, int rating)
+void PhotoWorkUnit::setRating(const QList<SqlPhotoInfo> & list, int rating)
 {
 
     QSqlQuery q;
-    q.prepare("update photo set rating=:rating where id=:id");
+    q.prepare("update photo set rating=:rating where id in (:id)");
     q.bindValue(":rating",rating);
-    q.bindValue(":id",id);
+
+    QString ids;
+    SqlPhotoInfo info;
+    foreach(info, list)
+        ids += QString::number(info.id) + ",";
+    ids.chop(1);
+    q.bindValue(":id",ids);
     q.exec();
 }
 
 void PhotoWorkUnit::insertKeywords(const QStringList &words)
 {
+    if (words.size() == 0 )
+        return;
+
     // TODO sql: set unique index and ingore error when inserting
     QSqlQuery q;
     QStringList newWords = words;
@@ -95,9 +104,10 @@ void PhotoWorkUnit::removeKeywordsExcept(const QStringList &words, const QList<S
 {
     QSqlQuery q;
 
-    q.prepare("delete from photo_keyword "\
+    QString query = "delete from photo_keyword "\
               "where photo_id in (:photo_id) "\
-              " and keyword_id not in ( select id from keyword where keyword in (:keywords))");
+              " and keyword_id not in " \
+              " ( select id from keyword where keyword in (':keywords'))";
 
     SqlPhotoInfo info;
     QString photo_id;
@@ -106,30 +116,25 @@ void PhotoWorkUnit::removeKeywordsExcept(const QStringList &words, const QList<S
         photo_id += QString::number(info.id) + ",";
     }
     photo_id.chop(1);
-    QString word;
-    QString keywords;
-    foreach(word, words)
-    {
-        keywords += "'" + word + "',";
-    }
-    keywords.chop(1);
-    q.bindValue(":photo_id",photo_id);
-    q.bindValue(":keywords",keywords);
-    if (!q.exec())
+    QString keywords = words.join("','");
+
+    query.replace(":photo_id",photo_id);
+    query.replace(":keywords",keywords);
+
+    if (!q.exec(query))
     {
         qDebug() << q.lastError();
         qDebug() << q.lastQuery();
     }
-    qDebug() << q.lastQuery().replace(":photo_id",photo_id).replace(":keywords",keywords);
 }
 
-QHash<QString,int> PhotoWorkUnit::getPhotoKeywords(const QList<SqlPhotoInfo> & list) const
+QMap<QString,int> PhotoWorkUnit::getPhotoKeywords(const QList<SqlPhotoInfo> & list) const
 {
     QSqlQuery q;
     QString query = "select k.keyword, count(pk.photo_id) " \
                     "from keyword k, photo_keyword pk on k.id = pk.keyword_id " \
                     " where pk.photo_id in (:photo_ids) " \
-                    " group by k.keyword ";
+                    " group by k.keyword order by k.keyword ";
     QString photo_ids;
     SqlPhotoInfo info;
     foreach(info, list)
@@ -142,9 +147,8 @@ QHash<QString,int> PhotoWorkUnit::getPhotoKeywords(const QList<SqlPhotoInfo> & l
         qDebug() << q.lastError();
         qDebug() << q.lastQuery();
     }
-    qDebug() << q.lastQuery();
 
-    QHash<QString,int> dict;
+    QMap<QString,int> dict;
     while (q.next())
     {
         dict.insert(q.value(0).toString(), q.value(1).toInt());

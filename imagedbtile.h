@@ -27,10 +27,10 @@ public:
 
 signals:
 
-    void rotateLeftClicked(const QModelIndex & index);
-    void rotateRightClicked(const QModelIndex & index);
+ //   void rotateLeftClicked(const QModelIndex & index);
+ //   void rotateRightClicked(const QModelIndex & index);
 
-    void ratingClicked(const QModelIndex &index, int rating);
+//    void ratingClicked(const QModelIndex &index, int rating);
 
 private:
     QRect resizeToFrameKeepAspectRatio(const QSize &src, const QSize &destFrame);

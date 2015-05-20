@@ -68,12 +68,12 @@ int FixedTreeView::CalculateHeightRec(const QModelIndex& index) const
     return h;
 }
 
-void FixedTreeView::onItemExpanded(const QModelIndex &index)
+void FixedTreeView::onItemExpanded(const QModelIndex &/*index*/)
 {
     setMinimumHeight(CalculateHeight());
 }
 
-void FixedTreeView::onItemCollapsed(const QModelIndex &index)
+void FixedTreeView::onItemCollapsed(const QModelIndex &/*index*/)
 {
     setMinimumHeight(CalculateHeight());
 }

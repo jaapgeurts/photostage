@@ -1,6 +1,6 @@
 #include <QDebug>
 #include <QThread>
-
+#include "constants.h"
 #include "imagefileloader.h"
 
 ImageFileLoader::ImageFileLoader(const QString& path,const QModelIndex& index)
@@ -22,7 +22,7 @@ void ImageFileLoader::run()
     // TODO: catch errors and emit error(QString)
     //qDebug() << "Reading image:" << mPath;
     QImage pixmap = QImage(mPath);
-    QImage image = pixmap.scaled(QSize(256,256),Qt::KeepAspectRatio);
+    QImage image = pixmap.scaled(QSize(PREVIEW_IMG_WIDTH,PREVIEW_IMG_HEIGHT),Qt::KeepAspectRatio);
     emit dataReady(mModelIndex,image);
 }
 
