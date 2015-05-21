@@ -7,7 +7,7 @@
 
 #include "widgets/tileview.h"
 
-#include "importinfo.h"
+#include "workunits/importinfo.h"
 
 namespace Ui {
 class ImportDialog;

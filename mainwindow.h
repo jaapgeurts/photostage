@@ -6,8 +6,8 @@
 
 #include "databaseaccess.h"
 #include "sqlphotomodel.h"
-#include "photoworkunit.h"
-#include "librarymodules/keywordingmodule.h"
+#include "workunits/photoworkunit.h"
+#include "library/modules/keywordingmodule.h"
 
 namespace Ui {
 class MainWindow;

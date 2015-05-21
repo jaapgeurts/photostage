@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QtSql>
 
-#include "importinfo.h"
+#include "workunits/importinfo.h"
 
 class ImportWorkUnit : public QObject
 {

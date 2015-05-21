@@ -229,6 +229,8 @@ void ImageDbTile::mouseLeaveEvent(const TileInfo &/*info*/)
     update(); */
 }
 
+/* fits the source frame into the destination frame and
+ * centers the image */
 QRect ImageDbTile::resizeToFrameKeepAspectRatio(const QSize& src, const QSize& destFrame)
 {
 

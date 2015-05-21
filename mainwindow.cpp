@@ -9,8 +9,8 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "importworkunit.h"
-#include "imagedbtile.h"
+#include "workunits/importworkunit.h"
+#include "library/imagedbtile.h"
 
 // Models
 #include "sqlphotomodel.h"
@@ -21,12 +21,12 @@
 // dialogs
 #include "aboutdialog.h"
 #include "timeadjustdialog.h"
-#include "importdialog.h"
+#include "import/importdialog.h"
 
 #include "widgets/translucentwindow.h"
 #include "widgets/fixedtreeview.h"
 
-#include "librarymodules/keywordingmodule.h"
+#include "library/modules/keywordingmodule.h"
 
 
 using namespace std;

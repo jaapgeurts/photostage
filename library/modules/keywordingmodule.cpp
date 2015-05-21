@@ -3,8 +3,8 @@
 #include <QEvent>
 #include <QKeyEvent>
 
-#include "keywordingmodule.h"
-#include "photoworkunit.h"
+#include "library/modules/keywordingmodule.h"
+#include "workunits/photoworkunit.h"
 
 KeywordingModule::KeywordingModule(QWidget *parent) : LibraryModule(parent)
 {

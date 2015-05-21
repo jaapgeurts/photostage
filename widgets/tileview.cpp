@@ -10,7 +10,6 @@
 #include <QWheelEvent>
 
 #include "tileview.h"
-#include "imagefilesystemmodel.h"
 
 using namespace std;
 
@@ -227,8 +226,6 @@ void TileView::paintEvent(QPaintEvent */*event*/)
 
         mTile->render(painter,tileInfo,item);
 
-        painter.restore();
-
         // render the checkbox
 
         if (mIsCheckBoxMode)
@@ -239,9 +236,10 @@ void TileView::paintEvent(QPaintEvent */*event*/)
             option.state = QStyle::State_Enabled;
             option.state |= mCheckedList->contains(itemIndex) ? QStyle::State_On : QStyle::State_Off;
             option.rect.setRect(5,5,25,25);
-
             style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,&option,&painter,this);
         }
+
+        painter.restore();
 
         col++;
     }

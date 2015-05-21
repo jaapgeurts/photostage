@@ -10,7 +10,7 @@ class ImageFileTile : public AbstractTile
 public:
     ImageFileTile(TileView* parent=0);
 
-    void render(QPainter& painter, const TileInfo &info, const QVariant& data);
+    void render(QPainter& painter, const TileInfo &tileInfo, const QVariant& data);
 };
 
 #endif // IMAGEFILECELLRENDERER_H

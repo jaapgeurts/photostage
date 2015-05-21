@@ -16,67 +16,68 @@ CONFIG += c++11
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    importdialog.cpp \
-    imagefilesystemmodel.cpp \
     imagefileloader.cpp \
     preferencesdialog.cpp \
     databaseaccess.cpp \
-    importworkunit.cpp \
-    importinfo.cpp \
     sqlphotomodel.cpp \
     sqlpathmodel.cpp \
     sqlkeywordmodel.cpp \
-    widgets/modulepanel.cpp \
     aboutdialog.cpp \
-    widgets/fixedtreeview.cpp \
-    librarymodules/keywordingmodule.cpp \
     timeadjustdialog.cpp \
     sqlphotoinfo.cpp \
+    workunits/photoworkunit.cpp \
+    workunits/importinfo.cpp \
+    workunits/importworkunit.cpp \
+    library/imagedbtile.cpp \
+    library/modules/keywordingmodule.cpp \
+    library/modules/librarymodule.cpp \
+    widgets/modulepanel.cpp \
     widgets/abstracttile.cpp \
-    imagedbtile.cpp \
-    imagefiletile.cpp \
+    widgets/fixedtreeview.cpp \
     widgets/tileview.cpp \
-    photoworkunit.cpp \
-    librarymodules/librarymodule.cpp \
     widgets/translucentwindow.cpp \
-    previewfileloader.cpp \
-    exivfacade.cpp \
-    exiv2lib.cpp
+    import/importdialog.cpp \
+    import/imagefiletile.cpp \
+    import/previewfileloader.cpp \
+    import/exivfacade.cpp \
+    import/exiv2lib.cpp \
+    import/imagefilesystemmodel.cpp
 
 HEADERS  += mainwindow.h \
-    importdialog.h \
-    imagefilesystemmodel.h \
+    constants.h \
     imagefileloader.h \
     preferencesdialog.h \
     databaseaccess.h \
-    importworkunit.h \
-    importinfo.h \
     sqlphotomodel.h \
     sqlpathmodel.h \
     sqlkeywordmodel.h \
-    widgets/modulepanel.h \
     aboutdialog.h \
-    widgets/fixedtreeview.h \
-    librarymodules/keywordingmodule.h \
     timeadjustdialog.h \
     sqlphotoinfo.h \
+    workunits/photoworkunit.h \
+    workunits/importinfo.h \
+    workunits/importworkunit.h \
+    library/imagedbtile.h \
+    library/modules/keywordingmodule.h \
+    library/modules/librarymodule.h \
+    widgets/modulepanel.h \
+    widgets/fixedtreeview.h \
     widgets/abstracttile.h \
-    imagedbtile.h \
-    imagefiletile.h \
     widgets/tileview.h \
-    photoworkunit.h \
-    librarymodules/librarymodule.h \
     widgets/translucentwindow.h \
-    previewfileloader.h \
-    exivfacade.h \
-    constants.h \
-    exiv2lib.h
+    import/importdialog.h \
+    import/imagefilesystemmodel.h \
+    import/imagefiletile.h \
+    import/previewfileloader.h \
+    import/exivfacade.h \
+    import/exiv2lib.h
+
 
 FORMS    += mainwindow.ui \
-    importdialog.ui \
     preferencesdialog.ui \
     aboutdialog.ui \
-    timeadjustdialog.ui
+    timeadjustdialog.ui \
+    import/importdialog.ui
 
 DISTFILES +=
 
