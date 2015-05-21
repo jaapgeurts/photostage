@@ -16,6 +16,7 @@ class Library : public Module
     Q_OBJECT
 public:
     explicit Library(SqlPhotoModel * const model, QWidget *parent = 0);
+    ~Library();
 
     QRect lightGap();
 

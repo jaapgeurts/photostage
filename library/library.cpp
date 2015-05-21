@@ -63,6 +63,11 @@ Library::Library(SqlPhotoModel * const model, QWidget *parent) :
     mPhotoWorkUnit = PhotoWorkUnit::instance();
 }
 
+Library::~Library()
+{
+    delete ui;
+}
+
 QRect Library::lightGap()
 {
     QPoint pos = ui->mClvPhotos->mapToGlobal(QPoint(0,0));

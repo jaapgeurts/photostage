@@ -43,7 +43,9 @@ SOURCES += main.cpp\
     import/exiv2lib.cpp \
     import/imagefilesystemmodel.cpp \
     import/previewinfo.cpp \
-    library/library.cpp
+    library/library.cpp \
+    develop/develop.cpp \
+    map/map.cpp
 
 HEADERS  += mainwindow.h \
     constants.h \
@@ -75,7 +77,9 @@ HEADERS  += mainwindow.h \
     import/exiv2lib.h \
     import/previewinfo.h \
     library/library.h \
-    module.h
+    module.h \
+    develop/develop.h \
+    map/map.h
 
 
 FORMS    += mainwindow.ui \
@@ -83,7 +87,9 @@ FORMS    += mainwindow.ui \
     aboutdialog.ui \
     timeadjustdialog.ui \
     import/importdialog.ui \
-    library/library.ui
+    library/library.ui \
+    develop/develop.ui \
+    map/map.ui
 
 DISTFILES +=
 

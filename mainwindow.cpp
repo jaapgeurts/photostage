@@ -46,11 +46,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mPhotoModel = new SqlPhotoModel(this);
 
+    // Create the Library Module
     mLibrary = new Library(mPhotoModel,this);
     connect(mLibrary,(void (Library::*)(const QList<SqlPhotoInfo>&))&Library::selectionChanged, this, &MainWindow::selectionChanged);
-    int index = ui->stackedWidget->addWidget(mLibrary);
-    ui->stackedWidget->setCurrentIndex(index);
+    ui->stackedWidget->addWidget(mLibrary);
+
+    // Create the Develop Module
+    mDevelop = new Develop(this);
+    ui->stackedWidget->addWidget(mDevelop);
+
+    mMap = new Map(this);
+    ui->stackedWidget->addWidget(mMap);
+
+    // Set the current module variables
     mCurrentModule = mLibrary;
+    ui->stackedWidget->setCurrentWidget(mLibrary);
 
     mPhotoWorkUnit = PhotoWorkUnit::instance();
 
@@ -68,6 +78,21 @@ MainWindow::~MainWindow()
 void MainWindow::selectionChanged(const QList<SqlPhotoInfo> &list)
 {
     mCurrentSelection = list;
+}
+
+void MainWindow::onModeLibraryClicked()
+{
+    ui->stackedWidget->setCurrentWidget(mLibrary);
+}
+
+void MainWindow::onModeDevelopClicked()
+{
+    ui->stackedWidget->setCurrentWidget(mDevelop);
+}
+
+void MainWindow::onModeMapClicked()
+{
+    ui->stackedWidget->setCurrentWidget(mMap);
 }
 
 void MainWindow::onActionImportTriggered()
