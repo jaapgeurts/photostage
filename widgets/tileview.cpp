@@ -217,6 +217,7 @@ void TileView::paintEvent(QPaintEvent */*event*/)
             break;
 
         painter.save();
+        painter.setClipRect(xpos,ypos,mComputedCellWidth,mComputedCellHeight);
         painter.setWindow(0,0,mComputedCellWidth,mComputedCellHeight);
         painter.setViewport(xpos,ypos,mComputedCellWidth,mComputedCellHeight);
 
@@ -300,8 +301,6 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
         // the tile swallowed the event
         return;
 
-    mLastSelection = info.modelIndex;
-
     // Get the modelindex of the item that was clicked
     QModelIndex index = info.modelIndex;
 
@@ -343,6 +342,7 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
                     mSelection->clear();
                     mSelection->append(index);
                     // qDebug() << "No modifiers";
+                    mLastSelection = index;
                 }
                 else if ( (modifiers & (Qt::ShiftModifier|Qt::ControlModifier)) == (Qt::ShiftModifier|Qt::ControlModifier))
                 {
@@ -350,17 +350,18 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
                 }
                 else if ((modifiers & Qt::ShiftModifier) == Qt::ShiftModifier)
                 {
-                    //  qDebug() << "Shift";
+                    qDebug() << "Shift";
                     int first = mLastSelection.row();
                     int last = index.row();
                     // swap if negative direction
-                    if (first > last)
-                    {
+                    if (first > last) {
                         int t = first;
-                        first = last-1;
-                        last = t-1;
+                        first = last;
+                        last = t;
                     }
-                    for (int i=first+1;i<=last; i++)
+                    qDebug() << "From" << first << "to last" <<last;
+                    mSelection->clear();
+                    for (int i=first;i<=last; i++)
                     {
                         mSelection->append(mListModel->index(i,0,mRootIndex));
                     }
@@ -369,11 +370,12 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
                 {
                     //  qDebug() << "Control/Command";
                     mSelection->append(index);
+                    mLastSelection = index;
                 }
                 emit selectionChanged();
-                mLastSelection = index;
             }
         }
+
         update();
     }
 }
@@ -545,7 +547,7 @@ void TileView::selectAll()
 {
     int count = mListModel->rowCount(mRootIndex);
     for(int i=0;i<count; i++)
-      mSelection->append(mListModel->index(i,0,mRootIndex));
+        mSelection->append(mListModel->index(i,0,mRootIndex));
     update();
     emit selectionChanged();
 }

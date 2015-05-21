@@ -10,11 +10,14 @@ ImportWorkUnit::ImportWorkUnit(QObject *parent) : QObject(parent)
 
 }
 
+// TODO: run this action in a thread.
+// consider splitting import list in sections and run separate threads for each..
+// does the heavy lifting of importing photos
 void ImportWorkUnit::importPhotos(const ImportInfo & info)
 {
     QString lastpath;
     int lastkey;
-    foreach(QFileInfo file , info.getFiles())
+    foreach(QFileInfo file , info.files())
     {
         qDebug() << "Importing file" << file.canonicalFilePath();
         QString path = file.canonicalPath();
@@ -35,9 +38,19 @@ void ImportWorkUnit::importPhotos(const ImportInfo & info)
             // now we have the path key, insert all photos
             importPhoto(file, pathkey);
         }
+        switch (info.importMode())
+        {
+        case ImportInfo::ImportAdd:
+            break;
+        case ImportInfo::ImportCopy:
+            break;
+        case ImportInfo::ImportMove:
+            break;
+        }
     }
 }
 
+// inserts a record in the photo table
 int ImportWorkUnit::importPhoto(const QFileInfo& file, int pathkey)
 {
     //(id integer primary key AUTOINCREMENT, path integer,

@@ -19,9 +19,6 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
     //   painter.drawLine(0,0,w-1,h-1);
     //   painter.drawLine(0,h,w-1,0);
 
-    float ratio = 0.70f;
-    int wf = (int)(w * ratio); // width frame
-    int hf = (int)(h * ratio); // height frame
 
     // TODO: Load fonts in advance??
     painter.setFont(QFont("helvetica",18));
@@ -64,11 +61,20 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
         int wi = image.width(); // width of image
         int hi = image.height();
 
+
+        float ratio = 0.70f;
+        int wf = (int)(w * ratio); // width frame
+        int hf = (int)(h * ratio); // height frame
+
         QRect newSize = resizeToFrameKeepAspectRatio(QSize(wi,hi),QSize(wf,hf));
 
+        // move the frame to the center
         newSize.translate((w-wf)/2,(h-hf)/2);
-
         painter.drawImage(newSize,image);
+
+        // draw border around image
+        painter.setPen(QColor(Qt::black));
+        painter.drawRect(newSize);
 
         // Draw the rotate handles
         painter.save();
@@ -105,13 +111,11 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
 */
         painter.restore();
 
-        // draw border around image
-        // TODO: check if the rectange is on or outside the image
-        painter.setPen(QColor(Qt::black));
-        painter.drawRect(newSize);
+
     }
     else
     {
+        // TODO: draw missing picture instead of blue cross
         painter.setPen(QColor(Qt::blue));
         painter.drawLine(0,0,w-1,h-1);
         painter.drawLine(0,h-1,w-1,0);

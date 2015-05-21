@@ -7,6 +7,8 @@
 #include <QModelIndex>
 #include <QThreadPool>
 
+#include "previewinfo.h"
+
 
 class ImageFileSystemModel : public QFileSystemModel
 {
@@ -27,7 +29,7 @@ public slots:
     void loaderError(QString error);
 
 private:
-    QHash<QModelIndex,QImage> *mPixmapCache;
+    QHash<QModelIndex,PreviewInfo> *mPreviewInfoCache;
     QThreadPool *mThreadPool;
 };
 

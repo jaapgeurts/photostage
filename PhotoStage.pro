@@ -41,7 +41,8 @@ SOURCES += main.cpp\
     import/previewfileloader.cpp \
     import/exivfacade.cpp \
     import/exiv2lib.cpp \
-    import/imagefilesystemmodel.cpp
+    import/imagefilesystemmodel.cpp \
+    import/previewinfo.cpp
 
 HEADERS  += mainwindow.h \
     constants.h \
@@ -70,7 +71,8 @@ HEADERS  += mainwindow.h \
     import/imagefiletile.h \
     import/previewfileloader.h \
     import/exivfacade.h \
-    import/exiv2lib.h
+    import/exiv2lib.h \
+    import/previewinfo.h
 
 
 FORMS    += mainwindow.ui \

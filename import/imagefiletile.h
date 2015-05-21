@@ -11,6 +11,10 @@ public:
     ImageFileTile(TileView* parent=0);
 
     void render(QPainter& painter, const TileInfo &tileInfo, const QVariant& data);
+
+private:
+    QRect resizeToFrameKeepAspectRatio(const QSize &src, const QSize &destFrame);
+
 };
 
 #endif // IMAGEFILECELLRENDERER_H

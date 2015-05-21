@@ -7,17 +7,17 @@ ImportInfo::ImportInfo(const QList<QFileInfo> &sourceFiles, const QFileInfo & de
     mImportMode = mode;
 }
 
-const QList<QFileInfo>& ImportInfo::getFiles() const
+const QList<QFileInfo>& ImportInfo::files() const
 {
   return mSourceFiles;
 }
 
-const QFileInfo & ImportInfo::getDestinationDir() const
+const QFileInfo & ImportInfo::destinationDir() const
 {
     return mDestinationDir;
 }
 
-ImportInfo::ImportMode ImportInfo::getImportMode() const
+ImportInfo::ImportMode ImportInfo::importMode() const
 {
     return mImportMode;
 }

@@ -18,9 +18,9 @@ public:
 
     explicit ImportInfo(const QList<QFileInfo> & sourceFiles, const QFileInfo &destinationPath, ImportMode mode);
 
-    const QList<QFileInfo>& getFiles() const;
-    const QFileInfo & getDestinationDir() const;
-    ImportMode getImportMode() const;
+    const QList<QFileInfo>& files() const;
+    const QFileInfo & destinationDir() const;
+    ImportMode importMode() const;
 
 private:
     QList<QFileInfo> mSourceFiles;

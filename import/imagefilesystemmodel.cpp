@@ -7,14 +7,14 @@
 
 ImageFileSystemModel::ImageFileSystemModel(QObject* parent) : QFileSystemModel(parent)
 {
-    mPixmapCache = new QHash<QModelIndex,QImage>();
+    mPreviewInfoCache = new QHash<QModelIndex,PreviewInfo>();
     mThreadPool = new QThreadPool(this);
 }
 
 ImageFileSystemModel::~ImageFileSystemModel()
 {
-    mPixmapCache->clear();
-    delete mPixmapCache;
+    mPreviewInfoCache->clear();
+    delete mPreviewInfoCache;
 }
 
 QVariant ImageFileSystemModel::data(const QModelIndex &index, int role) const
@@ -28,26 +28,31 @@ QVariant ImageFileSystemModel::data(const QModelIndex &index, int role) const
     {
         // TODO: allocate on heap or stack?
         const QString path = data.toString();
-        QImage image;
-        if (mPixmapCache->contains(index))
+
+        PreviewInfo info;
+
+        if (mPreviewInfoCache->contains(index))
         {
             // return cached image
-            image = mPixmapCache->value(index);
+            info = mPreviewInfoCache->value(index);
         }
         else
         {
+
+            info.filePath = path;
             // load image in background thread
             PreviewFileLoader* loader = new PreviewFileLoader(path,index);
             connect(loader,&PreviewFileLoader::dataReady,this,&ImageFileSystemModel::imageLoaded);
             mThreadPool->start(loader);
 
             // Insert the dummy image here so that the we know the loader thread has been started
-            mPixmapCache->insert(index,image);
+            mPreviewInfoCache->insert(index,info);
 
             return QVariant();
         }
-
-        return image;
+        QVariant v;
+        v.setValue(info);
+        return v;
     }
     else
     {
@@ -58,13 +63,15 @@ QVariant ImageFileSystemModel::data(const QModelIndex &index, int role) const
 
 void ImageFileSystemModel::clearCache()
 {
-    mPixmapCache->clear();
+    mPreviewInfoCache->clear();
 }
 
 void ImageFileSystemModel::imageLoaded(const QModelIndex &index, const QImage& pixmap)
 {
 
-    mPixmapCache->insert(index,pixmap);
+    PreviewInfo info = mPreviewInfoCache->value(index);
+    info.image = pixmap;
+    mPreviewInfoCache->insert(index,info);
     QVector<int> roles;
     roles.append(TileView::PhotoRole);
     emit dataChanged(index,index,roles);

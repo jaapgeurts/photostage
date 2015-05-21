@@ -3,6 +3,7 @@
 
 #include "sqlphotomodel.h"
 #include "imagefileloader.h"
+#include "widgets/tileview.h"
 
 SqlPhotoModel::SqlPhotoModel(QObject *parent): QAbstractListModel(parent)
 {
@@ -63,7 +64,7 @@ SqlPhotoModel::~SqlPhotoModel()
 //  return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 //}
 
-QVariant SqlPhotoModel::data(const QModelIndex &index, int /*role*/) const
+QVariant SqlPhotoModel::data(const QModelIndex &index, int role) const
 {
 
     if (!index.isValid())
@@ -77,39 +78,48 @@ QVariant SqlPhotoModel::data(const QModelIndex &index, int /*role*/) const
         return QVariant();
     }
 
-    if (mPhotoInfoCache->contains(index))
+    if ( role == TileView::PhotoRole)
     {
-        // return cached image
-        info = mPhotoInfoCache->value(index);
+
+        if (mPhotoInfoCache->contains(index))
+        {
+            // return cached image
+            info = mPhotoInfoCache->value(index);
+        }
+        else
+        {
+            info.id = mMainQuery->value(0).toInt();
+            QString filename = mMainQuery->value(1).toString();
+            QString path = mMainQuery->value(2).toString();
+            info.fileName = path + QDir::separator() + filename;
+            if (mMainQuery->value(3).isNull())
+                info.setRating(0);
+            else
+                info.setRating(mMainQuery->value(3).toInt());
+            info.setColorLabel((SqlPhotoInfo::ColorLabel)mMainQuery->value(4).toInt());
+            info.setFlag((SqlPhotoInfo::Flag)mMainQuery->value(5).toInt());
+
+            // load image in background thread
+            ImageFileLoader* loader = new ImageFileLoader(info.fileName,index);
+            connect(loader,&ImageFileLoader::dataReady,this,&SqlPhotoModel::imageLoaded);
+            mThreadPool->start(loader);
+
+            // Insert the dummy image here so that the we know the loader thread has been started
+            mPhotoInfoCache->insert(index,info);
+
+            return QVariant();
+        }
+
+        QVariant v;
+        v.setValue(info);
+        return v;
+    }
+    else if (role == Qt::DisplayRole)
+    {
+        return QString(mMainQuery->value(1).toString());
     }
     else
-    {
-        info.id = mMainQuery->value(0).toInt();
-        QString filename = mMainQuery->value(1).toString();
-        QString path = mMainQuery->value(2).toString();
-        info.fileName = path + QDir::separator() + filename;
-        if (mMainQuery->value(3).isNull())
-            info.setRating(0);
-        else
-          info.setRating(mMainQuery->value(3).toInt());
-        info.setColorLabel((SqlPhotoInfo::ColorLabel)mMainQuery->value(4).toInt());
-        info.setFlag((SqlPhotoInfo::Flag)mMainQuery->value(5).toInt());
-
-        // load image in background thread
-        ImageFileLoader* loader = new ImageFileLoader(info.fileName,index);
-        connect(loader,&ImageFileLoader::dataReady,this,&SqlPhotoModel::imageLoaded);
-        mThreadPool->start(loader);
-
-        // Insert the dummy image here so that the we know the loader thread has been started
-        mPhotoInfoCache->insert(index,info);
-
         return QVariant();
-    }
-
-    QVariant v;
-    v.setValue(info);
-    return v;
-
 }
 
 void SqlPhotoModel::imageLoaded(const QModelIndex &index, const QImage& pixmap)
@@ -148,7 +158,7 @@ void SqlPhotoModel::updateData(const QList<QModelIndex>& list )
 
 QVariant SqlPhotoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int /*role*/) const
 {
-return QVariant();
+    return QVariant();
 }
 
 int SqlPhotoModel::rowCount(const QModelIndex &/*parent*/) const
