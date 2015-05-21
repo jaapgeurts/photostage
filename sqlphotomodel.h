@@ -28,7 +28,7 @@ public:
     bool removeRows(int row, int count, const QModelIndex &parent);
     */
 
-    void updateData(const QList<QModelIndex> &list);
+    void updateData(const QList<SqlPhotoInfo> &list);
 
 private slots:
     void imageLoaded(const QModelIndex &index, const QImage &pixmap);

@@ -42,7 +42,8 @@ SOURCES += main.cpp\
     import/exivfacade.cpp \
     import/exiv2lib.cpp \
     import/imagefilesystemmodel.cpp \
-    import/previewinfo.cpp
+    import/previewinfo.cpp \
+    library/library.cpp
 
 HEADERS  += mainwindow.h \
     constants.h \
@@ -72,14 +73,17 @@ HEADERS  += mainwindow.h \
     import/previewfileloader.h \
     import/exivfacade.h \
     import/exiv2lib.h \
-    import/previewinfo.h
+    import/previewinfo.h \
+    library/library.h \
+    module.h
 
 
 FORMS    += mainwindow.ui \
     preferencesdialog.ui \
     aboutdialog.ui \
     timeadjustdialog.ui \
-    import/importdialog.ui
+    import/importdialog.ui \
+    library/library.ui
 
 DISTFILES +=
 

@@ -133,28 +133,18 @@ void SqlPhotoModel::imageLoaded(const QModelIndex &index, const QImage& pixmap)
     emit dataChanged(index,index,roles);
 }
 
-void SqlPhotoModel::updateData(const QList<QModelIndex>& list )
+void SqlPhotoModel::updateData(const QList<SqlPhotoInfo> & /*list*/ )
 {
+    beginResetModel();
+    // FIXME: should only update items that have been changed
     mMainQuery->exec();
+    // mMainQuery->last();
+    // int count = mMainQuery->at()+1;
+    // mMainQuery->first();
 
-    // remove values from the cache
-    QModelIndex start,end;
-    QModelIndex index;
-    start = index;
-    end = index;
-    foreach (index, list) {
-        if (index.row()<start.row())
-            start = index;
-        if (index.row()>end.row())
-            end = index;
-        mPhotoInfoCache->remove(index);
-    }
-    QVector<int> roles;
-    emit dataChanged(start,end,roles);
-
+    mPhotoInfoCache->clear();
+    endResetModel();
 }
-
-
 
 QVariant SqlPhotoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int /*role*/) const
 {

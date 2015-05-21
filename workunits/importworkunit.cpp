@@ -35,17 +35,23 @@ void ImportWorkUnit::importPhotos(const ImportInfo & info)
         {
             int pathkey = lastkey;
 
+            switch (info.importMode())
+            {
+            case ImportInfo::ImportAdd:
+                // do nothing. just import the filepaths into the DB
+                break;
+            case ImportInfo::ImportCopy:
+            {
+                // copy each file
+                QFile file(path);
+            }
+                break;
+            case ImportInfo::ImportMove:
+                // move each file
+                break;
+            }
             // now we have the path key, insert all photos
             importPhoto(file, pathkey);
-        }
-        switch (info.importMode())
-        {
-        case ImportInfo::ImportAdd:
-            break;
-        case ImportInfo::ImportCopy:
-            break;
-        case ImportInfo::ImportMove:
-            break;
         }
     }
 }

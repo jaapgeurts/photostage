@@ -4,10 +4,12 @@
 #include <QMainWindow>
 #include <QPoint>
 
+// modules
+#include "module.h"
+#include "library/library.h"
+
 #include "databaseaccess.h"
-#include "sqlphotomodel.h"
-#include "workunits/photoworkunit.h"
-#include "library/modules/keywordingmodule.h"
+
 
 namespace Ui {
 class MainWindow;
@@ -22,8 +24,11 @@ public:
     ~MainWindow();
 
 private slots:
+    void selectionChanged(const QList<SqlPhotoInfo> & list);
+
     void onActionImportTriggered();
     void onActionAboutTriggered();
+
     void onActionEditTimeTriggered();
 
     void onActionRating1();
@@ -35,24 +40,21 @@ private slots:
 
     void onActionLightsOff();
 
-    void customContextMenu(const QPoint& pos);
-
-    // For clicks on the tile
-//    void rotateLeftClicked(const QModelIndex& index);
-//    void rotateRightClicked(const QModelIndex& index);
-//    void ratingClicked(const QModelIndex& index, int rating);
 
     // called when the selection in the photo tile view changes
-    void selectionChanged();
 
 private:
     Ui::MainWindow *ui;
     DatabaseAccess * mDatabaseAccess;
+    Library* mLibrary;
+    Module* mCurrentModule;
     SqlPhotoModel * mPhotoModel;
     PhotoWorkUnit * mPhotoWorkUnit;
-    KeywordingModule *mKeywording;
+
+    QList<SqlPhotoInfo> mCurrentSelection;
 
     void setRating(int rating);
+
 };
 
 #endif // MAINWINDOW_H
