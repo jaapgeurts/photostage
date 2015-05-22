@@ -11,6 +11,7 @@
 #include "map/map.h"
 
 #include "databaseaccess.h"
+#include "backgroundtaskmanager.h"
 
 
 namespace Ui {
@@ -54,6 +55,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    BackgroundTaskManager * mBackgroundTaskManager;
     DatabaseAccess * mDatabaseAccess;
     // module ui pointers
     Library* mLibrary;

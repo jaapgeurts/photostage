@@ -5,71 +5,77 @@
 
 #include "importworkunit.h"
 
-ImportWorkUnit::ImportWorkUnit(QObject *parent) : QObject(parent)
+
+// static initializers
+ImportWorkUnit* ImportWorkUnit::mInstance = NULL;
+
+ImportWorkUnit* ImportWorkUnit::instance()
+{
+    if (mInstance == NULL)
+        mInstance = new ImportWorkUnit();
+    return mInstance;
+}
+
+ImportWorkUnit::ImportWorkUnit()
 {
 
 }
 
-// TODO: run this action in a thread.
-// consider splitting import list in sections and run separate threads for each..
-// does the heavy lifting of importing photos
-void ImportWorkUnit::importPhotos(const ImportInfo & info)
+bool ImportWorkUnit::importPhoto(const QFileInfo& file, const ImportOptions& options)
 {
     QString lastpath;
-    int lastkey;
-    foreach(QFileInfo file , info.files())
+    int lastkey=0;
+
+    qDebug() << "Importing file" << file.canonicalFilePath();
+    QString fileName = file.fileName();
+    QString srcpath = file.canonicalFilePath();
+    QString dstdir = options.destinationDir().canonicalPath();
+    QString dstpath = dstdir + QDir::separator() + fileName;
+
+    int pathkey = lastkey;
+
+    //take action on the file(in case of copy & move)
+    switch (options.importMode())
     {
-        qDebug() << "Importing file" << file.canonicalFilePath();
-        QString path = file.canonicalPath();
-        QStringList pathlist = file.canonicalPath().split(QDir::separator(),QString::KeepEmptyParts);
-        QString fileName = file.fileName();
-
-        if (lastpath != path)
-        {
-            // check if the path already exists, if not create it.
-            lastkey = createPaths(pathlist);
-        }
-        if (lastkey == -1)
-            qDebug() << "Error inserting path" << path << "Can't import photo" << fileName;
-        else
-        {
-            int pathkey = lastkey;
-
-            switch (info.importMode())
-            {
-            case ImportInfo::ImportAdd:
-                // do nothing. just import the filepaths into the DB
-                break;
-            case ImportInfo::ImportCopy:
-            {
-                // copy each file
-                QFile file(path);
-            }
-                break;
-            case ImportInfo::ImportMove:
-                // move each file
-                break;
-            }
-            // now we have the path key, insert all photos
-            importPhoto(file, pathkey);
-        }
+    case ImportOptions::ImportAdd:
+        // do nothing. just import the filepaths into the DB
+        dstpath = srcpath;
+        break;
+    case ImportOptions::ImportCopy:
+        QFile::copy(srcpath,dstpath);
+        break;
+    case ImportOptions::ImportMove:
+        // move each file
+        QFile::rename(srcpath,dstpath); // rename moves if on different filesystems
+        break;
     }
+
+    if (lastpath != dstdir)
+    {
+        QStringList pathlist = dstdir.split(QDir::separator(),QString::KeepEmptyParts);
+        lastpath = dstdir;
+        // check if the path already exists, if not create it.
+        lastkey = createPaths(pathlist);
+    }
+    if (lastkey == -1)
+        qDebug() << "Error inserting path" << dstdir << "Can't import photo" << fileName;
+    else
+    {
+        // now we have the path key, insert all photos
+
+        //(id integer primary key AUTOINCREMENT, path integer,
+        // filename varchar, iso integer, shutter_speed float,
+        // float focal_length, datetime_taken text, hash varchar,
+        // rating integer, color integer, flag integer"));
+        QSqlQuery q;
+        q.prepare("insert into photo (path_id,filename) values (:path, :filename)");
+        q.bindValue(":path",pathkey);
+        q.bindValue(":filename",fileName);
+        return q.exec();
+    }
+    return false;
 }
 
-// inserts a record in the photo table
-int ImportWorkUnit::importPhoto(const QFileInfo& file, int pathkey)
-{
-    //(id integer primary key AUTOINCREMENT, path integer,
-    // filename varchar, iso integer, shutter_speed float,
-    // float focal_length, datetime_taken text, hash varchar,
-    // rating integer, color integer, flag integer"));
-    QSqlQuery q;
-    q.prepare("insert into photo (path_id,filename) values (:path, :filename)");
-    q.bindValue(":path",pathkey);
-    q.bindValue(":filename",file.fileName());
-    q.exec();
-    return q.lastInsertId().toInt();
-}
 
 
 // This function will check the path hierarchy in the database and insert the necessary paths

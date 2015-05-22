@@ -1,27 +1,29 @@
 #ifndef IMPORTWORKUNIT_H
 #define IMPORTWORKUNIT_H
 
-#include <QObject>
 #include <QtSql>
 
 #include "workunits/importinfo.h"
 
-class ImportWorkUnit : public QObject
+class ImportWorkUnit
 {
-    Q_OBJECT
-public:
-    explicit ImportWorkUnit(QObject *parent = 0);
 
-    void importPhotos(const ImportInfo &info);
+public:
+    static ImportWorkUnit* instance();
+    bool importPhoto(const QFileInfo& info, const ImportOptions& options);
+
+protected:
+     explicit ImportWorkUnit();
 
 signals:
 
 public slots:
 
 private:
+    static ImportWorkUnit* mInstance;
+
     int createPaths(QStringList &paths);
     int insertPath(QSqlQuery &q, const QStringList &path, int pos, int parentid);
-    int importPhoto(const QFileInfo &file, int pathkey);
 };
 
 #endif // IMPORTWORKUNIT_H

@@ -21,7 +21,7 @@ public:
     explicit ImportDialog(QWidget *parent = 0);
     ~ImportDialog();
 
-    ImportInfo getImportInfo();
+    ImportInfo importInfo();
 
 
 private slots:
@@ -38,7 +38,7 @@ private:
     QModelIndex mDestinationModelIndex;
     ImageFileSystemModel *mFilesModel;
     TileView * mCfvPhotos;
-    ImportInfo::ImportMode mImportMode;
+    ImportOptions::ImportMode mImportMode;
 
 };
 

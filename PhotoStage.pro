@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql concurrent
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -45,7 +45,13 @@ SOURCES += main.cpp\
     import/previewinfo.cpp \
     library/library.cpp \
     develop/develop.cpp \
-    map/map.cpp
+    map/map.cpp \
+    widgets/backgroundtaskprogress.cpp \
+    backgroundtaskmanager.cpp \
+    backgroundtask.cpp \
+    runtester.cpp \
+    import/importbackgroundtask.cpp \
+    import/importoptions.cpp
 
 HEADERS  += mainwindow.h \
     constants.h \
@@ -79,7 +85,13 @@ HEADERS  += mainwindow.h \
     library/library.h \
     module.h \
     develop/develop.h \
-    map/map.h
+    map/map.h \
+    widgets/backgroundtaskprogress.h \
+    backgroundtaskmanager.h \
+    backgroundtask.h \
+    runtester.h \
+    import/importbackgroundtask.h \
+    import/importoptions.h
 
 
 FORMS    += mainwindow.ui \
@@ -89,7 +101,8 @@ FORMS    += mainwindow.ui \
     import/importdialog.ui \
     library/library.ui \
     develop/develop.ui \
-    map/map.ui
+    map/map.ui \
+    widgets/backgroundtaskprogress.ui
 
 DISTFILES +=
 

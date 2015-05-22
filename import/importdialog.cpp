@@ -71,7 +71,7 @@ ImportDialog::ImportDialog(QWidget *parent) :
 
     mCfvPhotos->setModel(mFilesModel);
 
-    mImportMode = ImportInfo::ImportCopy;
+    mImportMode = ImportOptions::ImportCopy;
 
 }
 
@@ -92,7 +92,7 @@ void ImportDialog::onDestinationDirClicked(const QModelIndex& index)
   mDestinationModelIndex = index;
 }
 
-ImportInfo ImportDialog::getImportInfo()
+ImportInfo ImportDialog::importInfo()
 {
     QList<QFileInfo> list;
     foreach(QModelIndex index, mCfvPhotos->checkedItems())
@@ -109,16 +109,16 @@ ImportInfo ImportDialog::getImportInfo()
 
 void ImportDialog::onImportModeCopy()
 {
-  mImportMode = ImportInfo::ImportCopy;
+  mImportMode = ImportOptions::ImportCopy;
 }
 
 void ImportDialog::onImportModeMove()
 {
-  mImportMode = ImportInfo::ImportMove;
+  mImportMode = ImportOptions::ImportMove;
 }
 
 void ImportDialog::onImportModeAdd()
 {
-  mImportMode = ImportInfo::ImportAdd;
+  mImportMode = ImportOptions::ImportAdd;
 }
 

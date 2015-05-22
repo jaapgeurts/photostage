@@ -6,10 +6,8 @@
 #include <QApplication>
 #include <QDesktopWidget>
 
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "workunits/importworkunit.h"
 
 // Models
 #include "sqlphotomodel.h"
@@ -21,11 +19,11 @@
 #include "import/importdialog.h"
 
 #include "widgets/translucentwindow.h"
+#include "widgets/backgroundtaskprogress.h"
 
+#include "backgroundtask.h"
+#include "import/importbackgroundtask.h"
 
-
-
-using namespace std;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -64,6 +62,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mPhotoWorkUnit = PhotoWorkUnit::instance();
 
+    mBackgroundTaskManager = new BackgroundTaskManager(ui->scrollAreaWidgetContents, this);
+
 }
 
 MainWindow::~MainWindow()
@@ -97,13 +97,14 @@ void MainWindow::onModeMapClicked()
 
 void MainWindow::onActionImportTriggered()
 {
+
     ImportDialog * importDialog = new ImportDialog(this);
-    ImportWorkUnit *workUnit = new ImportWorkUnit();
     int resultCode = importDialog->exec();
     if (resultCode == QDialog::Accepted)
     {
-        workUnit->importPhotos(importDialog->getImportInfo());
-        delete workUnit;
+        ImportBackgroundTask *r = new ImportBackgroundTask(importDialog->importInfo());
+        mBackgroundTaskManager->addRunnable(r);
+        r->start();
     }
     delete importDialog;
 }

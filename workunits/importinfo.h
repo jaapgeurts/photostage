@@ -4,29 +4,23 @@
 #include <QList>
 #include <QFileInfo>
 #include <QString>
+#include "import/importoptions.h"
 
 class ImportInfo
 {
 
 public:
-
-    /* ImportMove: Move files to target,
-     * ImportCopy: Copy files to target leaving source intact,
-     * ImportAdd: Do nothing just add the references into the catalog.
-     */
-    enum ImportMode { ImportMove, ImportCopy, ImportAdd };
-
-    explicit ImportInfo(const QList<QFileInfo> & sourceFiles, const QFileInfo &destinationPath, ImportMode mode);
+    ImportInfo() {};
+    ImportInfo(const ImportInfo& src);
+    explicit ImportInfo(const QList<QFileInfo> & sourceFiles, const QFileInfo &destinationPath, ImportOptions::ImportMode mode);
 
     const QList<QFileInfo>& files() const;
-    const QFileInfo & destinationDir() const;
-    ImportMode importMode() const;
+    const ImportOptions options() const;
 
 private:
     QList<QFileInfo> mSourceFiles;
-    QFileInfo mDestinationDir;
+    ImportOptions mOptions;
 
-    ImportMode mImportMode;
 };
 
 #endif // IMPORTINFO_H

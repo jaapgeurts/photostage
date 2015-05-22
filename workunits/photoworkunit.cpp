@@ -41,7 +41,6 @@ void PhotoWorkUnit::insertKeywords(const QStringList &words)
     if (words.size() == 0 )
         return;
 
-    // TODO sql: set unique index and ingore error when inserting
     QSqlQuery q;
     QStringList newWords = words;
     q.prepare("select id, keyword from keyword where keyword in (:list)");

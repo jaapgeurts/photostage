@@ -37,12 +37,20 @@ void DatabaseAccess::initDb()
     QSqlQuery q;
     if (!q.exec(QLatin1String("create table path (id integer primary key AUTOINCREMENT, directory varchar, parent_id integer)")))
         qDebug() << "Failed to create table" << q.lastError();
+
     if(!q.exec(QLatin1String("create table photo (id integer primary key AUTOINCREMENT, path_id integer, filename varchar, iso integer, shutter_speed float, float focal_length, datetime_taken text, hash varchar, rating integer, color integer, flag integer)")))
         qDebug() << "Failed to create table" << q.lastError();
+
     if(!q.exec(QLatin1String("create table keyword (id integer primary key AUTOINCREMENT, keyword varchar, parent_id integer)")))
         qDebug() << "Failed to create table" << q.lastError();
+    if(!q.exec(QLatin1String("create unique index idx_keyword on keyword (keyword, parent_id")))
+        qDebug() << "Failed to create index" << q.lastError();
+
     if(!q.exec(QLatin1String("create table photo_keyword (photo_id integer, keyword_id integer)")))
         qDebug() << "Failed to create table" << q.lastError();
+    if(!q.exec(QLatin1String("create unique index idx_photo_keyword on photo_keyword (photo_id, keyword_id)")))
+        qDebug() << "Failed to create index" << q.lastError();
+
 
 }
 
