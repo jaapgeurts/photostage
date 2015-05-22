@@ -21,6 +21,9 @@ public:
 private:
     QFileInfo mDestinationDir;
     ImportMode mImportMode;
+    // Preserve the structure when importing and moving/copying of the source
+    // folder or copy all files into the selected target folder
+    bool mPreserveDirectoryStructure;
 };
 
 #endif // IMPORTOPTIONS_H

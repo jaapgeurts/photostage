@@ -1,5 +1,4 @@
 
-#include <QtConcurrent>
 
 #include "importbackgroundtask.h"
 
@@ -8,7 +7,7 @@ ImportBackgroundTask::ImportBackgroundTask(const ImportInfo & info) : Background
     setDescription(QString("Importing..."));
     mInfo = info;
 
-
+    mWorkUnit = ImportWorkUnit::instance();
 
 }
 
@@ -22,43 +21,32 @@ int ImportBackgroundTask::progressMaximum()
     return mInfo.files().size()-1;
 }
 
-void reduce(bool & result, const bool & intermediate)
+void ImportBackgroundTask::run()
 {
-    if (result)
-        result = intermediate;
+    int i =0;
+    QListIterator<QFileInfo> it(mInfo.files());
+    while (it.hasNext() && running)
+    {
+        QFileInfo info = it.next();
+        if (!mWorkUnit->importPhoto(info,mInfo.options()))
+            qDebug() << "There was an error importing file:"<<info.filePath();
+        i++;
+        emit progressUpdated(i);
+    }
+    emit taskFinished(this);
 }
 
-struct Importer
-{
-    Importer(const ImportOptions& options) : mOptions(options)
-    {
-        mWorkUnit = ImportWorkUnit::instance();
-    }
-
-    typedef bool result_type;
-
-    bool operator()(const QFileInfo& info)
-    {
-        return mWorkUnit->importPhoto(info,mOptions);
-    }
-
-    ImportOptions mOptions;
-    ImportWorkUnit *mWorkUnit;
-};
 
 void ImportBackgroundTask::start()
 {
     // TODO: consider importing files in parallel, not in sequence
-    QFuture<bool> result = QtConcurrent::mappedReduced(mInfo.files(),Importer(mInfo.options()),&reduce);
+    running = true;
+    QThreadPool::globalInstance()->start(this);
 }
 
-bool ImportBackgroundTask::importFile(const QFileInfo & info)
-{
-
-}
 
 void ImportBackgroundTask::cancel()
 {
-
+    running = false;
 }
 

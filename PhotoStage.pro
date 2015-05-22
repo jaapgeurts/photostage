@@ -51,7 +51,7 @@ SOURCES += main.cpp\
     backgroundtask.cpp \
     runtester.cpp \
     import/importbackgroundtask.cpp \
-    import/importoptions.cpp
+    workunits/importoptions.cpp
 
 HEADERS  += mainwindow.h \
     constants.h \
@@ -91,7 +91,7 @@ HEADERS  += mainwindow.h \
     backgroundtask.h \
     runtester.h \
     import/importbackgroundtask.h \
-    import/importoptions.h
+    workunits/importoptions.h
 
 
 FORMS    += mainwindow.ui \

@@ -22,7 +22,11 @@ void PreviewFileLoader::run()
     ExivFacade *exiv = ExivFacade::createExivReader();
     qDebug() << "Reading image:" << mPath;
     QImage pixmap = exiv->thumbnail(mPath);
+    // if the image contained no thumbnail attempt to load it from disk directly
+    if (pixmap.isNull())
+        pixmap.load(mPath);
     QImage image = pixmap.scaled(QSize(PREVIEW_IMG_WIDTH,PREVIEW_IMG_HEIGHT),Qt::KeepAspectRatio);
+
     emit dataReady(mModelIndex,image);
     delete exiv;
 }

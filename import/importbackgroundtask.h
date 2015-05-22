@@ -1,17 +1,20 @@
 #ifndef IMPORTBACKGROUNDTASK_H
 #define IMPORTBACKGROUNDTASK_H
 
+#include <QRunnable>
+
 #include "backgroundtask.h"
 #include "workunits/importworkunit.h"
 
 
-class ImportBackgroundTask : public BackgroundTask
+class ImportBackgroundTask : public BackgroundTask, public QRunnable
 {
 public:
     ImportBackgroundTask(const ImportInfo & info);
 
     int progressMinimum();
     int progressMaximum();
+    void run();
 
 public slots:
     void start();
@@ -22,8 +25,8 @@ private:
     ImportInfo mInfo;
 
 
-
-    bool importFile(const QFileInfo &info);
+    ImportWorkUnit * mWorkUnit;
+    std::atomic<bool> running;
 };
 
 #endif // IMPORTBACKGROUNDTASK_H

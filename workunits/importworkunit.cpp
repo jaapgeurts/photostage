@@ -29,10 +29,8 @@ bool ImportWorkUnit::importPhoto(const QFileInfo& file, const ImportOptions& opt
     qDebug() << "Importing file" << file.canonicalFilePath();
     QString fileName = file.fileName();
     QString srcpath = file.canonicalFilePath();
-    QString dstdir = options.destinationDir().canonicalPath();
+    QString dstdir = options.destinationDir().canonicalFilePath();
     QString dstpath = dstdir + QDir::separator() + fileName;
-
-    int pathkey = lastkey;
 
     //take action on the file(in case of copy & move)
     switch (options.importMode())
@@ -69,7 +67,7 @@ bool ImportWorkUnit::importPhoto(const QFileInfo& file, const ImportOptions& opt
         // rating integer, color integer, flag integer"));
         QSqlQuery q;
         q.prepare("insert into photo (path_id,filename) values (:path, :filename)");
-        q.bindValue(":path",pathkey);
+        q.bindValue(":path",lastkey);
         q.bindValue(":filename",fileName);
         return q.exec();
     }

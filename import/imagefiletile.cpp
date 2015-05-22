@@ -41,34 +41,44 @@ void ImageFileTile::render(QPainter& painter,const TileInfo& tileInfo, const QVa
     {
         info = data.value<PreviewInfo>();
         QImage image = info.image;
+        if (!image.isNull())
+        {
 
-        int wi = image.width();
-        int hi = image.height();
+            int wi = image.width();
+            int hi = image.height();
 
-        float ratio = 0.70f;
-        int wf = (int)(w * ratio); // width frame
-        int hf = (int)(h * ratio); // height frame
+            float ratio = 0.70f;
+            int wf = (int)(w * ratio); // width frame
+            int hf = (int)(h * ratio); // height frame
 
-        QRect newSize = resizeToFrameKeepAspectRatio(QSize(wi,hi),QSize(wf,hf));
+            QRect newSize = resizeToFrameKeepAspectRatio(QSize(wi,hi),QSize(wf,hf));
 
-        // move the frame to the center
-        newSize.translate((w-wf)/2,(h-hf)/2);
-        // and draw the image
-        painter.drawImage(newSize,image);
+            // move the frame to the center
+            newSize.translate((w-wf)/2,(h-hf)/2);
+            // and draw the image
+            painter.drawImage(newSize,image);
 
-        // draw border around image
-        painter.setPen(QColor(Qt::black));
-        painter.drawRect(newSize);
+            // draw border around image
+            painter.setPen(QColor(Qt::black));
+            painter.drawRect(newSize);
 
 
-        // draw the file name
-        QFont fileNameFont = QFont("helvetica",10);
-        painter.setFont(fileNameFont);
-        painter.setPen(QColor(Qt::lightGray));
-        QString name = info.filePath.mid(info.filePath.lastIndexOf(QDir::separator())+1);
-        QFontMetrics m(fileNameFont);
-        int textWidth = m.width(name);
-        painter.drawText((w-textWidth)/2,h-5,name);
+            // draw the file name
+            QFont fileNameFont = QFont("helvetica",10);
+            painter.setFont(fileNameFont);
+            painter.setPen(QColor(Qt::lightGray));
+            QString name = info.filePath.mid(info.filePath.lastIndexOf(QDir::separator())+1);
+            QFontMetrics m(fileNameFont);
+            int textWidth = m.width(name);
+            painter.drawText((w-textWidth)/2,h-5,name);
+        }
+        else
+        {
+            // invalid image
+            painter.setPen(QColor(Qt::red));
+            painter.drawLine(0,0,w-1,h-1);
+            painter.drawLine(0,h-1,w-1,0);
+        }
 
     }
     else
