@@ -17,12 +17,13 @@ ImageFileLoader::~ImageFileLoader()
 
 void ImageFileLoader::run()
 {
-   // qDebug() << "worker thread " << mModelIndex.row() <<" started";
-
     // TODO: catch errors and emit error(QString)
-    //qDebug() << "Reading image:" << mPath;
     QImage pixmap = QImage(mPath);
-    QImage image = pixmap.scaled(QSize(PREVIEW_IMG_WIDTH,PREVIEW_IMG_HEIGHT),Qt::KeepAspectRatio);
+    QImage image;
+    if (pixmap.isNull())
+        qDebug() << "ImageFileLoader::run() Can't load image" << mPath;
+    else
+      image = pixmap.scaled(QSize(PREVIEW_IMG_WIDTH,PREVIEW_IMG_HEIGHT),Qt::KeepAspectRatio);
     emit dataReady(mModelIndex,image);
 }
 

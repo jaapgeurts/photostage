@@ -18,7 +18,7 @@
     <normaloff>:/appicon.png</normaloff>:/appicon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0,1">
     <property name="leftMargin">
      <number>0</number>
     </property>
@@ -283,22 +283,41 @@
        <enum>Qt::Vertical</enum>
       </property>
       <widget class="QStackedWidget" name="stackedWidget"/>
-      <widget class="QListView" name="listView_3">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QFrame" name="frame">
        <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
+        <enum>QFrame::StyledPanel</enum>
        </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
        </property>
-       <property name="flow">
-        <enum>QListView::LeftToRight</enum>
-       </property>
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
+        <item>
+         <widget class="QLabel" name="lblInformation">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QListView" name="listView_3">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="verticalScrollBarPolicy">
+           <enum>Qt::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="flow">
+           <enum>QListView::LeftToRight</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -346,20 +365,20 @@
      <property name="title">
       <string>Set Flag</string>
      </property>
-     <addaction name="actionFlagged"/>
-     <addaction name="actionUnflagged"/>
-     <addaction name="actionRejected"/>
+     <addaction name="actionFlagPick"/>
+     <addaction name="actionFlagNone"/>
+     <addaction name="actionFlagReject"/>
     </widget>
     <widget class="QMenu" name="menuSet_Rating">
      <property name="title">
       <string>Set Rating</string>
      </property>
-     <addaction name="actionNone"/>
-     <addaction name="action_8"/>
-     <addaction name="action_9"/>
-     <addaction name="action_10"/>
-     <addaction name="action_11"/>
-     <addaction name="action_12"/>
+     <addaction name="actionRatingNone"/>
+     <addaction name="actionRating1"/>
+     <addaction name="actionRating2"/>
+     <addaction name="actionRating3"/>
+     <addaction name="actionRating4"/>
+     <addaction name="actionRating5"/>
      <addaction name="separator"/>
      <addaction name="actionIncrease_rating"/>
      <addaction name="actionDecrease_Rating"/>
@@ -368,14 +387,14 @@
      <property name="title">
       <string>Set Color</string>
      </property>
-     <addaction name="actionRed"/>
-     <addaction name="actionGreen"/>
-     <addaction name="actionBlue"/>
-     <addaction name="actionYellow"/>
-     <addaction name="actionPurple"/>
-     <addaction name="actionOrange"/>
+     <addaction name="actionColorRed"/>
+     <addaction name="actionColorGreen"/>
+     <addaction name="actionColorBlue"/>
+     <addaction name="actionColorYellow"/>
+     <addaction name="actionColorPurple"/>
+     <addaction name="actionColorOrange"/>
      <addaction name="separator"/>
-     <addaction name="actionNone_2"/>
+     <addaction name="actionColorNone"/>
     </widget>
     <addaction name="actionAdd_to_Quick_Collection"/>
     <addaction name="separator"/>
@@ -608,22 +627,31 @@
     <string>Delete Rejected Photos</string>
    </property>
   </action>
-  <action name="actionFlagged">
+  <action name="actionFlagPick">
    <property name="text">
     <string>Flagged</string>
    </property>
+   <property name="shortcut">
+    <string>P</string>
+   </property>
   </action>
-  <action name="actionUnflagged">
+  <action name="actionFlagNone">
    <property name="text">
     <string>Unflagged</string>
    </property>
+   <property name="shortcut">
+    <string>U</string>
+   </property>
   </action>
-  <action name="actionRejected">
+  <action name="actionFlagReject">
    <property name="text">
     <string>Rejected</string>
    </property>
+   <property name="shortcut">
+    <string>X</string>
+   </property>
   </action>
-  <action name="actionNone">
+  <action name="actionRatingNone">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -634,7 +662,7 @@
     <string>0</string>
    </property>
   </action>
-  <action name="action_8">
+  <action name="actionRating1">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -645,7 +673,7 @@
     <string>1</string>
    </property>
   </action>
-  <action name="action_9">
+  <action name="actionRating2">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -656,7 +684,7 @@
     <string>2</string>
    </property>
   </action>
-  <action name="action_10">
+  <action name="actionRating3">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -667,7 +695,7 @@
     <string>3</string>
    </property>
   </action>
-  <action name="action_11">
+  <action name="actionRating4">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -678,7 +706,7 @@
     <string>4</string>
    </property>
   </action>
-  <action name="action_12">
+  <action name="actionRating5">
    <property name="checkable">
     <bool>true</bool>
    </property>
@@ -699,12 +727,12 @@
     <string>Decrease Rating</string>
    </property>
   </action>
-  <action name="actionNone_2">
+  <action name="actionColorNone">
    <property name="text">
     <string>None</string>
    </property>
   </action>
-  <action name="actionRed">
+  <action name="actionColorRed">
    <property name="text">
     <string>Red</string>
    </property>
@@ -712,7 +740,7 @@
     <string>6</string>
    </property>
   </action>
-  <action name="actionGreen">
+  <action name="actionColorGreen">
    <property name="text">
     <string>Green</string>
    </property>
@@ -720,7 +748,7 @@
     <string>7</string>
    </property>
   </action>
-  <action name="actionBlue">
+  <action name="actionColorBlue">
    <property name="text">
     <string>Blue</string>
    </property>
@@ -728,7 +756,7 @@
     <string>8</string>
    </property>
   </action>
-  <action name="actionYellow">
+  <action name="actionColorYellow">
    <property name="text">
     <string>Yellow</string>
    </property>
@@ -736,12 +764,12 @@
     <string>9</string>
    </property>
   </action>
-  <action name="actionPurple">
+  <action name="actionColorPurple">
    <property name="text">
     <string>Purple</string>
    </property>
   </action>
-  <action name="actionOrange">
+  <action name="actionColorOrange">
    <property name="text">
     <string>Orange</string>
    </property>
@@ -846,10 +874,10 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionAbout</sender>
+   <sender>actionColorRed</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
-   <slot>onActionAboutTriggered()</slot>
+   <slot>onActionColorRed()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>-1</x>
@@ -878,7 +906,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_8</sender>
+   <sender>actionRating1</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onActionRating1()</slot>
@@ -894,7 +922,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_9</sender>
+   <sender>actionRating2</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onActionRating2()</slot>
@@ -910,7 +938,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_10</sender>
+   <sender>actionRating3</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onActionRating3()</slot>
@@ -926,7 +954,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_11</sender>
+   <sender>actionRating4</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onActionRating4()</slot>
@@ -942,7 +970,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>action_12</sender>
+   <sender>actionRating5</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onActionRating5()</slot>
@@ -958,7 +986,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>actionNone</sender>
+   <sender>actionRatingNone</sender>
    <signal>triggered()</signal>
    <receiver>MainWindow</receiver>
    <slot>onActionRatingNone()</slot>
@@ -1037,6 +1065,166 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionFlagPick</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onActionFlagPick()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFlagReject</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onActionFlagReject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionFlagNone</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onActionFlagNone()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPreferences</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onActionPreferences()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionColorOrange</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onActionColorOrange()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionColorBlue</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onActionColorBlue()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionColorGreen</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onActionColorGreen()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionColorPurple</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onActionColorPurple()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionColorYellow</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onActionColorYellow()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionColorNone</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onActionColorNone()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onActionImportTriggered()</slot>
@@ -1052,6 +1240,17 @@
   <slot>onModeLibraryClicked()</slot>
   <slot>onModeDevelopClicked()</slot>
   <slot>onModeMapClicked()</slot>
+  <slot>onActionFlagPick()</slot>
+  <slot>onActionFlagReject()</slot>
+  <slot>onActionFlagNone()</slot>
+  <slot>onActionPreferences()</slot>
+  <slot>onActionColorNone()</slot>
+  <slot>onActionColorRed()</slot>
+  <slot>onActionColorGreen()</slot>
+  <slot>onActionColorBlue()</slot>
+  <slot>onActionColorYellow()</slot>
+  <slot>onActionColorOrange()</slot>
+  <slot>onActionColorPurple()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="moduleNavGroup"/>

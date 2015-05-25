@@ -52,6 +52,7 @@ void SqlPathModel::createPathtemsRec(PathItem* root)
     //int total = 0;
     while(query.next())
     {
+        // conside using std::shared_ptr
         item = new PathItem(query.value(0).toLongLong(),query.value(1).toString(), query.value(1).toLongLong());
         item->count = query.value(3).toInt();
         item->parent = root;
@@ -129,8 +130,15 @@ QVariant SqlPathModel::data(const QModelIndex &index, int role) const
 
     PathItem* item = static_cast<PathItem*>(index.internalPointer());
 
-    if (role == Qt::DisplayRole)
+    if (role == Qt::DisplayRole) {
         return QString("%1 (%2/%3)").arg(item->path , QString::number(item->count) , QString::number(item->cumulative));
+    }
+    else if (role == SqlPathModel::Path)
+    {
+        QVariant v;
+        v.setValue(item);
+        return v;
+    }
     else
         return QVariant();
 }

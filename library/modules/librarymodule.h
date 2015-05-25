@@ -2,7 +2,7 @@
 #define LIBRARYMODULE
 
 #include <QWidget>
-#include "sqlphotoinfo.h"
+#include "photo.h"
 
 class LibraryModule : public QWidget
 {
@@ -15,11 +15,11 @@ public:
     void setTitle(const QString& title) { mTitle = title; }
     const QString& title() const { return mTitle; }
 
-    virtual void setPhotos(const QList<SqlPhotoInfo>& list) { mPhotoInfoList = list; }
-    const QList<SqlPhotoInfo>& photos() const { return mPhotoInfoList; }
+    virtual void setPhotos(const QList<Photo*>& list) { mPhotoInfoList = list; }
+    const QList<Photo*>& photos() const { return mPhotoInfoList; }
 
 protected:
-    QList<SqlPhotoInfo> mPhotoInfoList;
+    QList<Photo*> mPhotoInfoList;
 
 private:
     QString mTitle;

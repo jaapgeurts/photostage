@@ -70,8 +70,9 @@ private slots:
 
     // slots for slider events
     void sliderValueChanged(int newValue);
-
-
+    // reinitialize the view =>
+    // clear selection clear model data
+    void resetView();
 protected:
     void paintEvent(QPaintEvent *event) Q_DECL_OVERRIDE;
     void wheelEvent(QWheelEvent * event) Q_DECL_OVERRIDE;
@@ -79,6 +80,8 @@ protected:
     void mouseReleaseEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
     void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
     void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
+
+
 
     TileInfo createTileInfo(int index);
 

@@ -5,14 +5,19 @@
 #include <QtSql>
 #include <QHash>
 
-#include "sqlphotoinfo.h"
+#include "workunits/photoworkunit.h"
+
+#include "photo.h"
 
 
-class SqlPhotoModel : public QAbstractListModel
+class PhotoModel : public QAbstractListModel
 {
 public:
-    SqlPhotoModel(QObject* parent = 0);
-    ~SqlPhotoModel();
+
+    enum SourceType { SourceFiles = 1, SourceCollection = 2 };
+
+    PhotoModel(QObject* parent = 0);
+    ~PhotoModel();
 
     int rowCount(const QModelIndex &parent) const;
     QVariant headerData(int, Qt::Orientation, int) const;
@@ -28,14 +33,21 @@ public:
     bool removeRows(int row, int count, const QModelIndex &parent);
     */
 
-    void updateData(const QList<SqlPhotoInfo> &list);
+    void refreshData(const QList<Photo*> &);
+    void addData(const QList<long long> &idList);
+
+public slots:
+    void onReloadPhotos(SourceType source, long long id );
 
 private slots:
     void imageLoaded(const QModelIndex &index, const QImage &pixmap);
 
 private:
-    QSqlQuery* mMainQuery;
-    QHash<QModelIndex,SqlPhotoInfo> *mPhotoInfoCache;
+    PhotoWorkUnit * mWorkUnit;
+    // The mPhotoInfoList is the main container for the Photo Objects.
+    // Delete is required on it's contents
+    QList<Photo*> mPhotoInfoList;
+    QHash<QModelIndex,Photo*> *mPhotoInfoCache;
     QThreadPool *mThreadPool;
 
 };

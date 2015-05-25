@@ -3,10 +3,14 @@
 
 #include <QtSql>
 #include <QAbstractItemModel>
+#include <QMetaType>
 
 
-struct PathItem
+class PathItem
 {
+public:
+    PathItem() {}
+
     PathItem(long long id, QString path, long long parent_id)
     {
         this->id = id; this->path = path; this->parent_id = parent_id; parent = NULL;
@@ -17,15 +21,18 @@ struct PathItem
     QString path;
     long long id;
     long long parent_id;
-    struct PathItem *parent;
+    PathItem *parent;
     int count;
     int cumulative;
-    QList<struct PathItem*> children;
+    QList<PathItem*> children;
 };
 
 class SqlPathModel : public QAbstractItemModel
 {
 public:
+
+    enum DataRole { Path = 1 };
+
     SqlPathModel(QObject* parent=0);
     ~SqlPathModel();
 
@@ -54,5 +61,8 @@ private:
     void createPathtemsRec(PathItem *root);
     void createPathItems();
 };
+
+Q_DECLARE_METATYPE(PathItem)
+Q_DECLARE_METATYPE(PathItem*)
 
 #endif // SQLPATHMODEL_H

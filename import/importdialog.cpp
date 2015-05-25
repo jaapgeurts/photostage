@@ -2,6 +2,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QtGlobal>
+#include <QSettings>
 
 #include "importdialog.h"
 #include "ui_importdialog.h"
@@ -41,13 +42,20 @@ ImportDialog::ImportDialog(QWidget *parent) :
     ui->trvwSource->hideColumn(2);
     ui->trvwSource->hideColumn(3);
     ui->trvwSource->expand(srcindex);
-//    ui->trvwSource->expand(index.parent());
-//    ui->trvwSource->expand(index.parent().parent());
-//    ui->trvwSource->expand(index.parent().parent().parent());
+    QSettings settings;
+    QString str = settings.value("importdialog/sourcepath").toString();
+    qDebug() << "show dir" << str;
+    QModelIndex index = mSourceDrivesModel->index(str);
+    QModelIndex dirIndex = index;
+    do {
+        ui->trvwSource->expand(index);
+        index = index.parent();
+    } while (index.isValid());
+    ui->trvwSource->selectionModel()->select(dirIndex,QItemSelectionModel::ClearAndSelect);
 
     mDestinationDrivesModel =  new QFileSystemModel(this);
     mDestinationDrivesModel->setFilter(QDir::NoDotAndDotDot| QDir::Dirs);
-   /* QModelIndex destIndex = */mDestinationDrivesModel->setRootPath("/Volumes");
+    /* QModelIndex destIndex = */mDestinationDrivesModel->setRootPath("/Volumes");
     ui->trvwDestination->setModel(mDestinationDrivesModel);
 
 #ifdef Q_OS_MAC
@@ -67,17 +75,30 @@ ImportDialog::ImportDialog(QWidget *parent) :
     filters << "*.png" << "*.jpg" << "*.jpeg" << "*.cr2" << "*.crw" << "*.nef" << "*.dng";
     mFilesModel->setNameFilters(filters);
     mFilesModel->setNameFilterDisables(false);
-    mFilesModel->setRootPath("/");
+
 
     mCfvPhotos->setModel(mFilesModel);
 
     mImportMode = ImportOptions::ImportCopy;
 
+    mCfvPhotos->setRootIndex(mFilesModel->setRootPath(str));
+    ui->btnImport->setEnabled(false);
+    ui->btnImport->setToolTip("You must select images before you can import.");
+
+    connect(mCfvPhotos,&TileView::selectionChanged,this,&ImportDialog::onFilesSelected);
+
 }
 
 ImportDialog::~ImportDialog()
 {  
-    delete ui;
+    if (result() == QDialog::Accepted)
+    {
+        QSettings settings;
+        QModelIndex index = ui->trvwSource->currentIndex();
+        QString path = mSourceDrivesModel->fileInfo(index).absoluteFilePath();
+        settings.setValue("importdialog/sourcepath",path);
+        delete ui;
+    }
 }
 
 void ImportDialog::onSourceDirClicked(const QModelIndex& index)
@@ -85,11 +106,40 @@ void ImportDialog::onSourceDirClicked(const QModelIndex& index)
     QString path = mSourceDrivesModel->fileInfo(index).absoluteFilePath();
     mFilesModel->clearCache();
     mCfvPhotos->setRootIndex(mFilesModel->setRootPath(path));
+    validateForm();
+}
+
+void ImportDialog::onFilesSelected()
+{
+    validateForm();
+}
+
+void ImportDialog::validateForm()
+{
+    if (mCfvPhotos->selection().size()==0)
+    {
+        ui->btnImport->setEnabled(false);
+        ui->btnImport->setToolTip("You must select images before you can import.");
+        return;
+    }
+    if (mImportMode == ImportOptions::ImportCopy || mImportMode == ImportOptions::ImportMove)
+    {
+        if (!mDestinationModelIndex.isValid())
+        {
+            ui->btnImport->setEnabled(false);
+            ui->btnImport->setToolTip("You must select a destination folder.");
+            return;
+        }
+    }
+    ui->btnImport->setToolTip("Import the selected images.");
+    ui->btnImport->setEnabled(true);
+
 }
 
 void ImportDialog::onDestinationDirClicked(const QModelIndex& index)
 {
-  mDestinationModelIndex = index;
+    mDestinationModelIndex = index;
+    validateForm();
 }
 
 ImportInfo ImportDialog::importInfo()
@@ -107,18 +157,22 @@ ImportInfo ImportDialog::importInfo()
 
 }
 
+
 void ImportDialog::onImportModeCopy()
 {
-  mImportMode = ImportOptions::ImportCopy;
+    mImportMode = ImportOptions::ImportCopy;
+    validateForm();
 }
 
 void ImportDialog::onImportModeMove()
 {
-  mImportMode = ImportOptions::ImportMove;
+    mImportMode = ImportOptions::ImportMove;
+    validateForm();
 }
 
 void ImportDialog::onImportModeAdd()
 {
-  mImportMode = ImportOptions::ImportAdd;
+    mImportMode = ImportOptions::ImportAdd;
+    validateForm();
 }
 

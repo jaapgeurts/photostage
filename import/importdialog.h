@@ -31,6 +31,8 @@ private slots:
 
     void onImportModeMove();
     void onImportModeAdd();
+    void onFilesSelected();
+
 private:
     Ui::ImportDialog *ui;
     QFileSystemModel *mSourceDrivesModel;
@@ -40,6 +42,9 @@ private:
     TileView * mCfvPhotos;
     ImportOptions::ImportMode mImportMode;
 
+    void expandTreeRec(const QModelIndex &index);
+
+    void validateForm();
 };
 
 #endif // IMPORTDIALOG_H

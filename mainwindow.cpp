@@ -1,22 +1,21 @@
-#include <QStringList>
-#include <QSqlTableModel>
+#include <QApplication>
 #include <QTreeView>
 #include <QTextEdit>
 #include <QLineEdit>
-#include <QApplication>
 #include <QDesktopWidget>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 // Models
-#include "sqlphotomodel.h"
-#include "sqlphotoinfo.h"
+#include "photomodel.h"
+#include "photo.h"
 
 // dialogs
 #include "aboutdialog.h"
 #include "timeadjustdialog.h"
 #include "import/importdialog.h"
+#include "preferencesdialog.h"
 
 #include "widgets/translucentwindow.h"
 #include "widgets/backgroundtaskprogress.h"
@@ -42,11 +41,15 @@ MainWindow::MainWindow(QWidget *parent) :
     QSettings settings;
     move(settings.value("mainwindow/location").toPoint());
 
-    mPhotoModel = new SqlPhotoModel(this);
+    mPhotoModel = new PhotoModel(this);
+    connect(mPhotoModel,&PhotoModel::modelReset,this,&MainWindow::onModelReset);
+    connect(mPhotoModel,&PhotoModel::rowsInserted,this,&MainWindow::onModelRowsInserted);
+    connect(mPhotoModel,&PhotoModel::rowsRemoved,this,&MainWindow::onModelRowsRemoved);
 
     // Create the Library Module
     mLibrary = new Library(mPhotoModel,this);
-    connect(mLibrary,(void (Library::*)(const QList<SqlPhotoInfo>&))&Library::selectionChanged, this, &MainWindow::selectionChanged);
+    connect(mLibrary,&Library::photoSelectionChanged, this, &MainWindow::onSelectionChanged);
+    connect(mLibrary,&Library::photoSourceChanged, mPhotoModel, &PhotoModel::onReloadPhotos);
     ui->stackedWidget->addWidget(mLibrary);
 
     // Create the Develop Module
@@ -75,9 +78,10 @@ MainWindow::~MainWindow()
     delete mDatabaseAccess;
 }
 
-void MainWindow::selectionChanged(const QList<SqlPhotoInfo> &list)
+void MainWindow::onSelectionChanged(const QList<Photo*> &list)
 {
     mCurrentSelection = list;
+    updateInformationBar();
 }
 
 void MainWindow::onModeLibraryClicked()
@@ -105,6 +109,7 @@ void MainWindow::onActionImportTriggered()
         ImportBackgroundTask *r = new ImportBackgroundTask(importDialog->importInfo());
         mBackgroundTaskManager->addRunnable(r);
         r->start();
+        connect(r,&ImportBackgroundTask::taskFinished,this,&MainWindow::importFinished);
     }
     delete importDialog;
 }
@@ -122,6 +127,12 @@ void MainWindow::onActionEditTimeTriggered()
     TimeAdjustDialog* timeAdjustDialog = new TimeAdjustDialog(this);
     /*int code = */timeAdjustDialog->exec();
     delete timeAdjustDialog;
+}
+
+void MainWindow::onActionPreferences()
+{
+    PreferencesDialog prefs(this);
+    prefs.exec();
 }
 
 void MainWindow::onActionRating1()
@@ -154,6 +165,57 @@ void MainWindow::onActionRatingNone()
     setRating(0);
 }
 
+void MainWindow::onActionFlagPick()
+{
+    setFlag(Photo::FlagPick);
+}
+
+void MainWindow::onActionFlagReject()
+{
+    setFlag(Photo::FlagReject);
+}
+
+void MainWindow::onActionFlagNone()
+{
+    setFlag(Photo::FlagNone);
+}
+
+void MainWindow::onActionColorNone()
+{
+    setColorLabel(Photo::LabelNoColor);
+}
+
+void MainWindow::onActionColorRed()
+{
+    setColorLabel(Photo::LabelRed);
+}
+
+void MainWindow::onActionColorGreen()
+{
+    setColorLabel(Photo::LabelGreen);
+}
+
+void MainWindow::onActionColorBlue()
+{
+    setColorLabel(Photo::LabelBlue);
+}
+
+void MainWindow::onActionColorYellow()
+{
+    setColorLabel(Photo::LabelYellow);
+}
+
+void MainWindow::onActionColorOrange()
+{
+    setColorLabel(Photo::LabelOrange);
+}
+
+void MainWindow::onActionColorPurple()
+{
+    setColorLabel(Photo::LabelPurple);
+}
+
+
 void MainWindow::onActionLightsOff()
 {
 
@@ -177,12 +239,62 @@ void MainWindow::onActionLightsOff()
     }
 }
 
+void MainWindow::importFinished(BackgroundTask *task)
+{
+    ImportBackgroundTask * t = static_cast<ImportBackgroundTask*>(task);
+    mPhotoModel->addData(t->resultList());
+
+    // update the files tree as well and the collection tree
+
+    task->deleteLater();
+}
+
+void MainWindow::onModelReset()
+{
+    updateInformationBar();
+}
+
+void MainWindow::onModelRowsInserted(const QModelIndex &parent, int start, int end)
+{
+    updateInformationBar();
+}
+
+void MainWindow::onModelRowsRemoved(const QModelIndex &parent, int start, int end)
+{
+    updateInformationBar();
+}
+
+void MainWindow::updateInformationBar()
+{
+    QString info;
+    int count = mPhotoModel->rowCount(QModelIndex());
+    int selCount = mCurrentSelection.size();
+    ui->lblInformation->setText(QString::number(selCount)+"/"+QString::number(count));
+}
+
 void MainWindow::setRating(int rating)
 {
     mPhotoWorkUnit->setRating(mCurrentSelection,rating);
     QVector<int> roles;
     roles.append(TileView::PhotoRole);
-    mPhotoModel->updateData(mCurrentSelection);
+    mPhotoModel->refreshData(mCurrentSelection);
+}
+
+void MainWindow::setFlag(Photo::Flag flag)
+{
+    mPhotoWorkUnit->setFlag(mCurrentSelection,flag);
+    QVector<int> roles;
+    roles.append(TileView::PhotoRole);
+    mPhotoModel->refreshData(mCurrentSelection);
+
+}
+
+void MainWindow::setColorLabel(Photo::ColorLabel color)
+{
+    mPhotoWorkUnit->setColorLabel(mCurrentSelection,color);
+    QVector<int> roles;
+    roles.append(TileView::PhotoRole);
+    mPhotoModel->refreshData(mCurrentSelection);
 }
 
 

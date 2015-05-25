@@ -19,12 +19,10 @@ SOURCES += main.cpp\
     imagefileloader.cpp \
     preferencesdialog.cpp \
     databaseaccess.cpp \
-    sqlphotomodel.cpp \
     sqlpathmodel.cpp \
     sqlkeywordmodel.cpp \
     aboutdialog.cpp \
     timeadjustdialog.cpp \
-    sqlphotoinfo.cpp \
     workunits/photoworkunit.cpp \
     workunits/importinfo.cpp \
     workunits/importworkunit.cpp \
@@ -49,21 +47,20 @@ SOURCES += main.cpp\
     widgets/backgroundtaskprogress.cpp \
     backgroundtaskmanager.cpp \
     backgroundtask.cpp \
-    runtester.cpp \
     import/importbackgroundtask.cpp \
-    workunits/importoptions.cpp
+    workunits/importoptions.cpp \
+    photo.cpp \
+    photomodel.cpp
 
 HEADERS  += mainwindow.h \
     constants.h \
     imagefileloader.h \
     preferencesdialog.h \
     databaseaccess.h \
-    sqlphotomodel.h \
     sqlpathmodel.h \
     sqlkeywordmodel.h \
     aboutdialog.h \
     timeadjustdialog.h \
-    sqlphotoinfo.h \
     workunits/photoworkunit.h \
     workunits/importinfo.h \
     workunits/importworkunit.h \
@@ -89,9 +86,10 @@ HEADERS  += mainwindow.h \
     widgets/backgroundtaskprogress.h \
     backgroundtaskmanager.h \
     backgroundtask.h \
-    runtester.h \
     import/importbackgroundtask.h \
-    workunits/importoptions.h
+    workunits/importoptions.h \
+    photo.h \
+    photomodel.h
 
 
 FORMS    += mainwindow.ui \
@@ -104,7 +102,8 @@ FORMS    += mainwindow.ui \
     map/map.ui \
     widgets/backgroundtaskprogress.ui
 
-DISTFILES +=
+DISTFILES += \
+    Info.plist
 
 
 mac {

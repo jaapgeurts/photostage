@@ -27,18 +27,18 @@ public:
     ~MainWindow();
 
 private slots:
-    void selectionChanged(const QList<SqlPhotoInfo> & list);
+    void onSelectionChanged(const QList<Photo *> &list);
 
     // Modules
     void onModeLibraryClicked();
     void onModeDevelopClicked();
     void onModeMapClicked();
 
-    // Menu actions
+    // Dialogs
     void onActionImportTriggered();
     void onActionAboutTriggered();
-
     void onActionEditTimeTriggered();
+    void onActionPreferences();
 
     // Rating
     void onActionRating1();
@@ -48,10 +48,30 @@ private slots:
     void onActionRating5();
     void onActionRatingNone();
 
+    // flags
+    void onActionFlagPick();
+    void onActionFlagReject();
+    void onActionFlagNone();
+
+    // color labels
+    void onActionColorNone();
+    void onActionColorRed();
+    void onActionColorGreen();
+    void onActionColorBlue();
+    void onActionColorYellow();
+    void onActionColorOrange();
+    void onActionColorPurple();
+
     void onActionLightsOff();
 
+    // called in response to the import thread
+    void importFinished(BackgroundTask * task);
 
-    // called when the selection in the photo tile view changes
+
+    // model changes
+    void onModelReset();
+    void onModelRowsInserted(const QModelIndex & parent, int start, int end);
+    void onModelRowsRemoved(const QModelIndex & parent, int start, int end);
 
 private:
     Ui::MainWindow *ui;
@@ -63,13 +83,15 @@ private:
     Map* mMap;
     Module* mCurrentModule;
 
-    SqlPhotoModel * mPhotoModel;
+    PhotoModel * mPhotoModel;
     PhotoWorkUnit * mPhotoWorkUnit;
 
-    QList<SqlPhotoInfo> mCurrentSelection;
+    QList<Photo*> mCurrentSelection;
 
     void setRating(int rating);
-
+    void setColorLabel(Photo::ColorLabel color);
+    void setFlag(Photo::Flag flag);
+    void updateInformationBar();
 };
 
 #endif // MAINWINDOW_H

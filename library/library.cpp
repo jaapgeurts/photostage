@@ -5,13 +5,12 @@
 #include "library/modules/keywordingmodule.h"
 
 // models
-#include "sqlpathmodel.h"
 #include "sqlkeywordmodel.h"
 
 // widgets
 #include "widgets/fixedtreeview.h"
 
-Library::Library(SqlPhotoModel * const model, QWidget *parent) :
+Library::Library(PhotoModel * const model, QWidget *parent) :
     Module(parent),
     ui(new Ui::Library)
 {
@@ -41,15 +40,16 @@ Library::Library(SqlPhotoModel * const model, QWidget *parent) :
     // **** MODULE
     // Files module
     FixedTreeView * trvwFiles = new FixedTreeView(ui->ModulePanel_1);
-    SqlPathModel *pathModel = new SqlPathModel(this);
-    trvwFiles->setModel(pathModel);
+    mPathModel = new SqlPathModel(this);
+    trvwFiles->setModel(mPathModel);
     trvwFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->ModulePanel_1->addPanel("Folders",trvwFiles);
+    connect(trvwFiles,&FixedTreeView::clicked,this,&Library::onFilesClicked);
 
     // **** MODULE
     // Keywording (editing keywords module)
     mKeywording = new KeywordingModule(ui->ModulePanel_2);
-    connect(ui->mClvPhotos,SIGNAL(selectionChanged()),this,SLOT(selectionChanged()));
+    connect(ui->mClvPhotos,&TileView::selectionChanged,this,&Library::onPhotoSelectionChanged);
     ui->ModulePanel_2->addPanel("Keywords",mKeywording);
 
     // **** MODULE
@@ -75,17 +75,26 @@ QRect Library::lightGap()
     return gap;
 }
 
+void Library::onFilesClicked(const QModelIndex &index)
+{
+    // TODO: get the path model and get the file to query and show only those images in the view
+    QVariant v = mPathModel->data(index,SqlPathModel::Path);
+    PathItem * item = v.value<PathItem*>();
+    // reset the photo model to the root of this item
+    emit photoSourceChanged(PhotoModel::SourceFiles,item->id);
+}
+
 
 void Library::customContextMenu(const QPoint &pos)
 {
     QModelIndex index = ui->mClvPhotos->posToModelIndex(pos);
     // check if there is a single selection or a list.
-    SqlPhotoInfo info = mPhotoModel->data(index,TileView::PhotoRole).value<SqlPhotoInfo>();
+    Photo* info = mPhotoModel->data(index,TileView::PhotoRole).value<Photo*>();
 
     // TODO: FIXME: fix popup
-//    QMenu *m = ui->menuPhoto;
-//    m->popup(ui->mClvPhotos->mapToGlobal(pos));
-//    m->exec();
+    //    QMenu *m = ui->menuPhoto;
+    //    m->popup(ui->mClvPhotos->mapToGlobal(pos));
+    //    m->exec();
 }
 
 /*void Library::rotateLeftClicked(const QModelIndex &index)
@@ -116,16 +125,15 @@ void Library::ratingClicked(const QModelIndex &index, int rating)
 
 // Called when the selection in the photo tile view changes.
 // get the new selectionlist and pass it to all the modules.
-void Library::selectionChanged()
+void Library::onPhotoSelectionChanged()
 {
-    qDebug() << "Selection changed";
     QList<QModelIndex> list= ui->mClvPhotos->selection();
-    QList<SqlPhotoInfo> photos;
+    QList<Photo*> photos;
     QModelIndex index;
     foreach(index, list)
     {
-        photos.append(mPhotoModel->data(index,TileView::PhotoRole).value<SqlPhotoInfo>());
+        photos.append(mPhotoModel->data(index,TileView::PhotoRole).value<Photo*>());
     }
     mKeywording->setPhotos(photos);
-    emit selectionChanged(photos);
+    emit photoSelectionChanged(photos);
 }

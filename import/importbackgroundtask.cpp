@@ -9,6 +9,7 @@ ImportBackgroundTask::ImportBackgroundTask(const ImportInfo & info) : Background
 
     mWorkUnit = ImportWorkUnit::instance();
 
+    setAutoDelete(false);
 }
 
 int ImportBackgroundTask::progressMinimum()
@@ -25,11 +26,15 @@ void ImportBackgroundTask::run()
 {
     int i =0;
     QListIterator<QFileInfo> it(mInfo.files());
-    while (it.hasNext() && running)
+    mWorkUnit->beginImport();
+    while (it.hasNext() && mRunning)
     {
         QFileInfo info = it.next();
-        if (!mWorkUnit->importPhoto(info,mInfo.options()))
+        long long id = mWorkUnit->importPhoto(info,mInfo.options());
+        if (id == -1)
             qDebug() << "There was an error importing file:"<<info.filePath();
+        else
+            mIdList.append(id);
         i++;
         emit progressUpdated(i);
     }
@@ -37,16 +42,17 @@ void ImportBackgroundTask::run()
 }
 
 
+
 void ImportBackgroundTask::start()
 {
     // TODO: consider importing files in parallel, not in sequence
-    running = true;
+    mRunning = true;
     QThreadPool::globalInstance()->start(this);
 }
 
 
 void ImportBackgroundTask::cancel()
 {
-    running = false;
+    mRunning = false;
 }
 

@@ -76,16 +76,25 @@ void TileView::setModel(QAbstractItemModel* model)
 
     connect(model,&QAbstractItemModel::rowsInserted,this,&TileView::newRowsAvailable);
     connect(model,&QAbstractItemModel::dataChanged,this,&TileView::updateCellContents);
+    connect(model,&QAbstractItemModel::modelReset,this,&TileView::resetView);
+
+    resetView();
+}
+
+void TileView::resetView()
+{
+    mSelection->clear();
+    mCheckedList->clear();
+    computeScrollBarValues(mListModel->rowCount(QModelIndex()));
+    emit selectionChanged();
+    update();
 }
 
 void TileView::setRootIndex(const QModelIndex& index)
 {
     mRootIndex = index;
-    computeScrollBarValues(mListModel->rowCount(index));
-    mCheckedList->clear();
-    mSelection->clear();
     mLastSelection = mRootIndex;
-    update();
+    resetView();
 }
 
 
@@ -155,7 +164,7 @@ void TileView::paintEvent(QPaintEvent */*event*/)
 {
 
     QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
+    //painter.setRenderHint(QPainter::Antialiasing);
 
     // TODO: implement margins / padding
     // TODO: implement intercell spacing & grid lines etc
@@ -533,31 +542,34 @@ void TileView::setCheckBoxMode(bool mode)
 
 void TileView::newRowsAvailable(const QModelIndex & /*parent*/, int /*first*/, int last)
 {
-    computeScrollBarValues(last);
+    computeScrollBarValues(mListModel->rowCount(mRootIndex));
     update();
 }
 
 void TileView::updateCellContents(const QModelIndex & /*topleft*/, const QModelIndex& /*bottomright*/,const QVector<int> & /*roles*/)
 {
     // TODO: don't just just update all, only update the affected tile
+    // check if the index is in view, then update those.
+    // the paint function only draws and requests those items in view.
     update();
 }
+
+
 
 void TileView::selectAll()
 {
     int count = mListModel->rowCount(mRootIndex);
     for(int i=0;i<count; i++)
         mSelection->append(mListModel->index(i,0,mRootIndex));
-    update();
     emit selectionChanged();
+    update();
 }
 
 void TileView::clearSelection()
 {
-    qDebug() << "clear";
     mSelection->clear();
-    update();
     emit selectionChanged();
+    update();
 }
 
 const QList<QModelIndex> & TileView::checkedItems() const

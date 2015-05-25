@@ -34,7 +34,7 @@ signals:
 
 private:
     QRect resizeToFrameKeepAspectRatio(const QSize &src, const QSize &destFrame);
-    QFont mFontAwesome;
+    QFont mFontFoundIcons;
     // Hover states for rotate
     QHash<int,bool> mLeftHover;
     QHash<int,bool> mRightHover;

@@ -2,6 +2,7 @@
 #include <QSqlError>
 #include <QVariant>
 #include <QDebug>
+#include <QDir>
 
 #include "photoworkunit.h"
 
@@ -20,19 +21,58 @@ PhotoWorkUnit::PhotoWorkUnit()
 
 }
 
-void PhotoWorkUnit::setRating(const QList<SqlPhotoInfo> & list, int rating)
+void PhotoWorkUnit::setRating(const QList<Photo*> & list, int rating)
 {
 
     QSqlQuery q;
-    q.prepare("update photo set rating=:rating where id in (:id)");
-    q.bindValue(":rating",rating);
+    QString query = "update photo set rating=:rating where id in (:id)";
 
     QString ids;
-    SqlPhotoInfo info;
-    foreach(info, list)
-        ids += QString::number(info.id) + ",";
+    Photo* info;
+    foreach(info, list) {
+        ids += QString::number(info->id) + ",";
+        info->setRating(rating);
+    }
     ids.chop(1);
-    q.bindValue(":id",ids);
+    query.replace(":id",ids);
+    q.prepare(query);
+    q.bindValue(":rating",rating);
+    q.exec();
+}
+
+void PhotoWorkUnit::setFlag(const QList<Photo *> &list, Photo::Flag flag)
+{
+    QSqlQuery q;
+    QString query = ("update photo set flag=:flag where id in (:id)");
+
+    QString ids;
+    Photo* info;
+    foreach(info, list) {
+        ids += QString::number(info->id) + ",";
+        info->setFlag(flag);
+    }
+    ids.chop(1);
+    query.replace(":id",ids);
+    q.prepare(query);
+    q.bindValue(":flag",(int)flag);
+    q.exec();
+}
+
+void PhotoWorkUnit::setColorLabel(const QList<Photo *> &list, Photo::ColorLabel color)
+{
+    QSqlQuery q;
+    QString query = ("update photo set color=:color where id in (:id)");
+
+    QString ids;
+    Photo* info;
+    foreach(info, list) {
+        ids += QString::number(info->id) + ",";
+        info->setColorLabel(color);
+    }
+    ids.chop(1);
+    query.replace(":id",ids);
+    q.prepare(query);
+    q.bindValue(":color",(int)color);
     q.exec();
 }
 
@@ -77,19 +117,19 @@ void PhotoWorkUnit::insertKeywords(const QStringList &words)
     QSqlDatabase::database().commit();
 }
 
-void PhotoWorkUnit::assignKeywords(const QStringList &words,const QList<SqlPhotoInfo> &list)
+void PhotoWorkUnit::assignKeywords(const QStringList &words, const QList<Photo *> &list)
 {
     QSqlQuery q;
     QString word;
     QSqlDatabase::database().transaction();
-    q.prepare("insert into photo_keyword (photo_id, keyword_id) "\
-              "select :photo_id, k.id "\
-              "from keyword k "\
-              " where k.keyword = :keyword");
-    SqlPhotoInfo info;
-    foreach(info, list)
+    q.prepare("insert into photo_keyword (photo_id, keyword_id) \
+              select :photo_id, k.id \
+              from keyword k \
+              where k.keyword = :keyword");
+            Photo *info;
+            foreach(info, list)
     {
-        q.bindValue(":photo_id",info.id);
+        q.bindValue(":photo_id",info->id);
         foreach(word, words)
         {
             q.bindValue(":keyword",word);
@@ -99,20 +139,20 @@ void PhotoWorkUnit::assignKeywords(const QStringList &words,const QList<SqlPhoto
     QSqlDatabase::database().commit();
 }
 
-void PhotoWorkUnit::removeKeywordsExcept(const QStringList &words, const QList<SqlPhotoInfo> &list)
+void PhotoWorkUnit::removeKeywordsExcept(const QStringList &words, const QList<Photo *> &list)
 {
     QSqlQuery q;
 
-    QString query = "delete from photo_keyword "\
-              "where photo_id in (:photo_id) "\
-              " and keyword_id not in " \
-              " ( select id from keyword where keyword in (':keywords'))";
+    QString query = "delete from photo_keyword \
+            where photo_id in (:photo_id) \
+            and keyword_id not in  \
+            ( select id from keyword where keyword in (':keywords'))";
 
-    SqlPhotoInfo info;
+            Photo *info;
     QString photo_id;
     foreach(info, list)
     {
-        photo_id += QString::number(info.id) + ",";
+        photo_id += QString::number(info->id) + ",";
     }
     photo_id.chop(1);
     QString keywords = words.join("','");
@@ -127,17 +167,17 @@ void PhotoWorkUnit::removeKeywordsExcept(const QStringList &words, const QList<S
     }
 }
 
-QMap<QString,int> PhotoWorkUnit::getPhotoKeywords(const QList<SqlPhotoInfo> & list) const
+QMap<QString,int> PhotoWorkUnit::getPhotoKeywords(const QList<Photo *> &list) const
 {
     QSqlQuery q;
-    QString query = "select k.keyword, count(pk.photo_id) " \
-                    "from keyword k, photo_keyword pk on k.id = pk.keyword_id " \
-                    " where pk.photo_id in (:photo_ids) " \
-                    " group by k.keyword order by k.keyword ";
-    QString photo_ids;
-    SqlPhotoInfo info;
+    QString query = "select k.keyword, count(pk.photo_id) \
+            from keyword k, photo_keyword pk on k.id = pk.keyword_id \
+            where pk.photo_id in (:photo_ids) \
+            group by k.keyword order by k.keyword ";
+            QString photo_ids;
+    Photo *info;
     foreach(info, list)
-        photo_ids += QString::number(info.id) + ",";
+        photo_ids += QString::number(info->id) + ",";
     photo_ids.chop(1);
     query.replace(":photo_ids",photo_ids);
 
@@ -153,5 +193,113 @@ QMap<QString,int> PhotoWorkUnit::getPhotoKeywords(const QList<SqlPhotoInfo> & li
         dict.insert(q.value(0).toString(), q.value(1).toInt());
     }
     return dict;
+}
+
+QList<Photo*> PhotoWorkUnit::getPhotosById(QList<long long> idList)
+{
+    QList<Photo*> list;
+
+    QSqlQuery q;
+    QString query = QString("with recursive cte as ( \
+                            select id,directory \
+                            from path \
+                            where parent_id is NULL \
+                            union all \
+                            select t.id as id , cte.directory || :separator || t.directory as directory \
+                            from cte, path t \
+                            where cte.id = t.parent_id \
+            ) select p.id, p.filename, c.directory,p.rating,p.color,p.flag \
+            from cte c, photo p \
+            where c.id = p.path_id \
+            and p.id in (:photoids) \
+            order by p.id");
+
+            QString photoids;
+    for (int i=0;i<idList.size(); i++)
+    {
+        photoids += QString::number(idList.at(i))+",";
+    }
+    photoids.chop(1);
+    query.replace(":photoids",photoids);
+    q.prepare(query);
+    q.bindValue(":separator",QDir::separator());
+
+    if (!q.exec())
+        qDebug() << "SqlPhotoModel error" << q.lastError();
+
+    QList<Photo*> photoInfoList;
+    while (q.next())
+    {
+        photoInfoList.append(new Photo(q));
+    }
+    return photoInfoList;
+
+}
+
+// TODO: make path_id work and option to include
+QList<Photo*> PhotoWorkUnit::getPhotosByPath(long long path_id, bool includeSubDirs)
+{
+    QSqlQuery q;
+
+    QString query;
+    query = "WITH RECURSIVE cte AS ( \
+            SELECT id,directory \
+            FROM path \
+            WHERE parent_id IS NULL \
+            UNION ALL \
+            SELECT t.id AS id , cte.directory || '/' || t.directory AS directory \
+            FROM cte, path t \
+            WHERE cte.id = t.parent_id ) \
+            SELECT c.directory \
+            FROM cte c \
+            where c.id = :pathid";
+
+    q.prepare(query);
+    q.bindValue(":pathid",path_id);
+
+    if (!q.exec())
+        qDebug() << "Error getting path for selected id\n"  <<q.lastError();
+    if (!q.first())
+        qDebug() << "Query to get path didn't return results\n" <<q.lastError();
+    QString path = q.value(0).toString();
+    QString includeSubDirsClause = "c.directory like ':path%'";
+    includeSubDirsClause.replace(":path",path);
+
+
+    query = QString("with recursive cte as ( \
+                    select id,directory \
+                    from path \
+                    where parent_id is null \
+                    union all \
+                    select t.id as id , cte.directory || :separator || t.directory as directory \
+                    from cte, path t \
+                    where cte.id = t.parent_id \
+            ) select p.id, p.filename, c.directory,p.rating,p.color,p.flag,c.id \
+            from cte c, photo p \
+            where c.id = p.path_id and :top_or_include \
+            order by p.id");
+
+    if (includeSubDirs)
+        query.replace(":top_or_include",includeSubDirsClause);
+    else
+    query.replace(":top_or_include","c.id = " + QString::number(path_id));
+
+    q.clear();
+    q.prepare(query);
+    q.bindValue(":separator",QDir::separator());
+    q.bindValue(":topid",path_id);
+
+    if (!q.exec())
+        qDebug() << "SqlPhotoModel error" << q.lastError();
+
+    qDebug() << q.lastQuery();
+
+    QList<Photo*> photoInfoList;
+    while (q.next())
+    {
+        Photo* info  = new Photo(q);
+        photoInfoList.append(info);
+    }
+    return photoInfoList;
 }
 

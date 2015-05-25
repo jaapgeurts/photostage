@@ -3,7 +3,8 @@
 
 #include "module.h"
 
-#include "sqlphotomodel.h"
+#include "photomodel.h"
+#include "sqlpathmodel.h"
 #include "workunits/photoworkunit.h"
 #include "library/modules/keywordingmodule.h"
 
@@ -15,19 +16,22 @@ class Library : public Module
 {
     Q_OBJECT
 public:
-    explicit Library(SqlPhotoModel * const model, QWidget *parent = 0);
+
+    explicit Library(PhotoModel * const model, QWidget *parent = 0);
     ~Library();
 
     QRect lightGap();
 
 signals:
 
-    void selectionChanged(const QList<SqlPhotoInfo> & list);
+    void photoSelectionChanged(const QList<Photo*> & list);
+    void photoSourceChanged(PhotoModel::SourceType type, long long id);
 
 public slots:
 
+    void onFilesClicked(const QModelIndex&);
     void customContextMenu(const QPoint& pos);
-    void selectionChanged();
+    void onPhotoSelectionChanged();
 
     // For clicks on the tile
 //    void rotateLeftClicked(const QModelIndex& index);
@@ -37,9 +41,9 @@ public slots:
 
 private:
         Ui::Library *ui;
-
-        SqlPhotoModel * mPhotoModel;
+        PhotoModel * mPhotoModel;
         PhotoWorkUnit * mPhotoWorkUnit;
+        SqlPathModel *mPathModel;
         KeywordingModule *mKeywording;
 
 };

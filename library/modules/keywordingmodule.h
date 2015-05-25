@@ -14,7 +14,7 @@ class KeywordingModule : public LibraryModule
 public:
     explicit KeywordingModule(QWidget *parent = 0);
 
-    void setPhotos(const QList<SqlPhotoInfo>& list);
+    void setPhotos(const QList<Photo *> &list);
 
     bool eventFilter(QObject *object, QEvent *event);
 signals:

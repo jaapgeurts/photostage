@@ -94,7 +94,7 @@ void KeywordingModule::keywordsChanged()
 
 }
 
-void KeywordingModule::setPhotos(const QList<SqlPhotoInfo>& list)
+void KeywordingModule::setPhotos(const QList<Photo*>& list)
 {
     LibraryModule::setPhotos(list);
     PhotoWorkUnit* workUnit = PhotoWorkUnit::instance();

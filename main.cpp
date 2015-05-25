@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include <QApplication>
 #include <QFontDatabase>
+#include <QDebug>
 
 
 int main(int argc, char *argv[])
@@ -11,7 +12,10 @@ int main(int argc, char *argv[])
 //    a.setQuitOnLastWindowClosed(false);
 
     // Load extra fonts
-    /*int id =*/ QFontDatabase::addApplicationFont(":/fonts/font-awesome.ttf");
+    /*int id =*/ //QFontDatabase::addApplicationFont(":/fonts/font-awesome.ttf");
+     int id = QFontDatabase::addApplicationFont(":/fonts/foundation-icons-general.ttf");
+    QStringList l = QFontDatabase::applicationFontFamilies(id);
+    qDebug() << "Loaded fonts:" <<l;
 
     // Setup application details
     QCoreApplication::setOrganizationName("PhotoStage");
@@ -19,6 +23,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("PhotoStage");
 
     // Load the dark style
+#define STYLE_SHEET 1
+#ifdef STYLE_SHEET
     QFile f (":qdarkstyle/style.qss");
     if (!f.exists())
     {
@@ -30,6 +36,23 @@ int main(int argc, char *argv[])
         QTextStream ts(&f);
         a.setStyleSheet(ts.readAll());
     }
+#else
+    QPalette darkPalette = QApplication::palette();
+    darkPalette.setColor(QPalette::Normal,QPalette::Window,QColor(Qt::black));
+    darkPalette.setColor(QPalette::Normal,QPalette::Base,QColor(Qt::black));
+    darkPalette.setColor(QPalette::Normal,QPalette::WindowText,QColor(Qt::lightGray));
+    darkPalette.setColor(QPalette::Normal,QPalette::Text,QColor(Qt::lightGray));
+    darkPalette.setColor(QPalette::Normal,QPalette::Button,QColor(Qt::black));
+    darkPalette.setColor(QPalette::Normal,QPalette::ButtonText,QColor(Qt::lightGray));
+    darkPalette.setColor(QPalette::Normal,QPalette::Light,QColor(Qt::lightGray).lighter(180));
+    darkPalette.setColor(QPalette::Normal,QPalette::Midlight,QColor(Qt::lightGray).lighter(150));
+    darkPalette.setColor(QPalette::Normal,QPalette::Dark,QColor(Qt::darkGray).lighter(150));
+    darkPalette.setColor(QPalette::Normal,QPalette::Mid,QColor(Qt::darkGray).lighter(120));
+    darkPalette.setColor(QPalette::Normal,QPalette::Shadow,QColor(Qt::darkGray));
+
+    QApplication::setPalette(darkPalette);
+#endif
+
     MainWindow w;
     w.show();
 
