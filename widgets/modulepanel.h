@@ -3,11 +3,14 @@
 
 #include <QPushButton>
 #include <QWidget>
+#include <QMenu>
 #include <QHash>
 
 struct PanelInfo {
     QString title;
-    QPushButton* header;
+    QWidget* header;
+    QPushButton* btnMenu;
+    QMenu* menu;
     QWidget* panel;
 };
 
@@ -18,13 +21,14 @@ public:
     explicit ModulePanel(QWidget *parent = 0);
     ~ModulePanel();
 
-    void addPanel(const QString& title, QWidget* panel);
+    void addPanel(const QString& title, QWidget* panel, QMenu *menu=0);
     void removePanel(const QString& title);
 
 signals:
 
-public slots:
+private slots:
     void onHeaderClicked();
+    void onMenuClicked(bool checked);
 
 private:
     QHash<QString,PanelInfo> mPanels;

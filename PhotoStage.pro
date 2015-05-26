@@ -50,7 +50,11 @@ SOURCES += main.cpp\
     import/importbackgroundtask.cpp \
     workunits/importoptions.cpp \
     photo.cpp \
-    photomodel.cpp
+    photomodel.cpp \
+    preferences.cpp \
+    library/modules/collectionmodule.cpp \
+    library/modules/shortcutmodule.cpp \
+    widgets/histogram.cpp
 
 HEADERS  += mainwindow.h \
     constants.h \
@@ -89,7 +93,11 @@ HEADERS  += mainwindow.h \
     import/importbackgroundtask.h \
     workunits/importoptions.h \
     photo.h \
-    photomodel.h
+    photomodel.h \
+    preferences.h \
+    library/modules/collectionmodule.h \
+    library/modules/shortcutmodule.h \
+    widgets/histogram.h
 
 
 FORMS    += mainwindow.ui \

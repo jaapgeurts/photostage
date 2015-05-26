@@ -76,10 +76,7 @@ QVariant PhotoModel::data(const QModelIndex &index, int role) const
 
             return QVariant();
         }
-
-        QVariant v;
-        v.setValue(info);
-        return v;
+        return QVariant::fromValue<Photo*>(info);
     }
     else if (role == Qt::DisplayRole)
     {

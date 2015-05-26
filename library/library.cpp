@@ -1,14 +1,20 @@
+#include <QMenu>
+
 #include "library.h"
 #include "ui_library.h"
 
-#include "library/imagedbtile.h"
-#include "library/modules/keywordingmodule.h"
+#include "imagedbtile.h"
+#include "modules/keywordingmodule.h"
+#include "modules/collectionmodule.h"
+#include "modules/shortcutmodule.h"
 
 // models
 #include "sqlkeywordmodel.h"
 
 // widgets
 #include "widgets/fixedtreeview.h"
+
+#define SETTINGS_SPLITTER_MAIN_SIZES "mainwindow/splitter_main"
 
 Library::Library(PhotoModel * const model, QWidget *parent) :
     Module(parent),
@@ -17,6 +23,20 @@ Library::Library(PhotoModel * const model, QWidget *parent) :
     mPhotoModel = model;
 
     ui->setupUi(this);
+
+    QSettings settings;
+    QList<int> l;
+    if (settings.contains(SETTINGS_SPLITTER_MAIN_SIZES))
+    {
+    foreach(QVariant v, settings.value(SETTINGS_SPLITTER_MAIN_SIZES).toList())
+    {
+        l << v.toInt();
+    }
+    } else
+    {
+        l << 200 << 600 << 200;
+    }
+    ui->splitterMain->setSizes(l);
 
     ImageDbTile * tile = new ImageDbTile(ui->mClvPhotos);
     // connect(tile,&ImageDbTile::rotateLeftClicked, this, &Library::rotateLeftClicked);
@@ -37,7 +57,12 @@ Library::Library(PhotoModel * const model, QWidget *parent) :
     ui->scrollArea->setWidgetResizable(true);
     ui->scrollArea_2->setWidgetResizable(true);
 
-    // **** MODULE
+    // **** MODULES LEFT
+
+    // shortcuts module
+    ShortcutModule *sm = new ShortcutModule(ui->ModulePanel_1);
+    ui->ModulePanel_1->addPanel("Shortcuts",sm);
+
     // Files module
     FixedTreeView * trvwFiles = new FixedTreeView(ui->ModulePanel_1);
     mPathModel = new SqlPathModel(this);
@@ -46,7 +71,13 @@ Library::Library(PhotoModel * const model, QWidget *parent) :
     ui->ModulePanel_1->addPanel("Folders",trvwFiles);
     connect(trvwFiles,&FixedTreeView::clicked,this,&Library::onFilesClicked);
 
-    // **** MODULE
+    // collections module
+    CollectionModule *cm = new CollectionModule(ui->ModulePanel_1);
+    QMenu* menu = new QMenu(this);
+    menu->addAction("New Collection",this,SLOT(onNewCollectionClicked()));
+    ui->ModulePanel_1->addPanel("Collections",cm,menu);
+
+    // **** MODULES RIGHT
     // Keywording (editing keywords module)
     mKeywording = new KeywordingModule(ui->ModulePanel_2);
     connect(ui->mClvPhotos,&TileView::selectionChanged,this,&Library::onPhotoSelectionChanged);
@@ -65,6 +96,14 @@ Library::Library(PhotoModel * const model, QWidget *parent) :
 
 Library::~Library()
 {
+    QSettings settings;
+    QVariantList list;
+    foreach(int size, ui->splitterMain->sizes())
+    {
+        list << size;
+    }
+    settings.setValue(SETTINGS_SPLITTER_MAIN_SIZES,list);
+
     delete ui;
 }
 
@@ -136,4 +175,9 @@ void Library::onPhotoSelectionChanged()
     }
     mKeywording->setPhotos(photos);
     emit photoSelectionChanged(photos);
+}
+
+void Library::onNewCollectionClicked()
+{
+    qDebug() << "create new collection";
 }

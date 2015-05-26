@@ -20,23 +20,52 @@ ModulePanel::~ModulePanel()
 {
 }
 
-void ModulePanel::addPanel(const QString &title, QWidget *panel)
+void ModulePanel::addPanel(const QString &title, QWidget *panel, QMenu *menu)
 {
+    if (mPanels.contains(title)) {
+        qDebug() << "Panel titles must be unique";
+        return;
+    }
     PanelInfo info;
+    info.menu = NULL;
     info.title = title;
-    QPushButton *pb = new QPushButton(title,this);
-    pb->setContentsMargins(0,0,0,0);
-    pb->setProperty("title",info.title);
-    connect(pb,&QPushButton::clicked,this,&ModulePanel::onHeaderClicked);
-    info.header= pb;
+    QPushButton *pbHeader = new QPushButton(title,this);
+    pbHeader->setStyleSheet("text-align: left; background: #333");
+    pbHeader->setContentsMargins(0,0,0,0);
+    pbHeader->setProperty("title",info.title);
+    connect(pbHeader,&QPushButton::clicked,this,&ModulePanel::onHeaderClicked);
 
     panel->setSizePolicy(sizePolicy().horizontalPolicy(),QSizePolicy::Fixed);
     panel->setContentsMargins(0,0,0,0);
 
+    if (menu != NULL)
+    {
+        QFrame *frame  = new QFrame(this);
+        frame->setFrameStyle(QFrame::NoFrame);
+        QHBoxLayout *hbLayout = new QHBoxLayout(frame);
+        QPushButton *pbExpose = new QPushButton("≡",this);
+        pbExpose->setProperty("title",info.title);
+        connect(pbExpose,&QPushButton::clicked,this,&ModulePanel::onMenuClicked);
+        //pbExpose->setCheckable(true);
+        hbLayout->addWidget(pbHeader,1);
+        hbLayout->addWidget(pbExpose,0);
+        hbLayout->setContentsMargins(0,0,0,0);
+        info.header = frame;
+        info.menu = menu;
+        info.btnMenu = pbExpose;
+    }
+    else
+    {
+        info.header = pbHeader;
+    }
+
     info.panel = panel;
     mPanels.insert(title,info);
+
     layout()->addWidget(info.header);
     layout()->addWidget(info.panel);
+
+
 }
 
 void ModulePanel::removePanel(const QString &title)
@@ -45,6 +74,8 @@ void ModulePanel::removePanel(const QString &title)
     layout()->removeWidget(info.header);
     layout()->removeWidget(info.panel);
     delete info.header;
+    if (info.menu != NULL)
+        delete info.menu;
     mPanels.remove(title);
 }
 
@@ -68,4 +99,11 @@ void ModulePanel::onHeaderClicked()
     layout()->update();
     update();
 
+}
+
+void ModulePanel::onMenuClicked(bool checked)
+{
+    QString title = sender()->property("title").toString();
+    PanelInfo info = mPanels.value(title);
+    info.menu->popup(info.header->mapToGlobal(info.btnMenu->frameGeometry().bottomLeft()));
 }

@@ -135,9 +135,7 @@ QVariant SqlPathModel::data(const QModelIndex &index, int role) const
     }
     else if (role == SqlPathModel::Path)
     {
-        QVariant v;
-        v.setValue(item);
-        return v;
+        return QVariant::fromValue<PathItem*>(item);
     }
     else
         return QVariant();

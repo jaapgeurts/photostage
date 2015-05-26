@@ -18,7 +18,9 @@ DatabaseAccess::DatabaseAccess(QObject *parent) : QObject(parent)
     if (tables.contains("photo", Qt::CaseInsensitive)
             && tables.contains("path", Qt::CaseInsensitive)
             && tables.contains("keyword", Qt::CaseInsensitive)
-            && tables.contains("photo_keyword", Qt::CaseInsensitive))
+            && tables.contains("photo_keyword", Qt::CaseInsensitive)
+            && tables.contains("collection", Qt::CaseInsensitive)
+            && tables.contains("import_history", Qt::CaseInsensitive))
         qDebug() << "Tables already exist.";
     else
     {
@@ -34,22 +36,30 @@ const QSqlDatabase& DatabaseAccess::getDb()
 
 void DatabaseAccess::initDb()
 {
+    QStringList list;
+
+    list << "create table if not exists path (id integer primary key AUTOINCREMENT, directory varchar, parent_id integer)";
+    list << "create table if not exists photo (id integer primary key AUTOINCREMENT, path_id integer, filename varchar, iso integer, shutter_speed float, float focal_length, datetime_taken text, hash varchar, rating integer, color integer, flag integer)";
+    list << "create table if not exists keyword (id integer primary key AUTOINCREMENT, keyword varchar, parent_id integer)";
+    list << "create unique index if not exists idx_keyword on keyword (keyword, parent_id)";
+    list << "create table if not exists photo_keyword (photo_id integer, keyword_id integer)";
+    list << "create unique index if not exists idx_photo_keyword on photo_keyword (photo_id, keyword_id)";
+    list << "create table if not exists collection (id integer primary key AUTOINCREMENT, name varchar, parent_id integer)";
+
+    list << "create table if not exists work (id integer primary key AUTOINCREMENT, parent_id integer)";
+    list << "create table if not exists work_photo (work_id integer, photo_id integer)";
+
+    list << "create table if not exists importhistory (id integer primary key AUTOINCREMENT, date_time varchar)";
+    list << "create table if not exists importhistory_photo (importhistory_id integer, photo_id integer)";
+
     QSqlQuery q;
-    if (!q.exec(QLatin1String("create table path (id integer primary key AUTOINCREMENT, directory varchar, parent_id integer)")))
-        qDebug() << "1. Failed to create table" << q.lastError();
-
-    if(!q.exec(QLatin1String("create table photo (id integer primary key AUTOINCREMENT, path_id integer, filename varchar, iso integer, shutter_speed float, float focal_length, datetime_taken text, hash varchar, rating integer, color integer, flag integer)")))
-        qDebug() << "2. Failed to create table" << q.lastError();
-
-    if(!q.exec(QLatin1String("create table keyword (id integer primary key AUTOINCREMENT, keyword varchar, parent_id integer)")))
-        qDebug() << "3. Failed to create table" << q.lastError();
-    if(!q.exec(QLatin1String("create unique index idx_keyword on keyword (keyword, parent_id)")))
-        qDebug() << "4. Failed to create index" << q.lastError();
-
-    if(!q.exec(QLatin1String("create table photo_keyword (photo_id integer, keyword_id integer)")))
-        qDebug() << "5. Failed to create table" << q.lastError();
-    if(!q.exec(QLatin1String("create unique index idx_photo_keyword on photo_keyword (photo_id, keyword_id)")))
-        qDebug() << "6. Failed to create index" << q.lastError();
+    foreach(QString query, list)
+    {
+        if (!q.exec(query)) {
+            qDebug() << "Query failed\n" << q.lastError() << "\n" << q.lastQuery() << "Stopping.";
+            break;
+        }
+    }
 
 
 }

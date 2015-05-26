@@ -57,6 +57,7 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
 
         // draw the image.
         QImage image = info->image;
+        QRect photoFinalDimension;
 
         if (!image.isNull())
         {
@@ -69,15 +70,15 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
             int wf = (int)(w * ratio); // width frame
             int hf = (int)(h * ratio); // height frame
 
-            QRect newSize = resizeToFrameKeepAspectRatio(QSize(wi,hi),QSize(wf,hf));
+            photoFinalDimension = resizeToFrameKeepAspectRatio(QSize(wi,hi),QSize(wf,hf));
 
             // move the frame to the center
-            newSize.translate((w-wf)/2,(h-hf)/2);
-            painter.drawImage(newSize,image);
+            photoFinalDimension.translate((w-wf)/2,(h-hf)/2);
+            painter.drawImage(photoFinalDimension,image);
 
             // draw border around image
             painter.setPen(QColor(Qt::black));
-            painter.drawRect(newSize);
+            painter.drawRect(photoFinalDimension);
 
             // draw a flag over the image if one is set
             if (info->flag() != Photo::FlagNone)
@@ -169,7 +170,10 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
             painter.drawText(30,h-1-10,rating);
         }
 */
-
+        if (info->flag() == Photo::FlagReject && !(tileInfo.tileState & TileInfo::TileStateSelected))
+        {
+            painter.fillRect(0,0,w,h,QBrush(QColor(0,0,0,80)));
+        }
 
     }
     else

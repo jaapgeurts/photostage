@@ -29,8 +29,6 @@ signals:
 
 public slots:
 
-    void onFilesClicked(const QModelIndex&);
-    void customContextMenu(const QPoint& pos);
     void onPhotoSelectionChanged();
 
     // For clicks on the tile
@@ -38,6 +36,11 @@ public slots:
 //    void rotateRightClicked(const QModelIndex& index);
 //    void ratingClicked(const QModelIndex& index, int rating);
 
+
+private slots:
+    void onNewCollectionClicked();
+    void onFilesClicked(const QModelIndex&);
+    void customContextMenu(const QPoint& pos);
 
 private:
         Ui::Library *ui;

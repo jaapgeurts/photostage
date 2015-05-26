@@ -3,6 +3,7 @@
 #include <QTextEdit>
 #include <QLineEdit>
 #include <QDesktopWidget>
+#include <QVariantList>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -23,6 +24,8 @@
 #include "backgroundtask.h"
 #include "import/importbackgroundtask.h"
 
+#define SETTINGS_WINDOW_LOCATION "mainwindow/location"
+#define SETTINGS_SPLITTER_FILMSTRIP_SIZES "mainwindow/splitter_filmstrip"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -39,7 +42,20 @@ MainWindow::MainWindow(QWidget *parent) :
     mDatabaseAccess = new DatabaseAccess();
 
     QSettings settings;
-    move(settings.value("mainwindow/location").toPoint());
+    move(settings.value(SETTINGS_WINDOW_LOCATION).toPoint());
+
+    QList<int> l;
+    if (settings.contains(SETTINGS_SPLITTER_FILMSTRIP_SIZES))
+    {
+        foreach(QVariant v, settings.value(SETTINGS_SPLITTER_FILMSTRIP_SIZES).toList())
+        {
+            l << v.toInt();
+        }
+    } else
+    {
+        l << 600 << 200;
+    }
+    ui->splitter->setSizes(l);
 
     mPhotoModel = new PhotoModel(this);
     connect(mPhotoModel,&PhotoModel::modelReset,this,&MainWindow::onModelReset);
@@ -73,7 +89,13 @@ MainWindow::~MainWindow()
 {
     //QDesktopWidget * desktop = QApplication::desktop();
     QSettings settings;
-    settings.setValue("mainwindow/location",pos());
+    settings.setValue(SETTINGS_WINDOW_LOCATION,pos());
+    QVariantList list;
+    foreach(int size, ui->splitter->sizes())
+    {
+        list << size;
+    }
+    settings.setValue(SETTINGS_SPLITTER_FILMSTRIP_SIZES,list);
     delete ui;
     delete mDatabaseAccess;
 }

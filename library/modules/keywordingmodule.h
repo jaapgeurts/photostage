@@ -11,6 +11,7 @@
 class KeywordingModule : public LibraryModule
 {
     Q_OBJECT
+
 public:
     explicit KeywordingModule(QWidget *parent = 0);
 
