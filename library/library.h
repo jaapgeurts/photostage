@@ -6,7 +6,11 @@
 #include "photomodel.h"
 #include "sqlpathmodel.h"
 #include "workunits/photoworkunit.h"
-#include "library/modules/keywordingmodule.h"
+#include "imagedbtile.h"
+#include "modules/taggingmodule.h"
+#include "modules/collectionmodule.h"
+#include "modules/shortcutmodule.h"
+#include "modules/histogrammodule.h"
 
 namespace Ui {
 class Library;
@@ -47,7 +51,8 @@ private:
         PhotoModel * mPhotoModel;
         PhotoWorkUnit * mPhotoWorkUnit;
         SqlPathModel *mPathModel;
-        KeywordingModule *mKeywording;
+        TaggingModule *mKeywording;
+        HistogramModule* mHistogramModule;
 
 };
 

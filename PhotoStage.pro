@@ -27,7 +27,6 @@ SOURCES += main.cpp\
     workunits/importinfo.cpp \
     workunits/importworkunit.cpp \
     library/imagedbtile.cpp \
-    library/modules/keywordingmodule.cpp \
     library/modules/librarymodule.cpp \
     widgets/modulepanel.cpp \
     widgets/abstracttile.cpp \
@@ -54,7 +53,9 @@ SOURCES += main.cpp\
     preferences.cpp \
     library/modules/collectionmodule.cpp \
     library/modules/shortcutmodule.cpp \
-    widgets/histogram.cpp
+    widgets/histogram.cpp \
+    library/modules/taggingmodule.cpp \
+    library/modules/histogrammodule.cpp
 
 HEADERS  += mainwindow.h \
     constants.h \
@@ -69,7 +70,6 @@ HEADERS  += mainwindow.h \
     workunits/importinfo.h \
     workunits/importworkunit.h \
     library/imagedbtile.h \
-    library/modules/keywordingmodule.h \
     library/modules/librarymodule.h \
     widgets/modulepanel.h \
     widgets/fixedtreeview.h \
@@ -97,7 +97,9 @@ HEADERS  += mainwindow.h \
     preferences.h \
     library/modules/collectionmodule.h \
     library/modules/shortcutmodule.h \
-    widgets/histogram.h
+    widgets/histogram.h \
+    library/modules/taggingmodule.h \
+    library/modules/histogrammodule.h
 
 
 FORMS    += mainwindow.ui \
@@ -125,6 +127,7 @@ mac {
             -stdlib=libc++ \
             -L/opt/local/lib \
             -lexiv2 \
+            -llcms2 \
             -framework AppKit
 }
 

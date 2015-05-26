@@ -3,10 +3,7 @@
 #include "library.h"
 #include "ui_library.h"
 
-#include "imagedbtile.h"
-#include "modules/keywordingmodule.h"
-#include "modules/collectionmodule.h"
-#include "modules/shortcutmodule.h"
+
 
 // models
 #include "sqlkeywordmodel.h"
@@ -28,10 +25,10 @@ Library::Library(PhotoModel * const model, QWidget *parent) :
     QList<int> l;
     if (settings.contains(SETTINGS_SPLITTER_MAIN_SIZES))
     {
-    foreach(QVariant v, settings.value(SETTINGS_SPLITTER_MAIN_SIZES).toList())
-    {
-        l << v.toInt();
-    }
+        foreach(QVariant v, settings.value(SETTINGS_SPLITTER_MAIN_SIZES).toList())
+        {
+            l << v.toInt();
+        }
     } else
     {
         l << 200 << 600 << 200;
@@ -78,8 +75,12 @@ Library::Library(PhotoModel * const model, QWidget *parent) :
     ui->ModulePanel_1->addPanel("Collections",cm,menu);
 
     // **** MODULES RIGHT
+
+    mHistogramModule = new HistogramModule(ui->ModulePanel_2);
+    ui->ModulePanel_2->addPanel("Histogram",mHistogramModule);
+
     // Keywording (editing keywords module)
-    mKeywording = new KeywordingModule(ui->ModulePanel_2);
+    mKeywording = new TaggingModule(ui->ModulePanel_2);
     connect(ui->mClvPhotos,&TileView::selectionChanged,this,&Library::onPhotoSelectionChanged);
     ui->ModulePanel_2->addPanel("Keywords",mKeywording);
 
@@ -166,7 +167,7 @@ void Library::ratingClicked(const QModelIndex &index, int rating)
 // get the new selectionlist and pass it to all the modules.
 void Library::onPhotoSelectionChanged()
 {
-    QList<QModelIndex> list= ui->mClvPhotos->selection();
+    QList<QModelIndex> list = ui->mClvPhotos->selection();
     QList<Photo*> photos;
     QModelIndex index;
     foreach(index, list)
@@ -174,6 +175,7 @@ void Library::onPhotoSelectionChanged()
         photos.append(mPhotoModel->data(index,TileView::PhotoRole).value<Photo*>());
     }
     mKeywording->setPhotos(photos);
+    mHistogramModule->setPhotos(photos);
     emit photoSelectionChanged(photos);
 }
 

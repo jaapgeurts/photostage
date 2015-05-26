@@ -3,10 +3,10 @@
 #include <QEvent>
 #include <QKeyEvent>
 
-#include "library/modules/keywordingmodule.h"
+#include "library/modules/taggingmodule.h"
 #include "workunits/photoworkunit.h"
 
-KeywordingModule::KeywordingModule(QWidget *parent) : LibraryModule(parent)
+TaggingModule::TaggingModule(QWidget *parent) : LibraryModule(parent)
 {
 
     mTxtEdtKeywords = new QPlainTextEdit(this);
@@ -20,12 +20,12 @@ KeywordingModule::KeywordingModule(QWidget *parent) : LibraryModule(parent)
     vbLayout->setSpacing(0);
     setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
 
-    connect(mAddKeywords,&QLineEdit::returnPressed,this,&KeywordingModule::keywordsAdded);
+    connect(mAddKeywords,&QLineEdit::returnPressed,this,&TaggingModule::keywordsAdded);
 
     mTxtEdtKeywords->installEventFilter(this);
 }
 
-bool KeywordingModule::eventFilter(QObject *object, QEvent *event)
+bool TaggingModule::eventFilter(QObject *object, QEvent *event)
 {
     bool swallowed = false;
     if (object == mTxtEdtKeywords && event->type() == QEvent::KeyPress)
@@ -43,7 +43,7 @@ bool KeywordingModule::eventFilter(QObject *object, QEvent *event)
     return swallowed;
 }
 
-void KeywordingModule::keywordsAdded()
+void TaggingModule::keywordsAdded()
 {
     QString words = mAddKeywords->text();
     words = words.simplified();
@@ -60,7 +60,7 @@ void KeywordingModule::keywordsAdded()
     workUnit->assignKeywords(wordList,mPhotoInfoList);
 }
 
-void KeywordingModule::keywordsChanged()
+void TaggingModule::keywordsChanged()
 {
     QString words = mTxtEdtKeywords->document()->toPlainText();
     words = words.simplified();
@@ -94,7 +94,7 @@ void KeywordingModule::keywordsChanged()
 
 }
 
-void KeywordingModule::setPhotos(const QList<Photo*>& list)
+void TaggingModule::setPhotos(const QList<Photo*>& list)
 {
     LibraryModule::setPhotos(list);
     PhotoWorkUnit* workUnit = PhotoWorkUnit::instance();

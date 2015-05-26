@@ -8,12 +8,12 @@
 #include "librarymodule.h"
 
 
-class KeywordingModule : public LibraryModule
+class TaggingModule : public LibraryModule
 {
     Q_OBJECT
 
 public:
-    explicit KeywordingModule(QWidget *parent = 0);
+    explicit TaggingModule(QWidget *parent = 0);
 
     void setPhotos(const QList<Photo *> &list);
 
