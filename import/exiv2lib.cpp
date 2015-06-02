@@ -1,38 +1,209 @@
 #include <QDebug>
 
 #include "exiv2lib.h"
-#include "exiv2/image.hpp"
-#include "exiv2/preview.hpp"
-
 #include "constants.h"
 
-using namespace Exiv2;
+#define WB_AsShot      0
+#define WB_Auto        1
+#define WB_Daylight    2
+#define WB_Shade       3
+#define WB_Cloudy      4
+#define WB_Tungsten    5
+#define WB_Fluorescent 6
+#define WB_Flash       7
+#define WB_Custom1     8
+#define WB_Custom2     9
+
+struct __attribute__((packed)) WhiteBalanceEntry
+{
+    uint16_t RGGB[4];
+    uint16_t Temperature;
+};
+
+struct __attribute__((packed)) Canon_ColorData
+{
+
+    union {
+        // This version for the 20D & 350D
+        struct Canon_ColorData_V1
+        {
+            uint16_t bytecount;
+            uint16_t _unknown[24];
+            struct WhiteBalanceEntry WhiteBalanceTable[10];
+        } V1;
+
+        // this version is for the 1D Mark II and the 1Ds Mark II
+        struct Canon_ColorData_V2
+        {
+            //    uint16_t bytecount1;
+            //    uint16_t values[4]; // Some RGGB values
+            uint16_t bytecount;
+            uint16_t _unknown[31];
+            struct WhiteBalanceEntry WhiteBalanceTable[10];
+        } V2;
+        // this version is for the G10
+        struct Canon_ColorData_V3
+        {
+            uint16_t bytecount;
+            uint16_t _unknown[70];
+            struct WhiteBalanceEntry WhiteBalanceTable[10];
+        } V3;
+        // this is the default for canon
+        struct Canon_ColorData_V4
+        {
+            uint16_t bytecount;
+            uint16_t _unknown[62];
+            struct WhiteBalanceEntry WhiteBalanceTable[10];
+        } V4;
+        struct Canon_ColorData_V5
+        {
+            uint16_t bytecount;
+            uint16_t _unknown[49];
+            struct {
+                uint16_t GRGB[4];
+            } WhiteBalanceTable[3];
+        } V5;
+    };
+};
 
 Exiv2Lib::Exiv2Lib()
 {
 
 }
 
-
-
-const QImage Exiv2Lib::thumbnail(const QString& path)
+void Exiv2Lib::openFile(const QString &path)
 {
-    Image::AutoPtr img;
+
     try{
-        img = ImageFactory::open(path.toStdString());
+        mImageFile = ImageFactory::open(path.toStdString());
     }
     catch(BasicError<char> e)
     {
         qDebug() << e.what();
-        return QImage();
+        return;
     }
-    img->readMetadata();
+    mImageFile->readMetadata();
 
-    PreviewManager loader(*img);
+    ExifData& data = mImageFile->exifData();
+    ExifData::const_iterator pos;
+    pos = data.findKey(ExifKey("Exif.Image.Make"));
+    mExifData.make = QString::fromStdString(pos->toString());
+
+    // consider using Canon Model ID's
+    pos = data.findKey(ExifKey("Exif.Image.Model"));
+    // for canon chop off the name "Canon"
+    mExifData.model = QString::fromStdString(pos->toString());
+    if (mExifData.make == "Canon")
+    {
+        mExifData.model = mExifData.model.remove(0,6);
+    }
+    mExifData.thumbnail = loadImage();
+
+    setWhiteBalanceCoeffs(data,mExifData.rgbCoeffients);
+
+}
+
+ExifInfo Exiv2Lib::data()
+{
+    return mExifData;
+}
+
+
+void Exiv2Lib::setWhiteBalanceCoeffs(ExifData &data, float wb[3])
+{
+    ExifData::const_iterator pos;
+
+    pos = data.findKey(ExifKey("Exif.Canon.ColorData"));
+
+    if (pos != data.end() && pos->size() >0)
+    {
+        uint8_t *cdata = new uint8_t[pos->size()];
+
+        struct Canon_ColorData *colorData;
+        pos->copy(cdata,littleEndian);
+        colorData = (struct Canon_ColorData*)cdata;
+
+        if (mExifData.model == "EOS 350D DIGITAL") // || EOS 20D
+        {
+            qDebug() << "WB EOS 350D DIGITAL RGGB" << colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[0] << ","
+                     <<colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[1] << ","
+                     <<colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[2] << ","
+                     <<colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[3];
+
+            // optimize with bitshifts later
+            wb[0] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[2];
+            wb[1] = ((colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[1]+colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[3])/2);
+            wb[2] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[0];
+
+#define max(x,y) ((x)>(y)?(x):(y))
+
+            float mx = max(wb[0],max(wb[1],wb[2]));
+//            wb[0] =0;// /= mx; // red
+//            wb[1] =1;// /= mx;
+//            wb[2] =0;// /= mx; // green
+            wb[0] /= mx;
+            wb[1] /= mx;
+            wb[2] /= mx;
+
+        }
+        else if (mExifData.model == "EOS 1D Mark II") // || 1Ds Mark II
+        {
+
+        } else if (mExifData.model == "G10")
+        {
+
+        } else if (mExifData.model == "PowerShot S30")
+        {
+            uint16_t *s;
+            s = &colorData->V5.WhiteBalanceTable[WB_AsShot].GRGB[0];
+            qDebug() <<"WB values" << s[1] <<","<<s[0]<<","<<s[3]<<","<<s[2];
+
+            // optimize with bitshifs later
+            wb[0] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRGB[1];
+            wb[1] = (colorData->V5.WhiteBalanceTable[WB_AsShot].GRGB[0]+colorData->V5.WhiteBalanceTable[WB_AsShot].GRGB[2])/2;
+            wb[2] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRGB[3];
+
+            float mx = max(wb[0],max(wb[1],wb[2]));
+            wb[0] /= mx;
+            wb[1] /= mx;
+            wb[2] /= mx;
+
+        }
+        else // attempt to read at the default position at V4
+        {
+            qDebug() << "Unknown model. Attempting default";
+            // optimize with bitshifs later
+            wb[0] = colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[2];
+            wb[1] = (colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[1]+colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[3])/2;
+            wb[2] = colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[0];
+
+            float mx = max(wb[0],max(wb[1],wb[2]));
+            wb[0] /= mx;
+            wb[1] /= mx;
+            wb[2] /= mx;
+        }
+        delete cdata;
+    }else {
+
+        qDebug()<<"no such exif key";
+
+        wb[0] = 1.0;
+        wb[1] = 1.0;
+        wb[2] = 1.0;
+
+    }
+    qDebug() << "WB RGGB Multipliers" <<wb[0] <<","<<wb[1]<<","<<wb[2];
+}
+
+
+const QImage Exiv2Lib::loadImage()
+{
+
+    PreviewManager loader(*mImageFile);
     PreviewPropertiesList list = loader.getPreviewProperties();
     if (list.empty())
     {
-        qDebug() << "Image at" << path << " contains no thumbnail";
+        qDebug() << "Image contains no thumbnail";
         return QImage();
     }
 
@@ -54,7 +225,7 @@ const QImage Exiv2Lib::thumbnail(const QString& path)
     thumb.loadFromData(tmp,size);
 
     // Read the EXIF orientation flag and rotate the image accordingly.
-    ExifData & data = img->exifData();
+    ExifData & data = mImageFile->exifData();
     ExifData::const_iterator pos;
     pos = data.findKey(ExifKey("Exif.Image.Orientation"));
     // TODO: should flip/rotate after resize

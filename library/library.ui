@@ -52,13 +52,41 @@
        </property>
       </widget>
      </widget>
-     <widget class="TileView" name="mClvPhotos" native="true">
+     <widget class="QStackedWidget" name="StackedWidget_1">
       <property name="sizePolicy">
        <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
         <horstretch>1</horstretch>
         <verstretch>1</verstretch>
        </sizepolicy>
       </property>
+      <widget class="TileView" name="mClvPhotos"/>
+      <widget class="QScrollArea" name="scrollArea_3">
+       <property name="frameShape">
+        <enum>QFrame::NoFrame</enum>
+       </property>
+       <property name="sizeAdjustPolicy">
+        <enum>QAbstractScrollArea::AdjustToContents</enum>
+       </property>
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="LoupeView" name="mLoupeView">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>526</width>
+          <height>581</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </widget>
      </widget>
      <widget class="QScrollArea" name="scrollArea_2">
       <property name="minimumSize">
@@ -100,6 +128,12 @@
    <class>ModulePanel</class>
    <extends>QWidget</extends>
    <header>widgets/modulepanel.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>LoupeView</class>
+   <extends>QWidget</extends>
+   <header>widgets/loupeview.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

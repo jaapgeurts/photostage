@@ -1,6 +1,7 @@
 #include <QImage>
 #include <QDir>
 
+#include "constants.h"
 #include "photomodel.h"
 #include "imagefileloader.h"
 #include "widgets/tileview.h"
@@ -67,7 +68,7 @@ QVariant PhotoModel::data(const QModelIndex &index, int role) const
             info = mPhotoInfoList.at(index.row());
 
             // load image in background thread
-            ImageFileLoader* loader = new ImageFileLoader(info->fileName,index);
+            ImageFileLoader* loader = new ImageFileLoader(info->srcImagePath(),index);
             connect(loader,&ImageFileLoader::dataReady,this,&PhotoModel::imageLoaded);
             mThreadPool->start(loader);
 
@@ -80,17 +81,21 @@ QVariant PhotoModel::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::DisplayRole)
     {
-        return QString(mPhotoInfoList.at(index.row())->fileName);
+        return QString(mPhotoInfoList.at(index.row())->srcImagePath());
     }
     else
         return QVariant();
 }
 
-void PhotoModel::imageLoaded(const QModelIndex &index, const QImage& pixmap)
+void PhotoModel::imageLoaded(const QModelIndex &index, const QImage& image)
 {
 
     Photo* info = mPhotoInfoCache->value(index);
-    info->image = pixmap;
+
+    QImage preview = image.scaled(QSize(PREVIEW_IMG_WIDTH,PREVIEW_IMG_HEIGHT),Qt::KeepAspectRatio);
+
+    info->setPreview(preview);
+    info->setRawImage(image);
     mPhotoInfoCache->insert(index,info);
     QVector<int> roles;
     //roles.append(ImageFileSystemModel::FileImageRole);

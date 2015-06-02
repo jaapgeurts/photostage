@@ -1,4 +1,5 @@
 #include <QVBoxLayout>
+#include <QDebug>
 
 #include <lcms2.h>
 
@@ -19,12 +20,12 @@ void HistogramModule::setPhotos(const QList<Photo *> &list)
     {
         Photo * photo = list.at(0);
 
-        QImage image = loadImage(QImage(photo->fileName));
+        PhotoData image = loadImage(QImage(photo->rawImage()));
         mHistogram->setImageData(image);
     }
 }
 
-QImage HistogramModule::loadImage(const QImage&  image)
+PhotoData HistogramModule::loadImage(const QImage& inImage)
 {
     cmsHPROFILE hInProfile, hOutProfile;
     cmsHTRANSFORM hTransform;
@@ -32,21 +33,34 @@ QImage HistogramModule::loadImage(const QImage&  image)
     hInProfile = cmsOpenProfileFromFile("/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/sRGB.icc","r");
     hOutProfile = cmsOpenProfileFromFile("/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/MelissaRGB.icc","r");
 
-    hTransform = cmsCreateTransform(hInProfile,TYPE_RGBA_8,hOutProfile,TYPE_RGBA_8,INTENT_PERCEPTUAL,0);
+    hTransform = cmsCreateTransform(hInProfile,TYPE_BGRA_8,hOutProfile,TYPE_RGB_16,INTENT_PERCEPTUAL,0);
 
     cmsCloseProfile(hInProfile);
     cmsCloseProfile(hOutProfile);
 
-    QImage result = QImage(image.size(),image.format());
+    PhotoData result = PhotoData(inImage.size());
 
-    for (int i=0;i<image.height();i++)
+    qDebug() << "Has alpha" << (inImage.hasAlphaChannel() ? "yes" : "no");
+    if (inImage.format() != QImage::Format_RGB32) {
+        qDebug() << "Image not 32 bit:" <<inImage.format();
+
+    }
+
+    for (int i=0;i<inImage.height();i++)
     {
-        const uchar *inbuf = image.constScanLine(i);
-        uchar *outbuf = result.scanLine(i);
-        cmsDoTransform(hTransform,inbuf,outbuf,image.width());
+        const uchar *inbuf = inImage.constScanLine(i);
+        uint16_t *outbuf = result.scanLine(i);
+        //    const uchar *inbuf = image.constBits();
+        //    uint16_t *outbuf = result.data();
+        //    if (outbuf == NULL)
+        //        qDebug() << "outbuf == NULL";
+        cmsDoTransform(hTransform,inbuf,outbuf,inImage.width() );//* image.height());
     }
     cmsDeleteTransform(hTransform);
     return result;
 }
+
+
+
 
 

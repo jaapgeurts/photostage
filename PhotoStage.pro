@@ -4,12 +4,15 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql concurrent
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = PhotoStage
-TEMPLATE = app
+TEMPLATE =
+
+DEPENDPATH += .
+INCLUDEPATH += .
 
 # Qt uses libstdc++
 CONFIG += c++11
@@ -55,7 +58,10 @@ SOURCES += main.cpp\
     library/modules/shortcutmodule.cpp \
     widgets/histogram.cpp \
     library/modules/taggingmodule.cpp \
-    library/modules/histogrammodule.cpp
+    library/modules/histogrammodule.cpp \
+    photodata.cpp \
+    widgets/loupeview.cpp
+    #processing/amaze_demosaic_RT.c
 
 HEADERS  += mainwindow.h \
     constants.h \
@@ -99,7 +105,9 @@ HEADERS  += mainwindow.h \
     library/modules/shortcutmodule.h \
     widgets/histogram.h \
     library/modules/taggingmodule.h \
-    library/modules/histogrammodule.h
+    library/modules/histogrammodule.h \
+    photodata.h \
+    widgets/loupeview.h
 
 
 FORMS    += mainwindow.ui \
@@ -115,21 +123,46 @@ FORMS    += mainwindow.ui \
 DISTFILES += \
     Info.plist
 
+include($$PWD/external/rawspeed/rawspeed.pri)
 
-mac {
+
+unix:!macx {
+LIBS += \
+     -liconv
+}
+
+macx {
     #QMAKE_INFO_PLIST = Info.plist
-    QMAKE_CXXFLAGS += -std=c++11 -stdlib=libc++
+    QMAKE_CXXFLAGS += \
+                    -std=c++11 \
+                    -stdlib=libc++ \
+                    -fms-extensions \
+                    -Wignored-attributes
     ICON = resources/appicon.icns
-    INCLUDEPATH += /opt/local/include
-    HEADERS +=
+    INCLUDEPATH += /opt/local/include \
+                += $$PWD/external/exiv2/include
     OBJECTIVE_SOURCES +=
     LIBS += \
             -stdlib=libc++ \
+            $$PWD/external/exiv2/lib/libexiv2.a \
+            /usr/lib/libiconv.dylib \
+# for release link to the dynamic lib
+#            $$PWD/external/exiv2/lib/libexiv2.13.dylib \
             -L/opt/local/lib \
-            -lexiv2 \
-            -llcms2 \
             -framework AppKit
 }
+
+win32 {
+# LIBS +=
+}
+
+LIBS += \
+# for libexiv2
+            -lexpat \
+            -lz \
+# end libexiv2
+            -ljpeg \
+            -llcms2
 
 RESOURCES += \
     qdarkstyle/style.qrc \

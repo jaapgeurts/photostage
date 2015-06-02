@@ -294,10 +294,27 @@ void TileView::wheelEvent(QWheelEvent * event)
     }
 }
 
+void TileView::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    int idx = posToIndex(event->pos());
+    TileInfo info = createTileInfo(idx);
+    QModelIndex index = info.modelIndex;
+
+
+    mSelection->clear();
+    mSelection->append(index);
+    // qDebug() << "No modifiers";
+    mLastSelection = index;
+    emit selectionChanged();
+
+    emit doubleClickOnTile(index);
+}
+
 void TileView::mouseReleaseEvent(QMouseEvent* event)
 {
 
     QPoint pos = event->pos();
+
     int idx = posToIndex(pos);
     TileInfo info = createTileInfo(idx);
 
@@ -426,7 +443,7 @@ void TileView::keyPressEvent(QKeyEvent *event)
     switch (event->key())
     {
     case Qt::Key_Up:
-        if (oldIndex > mColumns)
+        if (oldIndex >= mColumns)
             newIndex = oldIndex - mColumns;
         break;
     case Qt::Key_Down:

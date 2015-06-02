@@ -20,9 +20,14 @@ public:
     Photo(QSqlQuery & query);
     virtual ~Photo();
 
-    QImage image;
-    QString fileName;
-    long long id;
+    void setPreview(const QImage& image);
+    const QImage& preview();
+
+    void setSrcImagePath(const QString &path);
+    const QString& srcImagePath();
+
+    void setPreviewCachePath(const QString &path);
+    const QString& previewCachePath();
 
     void setRating(int rating);
     int rating();
@@ -33,10 +38,22 @@ public:
     void setFlag(Flag flag);
     Flag flag();
 
+    QImage rawImage() { return mRawImage; }
+    void setRawImage(const QImage& image) { mRawImage = image; }
+
+public:
+    long long id;
+
 private:
     int mRating;
     ColorLabel mColorLabel;
     Flag mFlag;
+    QString mSrcImagePath;
+    QString mPreviewCachePath;
+
+    QImage mPreview;
+    QImage mRawImage;
+
 
 };
 

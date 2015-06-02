@@ -34,12 +34,15 @@ signals:
 public slots:
 
     void onPhotoSelectionChanged();
+    void onTileDoubleClicked(const QModelIndex& index);
 
     // For clicks on the tile
 //    void rotateLeftClicked(const QModelIndex& index);
 //    void rotateRightClicked(const QModelIndex& index);
 //    void ratingClicked(const QModelIndex& index, int rating);
 
+protected:
+    bool event(QEvent *event);
 
 private slots:
     void onNewCollectionClicked();

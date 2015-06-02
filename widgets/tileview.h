@@ -58,6 +58,7 @@ public:
 signals:
 
     void selectionChanged();
+    void doubleClickOnTile(const QModelIndex& index);
 
 public slots:
     void newRowsAvailable(const QModelIndex & parent, int first, int last);
@@ -78,6 +79,7 @@ protected:
     void wheelEvent(QWheelEvent * event) Q_DECL_OVERRIDE;
     void resizeEvent(QResizeEvent* event) Q_DECL_OVERRIDE;
     void mouseReleaseEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
+    void mouseDoubleClickEvent(QMouseEvent *) Q_DECL_OVERRIDE;
     void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
     void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
 

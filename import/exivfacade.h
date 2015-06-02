@@ -3,13 +3,22 @@
 
 #include <QImage>
 
+struct ExifInfo
+{
+    QString make;
+    QString model;
+    QImage thumbnail;
+    float rgbCoeffients[3];
+};
+
 class ExivFacade
 {
 public:
     static ExivFacade* createExivReader();
     virtual ~ExivFacade() {};
 
-    virtual const QImage thumbnail(const QString& path) =0;
+    virtual void openFile(const QString& path) = 0;
+    virtual ExifInfo data() = 0;
 
 protected:
     ExivFacade();

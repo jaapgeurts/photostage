@@ -11,9 +11,16 @@ Histogram::Histogram(QWidget *parent) : QWidget(parent)
     setMinimumHeight(120);
     setMaximumHeight(120);
     setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+
+    memset(mChannelRed,0,sizeof(unsigned long)*BIN_SIZE);
+    memset(mChannelBlue,0,sizeof(unsigned long)*BIN_SIZE);
+    memset(mChannelGreen,0,sizeof(unsigned long)*BIN_SIZE);
+
+    mMaxAll = 0;
+
 }
 
-void Histogram::setImageData(const QImage &image)
+void Histogram::setImageData(const PhotoData &image)
 {
     // the default BIN_SIZE = 256
     //set all values to 0
@@ -21,33 +28,31 @@ void Histogram::setImageData(const QImage &image)
     memset(mChannelBlue,0,sizeof(unsigned long)*BIN_SIZE);
     memset(mChannelGreen,0,sizeof(unsigned long)*BIN_SIZE);
 
-    mMaxRed = mMaxGreen = mMaxBlue = mMaxAll = 0;
+    mMaxAll = 0;
 
     // first do uniform distribution (linear transform)
 
-    if (image.depth() == 32)
+    double factor = (double)BIN_SIZE / (double)65535;
+    const uint16_t* pixels = image.constData();
+    int count = image.length() / NUM_CHANNELS;
+    for(int i = 0; i<count-3; i+=3)
     {
-        const QRgb *rgb = (QRgb*)image.constBits();
-        int count = image.byteCount() / 4;
-        for(int i = 0; i<count; i++)
-        {
-            unsigned int red = qRed(rgb[i]);
-            unsigned int green = qGreen(rgb[i]);
-            unsigned int blue = qBlue(rgb[i]);
-            unsigned int alpha = qAlpha(rgb[i]);
+        uint16_t red = pixels[i];
+        uint16_t green = pixels[i+1];
+        uint16_t blue = pixels[i+2];
 
-            mChannelRed[red]++;
-            mChannelGreen[green]++;
-            mChannelBlue[blue]++;
+        mChannelRed[(int)((double)red*factor)]++;
+        mChannelGreen[(int)((double)green*factor)]++;
+        mChannelBlue[(int)((double)blue*factor)]++;
 
-            // use green as the average luminance.
-            // use this value to scale the y axis of the histogram when painting
-            if (mMaxAll < mChannelGreen[green])
-                mMaxAll = mChannelGreen[green];
+        // use green as the average luminance.
+        // use this value to scale the y axis of the histogram when painting
+        if (mMaxAll < mChannelGreen[(int)((double)green*factor)])
+            mMaxAll = mChannelGreen[(int)((double)green*factor)];
 
-        }
-        update();
     }
+    qDebug() << "largest green value:"<<mMaxAll;
+    update();
 }
 
 void Histogram::paintEvent(QPaintEvent *event)
@@ -60,6 +65,8 @@ void Histogram::paintEvent(QPaintEvent *event)
     QPen penBlue = QPen(QColor(Qt::blue).darker(120));
 
     painter.setCompositionMode(QPainter::CompositionMode_Plus);
+    if (mMaxAll == 0)
+        return;
     for(int x = 0; x<256; x++)
     {
         painter.setPen(penRed);

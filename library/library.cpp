@@ -47,6 +47,7 @@ Library::Library(PhotoModel * const model, QWidget *parent) :
 
     ui->mClvPhotos->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->mClvPhotos,&TileView::customContextMenuRequested,this,&Library::customContextMenu);
+    connect(ui->mClvPhotos,&TileView::doubleClickOnTile,this,&Library::onTileDoubleClicked);
 
     // These models are auto deleted by the QObject hierarchy
     ui->mClvPhotos->setModel(mPhotoModel);
@@ -92,7 +93,11 @@ Library::Library(PhotoModel * const model, QWidget *parent) :
     trvwKeywords->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->ModulePanel_2->addPanel("Keyword List",trvwKeywords);
 
+    ui->StackedWidget_1->setCurrentWidget(ui->mClvPhotos);
+
+
     mPhotoWorkUnit = PhotoWorkUnit::instance();
+
 }
 
 Library::~Library()
@@ -177,6 +182,28 @@ void Library::onPhotoSelectionChanged()
     mKeywording->setPhotos(photos);
     mHistogramModule->setPhotos(photos);
     emit photoSelectionChanged(photos);
+}
+
+void Library::onTileDoubleClicked(const QModelIndex &index)
+{
+    qDebug() << "double clicke registerd";
+   Photo * photo = mPhotoModel->data(index,TileView::PhotoRole).value<Photo*>();
+   ui->mLoupeView->setPhoto(photo);
+   ui->StackedWidget_1->setCurrentWidget(ui->scrollArea_3);
+}
+
+bool Library::event(QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress)
+    {
+            QKeyEvent *ke = static_cast<QKeyEvent *>(event);
+            if (ke->key() == Qt::Key_Escape)
+            {
+                ui->StackedWidget_1->setCurrentWidget(ui->mClvPhotos);
+                return true;
+            }
+    }
+    return Module::event(event);
 }
 
 void Library::onNewCollectionClicked()

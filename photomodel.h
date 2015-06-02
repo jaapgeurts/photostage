@@ -40,7 +40,7 @@ public slots:
     void onReloadPhotos(SourceType source, long long id );
 
 private slots:
-    void imageLoaded(const QModelIndex &index, const QImage &pixmap);
+    void imageLoaded(const QModelIndex &index, const QImage &image);
 
 private:
     PhotoWorkUnit * mWorkUnit;

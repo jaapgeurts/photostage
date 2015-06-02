@@ -2,6 +2,7 @@
 #define HISTOGRAM_H
 
 #include <QWidget>
+#include "photodata.h"
 
 #define BIN_SIZE (256)
 
@@ -11,7 +12,7 @@ class Histogram : public QWidget
 public:
     explicit Histogram(QWidget *parent = 0);
 
-    void setImageData(const QImage & image);
+    void setImageData(const PhotoData &image);
 
 protected:
     void paintEvent(QPaintEvent * event);
@@ -24,10 +25,6 @@ private:
     unsigned long mChannelRed[BIN_SIZE];
     unsigned long mChannelGreen[BIN_SIZE];
     unsigned long mChannelBlue[BIN_SIZE];
-
-    unsigned long mMaxRed;
-    unsigned long mMaxGreen;
-    unsigned long mMaxBlue;
 
     unsigned long mMaxAll;
 
