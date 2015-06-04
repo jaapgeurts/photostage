@@ -60,7 +60,7 @@ struct __attribute__((packed)) Canon_ColorData
             uint16_t bytecount;
             uint16_t _unknown[49];
             struct {
-                uint16_t GRGB[4];
+                uint16_t GRBG[4];
             } WhiteBalanceTable[3];
         } V5;
     };
@@ -125,25 +125,25 @@ void Exiv2Lib::setWhiteBalanceCoeffs(ExifData &data, float wb[3])
 
         if (mExifData.model == "EOS 350D DIGITAL") // || EOS 20D
         {
-            qDebug() << "WB EOS 350D DIGITAL RGGB" << colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[0] << ","
-                     <<colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[1] << ","
-                     <<colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[2] << ","
-                     <<colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[3];
 
             // optimize with bitshifts later
-            wb[0] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[2];
-            wb[1] = ((colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[1]+colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[3])/2);
-            wb[2] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[0];
+//                                    wb[0] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[2];
+//                                    wb[1] = ((colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[1]+colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[3])/2);
+//                                    wb[2] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[0];
+            wb[0] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[0];
+            wb[1] = ((colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[1]+colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[2])/2);
+            wb[2] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[3];
+
+//            qDebug() << "WB EOS 350D DIGITAL RGGB" << wb[0] << ","<<wb[1]<<","<<wb[2];
 
 #define max(x,y) ((x)>(y)?(x):(y))
 
             float mx = max(wb[0],max(wb[1],wb[2]));
-//            wb[0] =0;// /= mx; // red
-//            wb[1] =1;// /= mx;
-//            wb[2] =0;// /= mx; // green
+
             wb[0] /= mx;
             wb[1] /= mx;
             wb[2] /= mx;
+
 
         }
         else if (mExifData.model == "EOS 1D Mark II") // || 1Ds Mark II
@@ -155,32 +155,34 @@ void Exiv2Lib::setWhiteBalanceCoeffs(ExifData &data, float wb[3])
         } else if (mExifData.model == "PowerShot S30")
         {
             uint16_t *s;
-            s = &colorData->V5.WhiteBalanceTable[WB_AsShot].GRGB[0];
-            qDebug() <<"WB values" << s[1] <<","<<s[0]<<","<<s[3]<<","<<s[2];
+            s = &colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[0];
+//            qDebug() <<"****V5 WB values" << s[1] <<","<<s[0]<<","<<s[3]<<","<<s[2];
 
             // optimize with bitshifs later
-            wb[0] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRGB[1];
-            wb[1] = (colorData->V5.WhiteBalanceTable[WB_AsShot].GRGB[0]+colorData->V5.WhiteBalanceTable[WB_AsShot].GRGB[2])/2;
-            wb[2] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRGB[3];
+            wb[0] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[1];
+            wb[1] = (colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[0]+colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[3])/2;
+            wb[2] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[2];
 
             float mx = max(wb[0],max(wb[1],wb[2]));
             wb[0] /= mx;
             wb[1] /= mx;
             wb[2] /= mx;
+
 
         }
         else // attempt to read at the default position at V4
         {
             qDebug() << "Unknown model. Attempting default";
             // optimize with bitshifs later
-            wb[0] = colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[2];
-            wb[1] = (colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[1]+colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[3])/2;
-            wb[2] = colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[0];
+            wb[0] = colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[0];
+            wb[1] = (colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[1]+colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[2])/2;
+            wb[2] = colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[3];
 
             float mx = max(wb[0],max(wb[1],wb[2]));
             wb[0] /= mx;
             wb[1] /= mx;
             wb[2] /= mx;
+
         }
         delete cdata;
     }else {
@@ -192,7 +194,8 @@ void Exiv2Lib::setWhiteBalanceCoeffs(ExifData &data, float wb[3])
         wb[2] = 1.0;
 
     }
-    qDebug() << "WB RGGB Multipliers" <<wb[0] <<","<<wb[1]<<","<<wb[2];
+//    qDebug() << "WB RGGB Multipliers" <<wb[0] <<","<<wb[1]<<","<<wb[2];
+
 }
 
 

@@ -116,7 +116,7 @@ void ImportDialog::onFilesSelected()
 
 void ImportDialog::validateForm()
 {
-    if (mCfvPhotos->selection().size()==0)
+    if (mCfvPhotos->checkedItems().size()==0)
     {
         ui->btnImport->setEnabled(false);
         ui->btnImport->setToolTip("You must select images before you can import.");

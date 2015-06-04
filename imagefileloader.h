@@ -33,7 +33,15 @@ private:
     QString mPath;
     QImage loadRaw();
 
-    void compute_inverse(float src[], float dst[]);
+    /**
+     * @brief ImageFileLoader::compute_inverse computes the inverse of a matrix
+     * @param src the input matrix
+     * @param dst (out parameter) the result
+     * @return true, if successful, false if the inverse doesn't exist
+     */
+    bool compute_inverse(const float src[], float dst[]);
+    void dump_matrix(const QString &name, float m[]);
+    int compute_cct(float R, float G, float B);
 };
 
 class Metadata
