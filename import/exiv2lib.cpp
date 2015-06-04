@@ -134,6 +134,7 @@ void Exiv2Lib::setWhiteBalanceCoeffs(ExifData &data, float wb[3])
             wb[1] = ((colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[1]+colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[2])/2);
             wb[2] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[3];
 
+
 //            qDebug() << "WB EOS 350D DIGITAL RGGB" << wb[0] << ","<<wb[1]<<","<<wb[2];
 
 #define max(x,y) ((x)>(y)?(x):(y))

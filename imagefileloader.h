@@ -42,6 +42,9 @@ private:
     bool compute_inverse(const float src[], float dst[]);
     void dump_matrix(const QString &name, float m[]);
     int compute_cct(float R, float G, float B);
+    void mmultm(float *A, float *B, float *out);
+    void vmultm(float *V, float *M, float *out);
+    void normalize(float *M);
 };
 
 class Metadata

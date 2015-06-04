@@ -138,6 +138,26 @@ int ImageFileLoader::compute_cct(float R,float G, float B)
 
 }
 
+void ImageFileLoader::mmultm(float *A, float *B, float * out)
+{
+    out[0] = A[0]*B[0]+A[1]*B[3]+A[2]*B[6];
+    out[1] = A[0]*B[1]+A[1]*B[4]+A[2]*B[7];
+    out[2] = A[0]*B[2]+A[1]*B[5]+A[2]*B[8];
+
+    out[3] = A[3]*B[0]+A[4]*B[3]+A[5]*B[6];
+    out[4] = A[3]*B[1]+A[4]*B[4]+A[5]*B[7];
+    out[5] = A[3]*B[2]+A[4]*B[5]+A[5]*B[8];
+
+    out[6] = A[6]*B[0]+A[7]*B[3]+A[8]*B[6];
+    out[7] = A[6]*B[1]+A[7]*B[4]+A[8]*B[7];
+    out[8] = A[6]*B[2]+A[7]*B[5]+A[8]*B[8];
+}
+
+void ImageFileLoader::vmultm(float *V,float *M,float *out)
+{
+
+}
+
 
 QImage ImageFileLoader::loadRaw()
 {
@@ -194,7 +214,7 @@ QImage ImageFileLoader::loadRaw()
         ColorFilterArray cfa = raw->cfa;
         uint32_t cfa_layout = cfa.getDcrawFilter();
 
-        //qDebug() << "dcraw filter:" <<cfa_layout;
+        qDebug() << "dcraw filter:" << QString("%1").arg(cfa_layout,0,16);
 
         int cfa_width = cfa.size.x;
         int cfa_height = cfa.size.y;
@@ -219,53 +239,76 @@ QImage ImageFileLoader::loadRaw()
         float wbr = ex_info.rgbCoeffients[0];
         float wbg = ex_info.rgbCoeffients[1];
         float wbb = ex_info.rgbCoeffients[2];
+        qDebug() << "WB coeffs" << wbr << ","<< wbg << ","<< wbb;
 
         // canon 350D
-        float canon350d_inverse[9] = {
-            1.781523684,	0.04683785,   0.206729619,
-            0.942699472,	0.682168803, -0.146525412,
-            0.144625863,   -0.144070435,  1.382906765
-        };
+
         float canon350d[9] = { 6018,-617,-965,-8645,15881,2975,-1530,1719,7642 };
         float powershots30[9] = { 10566,-3652,-1129,-6552,14662,2006,-2197,2581,7670 };
         float canon5DMarkII[9] = { 4716,603,-830,-7798,15474,2480,-1496,1937,6651 };
 
         float raw_xyzd65[9];
         if (ex_info.model == "EOS 350D DIGITAL") {
-//            qDebug() << "inverse for 350d";
+            //            qDebug() << "inverse for 350d";
             for (int i=0;i<9;i++)
                 canon350d[i] /= 10000;
             compute_inverse(canon350d,raw_xyzd65);
         }
         else if (ex_info.model == "PowerShot S30"){
-//            qDebug() << "inverse for S30";
+            //            qDebug() << "inverse for S30";
             for (int i=0;i<9;i++)
                 powershots30[i] /= 10000;
             compute_inverse(powershots30,raw_xyzd65);
         }
         else if (ex_info.model == "EOS 5D Mark II") {
-//            qDebug() << "inverse for 5D Mark II";
+            //            qDebug() << "inverse for 5D Mark II";
             for (int i=0;i<9;i++)
                 canon5DMarkII[i] /= 10000;
             compute_inverse(canon5DMarkII,raw_xyzd65);
         }
         //dump_matrix("raw_xyzd65",raw_xyzd65);
 
-        int temp = compute_cct(255*wbr,255*wbg,255*wbb);
-        qDebug() << "Camera WB temp:"<<temp;
-
-        // compute the forward matrix;
-
         float xyz65_srgb[9] = {  3.240481343,  -1.537151516,   -0.498536326,
                                  -0.96925495,	1.875990001,	0.041555927,
-                                0.055646639,  -0.204041338,	1.05731107 };
+                                 0.055646639,  -0.204041338,	1.05731107 };
+
+        //        float xyz50_srgb[9] {
+        //            3.1338561, -1.6168667, -0.4906146,
+        //            -0.9787684,  1.9161415 , 0.0334540,
+        //             0.0719453, -0.2289914 , 1.4052427 };
         //dump_matrix("xyz65_srgb",xyz65_srgb);
+
+        // compute the forward matrix;
+        // compute the inverse of the white balance matrix
+        float wb_matrix[9] = { wbr, 0,   0,
+                               0,   wbg, 0,
+                               0,   0,   wbb };
+        float wb_inv[9];
+        compute_inverse(wb_matrix,wb_inv);
+
+        float forward[9] = { // RGB -> XYZ
+             0.412453, 0.357580, 0.180423 ,
+             0.212671, 0.715160, 0.072169 ,
+             0.019334, 0.119193, 0.950227  };
+//        mmultm(raw_xyzd65,wb_inv,forward);
+        // => this forward matrix is working, but brings the colors to D65 not to custom WB
+        //dump_matrix("forward",forward);
+
+        //apply matrix to WB coeffs.
+        float wbrxyz = wbr * raw_xyzd65[0] + wbg*raw_xyzd65[1] + wbb*raw_xyzd65[2];
+        float wbgxyz = wbr * raw_xyzd65[3] + wbg*raw_xyzd65[4] + wbb*raw_xyzd65[5];
+        float wbbxyz = wbr * raw_xyzd65[6] + wbg*raw_xyzd65[7] + wbb*raw_xyzd65[8];
+
+        //compute the color temp from that.
+        int cct = compute_cct(wbrxyz, wbgxyz, wbbxyz);
+        int cct1 = compute_cct(wbr, wbg, wbb);
+        qDebug() << "CCT after transform:" << cct <<":"<<cct1;
+        //        << wbrxyz<<","<<wbgxyz<<","<<wbbxyz;
 
 
         float rm=0,gm=0,bm=0;
 
         // qDebug() << "Converted RGB MAX" << ex_info.RGB_mean[0] <<","<<ex_info.RGB_mean[1] <<","<<ex_info.RGB_mean[2];
-       // qDebug() << "WB coeffs" << wbr << ","<< wbg << ","<< wbb;
 
         for (int y=1;y<height-1;y++)
         {
@@ -282,7 +325,7 @@ QImage ImageFileLoader::loadRaw()
 
                 if ((x&1) == 0 && (y&1)==0) //red
                 {
-//                    assert(cfa.getColorAt(x,y) == CFA_RED);
+                    //                    assert(cfa.getColorAt(x,y) == CFA_RED);
                     r = row[x];
                     g = (row[x-1] + row[x+1] + row[x-pitch_in_bytes] + row[x+pitch_in_bytes])/4;
                     b = (row[x-1-pitch_in_bytes] + row[x+1-pitch_in_bytes] + row[x-1+pitch_in_bytes] + row[x+1+pitch_in_bytes])/4;
@@ -290,7 +333,7 @@ QImage ImageFileLoader::loadRaw()
                 }
                 else if (x&1 && y&1) //blue
                 {
-//                    assert(cfa.getColorAt(x,y) == CFA_BLUE);
+                    //                    assert(cfa.getColorAt(x,y) == CFA_BLUE);
 
                     r = (row[x-1-pitch_in_bytes] + row[x+1-pitch_in_bytes] + row[x-1+pitch_in_bytes] + row[x+1+pitch_in_bytes])/4;
                     g = (row[x-1] + row[x+1] + row[x-pitch_in_bytes] + row[x+pitch_in_bytes])/4;
@@ -298,27 +341,27 @@ QImage ImageFileLoader::loadRaw()
                 }
                 else //green
                 {
-//                    assert(cfa.getColorAt(x,y) == CFA_GREEN);
+                    //                    assert(cfa.getColorAt(x,y) == CFA_GREEN);
 
                     g = row[x];
 
                     if ((y&1)==0)
                     {
                         r = (row[x-1]+row[x+1])/2;
-//                        assert(cfa.getColorAt(x-1,y) == CFA_RED);
-//                        assert(cfa.getColorAt(x+1,y) == CFA_RED);
+                        //                        assert(cfa.getColorAt(x-1,y) == CFA_RED);
+                        //                        assert(cfa.getColorAt(x+1,y) == CFA_RED);
                         b = (row[x-pitch_in_bytes] + row[x+pitch_in_bytes])/2;
                     }
                     else
                     {
                         r = (row[x-pitch_in_bytes] + row[x+pitch_in_bytes])/2;
-                        if (cfa.getColorAt(x-1,y) != CFA_BLUE)
-                        {
-                            qDebug() << "Color:"<<cfa.getColorAt(x-1,y);
-                            qDebug() << "x,y" << x-1 <<","<<y;
-                        }
-//                        assert(cfa.getColorAt(x-1,y) == CFA_BLUE);
-//                        assert(cfa.getColorAt(x+1,y) == CFA_BLUE);
+                        //                        if (cfa.getColorAt(x-1,y) != CFA_BLUE)
+                        //                        {
+                        //                            qDebug() << "Color:"<<cfa.getColorAt(x-1,y);
+                        //                            qDebug() << "x,y" << x-1 <<","<<y;
+                        //                        }
+                        //                        assert(cfa.getColorAt(x-1,y) == CFA_BLUE);
+                        //                        assert(cfa.getColorAt(x+1,y) == CFA_BLUE);
                         b = (row[x-1]+row[x+1])/2;
                     }
                 }
@@ -336,7 +379,7 @@ QImage ImageFileLoader::loadRaw()
                 gt = gf * wbg;
                 bt = bf * wbb;
 
-#define WORKING
+                //#define WORKING
 #ifdef WORKING
                 rf = rt;
                 gf = gt;
@@ -344,10 +387,16 @@ QImage ImageFileLoader::loadRaw()
 #else
                 // data is now in camera color space
 
+
                 // apply raw -> xyzd65
-                rf = rt * raw_xyzd65[0] + gt*raw_xyzd65[1] + bt*raw_xyzd65[2];
-                gf = rt * raw_xyzd65[3] + gt*raw_xyzd65[4] + bt*raw_xyzd65[5];
-                bf = rt * raw_xyzd65[6] + gt*raw_xyzd65[7] + bt*raw_xyzd65[8];
+                //                rf = rt * raw_xyzd65[0] + gt*raw_xyzd65[1] + bt*raw_xyzd65[2];
+                //                gf = rt * raw_xyzd65[3] + gt*raw_xyzd65[4] + bt*raw_xyzd65[5];
+                //                bf = rt * raw_xyzd65[6] + gt*raw_xyzd65[7] + bt*raw_xyzd65[8];
+
+                // apply the computed forward matrix
+                rf = rt * forward[0] + gt*forward[1] + bt*forward[2];
+                gf = rt * forward[3] + gt*forward[4] + bt*forward[5];
+                bf = rt * forward[6] + gt*forward[7] + bt*forward[8];
 
                 rt = rf;
                 gt = gf;
@@ -371,7 +420,7 @@ QImage ImageFileLoader::loadRaw()
 
 
         float mx = 1.0/max(rm,max(gm,bm));
-//        qDebug() << "max r,g,b" << rm <<","<<gm<<","<<bm;
+        //        qDebug() << "max r,g,b" << rm <<","<<gm<<","<<bm;
         // mx = 1.0;
 
         for (int y=0;y<height;y++)
