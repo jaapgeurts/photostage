@@ -227,6 +227,13 @@ QImage ImageFileLoader::loadRaw()
         ColorFilterArray cfa = raw->cfa;
         uint32_t cfa_layout = cfa.getDcrawFilter();
 
+        uint16_t vert,horz;
+        if (cfa_layout == 0x94949494)
+            vert = horz = 0;
+        else if (cfa_layout = 0x49494949) {
+            horz = 0; vert = 1;
+        }
+
         qDebug() << "dcraw filter:" << QString("%1").arg(cfa_layout,0,16);
 
         int cfa_width = cfa.size.x;
@@ -252,6 +259,7 @@ QImage ImageFileLoader::loadRaw()
         float wbr = ex_info.rgbCoeffients[0];
         float wbg = ex_info.rgbCoeffients[1];
         float wbb = ex_info.rgbCoeffients[2];
+
         qDebug() << "WB coeffs" << wbr << ","<< wbg << ","<< wbb;
 
         // canon 350D
@@ -259,7 +267,9 @@ QImage ImageFileLoader::loadRaw()
         float canon350d[9] = { 6018,-617,-965,-8645,15881,2975,-1530,1719,7642 };
         float powershots30[9] = { 10566,-3652,-1129,-6552,14662,2006,-2197,2581,7670 };
         float canon5DMarkII[9] = { 4716,603,-830,-7798,15474,2480,-1496,1937,6651 };
+        float eos1100d[9] = { 6444,-904,-893,-4563,12308,2535,-903,2016,6728 };
 
+        // use default sRGB conversion matrix
         float xyz65_srgb[9] = {
              0.412453, 0.357580, 0.180423 ,
              0.212671, 0.715160, 0.072169 ,
@@ -286,6 +296,15 @@ QImage ImageFileLoader::loadRaw()
                 canon5DMarkII[i] /= 10000;
             mmultm(canon5DMarkII,xyz65_srgb,raw_xyzd65);
 //            compute_inverse(canon5DMarkII,raw_xyzd65);
+        } else if (ex_info.model == "EOS REBEL T3") {
+            for (int i=0;i<9;i++)
+                eos1100d[i] /= 10000;
+            mmultm(eos1100d,xyz65_srgb,raw_xyzd65);
+        } else
+        {
+            for (int i=0;i<9;i++)
+                canon5DMarkII[i] /= 10000;
+            mmultm(canon5DMarkII,xyz65_srgb,raw_xyzd65);
         }
         //dump_matrix("raw_xyzd65",raw_xyzd65);
 
@@ -313,17 +332,17 @@ QImage ImageFileLoader::loadRaw()
 
                 // bilinear interpolation
 
-                if ((x&1) == 0 && (y&1)==0) //red
+                if ((x&1) == horz && (y&1) == vert) //red
                 {
-                    //                    assert(cfa.getColorAt(x,y) == CFA_RED);
+                    assert(cfa.getColorAt(x,y) == CFA_RED);
                     r = row[x];
                     g = (row[x-1] + row[x+1] + row[x-pitch_in_bytes] + row[x+pitch_in_bytes])/4;
                     b = (row[x-1-pitch_in_bytes] + row[x+1-pitch_in_bytes] + row[x-1+pitch_in_bytes] + row[x+1+pitch_in_bytes])/4;
 
                 }
-                else if (x&1 && y&1) //blue
+                else if ((x&1)==((~horz)&1) && (y&1)==((~vert)&1)) //blue
                 {
-                    //                    assert(cfa.getColorAt(x,y) == CFA_BLUE);
+                    assert(cfa.getColorAt(x,y) == CFA_BLUE);
 
                     r = (row[x-1-pitch_in_bytes] + row[x+1-pitch_in_bytes] + row[x-1+pitch_in_bytes] + row[x+1+pitch_in_bytes])/4;
                     g = (row[x-1] + row[x+1] + row[x-pitch_in_bytes] + row[x+pitch_in_bytes])/4;
@@ -331,18 +350,20 @@ QImage ImageFileLoader::loadRaw()
                 }
                 else //green
                 {
-                    //                    assert(cfa.getColorAt(x,y) == CFA_GREEN);
+                    if (cfa.getColorAt(x,y) != CFA_GREEN)
+                         qDebug() << "Color:"<<cfa.getColorAt(x,y);
+                    assert(cfa.getColorAt(x,y) == CFA_GREEN);
 
                     g = row[x];
 
-                    if ((y&1)==0)
+                    if ((y&1)==vert) // red horizontal, blue vert
                     {
                         r = (row[x-1]+row[x+1])/2;
-                        //                        assert(cfa.getColorAt(x-1,y) == CFA_RED);
-                        //                        assert(cfa.getColorAt(x+1,y) == CFA_RED);
+                        assert(cfa.getColorAt(x-1,y) == CFA_RED);
+                        assert(cfa.getColorAt(x+1,y) == CFA_RED);
                         b = (row[x-pitch_in_bytes] + row[x+pitch_in_bytes])/2;
                     }
-                    else
+                    else // blue horizontal, red vert
                     {
                         r = (row[x-pitch_in_bytes] + row[x+pitch_in_bytes])/2;
                         //                        if (cfa.getColorAt(x-1,y) != CFA_BLUE)
@@ -350,8 +371,8 @@ QImage ImageFileLoader::loadRaw()
                         //                            qDebug() << "Color:"<<cfa.getColorAt(x-1,y);
                         //                            qDebug() << "x,y" << x-1 <<","<<y;
                         //                        }
-                        //                        assert(cfa.getColorAt(x-1,y) == CFA_BLUE);
-                        //                        assert(cfa.getColorAt(x+1,y) == CFA_BLUE);
+                        assert(cfa.getColorAt(x-1,y) == CFA_BLUE);
+                        assert(cfa.getColorAt(x+1,y) == CFA_BLUE);
                         b = (row[x-1]+row[x+1])/2;
                     }
                 }

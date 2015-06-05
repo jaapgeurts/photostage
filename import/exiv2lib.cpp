@@ -179,6 +179,8 @@ void Exiv2Lib::setWhiteBalanceCoeffs(ExifData &data, float wb[3])
             wb[1] = (colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[1]+colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[2])/2;
             wb[2] = colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[3];
 
+            qDebug() << "WB RGGB Levels" << wb[0] << ","<<wb[1]<<","<<wb[2];
+
             float mx = max(wb[0],max(wb[1],wb[2]));
             wb[0] /= mx;
             wb[1] /= mx;
