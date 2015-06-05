@@ -158,6 +158,19 @@ void ImageFileLoader::vmultm(float *V,float *M,float *out)
 
 }
 
+void ImageFileLoader::normalize(float *M)
+{
+    float sum;
+    for (int i=0;i<3;i++)
+    {
+        sum = 0;
+    for (int j=0;j<3;j++)
+      sum += M[i*3+j];
+    for (int j=0;j<3;j++)
+        M[i*3+j] /= sum;
+    }
+}
+
 
 QImage ImageFileLoader::loadRaw()
 {
@@ -213,10 +226,11 @@ QImage ImageFileLoader::loadRaw()
         //qDebug() << "run standard demosiac";
         ColorFilterArray cfa = raw->cfa;
         uint32_t cfa_layout = cfa.getDcrawFilter();
-        uint16_t horz, vert;
+
+        uint16_t vert,horz;
         if (cfa_layout == 0x94949494)
-            horz = vert = 0;
-        else if (cfa_layout == 0x49494949) {
+            vert = horz = 0;
+        else if (cfa_layout = 0x49494949) {
             horz = 0; vert = 1;
         }
 
@@ -245,6 +259,7 @@ QImage ImageFileLoader::loadRaw()
         float wbr = ex_info.rgbCoeffients[0];
         float wbg = ex_info.rgbCoeffients[1];
         float wbb = ex_info.rgbCoeffients[2];
+
         qDebug() << "WB coeffs" << wbr << ","<< wbg << ","<< wbb;
 
         // canon 350D
@@ -252,65 +267,49 @@ QImage ImageFileLoader::loadRaw()
         float canon350d[9] = { 6018,-617,-965,-8645,15881,2975,-1530,1719,7642 };
         float powershots30[9] = { 10566,-3652,-1129,-6552,14662,2006,-2197,2581,7670 };
         float canon5DMarkII[9] = { 4716,603,-830,-7798,15474,2480,-1496,1937,6651 };
+        float eos1100d[9] = { 6444,-904,-893,-4563,12308,2535,-903,2016,6728 };
+
+        // use default sRGB conversion matrix
+        float xyz65_srgb[9] = {
+             0.412453, 0.357580, 0.180423 ,
+             0.212671, 0.715160, 0.072169 ,
+             0.019334, 0.119193, 0.950227  };
 
         float raw_xyzd65[9];
         if (ex_info.model == "EOS 350D DIGITAL") {
             //            qDebug() << "inverse for 350d";
             for (int i=0;i<9;i++)
                 canon350d[i] /= 10000;
-            compute_inverse(canon350d,raw_xyzd65);
+            mmultm(canon350d,xyz65_srgb,raw_xyzd65);
+//            compute_inverse(canon350d,raw_xyzd65);
         }
         else if (ex_info.model == "PowerShot S30"){
             //            qDebug() << "inverse for S30";
             for (int i=0;i<9;i++)
                 powershots30[i] /= 10000;
-            compute_inverse(powershots30,raw_xyzd65);
+            mmultm(powershots30,xyz65_srgb,raw_xyzd65);
+//            compute_inverse(powershots30,raw_xyzd65);
         }
         else if (ex_info.model == "EOS 5D Mark II") {
             //            qDebug() << "inverse for 5D Mark II";
             for (int i=0;i<9;i++)
                 canon5DMarkII[i] /= 10000;
-            compute_inverse(canon5DMarkII,raw_xyzd65);
+            mmultm(canon5DMarkII,xyz65_srgb,raw_xyzd65);
+//            compute_inverse(canon5DMarkII,raw_xyzd65);
+        } else if (ex_info.model == "EOS REBEL T3") {
+            for (int i=0;i<9;i++)
+                eos1100d[i] /= 10000;
+            mmultm(eos1100d,xyz65_srgb,raw_xyzd65);
+        } else
+        {
+            for (int i=0;i<9;i++)
+                canon5DMarkII[i] /= 10000;
+            mmultm(canon5DMarkII,xyz65_srgb,raw_xyzd65);
         }
         //dump_matrix("raw_xyzd65",raw_xyzd65);
 
-        float xyz65_srgb[9] = {  3.240481343,  -1.537151516,   -0.498536326,
-                                 -0.96925495,	1.875990001,	0.041555927,
-                                 0.055646639,  -0.204041338,	1.05731107 };
-
-        //        float xyz50_srgb[9] {
-        //            3.1338561, -1.6168667, -0.4906146,
-        //            -0.9787684,  1.9161415 , 0.0334540,
-        //             0.0719453, -0.2289914 , 1.4052427 };
-        //dump_matrix("xyz65_srgb",xyz65_srgb);
-
-        // compute the forward matrix;
-        // compute the inverse of the white balance matrix
-        float wb_matrix[9] = { wbr, 0,   0,
-                               0,   wbg, 0,
-                               0,   0,   wbb };
-        float wb_inv[9];
-        compute_inverse(wb_matrix,wb_inv);
-
-        float forward[9] = { // RGB -> XYZ
-                             0.412453, 0.357580, 0.180423 ,
-                             0.212671, 0.715160, 0.072169 ,
-                             0.019334, 0.119193, 0.950227  };
-        //        mmultm(raw_xyzd65,wb_inv,forward);
-        // => this forward matrix is working, but brings the colors to D65 not to custom WB
-        //dump_matrix("forward",forward);
-
-        //apply matrix to WB coeffs.
-        float wbrxyz = wbr * raw_xyzd65[0] + wbg*raw_xyzd65[1] + wbb*raw_xyzd65[2];
-        float wbgxyz = wbr * raw_xyzd65[3] + wbg*raw_xyzd65[4] + wbb*raw_xyzd65[5];
-        float wbbxyz = wbr * raw_xyzd65[6] + wbg*raw_xyzd65[7] + wbb*raw_xyzd65[8];
-
-        //compute the color temp from that.
-        int cct = compute_cct(wbrxyz, wbgxyz, wbbxyz);
-        int cct1 = compute_cct(wbr, wbg, wbb);
-        qDebug() << "CCT after transform:" << cct <<":"<<cct1;
-        //        << wbrxyz<<","<<wbgxyz<<","<<wbbxyz;
-
+        normalize(raw_xyzd65);
+        compute_inverse(raw_xyzd65,xyz65_srgb);
 
         float rm=0,gm=0,bm=0;
 
@@ -402,13 +401,13 @@ QImage ImageFileLoader::loadRaw()
                 //                bf = rt * raw_xyzd65[6] + gt*raw_xyzd65[7] + bt*raw_xyzd65[8];
 
                 // apply the computed forward matrix
-                rf = rt * forward[0] + gt*forward[1] + bt*forward[2];
-                gf = rt * forward[3] + gt*forward[4] + bt*forward[5];
-                bf = rt * forward[6] + gt*forward[7] + bt*forward[8];
+//                rf = rt * forward[0] + gt*forward[1] + bt*forward[2];
+//                gf = rt * forward[3] + gt*forward[4] + bt*forward[5];
+//                bf = rt * forward[6] + gt*forward[7] + bt*forward[8];
 
-                rt = rf;
-                gt = gf;
-                bt = bf;
+//                rt = rf;
+//                gt = gf;
+//                bt = bf;
 
                 // apply xyzd65 -> sRGB conversion matrix
                 rf = rt * xyz65_srgb[0] + gt*xyz65_srgb[1] + bt*xyz65_srgb[2];
