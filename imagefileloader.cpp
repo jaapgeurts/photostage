@@ -213,6 +213,12 @@ QImage ImageFileLoader::loadRaw()
         //qDebug() << "run standard demosiac";
         ColorFilterArray cfa = raw->cfa;
         uint32_t cfa_layout = cfa.getDcrawFilter();
+        uint16_t horz, vert;
+        if (cfa_layout == 0x94949494)
+            horz = vert = 0;
+        else if (cfa_layout == 0x49494949) {
+            horz = 0; vert = 1;
+        }
 
         qDebug() << "dcraw filter:" << QString("%1").arg(cfa_layout,0,16);
 
@@ -287,10 +293,10 @@ QImage ImageFileLoader::loadRaw()
         compute_inverse(wb_matrix,wb_inv);
 
         float forward[9] = { // RGB -> XYZ
-             0.412453, 0.357580, 0.180423 ,
-             0.212671, 0.715160, 0.072169 ,
-             0.019334, 0.119193, 0.950227  };
-//        mmultm(raw_xyzd65,wb_inv,forward);
+                             0.412453, 0.357580, 0.180423 ,
+                             0.212671, 0.715160, 0.072169 ,
+                             0.019334, 0.119193, 0.950227  };
+        //        mmultm(raw_xyzd65,wb_inv,forward);
         // => this forward matrix is working, but brings the colors to D65 not to custom WB
         //dump_matrix("forward",forward);
 
@@ -323,17 +329,17 @@ QImage ImageFileLoader::loadRaw()
 
                 // bilinear interpolation
 
-                if ((x&1) == 0 && (y&1)==0) //red
+                if ((x&1) == horz && (y&1) == vert) //red
                 {
-                    //                    assert(cfa.getColorAt(x,y) == CFA_RED);
+                    assert(cfa.getColorAt(x,y) == CFA_RED);
                     r = row[x];
                     g = (row[x-1] + row[x+1] + row[x-pitch_in_bytes] + row[x+pitch_in_bytes])/4;
                     b = (row[x-1-pitch_in_bytes] + row[x+1-pitch_in_bytes] + row[x-1+pitch_in_bytes] + row[x+1+pitch_in_bytes])/4;
 
                 }
-                else if (x&1 && y&1) //blue
+                else if ((x&1)==((~horz)&1) && (y&1)==((~vert)&1)) //blue
                 {
-                    //                    assert(cfa.getColorAt(x,y) == CFA_BLUE);
+                    assert(cfa.getColorAt(x,y) == CFA_BLUE);
 
                     r = (row[x-1-pitch_in_bytes] + row[x+1-pitch_in_bytes] + row[x-1+pitch_in_bytes] + row[x+1+pitch_in_bytes])/4;
                     g = (row[x-1] + row[x+1] + row[x-pitch_in_bytes] + row[x+pitch_in_bytes])/4;
@@ -341,18 +347,20 @@ QImage ImageFileLoader::loadRaw()
                 }
                 else //green
                 {
-                    //                    assert(cfa.getColorAt(x,y) == CFA_GREEN);
+                    if (cfa.getColorAt(x,y) != CFA_GREEN)
+                         qDebug() << "Color:"<<cfa.getColorAt(x,y);
+                    assert(cfa.getColorAt(x,y) == CFA_GREEN);
 
                     g = row[x];
 
-                    if ((y&1)==0)
+                    if ((y&1)==vert) // red horizontal, blue vert
                     {
                         r = (row[x-1]+row[x+1])/2;
-                        //                        assert(cfa.getColorAt(x-1,y) == CFA_RED);
-                        //                        assert(cfa.getColorAt(x+1,y) == CFA_RED);
+                        assert(cfa.getColorAt(x-1,y) == CFA_RED);
+                        assert(cfa.getColorAt(x+1,y) == CFA_RED);
                         b = (row[x-pitch_in_bytes] + row[x+pitch_in_bytes])/2;
                     }
-                    else
+                    else // blue horizontal, red vert
                     {
                         r = (row[x-pitch_in_bytes] + row[x+pitch_in_bytes])/2;
                         //                        if (cfa.getColorAt(x-1,y) != CFA_BLUE)
@@ -360,8 +368,8 @@ QImage ImageFileLoader::loadRaw()
                         //                            qDebug() << "Color:"<<cfa.getColorAt(x-1,y);
                         //                            qDebug() << "x,y" << x-1 <<","<<y;
                         //                        }
-                        //                        assert(cfa.getColorAt(x-1,y) == CFA_BLUE);
-                        //                        assert(cfa.getColorAt(x+1,y) == CFA_BLUE);
+                        assert(cfa.getColorAt(x-1,y) == CFA_BLUE);
+                        assert(cfa.getColorAt(x+1,y) == CFA_BLUE);
                         b = (row[x-1]+row[x+1])/2;
                     }
                 }
