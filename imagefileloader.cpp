@@ -1,5 +1,7 @@
 #include <QDebug>
 #include <QThread>
+
+#include <lcms2.h>
 #include "constants.h"
 #include "imagefileloader.h"
 #include "import/exivfacade.h"
@@ -164,10 +166,10 @@ void ImageFileLoader::normalize(float *M)
     for (int i=0;i<3;i++)
     {
         sum = 0;
-    for (int j=0;j<3;j++)
-      sum += M[i*3+j];
-    for (int j=0;j<3;j++)
-        M[i*3+j] /= sum;
+        for (int j=0;j<3;j++)
+            sum += M[i*3+j];
+        for (int j=0;j<3;j++)
+            M[i*3+j] /= sum;
     }
 }
 
@@ -269,47 +271,60 @@ QImage ImageFileLoader::loadRaw()
         float canon5DMarkII[9] = { 4716,603,-830,-7798,15474,2480,-1496,1937,6651 };
         float eos1100d[9] = { 6444,-904,-893,-4563,12308,2535,-903,2016,6728 };
 
-        // use default sRGB conversion matrix
+        // use default sRGB -> xyz65 conversion matrix
+        //        float xyz65_srgb[9] = {
+        //            0.412453, 0.357580, 0.180423 ,
+        //            0.212671, 0.715160, 0.072169 ,
+        //            0.019334, 0.119193, 0.950227  };
+
         float xyz65_srgb[9] = {
-             0.412453, 0.357580, 0.180423 ,
-             0.212671, 0.715160, 0.072169 ,
-             0.019334, 0.119193, 0.950227  };
+            3.2404542, -1.5371385, -0.4985314,
+            -0.9692660,  1.8760108,  0.0415560,
+            0.0556434, -0.2040259,  1.0572252
+        };
 
         float raw_xyzd65[9];
         if (ex_info.model == "EOS 350D DIGITAL") {
             //            qDebug() << "inverse for 350d";
             for (int i=0;i<9;i++)
                 canon350d[i] /= 10000;
-            mmultm(canon350d,xyz65_srgb,raw_xyzd65);
-//            compute_inverse(canon350d,raw_xyzd65);
+            // mmultm(canon350d,xyz65_srgb,raw_xyzd65);
+            normalize(canon350d);
+            compute_inverse(canon350d,raw_xyzd65);
         }
         else if (ex_info.model == "PowerShot S30"){
             //            qDebug() << "inverse for S30";
             for (int i=0;i<9;i++)
                 powershots30[i] /= 10000;
-            mmultm(powershots30,xyz65_srgb,raw_xyzd65);
-//            compute_inverse(powershots30,raw_xyzd65);
+            //  mmultm(powershots30,xyz65_srgb,raw_xyzd65);
+            normalize(powershots30);
+            compute_inverse(powershots30,raw_xyzd65);
         }
         else if (ex_info.model == "EOS 5D Mark II") {
             //            qDebug() << "inverse for 5D Mark II";
             for (int i=0;i<9;i++)
                 canon5DMarkII[i] /= 10000;
-            mmultm(canon5DMarkII,xyz65_srgb,raw_xyzd65);
-//            compute_inverse(canon5DMarkII,raw_xyzd65);
+            // mmultm(canon5DMarkII,xyz65_srgb,raw_xyzd65);
+            normalize(canon5DMarkII);
+            compute_inverse(canon5DMarkII,raw_xyzd65);
         } else if (ex_info.model == "EOS REBEL T3") {
             for (int i=0;i<9;i++)
                 eos1100d[i] /= 10000;
-            mmultm(eos1100d,xyz65_srgb,raw_xyzd65);
+            //mmultm(eos1100d,xyz65_srgb,raw_xyzd65);
+            normalize(eos1100d);
+            compute_inverse(eos1100d,raw_xyzd65);
         } else
         {
             for (int i=0;i<9;i++)
                 canon5DMarkII[i] /= 10000;
-            mmultm(canon5DMarkII,xyz65_srgb,raw_xyzd65);
+            //  mmultm(canon5DMarkII,xyz65_srgb,raw_xyzd65);
+            normalize(canon5DMarkII);
+            compute_inverse(canon5DMarkII,raw_xyzd65);
         }
         //dump_matrix("raw_xyzd65",raw_xyzd65);
 
-        normalize(raw_xyzd65);
-        compute_inverse(raw_xyzd65,xyz65_srgb);
+        //normalize(raw_xyzd65);
+        //compute_inverse(raw_xyzd65,xyz65_srgb);
 
         float rm=0,gm=0,bm=0;
 
@@ -347,7 +362,7 @@ QImage ImageFileLoader::loadRaw()
                 else //green
                 {
                     if (cfa.getColorAt(x,y) != CFA_GREEN)
-                         qDebug() << "Color:"<<cfa.getColorAt(x,y);
+                        qDebug() << "Color:"<<cfa.getColorAt(x,y);
                     assert(cfa.getColorAt(x,y) == CFA_GREEN);
 
                     g = row[x];
@@ -396,23 +411,25 @@ QImage ImageFileLoader::loadRaw()
 
 
                 // apply raw -> xyzd65
-                //                rf = rt * raw_xyzd65[0] + gt*raw_xyzd65[1] + bt*raw_xyzd65[2];
-                //                gf = rt * raw_xyzd65[3] + gt*raw_xyzd65[4] + bt*raw_xyzd65[5];
-                //                bf = rt * raw_xyzd65[6] + gt*raw_xyzd65[7] + bt*raw_xyzd65[8];
+                rf = rt * raw_xyzd65[0] + gt*raw_xyzd65[1] + bt*raw_xyzd65[2];
+                gf = rt * raw_xyzd65[3] + gt*raw_xyzd65[4] + bt*raw_xyzd65[5];
+                bf = rt * raw_xyzd65[6] + gt*raw_xyzd65[7] + bt*raw_xyzd65[8];
+
+                // data is now in xyzd65
 
                 // apply the computed forward matrix
-//                rf = rt * forward[0] + gt*forward[1] + bt*forward[2];
-//                gf = rt * forward[3] + gt*forward[4] + bt*forward[5];
-//                bf = rt * forward[6] + gt*forward[7] + bt*forward[8];
+                //                rf = rt * forward[0] + gt*forward[1] + bt*forward[2];
+                //                gf = rt * forward[3] + gt*forward[4] + bt*forward[5];
+                //                bf = rt * forward[6] + gt*forward[7] + bt*forward[8];
 
-//                rt = rf;
-//                gt = gf;
-//                bt = bf;
+                //                rt = rf;
+                //                gt = gf;
+                //                bt = bf;
 
-                // apply xyzd65 -> sRGB conversion matrix
-                rf = rt * xyz65_srgb[0] + gt*xyz65_srgb[1] + bt*xyz65_srgb[2];
-                gf = rt * xyz65_srgb[3] + gt*xyz65_srgb[4] + bt*xyz65_srgb[5];
-                bf = rt * xyz65_srgb[6] + gt*xyz65_srgb[7] + bt*xyz65_srgb[8];
+                //                // apply xyzd65 -> sRGB conversion matrix
+                //                rf = rt * xyz65_srgb[0] + gt*xyz65_srgb[1] + bt*xyz65_srgb[2];
+                //                gf = rt * xyz65_srgb[3] + gt*xyz65_srgb[4] + bt*xyz65_srgb[5];
+                //                bf = rt * xyz65_srgb[6] + gt*xyz65_srgb[7] + bt*xyz65_srgb[8];
 #endif
                 if (rf > rm) rm =rf;
                 if (gf > gm) gm =gf;
@@ -425,6 +442,10 @@ QImage ImageFileLoader::loadRaw()
             }
         }
 
+        //float *out = new float[width*height*4];
+        // convert from xyz65 -> srgb using lcms2
+        convertXyz65sRGB(work,rawimage,width*height);
+        delete work;
 
         float mx = 1.0/max(rm,max(gm,bm));
         //        qDebug() << "max r,g,b" << rm <<","<<gm<<","<<bm;
@@ -436,16 +457,16 @@ QImage ImageFileLoader::loadRaw()
             {
                 int pix = (y*width+x)*4;
                 // squeeze into 255 levels (8bit)
-                uint8_t r = work[pix]*mx*255;
-                uint8_t g = work[pix+1]*mx*255;
-                uint8_t b = work[pix+2]*mx*255;
+              /*  uint8_t r = out[pix]*mx*255;
+                uint8_t g = out[pix+1]*mx*255;
+                uint8_t b = out[pix+2]*mx*255;
 
                 rawimage[pix+2] = r;
                 rawimage[pix+1] = g;
-                rawimage[pix] = b;
+                rawimage[pix] = b;*/
 
 
-                // gamma correction
+        /*        // gamma correction
                 float gar = 2.2;//2.22;
                 float gag = 2.2;//1.8;
                 float gab = 2.2;//2.22;
@@ -454,8 +475,8 @@ QImage ImageFileLoader::loadRaw()
                 rawimage[pix+2] = (uint8_t)(pow(rawimage[pix+2]/255.0,1.0/gar)*255); //red
 
                 // stretch contrast and brightness
-                float ct = 1.8;
-                float br = -30;
+        */        float ct = 1.7;
+                float br = -15;
                 uint8_t* bp = &rawimage[pix];
                 uint8_t* gp = &rawimage[pix+1];
                 uint8_t* rp = &rawimage[pix+2];
@@ -466,7 +487,6 @@ QImage ImageFileLoader::loadRaw()
                 rawimage[pix+3] = 0xff;//xff;
             }
         }
-
         qDebug()  << "tranfering data to image";
         image = QImage(rawimage,width,height,QImage::Format_RGB32);
         // apply post processing
@@ -477,6 +497,29 @@ QImage ImageFileLoader::loadRaw()
     delete decoder;
 
     return image;
+}
+
+void ImageFileLoader::convertXyz65sRGB(float *src, uint8_t *dst, size_t size)
+{
+    cmsHPROFILE hInProfile, hOutProfile;
+    cmsHTRANSFORM hTransform;
+
+    hInProfile = cmsOpenProfileFromFile("/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/D65_XYZ.icc","r");
+    hOutProfile = cmsOpenProfileFromFile("/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/sRGB.icc","r");
+//    hInProfile = cmsCreateXYZProfile();
+//    hOutProfile = cmsCreate_sRGBProfile();
+
+#define TYPE_XYZN_FLT          (FLOAT_SH(1)|COLORSPACE_SH(PT_XYZ)|EXTRA_SH(1)|CHANNELS_SH(3)|BYTES_SH(4))
+
+    hTransform = cmsCreateTransform(hInProfile,TYPE_RGBA_FLT,hOutProfile,TYPE_BGRA_8,INTENT_PERCEPTUAL,0);
+   // hTransform = cmsCreateTransform(hInProfile,TYPE_XYZN_FLT,hOutProfile,TYPE_BGRA_8,INTENT_PERCEPTUAL,0);
+
+    cmsCloseProfile(hInProfile);
+    cmsCloseProfile(hOutProfile);
+
+    cmsDoTransform(hTransform,src,dst,size);
+
+    cmsDeleteTransform(hTransform);
 }
 
 

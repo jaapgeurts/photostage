@@ -45,6 +45,7 @@ private:
     void mmultm(float *A, float *B, float *out);
     void vmultm(float *V, float *M, float *out);
     void normalize(float *M);
+    void convertXyz65sRGB(float *src, uint8_t *dst, size_t size);
 };
 
 class Metadata
