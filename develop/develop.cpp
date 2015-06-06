@@ -6,6 +6,22 @@ Develop::Develop(QWidget *parent) :
     ui(new Ui::Develop)
 {
     ui->setupUi(this);
+
+    // add panels for development.
+
+    // Histogram
+    mHistogramModule = new DevelopHistogramModule(ui->DevelopPanel);
+    ui->DevelopPanel->addPanel("Histogram",mHistogramModule);
+
+    // Raw
+    mRawModule = new RawModule(ui->DevelopPanel);
+    ui->DevelopPanel->addPanel("RAW",mRawModule);
+
+    // Normal
+    mBasicModule = new BasicModule(ui->DevelopPanel);
+    ui->DevelopPanel->addPanel("Basic",mBasicModule);
+
+
 }
 
 Develop::~Develop()

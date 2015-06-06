@@ -59,6 +59,9 @@
         <verstretch>1</verstretch>
        </sizepolicy>
       </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
       <widget class="TileView" name="mClvPhotos"/>
       <widget class="QScrollArea" name="scrollArea_3">
        <property name="frameShape">

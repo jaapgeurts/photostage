@@ -3,9 +3,9 @@
 
 #include <lcms2.h>
 
-#include "histogrammodule.h"
+#include "libraryhistogrammodule.h"
 
-HistogramModule::HistogramModule(QWidget *parent) : LibraryModule(parent)
+LibraryHistogramModule::LibraryHistogramModule(QWidget *parent) : LibraryModule(parent)
 {
     mHistogram = new Histogram(this);
     setLayout(new QVBoxLayout(this));
@@ -13,7 +13,7 @@ HistogramModule::HistogramModule(QWidget *parent) : LibraryModule(parent)
     layout()->addWidget(mHistogram);
 }
 
-void HistogramModule::setPhotos(const QList<Photo *> &list)
+void LibraryHistogramModule::setPhotos(const QList<Photo *> &list)
 {
     LibraryModule::setPhotos(list);
     if (list.size() == 1)
@@ -25,7 +25,7 @@ void HistogramModule::setPhotos(const QList<Photo *> &list)
     }
 }
 
-PhotoData HistogramModule::loadImage(const QImage& inImage)
+PhotoData LibraryHistogramModule::loadImage(const QImage& inImage)
 {
     cmsHPROFILE hInProfile, hOutProfile;
     cmsHTRANSFORM hTransform;

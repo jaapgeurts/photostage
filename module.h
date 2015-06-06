@@ -13,6 +13,7 @@ public:
     virtual ~Module() {}
 
     virtual QRect lightGap() = 0;
+
 };
 
 #endif // MODULE_H

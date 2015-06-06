@@ -9,6 +9,7 @@
 #define max(x,y) ((x)>(y)?(x):(y))
 #define min(x,y) ((x)<(y)?(x):(y))
 #define clip(v,x,y) (max(x,min(v,y)))
+#define SRC(x,y) (src[x]*src[y])
 
 CameraMetaData* Metadata::mMetaData = NULL;
 CameraMetaData* Metadata::metaData()
@@ -72,7 +73,6 @@ bool ImageFileLoader::compute_inverse(const float src[9], float dst[9])
 {
     bool result = false;
 
-#define SRC(x,y) (src[x]*src[y])
     memset(dst,0,9*sizeof(float));
 
     // See http://en.wikipedia.org/wiki/Invertible_matrix for algorithm
@@ -232,7 +232,7 @@ QImage ImageFileLoader::loadRaw()
         uint16_t vert,horz;
         if (cfa_layout == 0x94949494)
             vert = horz = 0;
-        else if (cfa_layout = 0x49494949) {
+        else if (cfa_layout == 0x49494949) {
             horz = 0; vert = 1;
         }
 

@@ -2,6 +2,10 @@
 #define DEVELOP_H
 
 #include "module.h"
+#include "modules/develophistogrammodule.h"
+#include "modules/rawmodule.h"
+#include "modules/basicmodule.h"
+
 
 namespace Ui {
 class Develop;
@@ -19,6 +23,10 @@ public:
 
 private:
     Ui::Develop *ui;
+    DevelopHistogramModule *mHistogramModule;
+    RawModule *mRawModule;
+    BasicModule* mBasicModule;
+
 };
 
 #endif // DEVELOP_H

@@ -58,9 +58,13 @@ SOURCES += main.cpp\
     library/modules/shortcutmodule.cpp \
     widgets/histogram.cpp \
     library/modules/taggingmodule.cpp \
-    library/modules/histogrammodule.cpp \
     photodata.cpp \
-    widgets/loupeview.cpp
+    widgets/loupeview.cpp \
+    develop/modules/rawmodule.cpp \
+    library/modules/libraryhistogrammodule.cpp \
+    develop/modules/develophistogrammodule.cpp \
+    develop/modules/developmodule.cpp \
+    develop/modules/basicmodule.cpp
     #processing/amaze_demosaic_RT.c
 
 HEADERS  += mainwindow.h \
@@ -105,9 +109,13 @@ HEADERS  += mainwindow.h \
     library/modules/shortcutmodule.h \
     widgets/histogram.h \
     library/modules/taggingmodule.h \
-    library/modules/histogrammodule.h \
     photodata.h \
-    widgets/loupeview.h
+    widgets/loupeview.h \
+    develop/modules/rawmodule.h \
+    library/modules/libraryhistogrammodule.h \
+    develop/modules/develophistogrammodule.h \
+    develop/modules/developmodule.h \
+    develop/modules/basicmodule.h
 
 
 FORMS    += mainwindow.ui \
@@ -118,7 +126,9 @@ FORMS    += mainwindow.ui \
     library/library.ui \
     develop/develop.ui \
     map/map.ui \
-    widgets/backgroundtaskprogress.ui
+    widgets/backgroundtaskprogress.ui \
+    develop/modules/rawmodule.ui \
+    develop/modules/BasicModule.ui
 
 DISTFILES += \
     Info.plist

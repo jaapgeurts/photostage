@@ -1,5 +1,5 @@
-#ifndef HISTOGRAMMODULE_H
-#define HISTOGRAMMODULE_H
+#ifndef LIBRARYHISTOGRAMMODULE_H
+#define LIBRARYHISTOGRAMMODULE_H
 
 #include <QObject>
 
@@ -7,10 +7,10 @@
 #include "widgets/histogram.h"
 
 
-class HistogramModule : public LibraryModule
+class LibraryHistogramModule : public LibraryModule
 {
 public:
-    HistogramModule(QWidget * parent);
+    LibraryHistogramModule(QWidget * parent);
 
     void setPhotos(const QList<Photo *> &list);
 
@@ -20,4 +20,4 @@ private:
     PhotoData loadImage(const QImage &inImage);
 };
 
-#endif // HISTOGRAMMODULE_H
+#endif // LIBRARYHISTOGRAMMODULE_H

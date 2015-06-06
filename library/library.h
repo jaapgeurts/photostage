@@ -10,7 +10,7 @@
 #include "modules/taggingmodule.h"
 #include "modules/collectionmodule.h"
 #include "modules/shortcutmodule.h"
-#include "modules/histogrammodule.h"
+#include "modules/libraryhistogrammodule.h"
 
 namespace Ui {
 class Library;
@@ -55,7 +55,7 @@ private:
         PhotoWorkUnit * mPhotoWorkUnit;
         SqlPathModel *mPathModel;
         TaggingModule *mKeywording;
-        HistogramModule* mHistogramModule;
+        LibraryHistogramModule* mHistogramModule;
 
 };
 

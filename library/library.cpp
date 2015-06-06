@@ -77,7 +77,7 @@ Library::Library(PhotoModel * const model, QWidget *parent) :
 
     // **** MODULES RIGHT
 
-    mHistogramModule = new HistogramModule(ui->ModulePanel_2);
+    mHistogramModule = new LibraryHistogramModule(ui->ModulePanel_2);
     ui->ModulePanel_2->addPanel("Histogram",mHistogramModule);
 
     // Keywording (editing keywords module)

@@ -276,12 +276,12 @@ void MainWindow::onModelReset()
     updateInformationBar();
 }
 
-void MainWindow::onModelRowsInserted(const QModelIndex &parent, int start, int end)
+void MainWindow::onModelRowsInserted(const QModelIndex &/*parent*/, int /*start*/, int /*end*/)
 {
     updateInformationBar();
 }
 
-void MainWindow::onModelRowsRemoved(const QModelIndex &parent, int start, int end)
+void MainWindow::onModelRowsRemoved(const QModelIndex &/*parent*/, int /*start*/, int /*end*/)
 {
     updateInformationBar();
 }
