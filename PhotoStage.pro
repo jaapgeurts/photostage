@@ -64,7 +64,8 @@ SOURCES += main.cpp\
     library/modules/libraryhistogrammodule.cpp \
     develop/modules/develophistogrammodule.cpp \
     develop/modules/developmodule.cpp \
-    develop/modules/basicmodule.cpp
+    develop/modules/basicmodule.cpp \
+    filmstriptile.cpp
     #processing/amaze_demosaic_RT.c
 
 HEADERS  += mainwindow.h \
@@ -115,7 +116,8 @@ HEADERS  += mainwindow.h \
     library/modules/libraryhistogrammodule.h \
     develop/modules/develophistogrammodule.h \
     develop/modules/developmodule.h \
-    develop/modules/basicmodule.h
+    develop/modules/basicmodule.h \
+    filmstriptile.h
 
 
 FORMS    += mainwindow.ui \

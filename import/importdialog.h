@@ -31,7 +31,7 @@ private slots:
 
     void onImportModeMove();
     void onImportModeAdd();
-    void onFilesSelected();
+    void onFilesSelected(const QItemSelection &selected, const QItemSelection &deselected);
 
 private:
     Ui::ImportDialog *ui;
@@ -41,6 +41,7 @@ private:
     ImageFileSystemModel *mFilesModel;
     TileView * mCfvPhotos;
     ImportOptions::ImportMode mImportMode;
+    QItemSelectionModel *mFilesSelectionModel;
 
     void expandTreeRec(const QModelIndex &index);
 

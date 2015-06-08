@@ -8,6 +8,7 @@
 #include <QVariant>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QItemSelectionModel>
 
 #include "abstracttile.h"
 
@@ -23,6 +24,8 @@ public:
     ~TileView();
 
     void setModel(QAbstractItemModel* model);
+    void setSelectionModel(QItemSelectionModel* selectionModel);
+    QItemSelectionModel *selectionModel() const;
 
     void setRootIndex(const QModelIndex& index);
 
@@ -35,11 +38,8 @@ public:
     void setMaximumCellWidth(int maxWidth);
     void setCellHeightRatio(float ratio);
 
-    void computeCellSize();
-
     void setCellMargins(int left, int top, int right, int bottom);
     void setCellMargins(const QMargins& margins);
-
 
     QSize sizeHint() const;
     QSize minimumSizeHint() const;
@@ -53,19 +53,31 @@ public:
     bool pointInCheckBox(const QPoint & coords) const;
 
     const QList<QModelIndex>& checkedItems() const;
-    const QList<QModelIndex>& selection() const;
+//    const QList<QModelIndex>& selection() const;
+
+    void setOrientation(Qt::Orientation orientation);
+    Qt::Orientation orientation() const;
+
+    void setMaxRows(int maxRows);
+    int maxRows() const;
+    void setMaxColumns(int maxColumns);
+    int maxColumns() const;
+
+    void setMinimumCellHeight(int minHeight);
+
+    // TODO: move these to a different place
+    void selectAll();
+    void clearSelection();
+
 
 signals:
 
-    void selectionChanged();
-    void doubleClickOnTile(const QModelIndex& index);
+    void doubleClickTile(const QModelIndex& index);
 
 public slots:
     void newRowsAvailable(const QModelIndex & parent, int first, int last);
     void updateCellContents(const QModelIndex & topleft, const QModelIndex& bottomright,const QVector<int> & roles);
-    void selectAll();
-    void clearSelection();
-
+    void onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
 
 private slots:
 
@@ -83,20 +95,24 @@ protected:
     void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
     void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
 
-
-
-    TileInfo createTileInfo(int index);
-
 private:
 
     // Tile Sizes
     int mMinimumCellWidth;
+    int mMinimumCellHeight;
     int mMaximumCellWidth;
     int mComputedCellWidth;
     int mComputedCellHeight;
     float mCellHeightRatio;
-    // number of columns in a row
-    int mColumns;
+
+    // other properties
+    Qt::Orientation mOrientation;
+    int mMaxColumns;
+    int mMaxRows;
+
+    // number of columns in a row or rows in a column depending on orientation
+    int mCurrentColumnCount;
+    int mCurrentRowCount;
 
     int mHighlightedTile;
 
@@ -107,8 +123,9 @@ private:
     QScrollBar *mHScrollBar;
 
     // selections
-    QList<QModelIndex> *mSelection;
-    QModelIndex mLastSelection;
+//    QList<QModelIndex> *mSelection;
+    QItemSelectionModel *mSelectionModel;
+//    QModelIndex mLastSelection;
 
     // checkbox
     bool mIsCheckBoxMode;
@@ -116,9 +133,11 @@ private:
     QList<QModelIndex> *mCheckedList;
 
     // for scrolling
-    int mViewportXPosition; // contains the top x position of the scroll area
+    int mViewportPosition; // contains the top x position of the scroll area
 
     void computeScrollBarValues(int count);
+    void computeCellSize();
+    TileInfo createTileInfo(int index);
 
 };
 

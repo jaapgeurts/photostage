@@ -26,6 +26,8 @@ public:
 
     QRect lightGap();
 
+    void setSelectionModel(QItemSelectionModel* selectionModel);
+
 signals:
 
     void photoSelectionChanged(const QList<Photo*> & list);
@@ -33,7 +35,7 @@ signals:
 
 public slots:
 
-    void onPhotoSelectionChanged();
+    void onPhotoSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
     void onTileDoubleClicked(const QModelIndex& index);
 
     // For clicks on the tile

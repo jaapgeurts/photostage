@@ -11,7 +11,7 @@
 // widgets
 #include "widgets/fixedtreeview.h"
 
-#define SETTINGS_SPLITTER_MAIN_SIZES "mainwindow/splitter_main"
+#define SETTINGS_SPLITTER_LIBRARY_SIZES "librarymodule/splitter_main"
 
 Library::Library(PhotoModel * const model, QWidget *parent) :
     Module(parent),
@@ -23,9 +23,9 @@ Library::Library(PhotoModel * const model, QWidget *parent) :
 
     QSettings settings;
     QList<int> l;
-    if (settings.contains(SETTINGS_SPLITTER_MAIN_SIZES))
+    if (settings.contains(SETTINGS_SPLITTER_LIBRARY_SIZES))
     {
-        foreach(QVariant v, settings.value(SETTINGS_SPLITTER_MAIN_SIZES).toList())
+        foreach(QVariant v, settings.value(SETTINGS_SPLITTER_LIBRARY_SIZES).toList())
         {
             l << v.toInt();
         }
@@ -47,7 +47,7 @@ Library::Library(PhotoModel * const model, QWidget *parent) :
 
     ui->mClvPhotos->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->mClvPhotos,&TileView::customContextMenuRequested,this,&Library::customContextMenu);
-    connect(ui->mClvPhotos,&TileView::doubleClickOnTile,this,&Library::onTileDoubleClicked);
+    connect(ui->mClvPhotos,&TileView::doubleClickTile,this,&Library::onTileDoubleClicked);
 
     // These models are auto deleted by the QObject hierarchy
     ui->mClvPhotos->setModel(mPhotoModel);
@@ -82,7 +82,6 @@ Library::Library(PhotoModel * const model, QWidget *parent) :
 
     // Keywording (editing keywords module)
     mKeywording = new TaggingModule(ui->ModulePanel_2);
-    connect(ui->mClvPhotos,&TileView::selectionChanged,this,&Library::onPhotoSelectionChanged);
     ui->ModulePanel_2->addPanel("Keywords",mKeywording);
 
     // **** MODULE
@@ -108,7 +107,7 @@ Library::~Library()
     {
         list << size;
     }
-    settings.setValue(SETTINGS_SPLITTER_MAIN_SIZES,list);
+    settings.setValue(SETTINGS_SPLITTER_LIBRARY_SIZES,list);
 
     delete ui;
 }
@@ -118,6 +117,13 @@ QRect Library::lightGap()
     QPoint pos = ui->mClvPhotos->mapToGlobal(QPoint(0,0));
     QRect gap = QRect(pos,ui->mClvPhotos->size());
     return gap;
+}
+
+void Library::setSelectionModel(QItemSelectionModel *selectionModel)
+{
+    ui->mClvPhotos->setSelectionModel(selectionModel);
+    connect(selectionModel,&QItemSelectionModel::selectionChanged,this,&Library::onPhotoSelectionChanged);
+
 }
 
 void Library::onFilesClicked(const QModelIndex &index)
@@ -170,15 +176,12 @@ void Library::ratingClicked(const QModelIndex &index, int rating)
 
 // Called when the selection in the photo tile view changes.
 // get the new selectionlist and pass it to all the modules.
-void Library::onPhotoSelectionChanged()
+void Library::onPhotoSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
 {
-    QList<QModelIndex> list = ui->mClvPhotos->selection();
-    QList<Photo*> photos;
-    QModelIndex index;
-    foreach(index, list)
-    {
+    QList<Photo *> photos;
+    foreach (QModelIndex index, selected.indexes())
         photos.append(mPhotoModel->data(index,TileView::PhotoRole).value<Photo*>());
-    }
+
     mKeywording->setPhotos(photos);
     mHistogramModule->setPhotos(photos);
     emit photoSelectionChanged(photos);

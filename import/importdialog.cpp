@@ -76,8 +76,9 @@ ImportDialog::ImportDialog(QWidget *parent) :
     mFilesModel->setNameFilters(filters);
     mFilesModel->setNameFilterDisables(false);
 
-
     mCfvPhotos->setModel(mFilesModel);
+//    mFilesSelectionModel = new QItemSelectionModel(mFilesModel,this);
+//    mCfvPhotos->setSelectionModel(mFilesSelectionModel);
 
     mImportMode = ImportOptions::ImportCopy;
 
@@ -85,7 +86,8 @@ ImportDialog::ImportDialog(QWidget *parent) :
     ui->btnImport->setEnabled(false);
     ui->btnImport->setToolTip("You must select images before you can import.");
 
-    connect(mCfvPhotos,&TileView::selectionChanged,this,&ImportDialog::onFilesSelected);
+    // TODO: change to selection model
+    connect(mCfvPhotos->selectionModel(),&QItemSelectionModel::selectionChanged,this,&ImportDialog::onFilesSelected);
 
 }
 
@@ -109,7 +111,7 @@ void ImportDialog::onSourceDirClicked(const QModelIndex& index)
     validateForm();
 }
 
-void ImportDialog::onFilesSelected()
+void ImportDialog::onFilesSelected(const QItemSelection & selected, const QItemSelection & deselected)
 {
     validateForm();
 }
@@ -154,7 +156,6 @@ ImportInfo ImportDialog::importInfo()
     ImportInfo importInfo = ImportInfo(list,destPath,mImportMode);
 
     return importInfo;
-
 }
 
 

@@ -15,7 +15,7 @@ Photo::Photo(const Photo &info)
 
 Photo::Photo(const QImage &image, const QString &filename, long long id)
 {
-    this->mPreview = image;
+    this->mLibraryPreview = image;
     this->mSrcImagePath = filename;
     this->id = id;
 }
@@ -41,12 +41,12 @@ Photo::~Photo()
 
 void Photo::setPreview(const QImage &image)
 {
-    mPreview = image;
+    mLibraryPreview = image;
 }
 
 const QImage &Photo::preview()
 {
-    return mPreview;
+    return mLibraryPreview;
 }
 
 void Photo::setSrcImagePath(const QString &path)
@@ -61,12 +61,12 @@ const QString &Photo::srcImagePath()
 
 void Photo::setPreviewCachePath(const QString &path)
 {
-    mPreviewCachePath = path;
+    mLibraryPreviewPath = path;
 }
 
 const QString &Photo::previewCachePath()
 {
-    return mPreviewCachePath;
+    return mLibraryPreviewPath;
 }
 
 

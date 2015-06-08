@@ -20,8 +20,8 @@ public:
     Photo(QSqlQuery & query);
     virtual ~Photo();
 
-    void setPreview(const QImage& image);
-    const QImage& preview();
+    void setLibraryPreview(const QImage& image);
+    const QImage& libraryPreview();
 
     void setSrcImagePath(const QString &path);
     const QString& srcImagePath();
@@ -49,9 +49,9 @@ private:
     ColorLabel mColorLabel;
     Flag mFlag;
     QString mSrcImagePath;
-    QString mPreviewCachePath;
+    QString mLibraryPreviewPath;
 
-    QImage mPreview;
+    QImage mLibraryPreview;
     QImage mRawImage;
 
 

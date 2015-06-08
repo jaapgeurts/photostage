@@ -23,6 +23,7 @@
 
 #include "backgroundtask.h"
 #include "import/importbackgroundtask.h"
+#include "filmstriptile.h"
 
 #define SETTINGS_WINDOW_LOCATION "mainwindow/location"
 #define SETTINGS_SPLITTER_FILMSTRIP_SIZES "mainwindow/splitter_filmstrip"
@@ -62,11 +63,23 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mPhotoModel,&PhotoModel::rowsInserted,this,&MainWindow::onModelRowsInserted);
     connect(mPhotoModel,&PhotoModel::rowsRemoved,this,&MainWindow::onModelRowsRemoved);
 
+    mPhotoSelection = new QItemSelectionModel(mPhotoModel,this);
+    connect(mPhotoSelection,&QItemSelectionModel::selectionChanged, this, &MainWindow::onSelectionChanged);
+
     // Create the Library Module
     mLibrary = new Library(mPhotoModel,this);
-    connect(mLibrary,&Library::photoSelectionChanged, this, &MainWindow::onSelectionChanged);
+    mLibrary->setSelectionModel(mPhotoSelection);
     connect(mLibrary,&Library::photoSourceChanged, mPhotoModel, &PhotoModel::onReloadPhotos);
     ui->stackedWidget->addWidget(mLibrary);
+
+    ui->filmStrip->setModel(mPhotoModel);
+    FilmstripTile* fsTile = new FilmstripTile(ui->filmStrip);
+    ui->filmStrip->setTileFlyweight(fsTile);
+    ui->filmStrip->setMinimumCellHeight(80);
+    ui->filmStrip->setMaxRows(1);
+    ui->filmStrip->setCheckBoxMode(false);
+    ui->filmStrip->setOrientation(Qt::Horizontal);
+    ui->filmStrip->setSelectionModel(mPhotoSelection);
 
     // Create the Develop Module
     mDevelop = new Develop(this);
@@ -100,9 +113,9 @@ MainWindow::~MainWindow()
     delete mDatabaseAccess;
 }
 
-void MainWindow::onSelectionChanged(const QList<Photo*> &list)
+void MainWindow::onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
 {
-    mCurrentSelection = list;
+//    mCurrentSelection = list;
     updateInformationBar();
 }
 
@@ -290,33 +303,47 @@ void MainWindow::updateInformationBar()
 {
     QString info;
     int count = mPhotoModel->rowCount(QModelIndex());
-    int selCount = mCurrentSelection.size();
+    int selCount = mPhotoSelection->selectedIndexes().size();
     ui->lblInformation->setText(QString::number(selCount)+"/"+QString::number(count));
 }
 
 void MainWindow::setRating(int rating)
 {
-    mPhotoWorkUnit->setRating(mCurrentSelection,rating);
+    QList<Photo *> list;
+    QModelIndexList indexes = mPhotoSelection->selectedIndexes();
+    foreach (QModelIndex index, indexes)
+        list.append(mPhotoModel->data(index,TileView::PhotoRole).value<Photo*>());
+    mPhotoWorkUnit->setRating(list,rating);
     QVector<int> roles;
     roles.append(TileView::PhotoRole);
-    mPhotoModel->refreshData(mCurrentSelection);
+    mPhotoModel->refreshData(list);
 }
 
 void MainWindow::setFlag(Photo::Flag flag)
 {
-    mPhotoWorkUnit->setFlag(mCurrentSelection,flag);
+    QList<Photo *> list;
+    QModelIndexList indexes = mPhotoSelection->selectedIndexes();
+    foreach (QModelIndex index, indexes)
+        list.append(mPhotoModel->data(index,TileView::PhotoRole).value<Photo*>());
+
+    mPhotoWorkUnit->setFlag(list,flag);
     QVector<int> roles;
     roles.append(TileView::PhotoRole);
-    mPhotoModel->refreshData(mCurrentSelection);
+    mPhotoModel->refreshData(list);
 
 }
 
 void MainWindow::setColorLabel(Photo::ColorLabel color)
 {
-    mPhotoWorkUnit->setColorLabel(mCurrentSelection,color);
+    QList<Photo *> list;
+    QModelIndexList indexes = mPhotoSelection->selectedIndexes();
+    foreach (QModelIndex index, indexes)
+        list.append(mPhotoModel->data(index,TileView::PhotoRole).value<Photo*>());
+
+    mPhotoWorkUnit->setColorLabel(list,color);
     QVector<int> roles;
     roles.append(TileView::PhotoRole);
-    mPhotoModel->refreshData(mCurrentSelection);
+    mPhotoModel->refreshData(list);
 }
 
 

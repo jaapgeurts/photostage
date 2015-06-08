@@ -27,7 +27,6 @@ public:
     ~MainWindow();
 
 private slots:
-    void onSelectionChanged(const QList<Photo *> &list);
 
     // Modules
     void onModeLibraryClicked();
@@ -67,6 +66,7 @@ private slots:
     // called in response to the import thread
     void importFinished(BackgroundTask * task);
 
+    void onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
     // model changes
     void onModelReset();
@@ -86,7 +86,9 @@ private:
     PhotoModel * mPhotoModel;
     PhotoWorkUnit * mPhotoWorkUnit;
 
-    QList<Photo*> mCurrentSelection;
+    QItemSelectionModel *mPhotoSelection;
+
+//    QList<Photo*> mCurrentSelection;
 
     void setRating(int rating);
     void setColorLabel(Photo::ColorLabel color);
