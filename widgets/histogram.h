@@ -2,6 +2,7 @@
 #define HISTOGRAM_H
 
 #include <QWidget>
+
 #include "photodata.h"
 
 #define BIN_SIZE (256)
@@ -12,7 +13,7 @@ class Histogram : public QWidget
 public:
     explicit Histogram(QWidget *parent = 0);
 
-    void setImageData(const PhotoData &image);
+    void setImageData(const QImage &image);
 
 protected:
     void paintEvent(QPaintEvent * event);

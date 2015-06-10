@@ -3,8 +3,7 @@
 #include <QFontDatabase>
 #include <QDebug>
 
-
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
 
@@ -13,9 +12,9 @@ int main(int argc, char *argv[])
 
     // Load extra fonts
     /*int id =*/ //QFontDatabase::addApplicationFont(":/fonts/font-awesome.ttf");
-     int id = QFontDatabase::addApplicationFont(":/fonts/foundation-icons-general.ttf");
+    int id = QFontDatabase::addApplicationFont(":/fonts/foundation-icons-general.ttf");
     QStringList l = QFontDatabase::applicationFontFamilies(id);
-    qDebug() << "Loaded fonts:" <<l;
+    qDebug() << "Loaded fonts:" << l;
 
     // Setup application details
     QCoreApplication::setOrganizationName("PhotoStage");
@@ -26,13 +25,14 @@ int main(int argc, char *argv[])
 #define STYLE_SHEET 1
 #ifdef STYLE_SHEET
     QFile f (":qdarkstyle/style.qss");
+
     if (!f.exists())
     {
         printf("Unable to set stylesheet. File qdarkstyle/style.qss not found.\n");
     }
     else
     {
-        f.open(QFile::ReadOnly|QFile::Text);
+        f.open(QFile::ReadOnly | QFile::Text);
         QTextStream ts(&f);
         a.setStyleSheet(ts.readAll());
     }

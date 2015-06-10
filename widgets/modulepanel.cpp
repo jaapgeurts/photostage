@@ -101,7 +101,7 @@ void ModulePanel::onHeaderClicked()
 
 }
 
-void ModulePanel::onMenuClicked(bool checked)
+void ModulePanel::onMenuClicked(bool /*checked*/)
 {
     QString title = sender()->property("title").toString();
     PanelInfo info = mPanels.value(title);

@@ -17,7 +17,7 @@ public:
 private:
     Histogram *mHistogram;
 
-    PhotoData loadImage(const QImage &inImage);
+//    PhotoData loadImage(const QImage &inImage);
 };
 
 #endif // LIBRARYHISTOGRAMMODULE_H

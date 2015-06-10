@@ -1,8 +1,5 @@
 #ifndef CONSTANTS
 #define CONSTANTS
-
-#define PREVIEW_IMG_WIDTH (256)
-#define PREVIEW_IMG_HEIGHT (256)
-
+#define PREVIEW_IMG_WIDTH  (1024)
+#define PREVIEW_IMG_HEIGHT (1024)
 #endif // CONSTANTS
-

@@ -75,9 +75,9 @@ signals:
     void doubleClickTile(const QModelIndex& index);
 
 public slots:
-    void newRowsAvailable(const QModelIndex & parent, int first, int last);
+    void newRowsAvailable(const QModelIndex & parent, int first, int);
     void updateCellContents(const QModelIndex & topleft, const QModelIndex& bottomright,const QVector<int> & roles);
-    void onSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected);
+    void onSelectionChanged(const QItemSelection &, const QItemSelection &);
 
 private slots:
 

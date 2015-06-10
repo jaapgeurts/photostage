@@ -20,7 +20,8 @@ Histogram::Histogram(QWidget *parent) : QWidget(parent)
 
 }
 
-void Histogram::setImageData(const PhotoData &image)
+//void Histogram::setImageData(const PhotoData &image)
+void Histogram::setImageData(const QImage& image)
 {
     // the default BIN_SIZE = 256
     //set all values to 0
@@ -32,24 +33,29 @@ void Histogram::setImageData(const PhotoData &image)
 
     // first do uniform distribution (linear transform)
 
-    double factor = (double)BIN_SIZE / (double)65535;
-    const uint16_t* pixels = image.constData();
-    int count = image.length() / NUM_CHANNELS;
-    for(int i = 0; i<count-3; i+=3)
+    double factor = 1.0;//(double)BIN_SIZE / (double)256;
+    //const uint8_t* pixels = image.constBits();
+//    int count = image.byteCount() / 4;//NUM_CHANNELS;
+    int count = image.bytesPerLine() / 4;
+    for (int j=0;j<image.height();j++)
     {
-        uint16_t red = pixels[i];
-        uint16_t green = pixels[i+1];
-        uint16_t blue = pixels[i+2];
+        const uint8_t* pixels = image.scanLine(j);
+        for(int i = 0; i<count-4; i+=4)
+        {
+            uint8_t red = pixels[i+2];
+            uint8_t green = pixels[i+1];
+            uint8_t blue = pixels[i];
 
-        mChannelRed[(int)((double)red*factor)]++;
-        mChannelGreen[(int)((double)green*factor)]++;
-        mChannelBlue[(int)((double)blue*factor)]++;
+            mChannelRed[(int)((double)red*factor)]++;
+            mChannelGreen[(int)((double)green*factor)]++;
+            mChannelBlue[(int)((double)blue*factor)]++;
 
-        // use green as the average luminance.
-        // use this value to scale the y axis of the histogram when painting
-        if (mMaxAll < mChannelGreen[(int)((double)green*factor)])
-            mMaxAll = mChannelGreen[(int)((double)green*factor)];
+            // use green as the average luminance.
+            // use this value to scale the y axis of the histogram when painting
+            if (mMaxAll < mChannelGreen[(int)((double)green*factor)])
+                mMaxAll = mChannelGreen[(int)((double)green*factor)];
 
+        }
     }
     qDebug() << "largest green value:"<<mMaxAll;
     update();

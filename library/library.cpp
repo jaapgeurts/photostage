@@ -140,7 +140,7 @@ void Library::customContextMenu(const QPoint &pos)
 {
     QModelIndex index = ui->mClvPhotos->posToModelIndex(pos);
     // check if there is a single selection or a list.
-    Photo* info = mPhotoModel->data(index,TileView::PhotoRole).value<Photo*>();
+//    Photo* info = mPhotoModel->data(index,TileView::PhotoRole).value<Photo*>();
 
     // TODO: FIXME: fix popup
     //    QMenu *m = ui->menuPhoto;
@@ -176,7 +176,7 @@ void Library::ratingClicked(const QModelIndex &index, int rating)
 
 // Called when the selection in the photo tile view changes.
 // get the new selectionlist and pass it to all the modules.
-void Library::onPhotoSelectionChanged(const QItemSelection & selected, const QItemSelection & deselected)
+void Library::onPhotoSelectionChanged(const QItemSelection & selected, const QItemSelection & /*deselected*/)
 {
     QList<Photo *> photos;
     foreach (QModelIndex index, selected.indexes())

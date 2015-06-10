@@ -6,7 +6,7 @@
 
 Preferences* Preferences::mPreferences = NULL;
 
-Preferences *Preferences::instance()
+Preferences* Preferences::instance()
 {
     if (mPreferences == NULL)
         mPreferences = new Preferences(NULL);
@@ -25,14 +25,12 @@ void Preferences::save()
     QSettings settings;
 
     settings.setValue(LIBRARY_INCLUDE_SUBFOLDERS,library_include_subfolders);
-
 }
 
-Preferences::Preferences(QObject *parent) : QObject(parent)
+Preferences::Preferences(QObject* parent) : QObject(parent)
 {
     // set defaults;
     library_include_subfolders = true;
 
     load();
 }
-

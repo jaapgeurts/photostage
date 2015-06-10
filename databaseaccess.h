@@ -1,24 +1,23 @@
 #ifndef DATABASEACCESS_H
 #define DATABASEACCESS_H
-
 #include <QtSql>
-
 class DatabaseAccess : public QObject
 {
     Q_OBJECT
-public:
-    explicit DatabaseAccess(QObject *parent = 0);
 
+    public:
 
-    const QSqlDatabase &getDb();
+        explicit DatabaseAccess(QObject* parent = 0);
+        const QSqlDatabase &getDb();
 
-signals:
+    signals:
 
-public slots:
+    public slots:
 
-private:
-    QSqlDatabase mDB;
-    void initDb();
+    private:
+
+        QSqlDatabase mDB;
+        void initDb();
 };
 
 #endif // DATABASEACCESS_H

@@ -12,7 +12,8 @@ TARGET = PhotoStage
 TEMPLATE =
 
 DEPENDPATH += .
-INCLUDEPATH += .
+INCLUDEPATH += . \
+               $$PWD/external/exiv2/include
 
 # Qt uses libstdc++
 CONFIG += c++11
@@ -65,7 +66,9 @@ SOURCES += main.cpp\
     develop/modules/develophistogrammodule.cpp \
     develop/modules/developmodule.cpp \
     develop/modules/basicmodule.cpp \
-    filmstriptile.cpp
+    filmstriptile.cpp \
+    previewcache.cpp \
+    engine/color.cpp
     #processing/amaze_demosaic_RT.c
 
 HEADERS  += mainwindow.h \
@@ -117,7 +120,9 @@ HEADERS  += mainwindow.h \
     develop/modules/develophistogrammodule.h \
     develop/modules/developmodule.h \
     develop/modules/basicmodule.h \
-    filmstriptile.h
+    filmstriptile.h \
+    previewcache.h \
+    engine/color.h
 
 
 FORMS    += mainwindow.ui \
@@ -151,8 +156,7 @@ macx {
                     -fms-extensions \
                     -Wignored-attributes
     ICON = resources/appicon.icns
-    INCLUDEPATH += /opt/local/include \
-                += $$PWD/external/exiv2/include
+    INCLUDEPATH += /opt/local/include
     OBJECTIVE_SOURCES +=
     LIBS += \
             -stdlib=libc++ \

@@ -10,16 +10,17 @@ LoupeView::LoupeView(QWidget *parent) : QWidget(parent)
 void LoupeView::setPhoto(Photo *photo)
 {
     mPhoto = photo;
-    setMinimumSize(mPhoto->rawImage().size());
+    setMinimumSize(mPhoto->libraryPreview().size());
 }
 
 void LoupeView::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
 
-    if (mPhoto != NULL && !mPhoto->rawImage().isNull())
+    // TODO: should convert to the monitor profile here.
+    if (mPhoto != NULL && !mPhoto->libraryPreviewsRGB().isNull())
     {
 
-        painter.drawImage(0,0,mPhoto->rawImage());
+        painter.drawImage(0,0,mPhoto->libraryPreviewsRGB());
     }
 }

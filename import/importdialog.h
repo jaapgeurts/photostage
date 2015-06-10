@@ -31,7 +31,7 @@ private slots:
 
     void onImportModeMove();
     void onImportModeAdd();
-    void onFilesSelected(const QItemSelection &selected, const QItemSelection &deselected);
+    void onFilesSelected(const QItemSelection &, const QItemSelection &);
 
 private:
     Ui::ImportDialog *ui;

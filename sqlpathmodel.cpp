@@ -1,13 +1,10 @@
 #include "sqlpathmodel.h"
 
-
-
-SqlPathModel::SqlPathModel(QObject *parent) : QAbstractItemModel(parent)
+SqlPathModel::SqlPathModel(QObject* parent) : QAbstractItemModel(parent)
 {
 
     // Construct the file tree
     createPathItems();
-
 }
 
 SqlPathModel::~SqlPathModel()
@@ -50,7 +47,7 @@ void SqlPathModel::createPathtemsRec(PathItem* root)
     query.exec();
 
     //int total = 0;
-    while(query.next())
+    while (query.next())
     {
         // conside using std::shared_ptr
         item = new PathItem(query.value(0).toLongLong(),query.value(1).toString(), query.value(1).toLongLong());
@@ -58,11 +55,11 @@ void SqlPathModel::createPathtemsRec(PathItem* root)
         item->parent = root;
         root->children.append(item);
         createPathtemsRec(item);
-        root->cumulative += item->count+item->cumulative;
+        root->cumulative += item->count + item->cumulative;
     }
 }
 
-void SqlPathModel::deletePathItems(PathItem *root)
+void SqlPathModel::deletePathItems(PathItem* root)
 {
     PathItem* item;
     foreach(item, root->children)
@@ -73,13 +70,13 @@ void SqlPathModel::deletePathItems(PathItem *root)
     delete root;
 }
 
-
 QModelIndex SqlPathModel::index(int row, int column, const QModelIndex &parent) const
 {
     if (!hasIndex(row,column,parent))
         return QModelIndex();
 
     PathItem* parentItem;
+
     if (!parent.isValid())
         parentItem = mRootItem;
     else
@@ -108,6 +105,7 @@ QModelIndex SqlPathModel::parent(const QModelIndex &index) const
 int SqlPathModel::rowCount(const QModelIndex &parent) const
 {
     PathItem* item;
+
     if (!parent.isValid())
         item = mRootItem;
     else
@@ -116,22 +114,24 @@ int SqlPathModel::rowCount(const QModelIndex &parent) const
     return item->children.size();
 }
 
-int SqlPathModel::columnCount(const QModelIndex &/*parent*/) const
+int SqlPathModel::columnCount(const QModelIndex & /*parent*/) const
 {
     return 1;
 }
 
 QVariant SqlPathModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid()) {
+    if (!index.isValid())
+    {
         qDebug() << "Requested item invalid";
         return QVariant();
     }
 
     PathItem* item = static_cast<PathItem*>(index.internalPointer());
 
-    if (role == Qt::DisplayRole) {
-        return QString("%1 (%2/%3)").arg(item->path , QString::number(item->count) , QString::number(item->cumulative));
+    if (role == Qt::DisplayRole)
+    {
+        return QString("%1 (%2/%3)").arg(item->path, QString::number(item->count), QString::number(item->cumulative));
     }
     else if (role == SqlPathModel::Path)
     {
@@ -145,11 +145,9 @@ QVariant SqlPathModel::data(const QModelIndex &index, int role) const
 //{
 //}
 
-
 QVariant SqlPathModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const
 {
     if (role == Qt::DisplayRole)
         return QString("Location");
     return QVariant();
 }
-

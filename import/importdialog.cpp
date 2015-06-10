@@ -111,7 +111,7 @@ void ImportDialog::onSourceDirClicked(const QModelIndex& index)
     validateForm();
 }
 
-void ImportDialog::onFilesSelected(const QItemSelection & selected, const QItemSelection & deselected)
+void ImportDialog::onFilesSelected(const QItemSelection & /*selected*/, const QItemSelection & /*deselected*/)
 {
     validateForm();
 }

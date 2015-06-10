@@ -2,12 +2,11 @@
 
 #include "sqlkeywordmodel.h"
 
-SqlKeywordModel::SqlKeywordModel(QObject *parent) : QAbstractItemModel(parent)
+SqlKeywordModel::SqlKeywordModel(QObject* parent) : QAbstractItemModel(parent)
 {
 
     // Construct the file tree
     createKeywordItems();
-
 }
 
 SqlKeywordModel::~SqlKeywordModel()
@@ -55,7 +54,7 @@ void SqlKeywordModel::createKeywordItemsRec(KeywordItem* root)
     query.bindValue(":parent_id",root->id);
     query.exec();
 
-    while(query.next())
+    while (query.next())
     {
         item = new KeywordItem(query.value(0).toLongLong(),query.value(1).toString(), query.value(1).toLongLong());
         item->parent = root;
@@ -64,10 +63,9 @@ void SqlKeywordModel::createKeywordItemsRec(KeywordItem* root)
     }
     // sort the children
     std::sort(root->children.begin(),root->children.end(),KComp);
-
 }
 
-void SqlKeywordModel::deleteKeywordItems(KeywordItem *root)
+void SqlKeywordModel::deleteKeywordItems(KeywordItem* root)
 {
     KeywordItem* item;
     foreach(item, root->children)
@@ -78,13 +76,13 @@ void SqlKeywordModel::deleteKeywordItems(KeywordItem *root)
     delete root;
 }
 
-
 QModelIndex SqlKeywordModel::index(int row, int column, const QModelIndex &parent) const
 {
     if (!hasIndex(row,column,parent))
         return QModelIndex();
 
     KeywordItem* parentItem;
+
     if (!parent.isValid())
         parentItem = mRootItem;
     else
@@ -113,6 +111,7 @@ QModelIndex SqlKeywordModel::parent(const QModelIndex &index) const
 int SqlKeywordModel::rowCount(const QModelIndex &parent) const
 {
     KeywordItem* item;
+
     if (!parent.isValid())
         item = mRootItem;
     else
@@ -121,14 +120,15 @@ int SqlKeywordModel::rowCount(const QModelIndex &parent) const
     return item->children.size();
 }
 
-int SqlKeywordModel::columnCount(const QModelIndex &/*parent*/) const
+int SqlKeywordModel::columnCount(const QModelIndex & /*parent*/) const
 {
     return 1;
 }
 
 QVariant SqlKeywordModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid()) {
+    if (!index.isValid())
+    {
         qDebug() << "Requested item invalid";
         return QVariant();
     }
@@ -145,11 +145,9 @@ QVariant SqlKeywordModel::data(const QModelIndex &index, int role) const
 //{
 //}
 
-
 QVariant SqlKeywordModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const
 {
     if (role == Qt::DisplayRole)
         return QString("Keywords");
     return QVariant();
 }
-

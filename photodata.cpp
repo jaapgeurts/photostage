@@ -1,13 +1,11 @@
-
 #include <QDebug>
 #include "photodata.h"
 
 PhotoData::PhotoData()
 {
     mData.clear();
-    qDebug()<<"Setting mData to NULL";
+    qDebug() << "Setting mData to NULL";
 }
-
 
 PhotoData::PhotoData(const int w, const int h) : PhotoData()
 {
@@ -25,12 +23,12 @@ PhotoData::~PhotoData()
 {
 }
 
-uint16_t *PhotoData::data()
+uint16_t* PhotoData::data()
 {
     return mData.data();
 }
 
-const uint16_t *PhotoData::constData() const
+const uint16_t* PhotoData::constData() const
 {
     return mData.data();
 }
@@ -40,7 +38,7 @@ int PhotoData::length() const
     return mWidth * mHeight * NUM_CHANNELS;
 }
 
-uint16_t *PhotoData::scanLine(int i)
+uint16_t* PhotoData::scanLine(int i)
 {
     return &(mData.data()[mWidth * i * NUM_CHANNELS]);
 }

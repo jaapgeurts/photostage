@@ -744,7 +744,7 @@ void TileView::setCheckBoxMode(bool mode)
     mIsCheckBoxMode = mode;
 }
 
-void TileView::newRowsAvailable(const QModelIndex & /*parent*/, int /*first*/, int last)
+void TileView::newRowsAvailable(const QModelIndex & /*parent*/, int /*first*/, int /*last*/)
 {
     computeScrollBarValues(mListModel->rowCount(mRootIndex));
     update();
@@ -758,7 +758,7 @@ void TileView::updateCellContents(const QModelIndex & /*topleft*/, const QModelI
     update();
 }
 
-void TileView::onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
+void TileView::onSelectionChanged(const QItemSelection &/*selected*/, const QItemSelection &/*deselected*/)
 {
     update();
 }

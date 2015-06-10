@@ -56,7 +56,7 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
         painter.restore();
 
         // draw the image.
-        QImage image = info->preview();
+        QImage image = info->libraryPreviewsRGB();
         QRect photoFinalDimension;
 
         if (!image.isNull())

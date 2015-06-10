@@ -35,7 +35,7 @@ signals:
 
 public slots:
 
-    void onPhotoSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void onPhotoSelectionChanged(const QItemSelection &selected, const QItemSelection &);
     void onTileDoubleClicked(const QModelIndex& index);
 
     // For clicks on the tile

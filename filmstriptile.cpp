@@ -1,9 +1,8 @@
 #include "filmstriptile.h"
 #include "photo.h"
 
-FilmstripTile::FilmstripTile(TileView *parent) : AbstractTile(parent)
+FilmstripTile::FilmstripTile(TileView* parent) : AbstractTile(parent)
 {
-
 }
 
 void FilmstripTile::render(QPainter &painter, const TileInfo &tileInfo, const QVariant &data)
@@ -12,7 +11,6 @@ void FilmstripTile::render(QPainter &painter, const TileInfo &tileInfo, const QV
     int h = painter.window().height();
     //   painter.drawLine(0,0,w-1,h-1);
     //   painter.drawLine(0,h,w-1,0);
-
 
     // TODO: Load fonts in advance??
     painter.setFont(QFont("helvetica",18));
@@ -26,17 +24,17 @@ void FilmstripTile::render(QPainter &painter, const TileInfo &tileInfo, const QV
             painter.setBrush(QBrush(QColor(Qt::darkGray),Qt::SolidPattern));
         // draw the tile
         painter.setPen(QColor(Qt::darkGray));
-        painter.drawRect(0,0,w-2,h-2);
+        painter.drawRect(0,0,w - 2,h - 2);
         painter.setBrush(Qt::NoBrush);
 
         // draw the bevel
         painter.setPen(QColor(Qt::gray));
         // draw clock wise
-        painter.drawLine(0,h-1,0,0); //left side
-        painter.drawLine(0,0,w-1,0); // top side
+        painter.drawLine(0,h - 1,0,0); //left side
+        painter.drawLine(0,0,w - 1,0); // top side
         painter.setPen(QColor(Qt::black));
-        painter.drawLine(w-1,0,w-1,h-1);// right side
-        painter.drawLine(w-1,h-1,0,h-1); // bottom side
+        painter.drawLine(w - 1,0,w - 1,h - 1);// right side
+        painter.drawLine(w - 1,h - 1,0,h - 1); // bottom side
 
         Photo* info = data.value<Photo*>();
 
@@ -45,12 +43,12 @@ void FilmstripTile::render(QPainter &painter, const TileInfo &tileInfo, const QV
         painter.setPen(QColor(Qt::darkGray).lighter(110));
         painter.setFont(QFont(QString("Verdana"),24,QFont::Bold));
         int fontHeight = painter.fontMetrics().height();
-        painter.drawText(5,fontHeight-5,QString::number(info->id));
+        painter.drawText(5,fontHeight - 5,QString::number(info->id));
 
         painter.restore();
 
         // draw the image.
-        QImage image = info->preview();
+        QImage image = info->libraryPreviewsRGB();
         QRect photoFinalDimension;
 
         if (!image.isNull())
@@ -59,7 +57,6 @@ void FilmstripTile::render(QPainter &painter, const TileInfo &tileInfo, const QV
             int wi = image.width(); // width of image
             int hi = image.height();
 
-
             float ratio = 0.90f;
             int wf = (int)(w * ratio); // width frame
             int hf = (int)(h * ratio); // height frame
@@ -67,29 +64,27 @@ void FilmstripTile::render(QPainter &painter, const TileInfo &tileInfo, const QV
             photoFinalDimension = resizeToFrameKeepAspectRatio(QSize(wi,hi),QSize(wf,hf));
 
             // move the frame to the center
-            photoFinalDimension.translate((w-wf)/2,(h-hf)/2);
+            photoFinalDimension.translate((w - wf) / 2,(h - hf) / 2);
             painter.drawImage(photoFinalDimension,image);
 
             // draw border around image
             painter.setPen(QColor(Qt::black));
             painter.drawRect(photoFinalDimension);
-
         }
         else
         {
             // TODO: draw missing image indicator
             painter.setPen(QColor(Qt::red));
-            painter.drawLine(w/2-15,h/2-15,w/2+15,h/2+15);
-            painter.drawLine(w/2-15,h/2+15,w/2+15,h/2-15);
+            painter.drawLine(w / 2 - 15,h / 2 - 15,w / 2 + 15,h / 2 + 15);
+            painter.drawLine(w / 2 - 15,h / 2 + 15,w / 2 + 15,h / 2 - 15);
         }
-
     }
     else
     {
         // TODO: draw missing picture instead of blue cross
         painter.setPen(QColor(Qt::blue));
-        painter.drawLine(0,0,w-1,h-1);
-        painter.drawLine(0,h-1,w-1,0);
+        painter.drawLine(0,0,w - 1,h - 1);
+        painter.drawLine(0,h - 1,w - 1,0);
     }
 }
 
@@ -104,20 +99,22 @@ QRect FilmstripTile::resizeToFrameKeepAspectRatio(const QSize& src, const QSize&
     int wd = destFrame.width(); // width destination
     int hd = destFrame.height();
 
-    float ratio = (float)ws/(float)hs;
+    float ratio = (float)ws / (float)hs;
 
-    int x=0;
-    int y=0;
+    int x = 0;
+    int y = 0;
     int hn = hd; // new height
     int wn = wd; // new width
-    if (ratio > 1.0f) {
+
+    if (ratio > 1.0f)
+    {
         hn = hd / ratio;
-        y = (hd-hn) / 2;
+        y = (hd - hn) / 2;
     }
-    else {
+    else
+    {
         wn = wd * ratio;
-        x = (wd-wn) / 2;
+        x = (wd - wn) / 2;
     }
     return QRect(x,y,wn,hn);
 }
-

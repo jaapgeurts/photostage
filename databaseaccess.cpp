@@ -3,11 +3,11 @@
 #include <QtSql>
 #include <QDebug>
 
-DatabaseAccess::DatabaseAccess(QObject *parent) : QObject(parent)
+DatabaseAccess::DatabaseAccess(QObject* parent) : QObject(parent)
 {
 
     mDB = QSqlDatabase::addDatabase("QSQLITE");
-    QString dbfile =  QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)+QDir::separator()+"photostage.db";
+    QString dbfile =  QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + QDir::separator() + "photostage.db";
     qDebug() << "Saving database to" << dbfile;
     mDB.setDatabaseName(dbfile);
 
@@ -15,18 +15,18 @@ DatabaseAccess::DatabaseAccess(QObject *parent) : QObject(parent)
         qDebug() << mDB.lastError();
 
     QStringList tables = mDB.tables();
+
     if (tables.contains("photo", Qt::CaseInsensitive)
-            && tables.contains("path", Qt::CaseInsensitive)
-            && tables.contains("keyword", Qt::CaseInsensitive)
-            && tables.contains("photo_keyword", Qt::CaseInsensitive)
-            && tables.contains("collection", Qt::CaseInsensitive)
-            && tables.contains("import_history", Qt::CaseInsensitive))
+        && tables.contains("path", Qt::CaseInsensitive)
+        && tables.contains("keyword", Qt::CaseInsensitive)
+        && tables.contains("photo_keyword", Qt::CaseInsensitive)
+        && tables.contains("collection", Qt::CaseInsensitive)
+        && tables.contains("import_history", Qt::CaseInsensitive))
         qDebug() << "Tables already exist.";
     else
     {
         initDb();
     }
-
 }
 
 const QSqlDatabase& DatabaseAccess::getDb()
@@ -55,14 +55,10 @@ void DatabaseAccess::initDb()
     QSqlQuery q;
     foreach(QString query, list)
     {
-        if (!q.exec(query)) {
+        if (!q.exec(query))
+        {
             qDebug() << "Query failed\n" << q.lastError() << "\n" << q.lastQuery() << "Stopping.";
             break;
         }
     }
-
-
 }
-
-
-
