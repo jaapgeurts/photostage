@@ -135,7 +135,7 @@ FORMS    += mainwindow.ui \
     map/map.ui \
     widgets/backgroundtaskprogress.ui \
     develop/modules/rawmodule.ui \
-    develop/modules/BasicModule.ui
+    develop/modules/basicmodule.ui
 
 DISTFILES += \
     Info.plist

@@ -1,9 +1,9 @@
-
 #include "rawmodule.h"
 #include "ui_rawmodule.h"
 
-RawModule::RawModule(QWidget *parent) : QWidget(parent), ui(new Ui::RawModule)
+RawModule::RawModule(QWidget* parent) :
+    DevelopModule(parent),
+    ui(new Ui::RawModule)
 {
     ui->setupUi(this);
 }
-

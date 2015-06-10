@@ -38,6 +38,8 @@ class Photo
         virtual ~Photo();
 
         // getters & setters
+        void setOriginal(const QImage& image);
+        const QImage& original() const;
         void setLibraryPreview(const QImage& image);
         const QImage& libraryPreview();
         const QImage& libraryPreviewsRGB(const ColorTransform &colorTransform);
@@ -65,6 +67,7 @@ private:
         Flag           mFlag;
         QImage         mLibraryPreview;
         QImage         mLibraryPreviewsRGB;
+        QImage         mOriginal;
         QString        mSrcImagePath;
 };
 

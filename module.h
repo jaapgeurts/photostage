@@ -1,7 +1,9 @@
 #ifndef MODULE_H
 #define MODULE_H
+
 #include <QWidget>
 #include <QRect>
+
 class Module : public QWidget
 {
     Q_OBJECT

@@ -26,6 +26,11 @@ class Develop : public Module
         void setPhoto(Photo* photo);
 
     public slots:
+        void imageChanged();
+
+    protected:
+
+        void showEvent(QShowEvent*);
 
     private:
 
@@ -38,9 +43,7 @@ class Develop : public Module
 
         // QWidget interface
 
-    protected:
-
-        void showEvent(QShowEvent*);
+        void doSetPhoto(Photo* photo);
 };
 
 #endif // DEVELOP_H

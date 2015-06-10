@@ -6,11 +6,21 @@
 
 class DevelopHistogramModule : public DevelopModule
 {
-public:
-    DevelopHistogramModule(QWidget *parent=0);
+    Q_OBJECT
 
-private:
-    Histogram* mHistogram;
+    public:
+
+        DevelopHistogramModule(QWidget* parent = 0);
+
+        void setPhoto(Photo* const photo);
+
+    public slots:
+
+        void recalculate();
+
+    private:
+
+        Histogram* mHistogram;
 };
 
 #endif // DEVELOPHISTOGRAMMODULE_H

@@ -42,6 +42,16 @@ Photo::~Photo()
 {
 }
 
+void Photo::setOriginal(const QImage &image)
+{
+    mOriginal = image;
+}
+
+const QImage &Photo::original() const
+{
+    return mOriginal;
+}
+
 void Photo::setLibraryPreview(const QImage &image)
 {
     mLibraryPreview = image;

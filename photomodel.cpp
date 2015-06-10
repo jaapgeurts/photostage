@@ -68,6 +68,7 @@ QVariant PhotoModel::data(const QModelIndex &index, int role) const
                 mPhotoInfoMap.insert(index,info);
             }
             info->setLibraryPreview(img);
+            info->setOriginal(img);
         }
 
         return QVariant::fromValue<Photo*>(info);

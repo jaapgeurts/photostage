@@ -255,5 +255,25 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>horizontalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>BasicModule</receiver>
+   <slot>onExposureChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>182</x>
+     <y>47</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>235</x>
+     <y>44</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onExposureChanged(int)</slot>
+ </slots>
 </ui>

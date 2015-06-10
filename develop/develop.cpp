@@ -33,15 +33,16 @@ Develop::Develop(QWidget* parent) :
 
     // Histogram
     mHistogramModule = new DevelopHistogramModule(ui->DevelopPanel);
-    ui->DevelopPanel->addPanel("Histogram",mHistogramModule);
+    ui->DevelopPanel->addPanel("Histogram", mHistogramModule);
 
     // Raw
     mRawModule = new RawModule(ui->DevelopPanel);
-    ui->DevelopPanel->addPanel("RAW",mRawModule);
+    ui->DevelopPanel->addPanel("RAW", mRawModule);
 
-    // Normal
+    // Basic
     mBasicModule = new BasicModule(ui->DevelopPanel);
-    ui->DevelopPanel->addPanel("Basic",mBasicModule);
+    ui->DevelopPanel->addPanel("Basic", mBasicModule);
+    connect(mBasicModule, &BasicModule::parametersAdjusted, this, &Develop::imageChanged);
 }
 
 Develop::~Develop()
@@ -53,7 +54,7 @@ Develop::~Develop()
     {
         list << size;
     }
-    settings.setValue(SETTINGS_SPLITTER_DEVELOP_SIZES,list);
+    settings.setValue(SETTINGS_SPLITTER_DEVELOP_SIZES, list);
 
     delete ui;
 }
@@ -76,17 +77,31 @@ void Develop::setPhoto(Photo* photo)
 
     // if visible, load immediately
     if (isVisible())
-        ui->developView->setPhoto(photo);
+        doSetPhoto(photo);
     else
         // TODO: if invisible, defer loading until visible
         mLoadPhoto = true;
 }
 
-void Develop::showEvent(QShowEvent *)
+void Develop::imageChanged()
+{
+    ui->developView->update();
+    mHistogramModule->setPhoto(mPhoto);
+}
+
+void Develop::showEvent(QShowEvent*)
 {
     if (mLoadPhoto)
     {
-        ui->developView->setPhoto(mPhoto);
+        doSetPhoto(mPhoto);
         mLoadPhoto = false;
     }
+}
+
+void Develop::doSetPhoto(Photo* photo)
+{
+    ui->developView->setPhoto(photo);
+    mHistogramModule->setPhoto(photo);
+    mRawModule->setPhoto(photo);
+    mBasicModule->setPhoto(photo);
 }
