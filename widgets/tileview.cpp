@@ -489,8 +489,7 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
                 Qt::KeyboardModifiers modifiers = event->modifiers();
                 if (modifiers == Qt::NoModifier)
                 {
-                    mSelectionModel->clear();
-                    mSelectionModel->select(index,QItemSelectionModel::SelectCurrent);
+                    mSelectionModel->setCurrentIndex(index,QItemSelectionModel::ClearAndSelect);
                     // qDebug() << "No modifiers";
 //                    mLastSelection = index;
                 }
@@ -515,11 +514,12 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
                     {
                         mSelectionModel->select(mListModel->index(i,0,mRootIndex),QItemSelectionModel::Select);
                     }
+                    mSelectionModel->setCurrentIndex(index,QItemSelectionModel::NoUpdate);
                 }
                 else if ((modifiers & Qt::ControlModifier) == Qt::ControlModifier)
                 {
                     //  qDebug() << "Control/Command";
-                    mSelectionModel->select(index,QItemSelectionModel::SelectCurrent);
+                    mSelectionModel->setCurrentIndex(index,QItemSelectionModel::SelectCurrent);
                 }
 //                emit selectionChanged();
             }

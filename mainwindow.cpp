@@ -113,9 +113,13 @@ MainWindow::~MainWindow()
     delete mDatabaseAccess;
 }
 
-void MainWindow::onSelectionChanged(const QItemSelection & /*selected*/, const QItemSelection & /*deselected*/)
+void MainWindow::onSelectionChanged(const QItemSelection & selected, const QItemSelection & /*deselected*/)
 {
-//    mCurrentSelection = list;
+    Photo *photo = NULL;
+    QModelIndex index = mPhotoSelection->currentIndex();
+    if (index.isValid())
+        photo = mPhotoModel->data(index,TileView::PhotoRole).value<Photo*>();
+    mDevelop->setPhoto(photo);
     updateInformationBar();
 }
 

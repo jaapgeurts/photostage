@@ -6,6 +6,8 @@
 #include <QMetaType>
 #include <QSqlQuery>
 
+#include "engine/colortransform.h"
+
 class Photo
 {
     public:
@@ -38,7 +40,7 @@ class Photo
         // getters & setters
         void setLibraryPreview(const QImage& image);
         const QImage& libraryPreview();
-        const QImage &libraryPreviewsRGB();
+        const QImage& libraryPreviewsRGB(const ColorTransform &colorTransform);
 
         void setSrcImagePath(const QString &path);
         const QString& srcImagePath();
@@ -56,15 +58,14 @@ class Photo
 
         long long id;
 
-    private:
+private:
 
-        int        mRating;
-        ColorLabel mColorLabel;
-        Flag       mFlag;
-        QImage     mLibraryPreview;
-        QImage     mLibraryPreviewsRGB;
-        QString    mSrcImagePath;
-
+        int            mRating;
+        ColorLabel     mColorLabel;
+        Flag           mFlag;
+        QImage         mLibraryPreview;
+        QImage         mLibraryPreviewsRGB;
+        QString        mSrcImagePath;
 };
 
 Q_DECLARE_METATYPE(Photo)

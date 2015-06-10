@@ -1,7 +1,9 @@
 #include "filmstriptile.h"
 #include "photo.h"
 
-FilmstripTile::FilmstripTile(TileView* parent) : AbstractTile(parent)
+FilmstripTile::FilmstripTile(TileView* parent) :
+    AbstractTile(parent),
+    mColorTransform(ColorTransform(WORKING_COLOR_SPACE,"sRGB"))
 {
 }
 
@@ -9,6 +11,7 @@ void FilmstripTile::render(QPainter &painter, const TileInfo &tileInfo, const QV
 {
     int w = painter.window().width();
     int h = painter.window().height();
+
     //   painter.drawLine(0,0,w-1,h-1);
     //   painter.drawLine(0,h,w-1,0);
 
@@ -17,7 +20,6 @@ void FilmstripTile::render(QPainter &painter, const TileInfo &tileInfo, const QV
 
     if (!data.isNull())
     {
-
         if ((tileInfo.tileState & TileInfo::TileStateSelected) == TileInfo::TileStateSelected)
             painter.setBrush(QBrush(QColor(Qt::darkGray).lighter(180),Qt::SolidPattern));
         else
@@ -48,18 +50,17 @@ void FilmstripTile::render(QPainter &painter, const TileInfo &tileInfo, const QV
         painter.restore();
 
         // draw the image.
-        QImage image = info->libraryPreviewsRGB();
-        QRect photoFinalDimension;
+        QImage image = info->libraryPreviewsRGB(mColorTransform);
+        QRect  photoFinalDimension;
 
         if (!image.isNull())
         {
-
-            int wi = image.width(); // width of image
-            int hi = image.height();
+            int   wi = image.width(); // width of image
+            int   hi = image.height();
 
             float ratio = 0.90f;
-            int wf = (int)(w * ratio); // width frame
-            int hf = (int)(h * ratio); // height frame
+            int   wf    = (int)(w * ratio); // width frame
+            int   hf    = (int)(h * ratio); // height frame
 
             photoFinalDimension = resizeToFrameKeepAspectRatio(QSize(wi,hi),QSize(wf,hf));
 
@@ -92,29 +93,28 @@ void FilmstripTile::render(QPainter &painter, const TileInfo &tileInfo, const QV
  * centers the image */
 QRect FilmstripTile::resizeToFrameKeepAspectRatio(const QSize& src, const QSize& destFrame)
 {
+    int   ws = src.width(); // width source;
+    int   hs = src.height();
 
-    int ws = src.width(); // width source;
-    int hs = src.height();
-
-    int wd = destFrame.width(); // width destination
-    int hd = destFrame.height();
+    int   wd = destFrame.width(); // width destination
+    int   hd = destFrame.height();
 
     float ratio = (float)ws / (float)hs;
 
-    int x = 0;
-    int y = 0;
-    int hn = hd; // new height
-    int wn = wd; // new width
+    int   x  = 0;
+    int   y  = 0;
+    int   hn = hd; // new height
+    int   wn = wd; // new width
 
     if (ratio > 1.0f)
     {
         hn = hd / ratio;
-        y = (hd - hn) / 2;
+        y  = (hd - hn) / 2;
     }
     else
     {
         wn = wd * ratio;
-        x = (wd - wn) / 2;
+        x  = (wd - wn) / 2;
     }
     return QRect(x,y,wn,hn);
 }

@@ -1,7 +1,6 @@
 #include <QDir>
 #include <QDebug>
 
-#include "engine/color.h"
 #include "photo.h"
 
 
@@ -46,6 +45,8 @@ Photo::~Photo()
 void Photo::setLibraryPreview(const QImage &image)
 {
     mLibraryPreview = image;
+    // force regeneration of the display image
+    mLibraryPreviewsRGB = QImage();
 }
 
 const QImage &Photo::libraryPreview()
@@ -53,10 +54,18 @@ const QImage &Photo::libraryPreview()
     return mLibraryPreview;
 }
 
-const QImage &Photo::libraryPreviewsRGB()
+const QImage &Photo::libraryPreviewsRGB(const ColorTransform& colorTransform)
 {
     if (mLibraryPreviewsRGB.isNull())
-        mLibraryPreviewsRGB = convertImageProfile(mLibraryPreview,WORKING_COLOR_SPACE,"sRGB");
+    {
+        // run this in a thread so the UI is fast.
+//        Image FileLoader* loader = new ImageFileLoader(index, info->srcImagePath());
+//        conne ct(loader,&ImageFileLoader::dataReady,this,&PhotoModel::imageLoaded);
+//        mThr eadPool->start(loader);
+
+        if (colorTransform.isValid())
+            mLibraryPreviewsRGB = colorTransform.transformImage(mLibraryPreview);
+    }
     return mLibraryPreviewsRGB;
 }
 

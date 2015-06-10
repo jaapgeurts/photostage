@@ -2,6 +2,7 @@
 #define FILMSTRIPTILE_H
 
 #include "widgets/abstracttile.h"
+#include "engine/colortransform.h"
 
 class FilmstripTile : public AbstractTile
 {
@@ -14,6 +15,8 @@ class FilmstripTile : public AbstractTile
     private:
 
         QRect resizeToFrameKeepAspectRatio(const QSize &src, const QSize &destFrame);
+
+        ColorTransform mColorTransform;
 };
 
 #endif // FILMSTRIPTILE_H

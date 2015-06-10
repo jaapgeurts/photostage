@@ -1,15 +1,17 @@
 #include "sqlpathmodel.h"
 
-SqlPathModel::SqlPathModel(QObject* parent) : QAbstractItemModel(parent)
+SqlPathModel::SqlPathModel(QObject* parent) :
+    QAbstractItemModel(parent),
+    mRootItem(NULL)
 {
-
     // Construct the file tree
     createPathItems();
 }
 
 SqlPathModel::~SqlPathModel()
 {
-    deletePathItems(mRootItem);
+    if (mRootItem != NULL)
+        deletePathItems(mRootItem);
 }
 
 void SqlPathModel::createPathItems()
@@ -22,23 +24,23 @@ void SqlPathModel::createPathItems()
     // first create the root item
     QSqlQuery query;
 
-    QString queryText = QString("select id,directory,parent_id from path where parent_id is NULL");
+    QString   queryText = QString("select id,directory,parent_id from path where parent_id is NULL");
 
     if (!query.exec(queryText))
         qDebug() << query.lastError();
 
-    if (!query.first())
-        qDebug() << "No records";
-
-    mRootItem = new PathItem(query.value(0).toLongLong(),query.value(1).toString(),query.value(2).toLongLong());
-
-    createPathtemsRec(mRootItem);
+    if (query.first())
+    {
+        mRootItem = new PathItem(query.value(0).toLongLong(),query.value(1).toString(),query.value(2).toLongLong());
+        createPathtemsRec(mRootItem);
+    }
 }
 
 void SqlPathModel::createPathtemsRec(PathItem* root)
 {
     QSqlQuery query;
-    QString queryText = QString("select p.id, p.directory, p.parent_id, count(f.id) from path p left outer join photo f on p.id = f.path_id where  parent_id = :parent_id group by p.id, p.directory, p.parent_id");
+    QString   queryText = QString("select p.id, p.directory, p.parent_id, count(f.id) from path p left outer join photo f on p.id = f.path_id where  parent_id = :parent_id group by p.id, p.directory, p.parent_id");
+
     query.prepare(queryText);
 
     PathItem* item;
@@ -50,8 +52,8 @@ void SqlPathModel::createPathtemsRec(PathItem* root)
     while (query.next())
     {
         // conside using std::shared_ptr
-        item = new PathItem(query.value(0).toLongLong(),query.value(1).toString(), query.value(1).toLongLong());
-        item->count = query.value(3).toInt();
+        item         = new PathItem(query.value(0).toLongLong(),query.value(1).toString(), query.value(1).toLongLong());
+        item->count  = query.value(3).toInt();
         item->parent = root;
         root->children.append(item);
         createPathtemsRec(item);
@@ -62,6 +64,7 @@ void SqlPathModel::createPathtemsRec(PathItem* root)
 void SqlPathModel::deletePathItems(PathItem* root)
 {
     PathItem* item;
+
     foreach(item, root->children)
     {
         deletePathItems(item);
@@ -111,7 +114,10 @@ int SqlPathModel::rowCount(const QModelIndex &parent) const
     else
         item = static_cast<PathItem*>(parent.internalPointer());
 
-    return item->children.size();
+    if (item != NULL)
+        return item->children.size();
+    else
+        return 0;
 }
 
 int SqlPathModel::columnCount(const QModelIndex & /*parent*/) const

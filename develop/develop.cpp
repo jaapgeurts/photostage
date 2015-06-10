@@ -1,25 +1,29 @@
 #include <QSettings>
+#include <QDebug>
 
 #include "develop.h"
 #include "ui_develop.h"
 
 #define SETTINGS_SPLITTER_DEVELOP_SIZES "developmodule/splitter_main"
 
-Develop::Develop(QWidget *parent) :
+Develop::Develop(QWidget* parent) :
     Module(parent),
-    ui(new Ui::Develop)
+    ui(new Ui::Develop),
+    mLoadPhoto(false)
 {
     ui->setupUi(this);
 
-    QSettings settings;
+    QSettings  settings;
     QList<int> l;
+
     if (settings.contains(SETTINGS_SPLITTER_DEVELOP_SIZES))
     {
         foreach(QVariant v, settings.value(SETTINGS_SPLITTER_DEVELOP_SIZES).toList())
         {
             l << v.toInt();
         }
-    } else
+    }
+    else
     {
         l << 200 << 600 << 200;
     }
@@ -38,14 +42,13 @@ Develop::Develop(QWidget *parent) :
     // Normal
     mBasicModule = new BasicModule(ui->DevelopPanel);
     ui->DevelopPanel->addPanel("Basic",mBasicModule);
-
-
 }
 
 Develop::~Develop()
 {
-    QSettings settings;
+    QSettings    settings;
     QVariantList list;
+
     foreach(int size, ui->splitterDevelop->sizes())
     {
         list << size;
@@ -57,5 +60,33 @@ Develop::~Develop()
 
 QRect Develop::lightGap()
 {
-// TODO: implement this
+    // TODO: implement this
+}
+
+void Develop::setPhoto(Photo* photo)
+{
+    if (photo == NULL)
+    {
+        qDebug() << "Develop::setPhoto(Photo*) called with NULL argument";
+        return;
+    }
+    // determine visibility
+
+    mPhoto = photo;
+
+    // if visible, load immediately
+    if (isVisible())
+        ui->developView->setPhoto(photo);
+    else
+        // TODO: if invisible, defer loading until visible
+        mLoadPhoto = true;
+}
+
+void Develop::showEvent(QShowEvent *)
+{
+    if (mLoadPhoto)
+    {
+        ui->developView->setPhoto(mPhoto);
+        mLoadPhoto = false;
+    }
 }

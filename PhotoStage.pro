@@ -68,7 +68,7 @@ SOURCES += main.cpp\
     develop/modules/basicmodule.cpp \
     filmstriptile.cpp \
     previewcache.cpp \
-    engine/color.cpp
+    engine/colortransform.cpp
     #processing/amaze_demosaic_RT.c
 
 HEADERS  += mainwindow.h \
@@ -122,7 +122,7 @@ HEADERS  += mainwindow.h \
     develop/modules/basicmodule.h \
     filmstriptile.h \
     previewcache.h \
-    engine/color.h
+    engine/colortransform.h
 
 
 FORMS    += mainwindow.ui \

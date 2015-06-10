@@ -7,12 +7,12 @@
 #include "imagefileloader.h"
 #include "import/exivfacade.h"
 
-#include "engine/color.h"
+#include "engine/colortransform.h"
 
-#define max(x,y) ((x) > (y) ? (x) : (y))
-#define min(x,y) ((x) < (y) ? (x) : (y))
+#define max(x,y)    ((x) > (y) ? (x) : (y))
+#define min(x,y)    ((x) < (y) ? (x) : (y))
 #define clip(v,x,y) (max(x,min(v,y)))
-#define SRC(x,y) (src[x] * src[y])
+#define SRC(x,y)    (src[x] * src[y])
 
 CameraMetaData* Metadata::mMetaData = NULL;
 CameraMetaData* Metadata::metaData()
@@ -34,14 +34,35 @@ CameraMetaData* Metadata::metaData()
 
 ImageFileLoader::ImageFileLoader(const QVariant &ref, const QString& path) :
     mRef(ref),
-    mPath(path)
+    mPath(path),
+    mColorTransformRGBWorking(ColorTransform("sRGB",WORKING_COLOR_SPACE))
 {
     //qDebug() << "worker thread " << mModelIndex.row() <<" created";
+
+    mHRawTransform = NULL;
+
+    cmsHPROFILE hInProfile, hOutProfile;
+
+    hInProfile  = cmsOpenProfileFromFile("/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/D65_XYZ.icc","r");
+    hOutProfile = cmsOpenProfileFromFile("/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/MelissaRGB.icc","r");
+    //    hInProfile = cmsCreateXYZProfile();
+    //    hOutProfile = cmsCreate_sRGBProfile();
+
+#define TYPE_XYZN_FLT (FLOAT_SH(1) | COLORSPACE_SH(PT_XYZ) | EXTRA_SH(1) | CHANNELS_SH(3) | BYTES_SH(4))
+
+    mHRawTransform = cmsCreateTransform(hInProfile,TYPE_RGBA_FLT,hOutProfile,TYPE_BGRA_8,INTENT_PERCEPTUAL,0);
+    // hTransform = cmsCreateTransform(hInProfile,TYPE_XYZN_FLT,hOutProfile,TYPE_BGRA_8,INTENT_PERCEPTUAL,0);
+
+    cmsCloseProfile(hInProfile);
+    cmsCloseProfile(hOutProfile);
 }
 
 ImageFileLoader::~ImageFileLoader()
 {
     //qDebug() << "worker thread " << mModelIndex.row() <<" deleted";
+
+    if (mHRawTransform != NULL)
+        cmsDeleteTransform(mHRawTransform);
 }
 
 int rawspeed_get_number_of_processor_cores()
@@ -69,7 +90,7 @@ void ImageFileLoader::run()
     {
         // TODO: get the color profile of this image and convert the image.
         // for now just assume sRGB
-        image = convertImageProfile(pixmap,"sRGB",WORKING_COLOR_SPACE);
+        image = mColorTransformRGBWorking.transformImage(pixmap);
         //image = pixmap;
     }
 
@@ -127,6 +148,7 @@ bool ImageFileLoader::compute_inverse(const float src[9], float dst[9])
 void ImageFileLoader::dump_matrix(const QString &name,float m[9])
 {
     QString space = QString(name.length(),' ');
+
     qDebug() << space << "┌";
     qDebug() << space << "│" << m[0] << " " << m[1] << " " << m[2];
     qDebug() << name << "│" << m[3] << " " << m[4] << " " << m[5];
@@ -139,6 +161,7 @@ int ImageFileLoader::compute_cct(float R,float G, float B)
     // see here for more details
     // http://dsp.stackexchange.com/questions/8949/how-do-i-calculate-the-color-temperature-of-the-light-source-illuminating-an-ima
     float X, Y, Z;
+
     X = (-0.14282) * (R)+(1.54924) * (G) + (-0.95641) * (B);
     Y = (-0.32466) * (R)+(1.57837) * (G) + (-0.73191) * (B);
     Z = (-0.68202) * (R)+(0.77073) * (G)+(0.56332) * (B);
@@ -147,7 +170,7 @@ int ImageFileLoader::compute_cct(float R,float G, float B)
     y = Y / (X + Y + Z);
     float n;
     n = (x - 0.3320) / (0.1858 - y);
-    int CCT = 449 * n * n * n + 3525 * n * n + 6823.3 * n + 5520.33;
+    int   CCT = 449 * n * n * n + 3525 * n * n + 6823.3 * n + 5520.33;
 
     return CCT;
 }
@@ -189,7 +212,7 @@ void ImageFileLoader::normalize(float* M)
 
 QImage ImageFileLoader::loadRaw()
 {
-    QImage image;
+    QImage      image;
 
     ExivFacade* ex = ExivFacade::createExivReader();
 
@@ -198,7 +221,7 @@ QImage ImageFileLoader::loadRaw()
     delete(ex);
 
     FileReader reader(strdup(mPath.toLocal8Bit().data()));
-    FileMap* map;
+    FileMap*   map;
     try
     {
         qDebug() << "loadRaw() opening" << reader.Filename();
@@ -226,24 +249,24 @@ QImage ImageFileLoader::loadRaw()
     decoder->decodeMetaData(Metadata::metaData());
     RawImage raw = decoder->mRaw;
     //raw->scaleBlackWhite();
-    float bl = (float)raw->blackLevel;
-    float wp = (float)raw->whitePoint;
+    float    bl = (float)raw->blackLevel;
+    float    wp = (float)raw->whitePoint;
 
     //qDebug() << "Blacklevel" <<bl;
     //qDebug() << "Whitepoint" <<wp;
 
-    int components_per_pixel = raw->getCpp();
-    int bytes_per_pixel = raw->getBpp();
-    RawImageType type = raw->getDataType();
-    bool is_cfa = raw->isCFA;
+    int          components_per_pixel = raw->getCpp();
+    int          bytes_per_pixel      = raw->getBpp();
+    RawImageType type                 = raw->getDataType();
+    bool         is_cfa               = raw->isCFA;
 
     if (is_cfa && components_per_pixel == 1 && type == TYPE_USHORT16 && bytes_per_pixel == 2)
     {
         //qDebug() << "run standard demosiac";
-        ColorFilterArray cfa = raw->cfa;
-        uint32_t cfa_layout = cfa.getDcrawFilter();
+        ColorFilterArray cfa        = raw->cfa;
+        uint32_t         cfa_layout = cfa.getDcrawFilter();
 
-        uint16_t vert,horz;
+        uint16_t         vert,horz;
 
         if (cfa_layout == 0x94949494)
             vert = horz = 0;
@@ -255,17 +278,17 @@ QImage ImageFileLoader::loadRaw()
 
         qDebug() << "dcraw filter:" << QString("%1").arg(cfa_layout,0,16);
 
-//        int cfa_width = cfa.size.x;
-//        int cfa_height = cfa.size.y;
-//        CFAColor c = cfa.getColorAt(0,0);
+        //        int cfa_width = cfa.size.x;
+        //        int cfa_height = cfa.size.y;
+        //        CFAColor c = cfa.getColorAt(0,0);
 
-        uint16_t* data = (uint16_t*)raw->getData(0,0);
-        int width = raw->dim.x;
-        int height = raw->dim.y;
-        int pitch_in_bytes = raw->pitch;
+        uint16_t* data           = (uint16_t*)raw->getData(0,0);
+        int       width          = raw->dim.x;
+        int       height         = raw->dim.y;
+        int       pitch_in_bytes = raw->pitch;
 
-        width -= 2; // cut of the borders off for simplicity.
-        height -= 2;
+        width          -= 2; // cut of the borders off for simplicity.
+        height         -= 2;
         pitch_in_bytes /= 2;
 
         // demosaic the image
@@ -283,10 +306,10 @@ QImage ImageFileLoader::loadRaw()
 
         // canon 350D
 
-        float canon350d[9] = { 6018,-617,-965,-8645,15881,2975,-1530,1719,7642 };
-        float powershots30[9] = { 10566,-3652,-1129,-6552,14662,2006,-2197,2581,7670 };
+        float canon350d[9]     = { 6018,-617,-965,-8645,15881,2975,-1530,1719,7642 };
+        float powershots30[9]  = { 10566,-3652,-1129,-6552,14662,2006,-2197,2581,7670 };
         float canon5DMarkII[9] = { 4716,603,-830,-7798,15474,2480,-1496,1937,6651 };
-        float eos1100d[9] = { 6444,-904,-893,-4563,12308,2535,-903,2016,6728 };
+        float eos1100d[9]      = { 6444,-904,-893,-4563,12308,2535,-903,2016,6728 };
 
         // use default sRGB -> xyz65 conversion matrix
         //        float xyz65_srgb[9] = {
@@ -356,12 +379,12 @@ QImage ImageFileLoader::loadRaw()
 
         for (int y = 1; y < height - 1; y++)
         {
-            int line = (y - 1) * width * 4;
-            uint16_t* row = &data[y * pitch_in_bytes];
+            int       line = (y - 1) * width * 4;
+            uint16_t* row  = &data[y * pitch_in_bytes];
 
             for (int x = 1; x < width - 1; x++)
             {
-                int pix = line + (x - 1) * 4;
+                int      pix = line + (x - 1) * 4;
 
                 uint16_t r,g,b;
 
@@ -463,7 +486,7 @@ QImage ImageFileLoader::loadRaw()
                 if (bf > bm)
                     bm = bf;
 
-                work[pix] = rf;
+                work[pix]     = rf;
                 work[pix + 1] = gf;
                 work[pix + 2] = bf;
             }
@@ -501,8 +524,8 @@ QImage ImageFileLoader::loadRaw()
                         rawimage[pix+2] = (uint8_t)(pow(rawimage[pix+2]/255.0,1.0/gar)*255); //red
 
                         // stretch contrast and brightness
-                 */float ct = 1.7;
-                float br = -15;
+                 */float    ct = 1.7;
+                float    br = -15;
                 uint8_t* bp = &rawimage[pix];
                 uint8_t* gp = &rawimage[pix + 1];
                 uint8_t* rp = &rawimage[pix + 2];
@@ -526,23 +549,5 @@ QImage ImageFileLoader::loadRaw()
 
 void ImageFileLoader::convertXyz65sRGB(float* src, uint8_t* dst, size_t size)
 {
-    cmsHPROFILE hInProfile, hOutProfile;
-    cmsHTRANSFORM hTransform;
-
-    hInProfile = cmsOpenProfileFromFile("/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/D65_XYZ.icc","r");
-    hOutProfile = cmsOpenProfileFromFile("/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/MelissaRGB.icc","r");
-//    hInProfile = cmsCreateXYZProfile();
-//    hOutProfile = cmsCreate_sRGBProfile();
-
-#define TYPE_XYZN_FLT          (FLOAT_SH(1) | COLORSPACE_SH(PT_XYZ) | EXTRA_SH(1) | CHANNELS_SH(3) | BYTES_SH(4))
-
-    hTransform = cmsCreateTransform(hInProfile,TYPE_RGBA_FLT,hOutProfile,TYPE_BGRA_8,INTENT_PERCEPTUAL,0);
-    // hTransform = cmsCreateTransform(hInProfile,TYPE_XYZN_FLT,hOutProfile,TYPE_BGRA_8,INTENT_PERCEPTUAL,0);
-
-    cmsCloseProfile(hInProfile);
-    cmsCloseProfile(hOutProfile);
-
-    cmsDoTransform(hTransform,src,dst,size);
-
-    cmsDeleteTransform(hTransform);
+    cmsDoTransform(mHRawTransform,src,dst,size);
 }

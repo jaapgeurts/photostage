@@ -7,6 +7,7 @@
 #include <QImage>
 #include <QRunnable>
 
+#include "engine/colortransform.h"
 #include "external/rawspeed/RawSpeed/RawSpeed-API.h"
 
 using namespace RawSpeed;
@@ -28,8 +29,10 @@ class ImageFileLoader : public QObject, public QRunnable
 
     private:
 
-        QVariant    mRef;
-        QString     mPath;
+        QVariant       mRef;
+        QString        mPath;
+        ColorTransform mColorTransformRGBWorking;
+        cmsHTRANSFORM  mHRawTransform;
 
         QImage loadRaw();
 
@@ -43,7 +46,8 @@ class ImageFileLoader : public QObject, public QRunnable
         void dump_matrix(const QString &name, float m[]);
         int compute_cct(float R, float G, float B);
         void mmultm(float* A, float* B, float* out);
-//        void vmultm(float* V, float* M, float* out);
+
+        //        void vmultm(float* V, float* M, float* out);
         void normalize(float* M);
         void convertXyz65sRGB(float* src, uint8_t* dst, size_t size);
 };
