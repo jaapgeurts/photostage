@@ -4,7 +4,7 @@
 #include "photo.h"
 
 Photo::Photo() :
-    mLibraryPreviewsRGB(NULL)
+    mLibraryPreviewsRGB()
 {
 }
 
@@ -13,8 +13,8 @@ Photo::Photo(const Photo& info)
     *this = info;
 }
 
-Photo::Photo(const Image& image, const QString& filename, long long id) :
-    mLibraryPreviewsRGB(NULL),
+Photo::Photo(const QImage& image, const QString& filename, long long id) :
+    mLibraryPreviewsRGB(),
     mLibraryPreview(image),
     mSrcImagePath(filename),
     id(id)
@@ -22,7 +22,7 @@ Photo::Photo(const Image& image, const QString& filename, long long id) :
 }
 
 Photo::Photo(QSqlQuery& q) :
-    mLibraryPreviewsRGB(NULL)
+    mLibraryPreviewsRGB()
 {
     id = q.value(0).toInt();
     QString filename = q.value(1).toString();
@@ -41,24 +41,24 @@ Photo::~Photo()
 {
 }
 
-void Photo::setOriginal(const Image& image)
+void Photo::setOriginal(const QImage& image)
 {
     mOriginal = image;
 }
 
-const Image& Photo::original() const
+const QImage& Photo::original() const
 {
     return mOriginal;
 }
 
-void Photo::setLibraryPreview(const Image& image)
+void Photo::setLibraryPreview(const QImage& image)
 {
     mLibraryPreview = image;
     // force regeneration of the display image
     mLibraryPreviewsRGB = QImage();
 }
 
-const Image& Photo::libraryPreview()
+const QImage& Photo::libraryPreview()
 {
     return mLibraryPreview;
 }
@@ -71,8 +71,13 @@ const QImage& Photo::libraryPreviewsRGB()
         //        Image FileLoader* loader = new ImageFileLoader(index, info->srcImagePath());
         //        conne ct(loader,&ImageFileLoader::dataReady,this,&PhotoModel::imageLoaded);
         //        mThr eadPool->start(loader);
-
-        mLibraryPreviewsRGB = mLibraryPreview.toQImage();
+        // convert the image to sRGB
+        ColorTransform transform = ColorTransform::getTransform(
+            WORKING_COLOR_SPACE,
+            "sRGB",
+            ColorTransform::FORMAT_RGB32,
+            ColorTransform::FORMAT_RGB32);
+        mLibraryPreviewsRGB = transform.transformQImage(mLibraryPreview);
     }
     return mLibraryPreviewsRGB;
 }

@@ -34,15 +34,15 @@ class Photo
         // Constructors
         Photo();
         Photo(const Photo& info);
-        Photo(const Image& image, const QString& filename, long long id);
+        Photo(const QImage &image, const QString& filename, long long id);
         Photo(QSqlQuery& query);
         virtual ~Photo();
 
         // getters & setters
-        void setOriginal(const Image& image);
-        const Image& original() const;
-        void setLibraryPreview(const Image& image);
-        const Image& libraryPreview();
+        void setOriginal(const QImage& image);
+        const QImage& original() const;
+        void setLibraryPreview(const QImage& image);
+        const QImage& libraryPreview();
         const QImage& libraryPreviewsRGB();
 
         void setSrcImagePath(const QString& path);
@@ -66,9 +66,9 @@ class Photo
         int        mRating;
         ColorLabel mColorLabel;
         Flag       mFlag;
-        Image      mLibraryPreview;
-        QImage      mLibraryPreviewsRGB;
-        Image      mOriginal;
+        QImage     mLibraryPreview;
+        QImage     mLibraryPreviewsRGB;
+        QImage     mOriginal;
         QString    mSrcImagePath;
 };
 

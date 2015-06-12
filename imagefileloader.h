@@ -24,17 +24,16 @@ class ImageFileLoader : public QObject, public QRunnable
 
     signals:
 
-        void dataReady(const QVariant& ref, const Image& image);
+        void dataReady(const QVariant& ref, const QImage& image);
         void error(QString error);
 
     private:
 
         QVariant       mRef;
         QString        mPath;
-        ColorTransform mColorTransformRGBWorking;
         cmsHTRANSFORM  mHRawTransform;
 
-        Image loadRaw();
+        QImage loadRaw();
 
         /**
          * @brief ImageFileLoader::compute_inverse computes the inverse of a matrix
@@ -49,7 +48,7 @@ class ImageFileLoader : public QObject, public QRunnable
 
         //        void vmultm(float* V, float* M, float* out);
         void normalize(float* M);
-        void convertXyz65sRGB(float* src, const Image& image, size_t size);
+        void convertXyz65sRGB(float* src, QImage& image);
 };
 
 class Metadata

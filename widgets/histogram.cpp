@@ -36,6 +36,7 @@ void Histogram::recalculate()
     mMaxAll = 0;
 
     // first do uniform distribution (linear transform)
+    // TODO: do we need to count all or just 1/2 or 1/4 of the pic (skip 2 or 4)
 
     int count = mImage.width();
 
@@ -43,22 +44,31 @@ void Histogram::recalculate()
     {
         float* pixels = mImage.scanLine(j);
 
-        for (int i = 0; i < count - 3; i += 3)
+        for (int i = 0; i < count; i++)
         {
-            float red   = pixels[i + 2];
-            float green = pixels[i + 1];
-            float blue  = pixels[i + 0];
+            float red   = pixels[i * 3 + 2];
+            float green = pixels[i * 3 + 1];
+            float blue  = pixels[i * 3 + 0];
 
             int   factor = BIN_SIZE;
 
-            mChannelRed[(int)(red * factor)]++;
-            mChannelGreen[(int)(green * factor)]++;
-            mChannelBlue[(int)(blue * factor)]++;
+            // TODO: consider how to handle values outside range
+            if (red > 0.0 && red < 1.0)
+                mChannelRed[(int)(red * factor)]++;
+
+            if (green > 0.0 && green < 1.0)
+                mChannelGreen[(int)(green * factor)]++;
+
+            if (blue > 0.0 && blue < 1.0)
+                mChannelBlue[(int)(blue * factor)]++;
 
             // use green as the average luminance.
             // use this value to scale the y axis of the histogram when painting
-            if (mMaxAll < mChannelGreen[(int)((double)green * factor)])
-                mMaxAll = mChannelGreen[(int)((double)green * factor)];
+
+            if (green > 0.0 && green < 1.0)
+                if (mMaxAll < mChannelGreen[(int)((double)green * factor)])
+                    mMaxAll = mChannelGreen[(int)((double)green * factor)];
+
         }
     }
     update();

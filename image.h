@@ -18,6 +18,8 @@ class Image
         Image(const QSize& size);
         ~Image();
 
+        Image clone() const;
+
         // static convenience functions
         static Image fromFile(const QString& filename);
         static Image fromQImage(const QImage& image);

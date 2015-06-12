@@ -140,6 +140,17 @@ rgb hsv2rgb(hsv in)
     return out;
 }
 
+inline float clamp(float l, float h, float v)
+{
+    if (v < l)
+        v = l;
+
+    if (v > h)
+        v = h;
+
+    return v;
+}
+
 void BasicModule::onExposureChanged(int value)
 {
     qDebug() << "exposure value" << value;
@@ -150,34 +161,36 @@ void BasicModule::onExposureChanged(int value)
         return;
     }
 
-    Image img = mPhoto->original();
+//    Image img = mPhoto->original().clone();
 
-//    float  mult = /*1.0 + */value / 100.0;
+//    float mult = /*1.0 + */ value / 100.0;
 
 //    qDebug() << "Multiplier" << mult;
 
-//    int count = img.bytesPerLine();
+//    int width  = img.width();
+//    int height = img.height();
 
-//    for (int y = 0; y < img.height(); y++)
+//    for (int y = 0; y < height; y++)
 //    {
-//        uint8_t* line = img.scanLine(y);
+//        float* line = img.scanLine(y);
 
-//        for (int x = 0; x < count - 4; x += 4)
+//        for (int x = 0; x < width; x++)
 //        {
 //            rgb from;
 //            hsv out;
-//            from.r = line[x + 2] / 255.0;
-//            from.g = line[x + 1] / 255.0;
-//            from.b = line[x] / 255.0;
+//            from.r = line[x * 3 + 2];
+//            from.g = line[x * 3 + 1];
+//            from.b = line[x * 3];
 
 //            out = rgb2hsv(from);
 
 //            out.v *= pow(2, mult);
 
-//            from         = hsv2rgb(out);
-//            line[x]     = from.b * 255;
-//            line[x + 1] = from.g * 255;
-//            line[x + 2] = from.r * 255;
+//            // TODO: consider what to do with clipping here.
+//            from            = hsv2rgb(out);
+//            line[x * 3]     = clamp(0, 1, from.b);
+//            line[x * 3 + 1] = clamp(0, 1, from.g);
+//            line[x * 3 + 2] = clamp(0, 1, from.r);
 
 //            //            line[x]     = (uint8_t)((float)line[x] * mult);
 //            //            line[x + 1] = (uint8_t)((float)line[x + 1] * mult);
@@ -186,4 +199,5 @@ void BasicModule::onExposureChanged(int value)
 //    }
 //    mPhoto->setLibraryPreview(img);
 //    emit parametersAdjusted();
+
 }

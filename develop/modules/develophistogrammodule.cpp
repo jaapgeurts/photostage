@@ -15,7 +15,7 @@ void DevelopHistogramModule::setPhoto(Photo * const photo)
 {
     DevelopModule::setPhoto(photo);
 
-    mHistogram->setImageData(photo->libraryPreview());
+    //mHistogram->setImageData(photo->libraryPreview());
 }
 
 void DevelopHistogramModule::recalculate()

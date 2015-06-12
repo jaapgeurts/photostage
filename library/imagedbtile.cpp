@@ -8,11 +8,11 @@
 
 ImageDbTile::ImageDbTile(TileView* parent) :
     AbstractTile(parent),
-    mFontFoundIcons(QFont("General Foundicons",15))
+    mFontFoundIcons(QFont("General Foundicons", 15))
 {
 }
 
-void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVariant &data)
+void ImageDbTile::render(QPainter& painter, const TileInfo& tileInfo, const QVariant& data)
 {
     int w = painter.window().width();
     int h = painter.window().height();
@@ -21,36 +21,36 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
     //   painter.drawLine(0,h,w-1,0);
 
     // TODO: Load fonts in advance??
-    painter.setFont(QFont("helvetica",18));
+    painter.setFont(QFont("helvetica", 18));
 
     if (!data.isNull())
     {
         if ((tileInfo.tileState & TileInfo::TileStateSelected) == TileInfo::TileStateSelected)
-            painter.setBrush(QBrush(QColor(Qt::darkGray).lighter(180),Qt::SolidPattern));
+            painter.setBrush(QBrush(QColor(Qt::darkGray).lighter(180), Qt::SolidPattern));
         else
-            painter.setBrush(QBrush(QColor(Qt::darkGray),Qt::SolidPattern));
+            painter.setBrush(QBrush(QColor(Qt::darkGray), Qt::SolidPattern));
         // draw the tile
         painter.setPen(QColor(Qt::darkGray));
-        painter.drawRect(0,0,w - 2,h - 2);
+        painter.drawRect(0, 0, w - 2, h - 2);
         painter.setBrush(Qt::NoBrush);
 
         // draw the bevel
         painter.setPen(QColor(Qt::gray));
         // draw clock wise
-        painter.drawLine(0,h - 1,0,0); //left side
-        painter.drawLine(0,0,w - 1,0); // top side
+        painter.drawLine(0, h - 1, 0, 0); //left side
+        painter.drawLine(0, 0, w - 1, 0); // top side
         painter.setPen(QColor(Qt::black));
-        painter.drawLine(w - 1,0,w - 1,h - 1);// right side
-        painter.drawLine(w - 1,h - 1,0,h - 1); // bottom side
+        painter.drawLine(w - 1, 0, w - 1, h - 1);// right side
+        painter.drawLine(w - 1, h - 1, 0, h - 1); // bottom side
 
         Photo* info = data.value<Photo*>();
 
         // draw the id text
         painter.save();
         painter.setPen(QColor(Qt::darkGray).lighter(110));
-        painter.setFont(QFont(QString("Verdana"),24,QFont::Bold));
+        painter.setFont(QFont(QString("Verdana"), 24, QFont::Bold));
         int fontHeight = painter.fontMetrics().height();
-        painter.drawText(5,fontHeight - 5,QString::number(info->id));
+        painter.drawText(5, fontHeight - 5, QString::number(info->id));
 
         painter.restore();
 
@@ -67,11 +67,11 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
             int   wf    = (int)(w * ratio); // width frame
             int   hf    = (int)(h * ratio); // height frame
 
-            photoFinalDimension = resizeToFrameKeepAspectRatio(QSize(wi,hi),QSize(wf,hf));
+            photoFinalDimension = resizeToFrameKeepAspectRatio(QSize(wi, hi), QSize(wf, hf));
 
             // move the frame to the center
-            photoFinalDimension.translate((w - wf) / 2,(h - hf) / 2);
-            painter.drawImage(photoFinalDimension,image);
+            photoFinalDimension.translate((w - wf) / 2, (h - hf) / 2);
+            painter.drawImage(photoFinalDimension, image);
 
             // draw border around image
             painter.setPen(QColor(Qt::black));
@@ -94,7 +94,7 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
                 QString icon = ""; // flag icon
 
                 painter.setPen(pen);
-                painter.drawText(10,20,icon);
+                painter.drawText(10, 20, icon);
             }
 
             // draw the color label
@@ -113,11 +113,11 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
                         break;
 
                     case Photo::LabelOrange:
-                        color = QColor(0xff,0x80,0);
+                        color = QColor(0xff, 0x80, 0);
                         break;
 
                     case Photo::LabelPurple:
-                        color = QColor(0xbb,0x00,0xff);
+                        color = QColor(0xbb, 0x00, 0xff);
                         break;
 
                     case Photo::LabelRed:
@@ -133,16 +133,16 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
                         color = QColor(Qt::gray);
                         break;
                 }
-                painter.fillRect(w - 15,h - 15,10,10,color);
-                painter.drawRect(w - 15,h - 15,10,10);
+                painter.fillRect(w - 15, h - 15, 10, 10, color);
+                painter.drawRect(w - 15, h - 15, 10, 10);
             }
         }
         else
         {
             // TODO: draw missing image indicator
             painter.setPen(QColor(Qt::red));
-            painter.drawLine(w / 2 - 15,h / 2 - 15,w / 2 + 15,h / 2 + 15);
-            painter.drawLine(w / 2 - 15,h / 2 + 15,w / 2 + 15,h / 2 - 15);
+            painter.drawLine(w / 2 - 15, h / 2 - 15, w / 2 + 15, h / 2 + 15);
+            painter.drawLine(w / 2 - 15, h / 2 + 15, w / 2 + 15, h / 2 - 15);
         }
         // Draw the rotate handles
         /*        if (mLeftHover.contains(tileInfo.index))
@@ -165,9 +165,9 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
         QFont   font = painter.font();
         font.setPointSize(12);
         painter.setFont(font);
-        rating.fill(QChar(CHAR_STAR),info->rating());
+        rating.fill(QChar(CHAR_STAR), info->rating());
         painter.setPen(QColor(Qt::black));
-        painter.drawText(30,h - 1 - 10,rating);
+        painter.drawText(30, h - 1 - 10, rating);
 
         /*        if (mRatingHover.contains(tileInfo.index))
            {
@@ -179,15 +179,15 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
          */
         if (info->flag() == Photo::FlagReject && !(tileInfo.tileState & TileInfo::TileStateSelected))
         {
-            painter.fillRect(0,0,w,h,QBrush(QColor(0,0,0,80)));
+            painter.fillRect(0, 0, w, h, QBrush(QColor(0, 0, 0, 80)));
         }
     }
     else
     {
         // TODO: draw missing picture instead of blue cross
         painter.setPen(QColor(Qt::blue));
-        painter.drawLine(0,0,w - 1,h - 1);
-        painter.drawLine(0,h - 1,w - 1,0);
+        painter.drawLine(0, 0, w - 1, h - 1);
+        painter.drawLine(0, h - 1, w - 1, 0);
     }
 }
 
@@ -255,7 +255,7 @@ void ImageDbTile::mouseMoveEvent(QMouseEvent*/*event*/, const TileInfo& /*info*/
      */
 }
 
-void ImageDbTile::mouseReleaseEvent(QMouseEvent* event, const TileInfo & /*info*/)
+void ImageDbTile::mouseReleaseEvent(QMouseEvent* event, const TileInfo& /*info*/)
 {
     //bool accept = false;
     // int x = event->pos().x();
@@ -289,11 +289,11 @@ void ImageDbTile::mouseReleaseEvent(QMouseEvent* event, const TileInfo & /*info*
     event->ignore();
 }
 
-void ImageDbTile::mouseEnterEvent(const TileInfo & /*info*/)
+void ImageDbTile::mouseEnterEvent(const TileInfo& /*info*/)
 {
 }
 
-void ImageDbTile::mouseLeaveEvent(const TileInfo & /*info*/)
+void ImageDbTile::mouseLeaveEvent(const TileInfo& /*info*/)
 {
     /*    mLeftHover.clear();
        mRightHover.clear();
@@ -328,5 +328,5 @@ QRect ImageDbTile::resizeToFrameKeepAspectRatio(const QSize& src, const QSize& d
         wn = wd * ratio;
         x  = (wd - wn) / 2;
     }
-    return QRect(x,y,wn,hn);
+    return QRect(x, y, wn, hn);
 }

@@ -33,6 +33,7 @@ class ColorTransform
 
         Image transformImage(const Image& inImage) const;
         QImage transformToQImage(const Image& inImage) const;
+        QImage transformQImage(const QImage& inImage) const;
         Image transformFromQImage(const QImage& inImage) const;
 
     private:

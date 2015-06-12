@@ -19,6 +19,7 @@ Image::Image() :
 template <typename T_>
 static void do_delete(T_ buf[])
 {
+    qDebug() << "Delete called on mPixels";
     delete[] buf;
 }
 
@@ -38,6 +39,18 @@ Image::Image(const QSize& size) :
 
 Image::~Image()
 {
+}
+
+Image Image::clone() const
+{
+    qDebug() << "Cloning image";
+    Image image;
+    image.mWidth  = this->mWidth;
+    image.mHeight = this->mHeight;
+    image.mPixels = QSharedPointer<float>(new float[mWidth * mHeight * IMG_NO_CHANNELS], do_delete<float>);
+
+    memcpy(image.mPixels.data(), this->mPixels.data(), sizeof(float) * mWidth * mHeight * IMG_NO_CHANNELS);
+    return image;
 }
 
 static void userReadData(png_structp pngPtr, png_bytep data, png_size_t length)
@@ -156,7 +169,7 @@ Image Image::fromFile(const QString& filename)
     for (size_t i = 0; i < height; i++)
     {
         png_uint_32 q =  stride * i;
-        rowPtrs[i] = (png_bytep)data + q*2;
+        rowPtrs[i] = (png_bytep)data + q * 2;
     }
 
     png_read_image(pngPtr, rowPtrs);
@@ -170,12 +183,12 @@ Image Image::fromFile(const QString& filename)
 
     for (int y = 0; y < height; y++)
     {
+        float* pixels = image.scanLine(y);
         for (int x = 0; x < width; x++)
         {
-            float* pixels = image.scanLine(y);
-            pixels[x * IMG_NO_CHANNELS]     =  (float)(data[y * stride + x*3 + 2] / 65535.0);
-            pixels[x * IMG_NO_CHANNELS + 1] =  (float)(data[y * stride + x*3 + 1] / 65535.0);
-            pixels[x * IMG_NO_CHANNELS + 2] =  (float)(data[y * stride + x*3 + 0] / 65535.0);
+            pixels[x * IMG_NO_CHANNELS]     =  (float)(data[y * stride + x * 3 + 2] / 65535.0);
+            pixels[x * IMG_NO_CHANNELS + 1] =  (float)(data[y * stride + x * 3 + 1] / 65535.0);
+            pixels[x * IMG_NO_CHANNELS + 2] =  (float)(data[y * stride + x * 3 + 0] / 65535.0);
         }
     }
     delete [] data;

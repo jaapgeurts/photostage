@@ -87,6 +87,7 @@ void Develop::imageChanged()
 {
     ui->developView->update();
     mHistogramModule->setPhoto(mPhoto);
+  //  mHistogramModule->recalculate();
 }
 
 void Develop::showEvent(QShowEvent*)

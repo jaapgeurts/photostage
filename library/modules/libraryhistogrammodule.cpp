@@ -22,7 +22,7 @@ void LibraryHistogramModule::setPhotos(const QList<Photo*> &list)
         if (!photo->libraryPreview().isNull())
         {
             //PhotoData image = loadImage(photo->libraryPreview());
-            mHistogram->setImageData(photo->libraryPreview());
+            //mHistogram->setImageData(photo->libraryPreview());
         }
     }
 }

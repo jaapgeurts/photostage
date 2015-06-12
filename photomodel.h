@@ -3,6 +3,7 @@
 
 #include <QAbstractListModel>
 #include <QThreadPool>
+#include <QImage>
 #include <QHash>
 
 #include "workunits/photoworkunit.h"
@@ -48,7 +49,7 @@ class PhotoModel : public QAbstractListModel
 
     private slots:
 
-        void imageLoaded(const QVariant &ref, const Image &image);
+        void imageLoaded(const QVariant &ref, const QImage &image);
 
     private:
 

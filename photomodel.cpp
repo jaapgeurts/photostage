@@ -10,7 +10,8 @@
 
 PhotoModel::PhotoModel(QObject* parent) :
     QAbstractListModel(parent),
-    mPreviewCache(QStandardPaths::writableLocation(QStandardPaths::CacheLocation), parent)
+    mPreviewCache(QStandardPaths::writableLocation(
+            QStandardPaths::CacheLocation), parent)
 {
     //
     // create table photo (
@@ -56,14 +57,18 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
         if (info->libraryPreview().isNull())
         {
             QString key = QString::number(info->id);
-            Image   img = mPreviewCache.get(key);
+            QImage  img = mPreviewCache.get(key);
 
             if (img.isNull() && !mPhotoInfoMap.contains(index))
             {
                 // If not available return
                 // load image in background thread
-                ImageFileLoader* loader = new ImageFileLoader(index, info->srcImagePath());
-                connect(loader, &ImageFileLoader::dataReady, this, &PhotoModel::imageLoaded);
+                ImageFileLoader* loader = new ImageFileLoader(index,
+                        info->srcImagePath());
+                connect(loader,
+                    &ImageFileLoader::dataReady,
+                    this,
+                    &PhotoModel::imageLoaded);
                 mThreadPool->start(loader);
                 mPhotoInfoMap.insert(index, info);
             }
@@ -81,20 +86,20 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
         return QVariant();
 }
 
-void PhotoModel::imageLoaded(const QVariant& ref, const Image& image)
+void PhotoModel::imageLoaded(const QVariant& ref, const QImage& image)
 {
-    QModelIndex index = ref.value<QModelIndex>();
-    //QImage      preview = image.scaled(QSize(PREVIEW_IMG_WIDTH,PREVIEW_IMG_HEIGHT),Qt::KeepAspectRatio,Qt::SmoothTransformation);
+    QModelIndex index   = ref.value<QModelIndex>();
+    QImage      preview =
+        image.scaled(QSize(PREVIEW_IMG_WIDTH,
+            PREVIEW_IMG_HEIGHT), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    Photo* info = mPhotoInfoMap.value(index);
-
-    //TODO: should scale the image here
-    Image   preview(image);
+    Photo*  info = mPhotoInfoMap.value(index);
 
     QString key = QString::number(info->id);
 
     mPreviewCache.put(key, preview);
 
+    // TODO: original = null
     info->setLibraryPreview(preview);
     mPhotoInfoMap.remove(index);
 
@@ -146,7 +151,9 @@ void PhotoModel::addData(const QList<long long>& idList)
     endInsertRows();
 }
 
-QVariant PhotoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int /*role*/) const
+QVariant PhotoModel::headerData(int /*section*/,
+    Qt::Orientation /*orientation*/,
+    int /*role*/) const
 {
     return QVariant();
 }
