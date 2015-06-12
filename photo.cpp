@@ -3,18 +3,17 @@
 
 #include "photo.h"
 
-
 Photo::Photo() :
     mLibraryPreviewsRGB(NULL)
 {
 }
 
-Photo::Photo(const Photo &info)
+Photo::Photo(const Photo& info)
 {
     *this = info;
 }
 
-Photo::Photo(const QImage &image, const QString &filename, long long id) :
+Photo::Photo(const Image& image, const QString& filename, long long id) :
     mLibraryPreviewsRGB(NULL),
     mLibraryPreview(image),
     mSrcImagePath(filename),
@@ -22,12 +21,12 @@ Photo::Photo(const QImage &image, const QString &filename, long long id) :
 {
 }
 
-Photo::Photo(QSqlQuery &q) :
+Photo::Photo(QSqlQuery& q) :
     mLibraryPreviewsRGB(NULL)
 {
     id = q.value(0).toInt();
     QString filename = q.value(1).toString();
-    QString path = q.value(2).toString();
+    QString path     = q.value(2).toString();
     mSrcImagePath = path + QDir::separator() + filename;
 
     if (q.value(3).isNull())
@@ -42,53 +41,51 @@ Photo::~Photo()
 {
 }
 
-void Photo::setOriginal(const QImage &image)
+void Photo::setOriginal(const Image& image)
 {
     mOriginal = image;
 }
 
-const QImage &Photo::original() const
+const Image& Photo::original() const
 {
     return mOriginal;
 }
 
-void Photo::setLibraryPreview(const QImage &image)
+void Photo::setLibraryPreview(const Image& image)
 {
     mLibraryPreview = image;
     // force regeneration of the display image
     mLibraryPreviewsRGB = QImage();
 }
 
-const QImage &Photo::libraryPreview()
+const Image& Photo::libraryPreview()
 {
     return mLibraryPreview;
 }
 
-const QImage &Photo::libraryPreviewsRGB(const ColorTransform& colorTransform)
+const QImage& Photo::libraryPreviewsRGB()
 {
     if (mLibraryPreviewsRGB.isNull())
     {
         // run this in a thread so the UI is fast.
-//        Image FileLoader* loader = new ImageFileLoader(index, info->srcImagePath());
-//        conne ct(loader,&ImageFileLoader::dataReady,this,&PhotoModel::imageLoaded);
-//        mThr eadPool->start(loader);
+        //        Image FileLoader* loader = new ImageFileLoader(index, info->srcImagePath());
+        //        conne ct(loader,&ImageFileLoader::dataReady,this,&PhotoModel::imageLoaded);
+        //        mThr eadPool->start(loader);
 
-        if (colorTransform.isValid())
-            mLibraryPreviewsRGB = colorTransform.transformImage(mLibraryPreview);
+        mLibraryPreviewsRGB = mLibraryPreview.toQImage();
     }
     return mLibraryPreviewsRGB;
 }
 
-void Photo::setSrcImagePath(const QString &path)
+void Photo::setSrcImagePath(const QString& path)
 {
     mSrcImagePath = path;
 }
 
-const QString &Photo::srcImagePath()
+const QString& Photo::srcImagePath()
 {
     return mSrcImagePath;
 }
-
 
 void Photo::setRating(int rating)
 {
@@ -124,5 +121,3 @@ Photo::Flag Photo::flag()
 {
     return mFlag;
 }
-
-

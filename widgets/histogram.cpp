@@ -9,17 +9,17 @@ Histogram::Histogram(QWidget* parent) : QWidget(parent)
 {
     setMinimumHeight(120);
     setMaximumHeight(120);
-    setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    memset(mChannelRed,0,sizeof(unsigned long) * BIN_SIZE);
-    memset(mChannelBlue,0,sizeof(unsigned long) * BIN_SIZE);
-    memset(mChannelGreen,0,sizeof(unsigned long) * BIN_SIZE);
+    memset(mChannelRed, 0, sizeof(unsigned long) * BIN_SIZE);
+    memset(mChannelBlue, 0, sizeof(unsigned long) * BIN_SIZE);
+    memset(mChannelGreen, 0, sizeof(unsigned long) * BIN_SIZE);
 
     mMaxAll = 0;
 }
 
 //void Histogram::setImageData(const PhotoData &image)
-void Histogram::setImageData(const QImage& image)
+void Histogram::setImageData(const Image& image)
 {
     mImage = image;
     recalculate();
@@ -27,35 +27,33 @@ void Histogram::setImageData(const QImage& image)
 
 void Histogram::recalculate()
 {
-
     // the default BIN_SIZE = 256
     //set all values to 0
-    memset(mChannelRed,0,sizeof(unsigned long) * BIN_SIZE);
-    memset(mChannelBlue,0,sizeof(unsigned long) * BIN_SIZE);
-    memset(mChannelGreen,0,sizeof(unsigned long) * BIN_SIZE);
+    memset(mChannelRed, 0, sizeof(unsigned long) * BIN_SIZE);
+    memset(mChannelBlue, 0, sizeof(unsigned long) * BIN_SIZE);
+    memset(mChannelGreen, 0, sizeof(unsigned long) * BIN_SIZE);
 
     mMaxAll = 0;
 
     // first do uniform distribution (linear transform)
 
-    double factor = 1.0;//(double)BIN_SIZE / (double)256;
-    //const uint8_t* pixels = image.constBits();
-    //    int count = image.byteCount() / 4;//NUM_CHANNELS;
-    int count = mImage.bytesPerLine();
+    int count = mImage.width();
 
     for (int j = 0; j < mImage.height(); j++)
     {
-        const uint8_t* pixels = mImage.constScanLine(j);
+        float* pixels = mImage.scanLine(j);
 
-        for (int i = 0; i < count - 4; i += 4)
+        for (int i = 0; i < count - 3; i += 3)
         {
-            uint8_t red   = pixels[i + 2];
-            uint8_t green = pixels[i + 1];
-            uint8_t blue  = pixels[i];
+            float red   = pixels[i + 2];
+            float green = pixels[i + 1];
+            float blue  = pixels[i + 0];
 
-            mChannelRed[(int)((double)red * factor)]++;
-            mChannelGreen[(int)((double)green * factor)]++;
-            mChannelBlue[(int)((double)blue * factor)]++;
+            int   factor = BIN_SIZE;
+
+            mChannelRed[(int)(red * factor)]++;
+            mChannelGreen[(int)(green * factor)]++;
+            mChannelBlue[(int)(blue * factor)]++;
 
             // use green as the average luminance.
             // use this value to scale the y axis of the histogram when painting
@@ -83,12 +81,12 @@ void Histogram::paintEvent(QPaintEvent* event)
     for (int x = 0; x < 256; x++)
     {
         painter.setPen(penRed);
-        painter.drawLine(x,wh - 1,x,wh - (int)((double)mChannelRed[x] / (double)mMaxAll * (double)wh));
+        painter.drawLine(x, wh - 1, x, wh - (int)((double)mChannelRed[x] / (double)mMaxAll * (double)wh));
 
         painter.setPen(penGreen);
-        painter.drawLine(x,wh - 1,x,wh - (int)((double)mChannelGreen[x] / (double)mMaxAll * (double)wh));
+        painter.drawLine(x, wh - 1, x, wh - (int)((double)mChannelGreen[x] / (double)mMaxAll * (double)wh));
 
         painter.setPen(penBlue);
-        painter.drawLine(x,wh - 1,x,wh - (int)((double)mChannelBlue[x] / (double)mMaxAll * (double)wh));
+        painter.drawLine(x, wh - 1, x, wh - (int)((double)mChannelBlue[x] / (double)mMaxAll * (double)wh));
     }
 }

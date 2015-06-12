@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "photodata.h"
+#include "image.h"
 
 #define BIN_SIZE (256)
 
@@ -15,7 +15,7 @@ class Histogram : public QWidget
 
         explicit Histogram(QWidget* parent = 0);
 
-        void setImageData(const QImage& image);
+        void setImageData(const Image &image);
 
     protected:
 
@@ -28,7 +28,7 @@ class Histogram : public QWidget
 
 private:
 
-        QImage        mImage;
+        Image        mImage;
 
         unsigned long mChannelRed[BIN_SIZE];
         unsigned long mChannelGreen[BIN_SIZE];

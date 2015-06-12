@@ -3,6 +3,8 @@
 #include <QFontDatabase>
 #include <QDebug>
 
+#include <QMetaType>
+
 int main(int argc, char* argv[])
 {
     QApplication a(argc, argv);
@@ -52,6 +54,9 @@ int main(int argc, char* argv[])
 
     QApplication::setPalette(darkPalette);
 #endif
+
+    // Register the Image type so that we can use it in signals and slots
+    qRegisterMetaType<Image>("Image");
 
     MainWindow w;
     w.show();

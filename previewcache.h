@@ -2,8 +2,9 @@
 #define PREVIEWCACHE_H
 
 #include <QObject>
-#include <QImage>
 #include <QCryptographicHash>
+
+#include "image.h"
 
 class PreviewCache : public QObject
 {
@@ -13,8 +14,8 @@ class PreviewCache : public QObject
 
         explicit PreviewCache(const QString& baseDir, QObject* parent = 0);
 
-        QImage get(const QString& key);
-        void put(const QString& key, const QImage& image);
+        Image get(const QString& key);
+        void put(const QString& key, const Image& image);
 
     public slots:
 

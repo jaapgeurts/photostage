@@ -59,7 +59,6 @@ SOURCES += main.cpp\
     library/modules/shortcutmodule.cpp \
     widgets/histogram.cpp \
     library/modules/taggingmodule.cpp \
-    photodata.cpp \
     widgets/loupeview.cpp \
     develop/modules/rawmodule.cpp \
     library/modules/libraryhistogrammodule.cpp \
@@ -68,7 +67,8 @@ SOURCES += main.cpp\
     develop/modules/basicmodule.cpp \
     filmstriptile.cpp \
     previewcache.cpp \
-    engine/colortransform.cpp
+    engine/colortransform.cpp \
+    image.cpp
     #processing/amaze_demosaic_RT.c
 
 HEADERS  += mainwindow.h \
@@ -122,7 +122,8 @@ HEADERS  += mainwindow.h \
     develop/modules/basicmodule.h \
     filmstriptile.h \
     previewcache.h \
-    engine/colortransform.h
+    engine/colortransform.h \
+    image.h
 
 
 FORMS    += mainwindow.ui \
@@ -178,6 +179,7 @@ LIBS += \
             -lz \
 # end libexiv2
             -ljpeg \
+            -lpng \
             -llcms2
 
 RESOURCES += \

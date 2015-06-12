@@ -48,7 +48,7 @@ class PhotoModel : public QAbstractListModel
 
     private slots:
 
-        void imageLoaded(const QVariant &ref, const QImage &image);
+        void imageLoaded(const QVariant &ref, const Image &image);
 
     private:
 

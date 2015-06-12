@@ -1,10 +1,11 @@
 #ifndef PHOTO
 #define PHOTO
 
-#include <QImage>
 #include <QString>
 #include <QMetaType>
 #include <QSqlQuery>
+
+#include "image.h"
 
 #include "engine/colortransform.h"
 
@@ -33,18 +34,18 @@ class Photo
         // Constructors
         Photo();
         Photo(const Photo& info);
-        Photo(const QImage& image, const QString& filename, long long id);
-        Photo(QSqlQuery & query);
+        Photo(const Image& image, const QString& filename, long long id);
+        Photo(QSqlQuery& query);
         virtual ~Photo();
 
         // getters & setters
-        void setOriginal(const QImage& image);
-        const QImage& original() const;
-        void setLibraryPreview(const QImage& image);
-        const QImage& libraryPreview();
-        const QImage& libraryPreviewsRGB(const ColorTransform &colorTransform);
+        void setOriginal(const Image& image);
+        const Image& original() const;
+        void setLibraryPreview(const Image& image);
+        const Image& libraryPreview();
+        const QImage& libraryPreviewsRGB();
 
-        void setSrcImagePath(const QString &path);
+        void setSrcImagePath(const QString& path);
         const QString& srcImagePath();
 
         void setRating(int rating);
@@ -60,15 +61,15 @@ class Photo
 
         long long id;
 
-private:
+    private:
 
-        int            mRating;
-        ColorLabel     mColorLabel;
-        Flag           mFlag;
-        QImage         mLibraryPreview;
-        QImage         mLibraryPreviewsRGB;
-        QImage         mOriginal;
-        QString        mSrcImagePath;
+        int        mRating;
+        ColorLabel mColorLabel;
+        Flag       mFlag;
+        Image      mLibraryPreview;
+        QImage      mLibraryPreviewsRGB;
+        Image      mOriginal;
+        QString    mSrcImagePath;
 };
 
 Q_DECLARE_METATYPE(Photo)

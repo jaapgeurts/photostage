@@ -4,9 +4,9 @@
 #include <QObject>
 #include <QModelIndex>
 #include <QString>
-#include <QImage>
 #include <QRunnable>
 
+#include "image.h"
 #include "engine/colortransform.h"
 #include "external/rawspeed/RawSpeed/RawSpeed-API.h"
 
@@ -18,13 +18,13 @@ class ImageFileLoader : public QObject, public QRunnable
 
     public:
 
-        explicit ImageFileLoader(const QVariant &ref, const QString& path);
+        explicit ImageFileLoader(const QVariant& ref, const QString& path);
         ~ImageFileLoader();
         void run();
 
     signals:
 
-        void dataReady(const QVariant& ref, const QImage& image);
+        void dataReady(const QVariant& ref, const Image& image);
         void error(QString error);
 
     private:
@@ -34,7 +34,7 @@ class ImageFileLoader : public QObject, public QRunnable
         ColorTransform mColorTransformRGBWorking;
         cmsHTRANSFORM  mHRawTransform;
 
-        QImage loadRaw();
+        Image loadRaw();
 
         /**
          * @brief ImageFileLoader::compute_inverse computes the inverse of a matrix
@@ -43,13 +43,13 @@ class ImageFileLoader : public QObject, public QRunnable
          * @return true, if successful, false if the inverse doesn't exist
          */
         bool compute_inverse(const float src[], float dst[]);
-        void dump_matrix(const QString &name, float m[]);
+        void dump_matrix(const QString& name, float m[]);
         int compute_cct(float R, float G, float B);
         void mmultm(float* A, float* B, float* out);
 
         //        void vmultm(float* V, float* M, float* out);
         void normalize(float* M);
-        void convertXyz65sRGB(float* src, uint8_t* dst, size_t size);
+        void convertXyz65sRGB(float* src, const Image& image, size_t size);
 };
 
 class Metadata

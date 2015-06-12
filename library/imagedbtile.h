@@ -42,7 +42,6 @@ class ImageDbTile : public AbstractTile
         QHash<int,bool> mLeftHover;
         QHash<int,bool> mRightHover;
         QHash<int,int>  mRatingHover;
-        ColorTransform  mColorTransform;
 };
 
 #endif // IMAGEDBCELLRENDERER_H

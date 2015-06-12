@@ -2,8 +2,7 @@
 #include "photo.h"
 
 FilmstripTile::FilmstripTile(TileView* parent) :
-    AbstractTile(parent),
-    mColorTransform(ColorTransform(WORKING_COLOR_SPACE,"sRGB"))
+    AbstractTile(parent)
 {
 }
 
@@ -50,7 +49,7 @@ void FilmstripTile::render(QPainter &painter, const TileInfo &tileInfo, const QV
         painter.restore();
 
         // draw the image.
-        QImage image = info->libraryPreviewsRGB(mColorTransform);
+        QImage image = info->libraryPreviewsRGB();
         QRect  photoFinalDimension;
 
         if (!image.isNull())

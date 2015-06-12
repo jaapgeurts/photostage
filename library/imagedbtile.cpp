@@ -8,8 +8,7 @@
 
 ImageDbTile::ImageDbTile(TileView* parent) :
     AbstractTile(parent),
-    mFontFoundIcons(QFont("General Foundicons",15)),
-    mColorTransform(ColorTransform(WORKING_COLOR_SPACE,"sRGB"))
+    mFontFoundIcons(QFont("General Foundicons",15))
 {
 }
 
@@ -56,7 +55,7 @@ void ImageDbTile::render(QPainter &painter, const TileInfo& tileInfo, const QVar
         painter.restore();
 
         // draw the image.
-        QImage image = info->libraryPreviewsRGB(mColorTransform);
+        QImage image = info->libraryPreviewsRGB();
         QRect  photoFinalDimension;
 
         if (!image.isNull())

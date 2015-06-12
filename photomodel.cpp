@@ -10,7 +10,7 @@
 
 PhotoModel::PhotoModel(QObject* parent) :
     QAbstractListModel(parent),
-    mPreviewCache(QStandardPaths::writableLocation(QStandardPaths::CacheLocation),parent)
+    mPreviewCache(QStandardPaths::writableLocation(QStandardPaths::CacheLocation), parent)
 {
     //
     // create table photo (
@@ -36,7 +36,7 @@ PhotoModel::~PhotoModel()
     mPhotoInfoList.clear();
 }
 
-QVariant PhotoModel::data(const QModelIndex &index, int role) const
+QVariant PhotoModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -56,16 +56,16 @@ QVariant PhotoModel::data(const QModelIndex &index, int role) const
         if (info->libraryPreview().isNull())
         {
             QString key = QString::number(info->id);
-            QImage  img = mPreviewCache.get(key);
+            Image   img = mPreviewCache.get(key);
 
             if (img.isNull() && !mPhotoInfoMap.contains(index))
             {
                 // If not available return
                 // load image in background thread
                 ImageFileLoader* loader = new ImageFileLoader(index, info->srcImagePath());
-                connect(loader,&ImageFileLoader::dataReady,this,&PhotoModel::imageLoaded);
+                connect(loader, &ImageFileLoader::dataReady, this, &PhotoModel::imageLoaded);
                 mThreadPool->start(loader);
-                mPhotoInfoMap.insert(index,info);
+                mPhotoInfoMap.insert(index, info);
             }
             info->setLibraryPreview(img);
             info->setOriginal(img);
@@ -81,21 +81,25 @@ QVariant PhotoModel::data(const QModelIndex &index, int role) const
         return QVariant();
 }
 
-void PhotoModel::imageLoaded(const QVariant& ref, const QImage& image)
+void PhotoModel::imageLoaded(const QVariant& ref, const Image& image)
 {
-    QModelIndex index   = ref.value<QModelIndex>();
-    QImage      preview = image.scaled(QSize(PREVIEW_IMG_WIDTH,PREVIEW_IMG_HEIGHT),Qt::KeepAspectRatio,Qt::SmoothTransformation);
+    QModelIndex index = ref.value<QModelIndex>();
+    //QImage      preview = image.scaled(QSize(PREVIEW_IMG_WIDTH,PREVIEW_IMG_HEIGHT),Qt::KeepAspectRatio,Qt::SmoothTransformation);
 
-    Photo*      info = mPhotoInfoMap.value(index);
+    Photo* info = mPhotoInfoMap.value(index);
+
+    //TODO: should scale the image here
+    Image   preview(image);
 
     QString key = QString::number(info->id);
-    mPreviewCache.put(key,preview);
+
+    mPreviewCache.put(key, preview);
 
     info->setLibraryPreview(preview);
     mPhotoInfoMap.remove(index);
 
     QVector<int> roles;
-    emit dataChanged(index,index,roles);
+    emit         dataChanged(index, index, roles);
 }
 
 void PhotoModel::onReloadPhotos(PhotoModel::SourceType source, long long pathId)
@@ -115,15 +119,15 @@ void PhotoModel::onReloadPhotos(PhotoModel::SourceType source, long long pathId)
     endResetModel();
 }
 
-bool PComp(const Photo* const & a, const Photo* const & b)
+bool PComp(const Photo* const& a, const Photo* const& b)
 {
     return a->id < b->id;
 }
 
-void PhotoModel::refreshData(const QList<Photo*> &list )
+void PhotoModel::refreshData(const QList<Photo*>& list )
 {
     // for now just emit that all data has changed. the tileview doesnt check anyway
-    emit dataChanged(index(0,0),index(rowCount(QModelIndex()) - 1,0));
+    emit dataChanged(index(0, 0), index(rowCount(QModelIndex()) - 1, 0));
 }
 
 void PhotoModel::addData(const QList<long long>& idList)
@@ -132,7 +136,7 @@ void PhotoModel::addData(const QList<long long>& idList)
     int           start = rowCount(QModelIndex());
 
     QList<Photo*> list = mWorkUnit->getPhotosById(idList);
-    beginInsertRows(QModelIndex(),start,list.size() - 1);
+    beginInsertRows(QModelIndex(), start, list.size() - 1);
     Photo*        info;
     foreach(info, list)
     {
@@ -147,7 +151,7 @@ QVariant PhotoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/
     return QVariant();
 }
 
-int PhotoModel::rowCount(const QModelIndex & /*parent*/) const
+int PhotoModel::rowCount(const QModelIndex& /*parent*/) const
 {
     return mPhotoInfoList.size();
 }

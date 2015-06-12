@@ -2,22 +2,59 @@
 
 #include "colortransform.h"
 
+// init static variables
+QHash<QString, ColorTransform> ColorTransform::mTransformCache;
+
+ColorTransform ColorTransform::getTransform(const QString& from, const QString& to, Format inFormat, Format outFormat)
+{
+    QString key = from + to;
+
+    if (mTransformCache.contains(key))
+    {
+        return mTransformCache.value(key);
+    }
+    else
+    {
+        ColorTransform transform(from, to, inFormat, outFormat);
+        mTransformCache.insert(key, transform );
+        return transform;
+    }
+}
+
 ColorTransform::ColorTransform() :
     mHTransform(NULL)
 {
 }
 
-ColorTransform::ColorTransform(const QString &from, const QString &to)
+static void transform_delete(char* d)
+{
+    cmsHTRANSFORM transform = (cmsHTRANSFORM)d;
+
+    cmsDeleteTransform(transform);
+}
+
+ColorTransform::ColorTransform(const QString& from, const QString& to, Format inFormat, Format outFormat)
 {
     cmsHPROFILE hInProfile, hOutProfile;
 
     QString     fromProfile = "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + from + ".icc";
     QString     toProfile   = "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + to + ".icc";
 
-    hInProfile  = cmsOpenProfileFromFile(fromProfile.toLocal8Bit().data(),"r");
-    hOutProfile = cmsOpenProfileFromFile(toProfile.toLocal8Bit().data(),"r");
+    hInProfile  = cmsOpenProfileFromFile(fromProfile.toLocal8Bit().data(), "r");
+    hOutProfile = cmsOpenProfileFromFile(toProfile.toLocal8Bit().data(), "r");
 
-    mHTransform = cmsCreateTransform(hInProfile,TYPE_BGRA_8,hOutProfile,TYPE_BGRA_8,INTENT_PERCEPTUAL,0);
+#define MY_TYPE (FLOAT_SH(1) | COLORSPACE_SH(PT_RGB) | CHANNELS_SH(3) | BYTES_SH(4) | DOSWAP_SH(1))
+
+    cmsUInt32Number inputFormat  = MY_TYPE;
+    cmsUInt32Number outputFormat = MY_TYPE;
+
+    if (inFormat == FORMAT_RGB32)
+        inputFormat = TYPE_BGRA_8;
+
+    if (outFormat == FORMAT_RGB32)
+        outputFormat = TYPE_BGRA_8;
+
+    mHTransform = QSharedPointer<char>((char*)cmsCreateTransform(hInProfile, inputFormat, hOutProfile, outputFormat, INTENT_PERCEPTUAL, 0), transform_delete);
 
     cmsCloseProfile(hInProfile);
     cmsCloseProfile(hOutProfile);
@@ -25,7 +62,6 @@ ColorTransform::ColorTransform(const QString &from, const QString &to)
 
 ColorTransform::~ColorTransform()
 {
-    cmsDeleteTransform(mHTransform);
 }
 
 bool ColorTransform::isValid() const
@@ -33,29 +69,48 @@ bool ColorTransform::isValid() const
     return mHTransform != NULL;
 }
 
-QImage ColorTransform::transformImage(const QImage& inImage) const
+Image ColorTransform::transformImage(const Image& inImage) const
 {
     //PhotoData result = PhotoData(inImage.size());
 
-    qDebug() << "Has alpha" << (inImage.hasAlphaChannel() ? "yes" : "no");
+    //qDebug() << "Has alpha" << (inImage.hasAlphaChannel() ? "yes" : "no");
 
-    if (inImage.format() != QImage::Format_RGB32)
+    Image  outImage(inImage.size());
+
+    float* inbuf  = inImage.data();
+    float* outbuf = outImage.data();
+
+    cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inbuf, outbuf, inImage.width() * inImage.height());
+
+    return outImage;
+}
+
+QImage ColorTransform::transformToQImage(const Image& inImage) const
+{
+    QImage outImage(inImage.size(), QImage::Format_RGB32);
+    int    width  = outImage.width();
+    int    height = outImage.height();
+
+    for (int y = 0; y < height; y++)
     {
-        qDebug() << "Image not 32 bit:" << inImage.format();
+        const float* inLine  = inImage.scanLine(y);
+        uint8_t*     outLine = outImage.scanLine(y);
+        cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inLine, outLine, width);
     }
+    return outImage;
+}
 
-    QImage outImage(inImage.size(),inImage.format());
+Image ColorTransform::transformFromQImage(const QImage& inImage) const
+{
+    Image outImage(inImage.size());
+    int   height = inImage.height();
+    int   width  = inImage.width();
 
-    for (int i = 0; i < inImage.height(); i++)
+    for (int y = 0; y < height; y++)
     {
-        const uchar* inbuf  = inImage.constScanLine(i);
-        uchar*       outbuf = outImage.scanLine(i);
-        //    const uchar *inbuf = image.constBits();
-        //    uint16_t *outbuf = result.data();
-        //    if (outbuf == NULL)
-        //        qDebug() << "outbuf == NULL";
-        cmsDoTransform(mHTransform,inbuf,outbuf,inImage.bytesPerLine() / 4);//* image.height());
+        const uint8_t* inLine  = inImage.constScanLine(y);
+        float*         outLine = outImage.scanLine(y);
+        cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inLine, outLine, width);
     }
-
     return outImage;
 }

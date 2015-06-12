@@ -10,7 +10,7 @@ PreviewCache::PreviewCache(const QString &baseDir, QObject* parent) :
 {
 }
 
-QImage PreviewCache::get(const QString &key)
+Image PreviewCache::get(const QString &key)
 {
     // Fetch the image from disk.
     std::pair<QString,QString> pair = dirFromKey(key);
@@ -19,15 +19,11 @@ QImage PreviewCache::get(const QString &key)
 
     QString                    fileName = dir + QDir::separator() + hash;
 
-    if (QFile::exists(fileName))
-    {
-        return QImage(fileName);
-    }
+    return Image::fromFile(fileName);
 
-    return QImage();
 }
 
-void PreviewCache::put(const QString &key, const QImage &image)
+void PreviewCache::put(const QString &key, const Image &image)
 {
     std::pair<QString,QString> pair = dirFromKey(key);
     QString                    dir  = pair.first;
@@ -38,7 +34,7 @@ void PreviewCache::put(const QString &key, const QImage &image)
 
     d.mkpath(dir);
     qDebug() << "Storing image at" << filePath;
-    image.save(filePath,"jpg",99);
+    image.saveToFile(filePath);
 }
 
 std::pair<QString,QString> PreviewCache::dirFromKey(const QString &key)

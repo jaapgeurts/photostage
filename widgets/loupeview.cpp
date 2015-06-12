@@ -6,7 +6,6 @@ LoupeView::LoupeView(QWidget* parent)
     : QWidget(parent),
     mPhoto(NULL),
     mPanning(false),
-    mColorTransform(ColorTransform(WORKING_COLOR_SPACE,"sRGB")),
     mPhotoTopLeft(0,0)
 {
     setMinimumSize(200,200);
@@ -26,7 +25,7 @@ void LoupeView::paintEvent(QPaintEvent* event)
     if (mPhoto == NULL)
         return;
     // TODO: should convert to the monitor profile here.
-    QImage img = mPhoto->libraryPreviewsRGB(mColorTransform);
+    QImage img = mPhoto->libraryPreviewsRGB();
 
     if (mPhoto != NULL && !img.isNull())
     {
@@ -61,8 +60,8 @@ void LoupeView::mouseMoveEvent(QMouseEvent* event)
         if (mPhotoTopLeft.y() > 0)
             mPhotoTopLeft.setY(0);
 
-        int hiddenx = width() - mPhoto->libraryPreviewsRGB(mColorTransform).width();
-        int hiddeny = height() - mPhoto->libraryPreviewsRGB(mColorTransform).height();
+        int hiddenx = width() - mPhoto->libraryPreviewsRGB().width();
+        int hiddeny = height() - mPhoto->libraryPreviewsRGB().height();
 
         if (mPhotoTopLeft.x() < hiddenx)
             mPhotoTopLeft.setX(hiddenx);

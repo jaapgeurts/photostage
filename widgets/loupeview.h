@@ -4,7 +4,6 @@
 #include <QWidget>
 #include <QPaintEvent>
 
-#include "engine/colortransform.h"
 #include "photo.h"
 
 class LoupeView : public QWidget
@@ -34,7 +33,6 @@ class LoupeView : public QWidget
     private:
 
         Photo*         mPhoto;
-        ColorTransform mColorTransform;
         bool           mPanning;
         QPoint         mMousePressLocation;
         QPoint         mPhotoTopLeft;
