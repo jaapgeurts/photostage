@@ -4,13 +4,29 @@
 #include <QObject>
 #include <QModelIndex>
 #include <QString>
+#include <QQueue>
 #include <QRunnable>
+#include <QThread>
+#include <QMutex>
 
 #include "image.h"
 #include "engine/colortransform.h"
 #include "external/rawspeed/RawSpeed/RawSpeed-API.h"
 
+#include <Halide.h>
+
 using namespace RawSpeed;
+
+struct Job
+{
+    Job()
+    {
+    }
+
+    Job(const QVariant& ref, const QString& path);
+    QVariant ref;
+    QString path;
+};
 
 class ImageFileLoader : public QObject, public QRunnable
 {
@@ -18,22 +34,30 @@ class ImageFileLoader : public QObject, public QRunnable
 
     public:
 
-        explicit ImageFileLoader(const QVariant& ref, const QString& path);
+        static ImageFileLoader* getLoader();
+
+        explicit ImageFileLoader();
         ~ImageFileLoader();
+
+        void addJob(const QVariant& ref, const QString& path);
+
         void run();
 
     signals:
 
         void dataReady(const QVariant& ref, const QImage& image);
-        void error(QString error);
+        void error(const QVariant& ref, QString error);
 
     private:
 
-        QVariant       mRef;
-        QString        mPath;
-        cmsHTRANSFORM  mHRawTransform;
+        static ImageFileLoader* mLoader;
 
-        QImage loadRaw();
+        QMutex                  mMutexJobs;
+        QQueue<Job>             mJobs;
+        cmsHTRANSFORM           mHRawTransform;
+        QThread                 mThread;
+
+        QImage loadRaw(const QString& path);
 
         /**
          * @brief ImageFileLoader::compute_inverse computes the inverse of a matrix
@@ -49,6 +73,11 @@ class ImageFileLoader : public QObject, public QRunnable
         //        void vmultm(float* V, float* M, float* out);
         void normalize(float* M);
         void convertXyz65sRGB(float* src, QImage& image);
+        void createRawProfileConversion();
+        QImage genThumb(const QString& path);
+        Job hasMore(QQueue<Job>& queue);
+        QImage rawThumb(const QString &path);
+        Halide::Image<float> getMatrix();
 };
 
 class Metadata

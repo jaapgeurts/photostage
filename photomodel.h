@@ -2,11 +2,11 @@
 #define QPHOTOMODEL_H
 
 #include <QAbstractListModel>
-#include <QThreadPool>
 #include <QImage>
 #include <QHash>
 
 #include "workunits/photoworkunit.h"
+#include "imagefileloader.h"
 #include "previewcache.h"
 #include "photo.h"
 
@@ -27,9 +27,9 @@ class PhotoModel : public QAbstractListModel
         ~PhotoModel();
 
         // getters / setters
-        int rowCount(const QModelIndex &parent) const;
+        int rowCount(const QModelIndex& parent) const;
         QVariant headerData(int, Qt::Orientation, int) const;
-        QVariant data(const QModelIndex &index, int role) const;
+        QVariant data(const QModelIndex& index, int role) const;
 
         /*
            // these methods are for editing
@@ -40,8 +40,8 @@ class PhotoModel : public QAbstractListModel
            bool insertRows(int row, int count, const QModelIndex &parent);
            bool removeRows(int row, int count, const QModelIndex &parent);
          */
-        void refreshData(const QList<Photo*> &);
-        void addData(const QList<long long> &idList);
+        void refreshData(const QList<Photo*>&);
+        void addData(const QList<long long>& idList);
 
     public slots:
 
@@ -49,17 +49,17 @@ class PhotoModel : public QAbstractListModel
 
     private slots:
 
-        void imageLoaded(const QVariant &ref, const QImage &image);
+        void imageLoaded(const QVariant& ref, const QImage& image);
 
     private:
 
-        PhotoWorkUnit* mWorkUnit;
+        PhotoWorkUnit*   mWorkUnit;
+        ImageFileLoader* mLoader;
         // The mPhotoInfoList is the main container for the Photo Objects.
         // Delete is required on it's contents
-        QList<Photo*>                     mPhotoInfoList;
-        mutable QHash<QModelIndex,Photo*> mPhotoInfoMap;
-        QThreadPool*                      mThreadPool;
-        mutable PreviewCache              mPreviewCache;
+        QList<Photo*>                      mPhotoInfoList;
+        mutable QHash<QModelIndex, Photo*> mPhotoInfoMap;
+        mutable PreviewCache               mPreviewCache;
 };
 
 #endif // QPHOTOMODEL_H

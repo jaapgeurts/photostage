@@ -9,6 +9,10 @@
 
 #include "engine/colortransform.h"
 
+#include <Halide.h>
+
+using namespace Halide;
+
 #define max(x, y)     ((x) > (y) ? (x) : (y))
 #define min(x, y)     ((x) < (y) ? (x) : (y))
 #define clip(v, x, y) (max(x, min(v, y)))
@@ -33,12 +37,27 @@ CameraMetaData* Metadata::metaData()
     return mMetaData;
 }
 
-ImageFileLoader::ImageFileLoader(const QVariant& ref, const QString& path) :
-    mRef(ref),
-    mPath(path)
+ImageFileLoader* ImageFileLoader::mLoader = NULL;
+
+ImageFileLoader* ImageFileLoader::getLoader()
+{
+    if (mLoader == NULL)
+        mLoader = new ImageFileLoader();
+
+    return mLoader;
+}
+
+ImageFileLoader::ImageFileLoader()
 {
     //qDebug() << "worker thread " << mModelIndex.row() <<" created";
 
+    setAutoDelete(false);
+
+    createRawProfileConversion();
+}
+
+void ImageFileLoader::createRawProfileConversion()
+{
     mHRawTransform = NULL;
 
     cmsHPROFILE hInProfile, hOutProfile;
@@ -57,7 +76,7 @@ ImageFileLoader::ImageFileLoader(const QVariant& ref, const QString& path) :
     CHANNELS_SH(3) | BYTES_SH(4))
 
     mHRawTransform = cmsCreateTransform(hInProfile,
-            TYPE_RGBA_FLT,
+            TYPE_RGB_FLT | PLANAR_SH(1),
             hOutProfile,
             TYPE_BGRA_8,
             INTENT_PERCEPTUAL,
@@ -73,6 +92,29 @@ ImageFileLoader::~ImageFileLoader()
 
     if (mHRawTransform != NULL)
         cmsDeleteTransform(mHRawTransform);
+
+    mJobs.clear();
+}
+
+void ImageFileLoader::addJob(const QVariant& ref, const QString& path)
+{
+    // TODO: these two lines should be atomic
+
+    mMutexJobs.lock();
+    bool shouldStart = mJobs.isEmpty();
+    mJobs.enqueue(Job(ref, path));
+    mMutexJobs.unlock();
+
+    if (shouldStart)
+    {
+        if (thread() != &mThread)
+        {
+            moveToThread(&mThread);
+            qDebug() << "Launching thread";
+            connect(&mThread, &QThread::started, this, &ImageFileLoader::run);
+        }
+        mThread.start();
+    }
 }
 
 int rawspeed_get_number_of_processor_cores()
@@ -80,21 +122,74 @@ int rawspeed_get_number_of_processor_cores()
     return 1;
 }
 
+//gradient(x, y) = x + y;
+//gradient(x, y) = e;
+
+QImage genGradient()
+{
+    QImage image(800, 600, QImage::Format_RGB32);
+
+    Var    x, y;
+    Func   gradient;
+
+    gradient(x, y) = x + y;
+
+    Image<int32_t> output = gradient.realize(800, 600);
+
+    memcpy(image.bits(), output.raw_buffer()->host, 800 * 600 * 4);
+
+    return image;
+}
+
+Job ImageFileLoader::hasMore(QQueue<Job>& queue)
+{
+    Job ret;
+
+    mMutexJobs.lock();
+
+    if (!queue.isEmpty())
+        ret = mJobs.dequeue();
+    mMutexJobs.unlock();
+    return ret;
+}
+
 void ImageFileLoader::run()
+{
+    Job j;
+
+    qDebug() << "Thread started";
+
+    while ((j = hasMore(mJobs)).ref.isValid())
+    {
+        QVariant ref  = j.ref;
+        QString  path = j.path;
+
+        QImage   image = genThumb(path);
+        emit     dataReady(ref, image);
+    }
+    qDebug() << "Thread stopped";
+    thread()->quit();
+}
+
+QImage ImageFileLoader::genThumb(const QString& path)
 {
     // TODO: catch errors and emit error(QString)
     QImage image;
-    QImage pixmap = QImage(mPath);
+
+    QImage pixmap = QImage(path);
+
+    // QImage pixmap = genGradient();
 
     // convert the image to an Image;
 
-    qDebug() << "Load image from" << mPath;
+    qDebug() << "Load image from" << path;
 
     if (pixmap.isNull())
     {
-        qDebug() << "QImage can't read." << mPath << "Attempting as raw";
+        qDebug() << "QImage can't read." << path << "Attempting as raw";
         // skip loading raw
-        image = loadRaw();
+        //image = loadRaw(path);
+        image = rawThumb(path);
 
         if (image.isNull())
             qDebug() << "raw image loading failed";
@@ -110,8 +205,7 @@ void ImageFileLoader::run()
 
         image = toWorking.transformQImage(pixmap);
     }
-
-    emit dataReady(mRef, image);
+    return image;
 }
 
 /**
@@ -227,17 +321,238 @@ void ImageFileLoader::normalize(float* M)
     }
 }
 
-QImage ImageFileLoader::loadRaw()
+Image<float> ImageFileLoader::getMatrix()
+{
+    float canon350d[9] =
+    { 6018, -617, -965, -8645, 15881, 2975, -1530, 1719, 7642 };
+
+    float raw_xyzd65[9];
+
+    //            qDebug() << "inverse for 350d";
+    for (int i = 0; i < 9; i++)
+        canon350d[i] /= 10000;
+
+    normalize(canon350d);
+
+    compute_inverse(canon350d, raw_xyzd65);
+
+    Image<float> im(3, 3);
+
+    for (int y = 0; y < 3; y++)
+        for (int x = 0; x < 3; x++)
+            im(x, y) = raw_xyzd65[y * 3 + x];
+
+
+    return im;
+}
+
+QImage ImageFileLoader::rawThumb(const QString& path)
 {
     QImage      image;
 
     ExivFacade* ex = ExivFacade::createExivReader();
 
-    ex->openFile(mPath);
+    ex->openFile(path);
     ExifInfo ex_info = ex->data();
     delete(ex);
 
-    FileReader reader(strdup(mPath.toLocal8Bit().data()));
+    FileReader reader(strdup(path.toLocal8Bit().data()));
+    FileMap*   map;
+    try
+    {
+        qDebug() << "loadRaw() opening" << reader.Filename();
+        map = reader.readFile();
+    }
+    catch (FileIOException& e)
+    {
+        qDebug() << "Error reading raw" << e.what();
+        return image;
+    }
+
+    RawDecoder* decoder;
+    try
+    {
+        RawParser parser(map);
+        decoder = parser.getDecoder();
+    }
+    catch (RawDecoderException& e)
+    {
+    }
+    decoder->failOnUnknown = 0;
+    decoder->checkSupport(Metadata::metaData());
+
+    decoder->decodeRaw();
+    decoder->decodeMetaData(Metadata::metaData());
+    RawImage raw = decoder->mRaw;
+    //raw->scaleBlackWhite();
+    float    bl = (float)raw->blackLevel;
+    float    wp = (float)raw->whitePoint;
+
+    qDebug() << "Blacklevel" << bl;
+    qDebug() << "Whitepoint" << wp;
+
+    int          components_per_pixel = raw->getCpp();
+    int          bytes_per_pixel      = raw->getBpp();
+    RawImageType type                 = raw->getDataType();
+    bool         is_cfa               = raw->isCFA;
+
+    if (is_cfa && components_per_pixel == 1 && type == TYPE_USHORT16 &&
+        bytes_per_pixel == 2)
+    {
+        ColorFilterArray cfa        = raw->cfa;
+        uint32_t         cfa_layout = cfa.getDcrawFilter();
+
+        uint16_t         vert, horz;
+
+        if (cfa_layout == 0x94949494)
+            vert = horz = 0;
+        else if (cfa_layout == 0x49494949)
+        {
+            horz = 0;
+            vert = 1;
+        }
+
+        uint16_t* rawdata        = (uint16_t*)raw->getData(0, 0);
+        int       width          = raw->dim.x;
+        int       height         = raw->dim.y;
+        int       pitch_in_bytes = raw->pitch;
+
+        width          -= 2; // cut of the borders off for simplicity.
+        height         -= 2;
+        pitch_in_bytes /= 2;
+
+        Halide::Image<uint16_t> rawh(raw->dim.x, raw->dim.y, "Raw Image");
+        uint16_t*               data = rawh.data();
+
+        for (int y = 0; y < raw->dim.y; y++)
+        {
+            uint16_t* row = &data[y * raw->dim.x];
+
+            // planar is not a problem now since we only have one plane
+            for (int x = 0; x < raw->dim.x; x++)
+                row[x] = rawdata[y * pitch_in_bytes + x];
+        }
+
+        Var  x("x"), y("y"), c("c");
+
+        Func shifted("shifted");
+        shifted(x, y) = rawh(x + 1, y + 1);
+
+        Func red("red");
+        red(x, y) = select((x % 2) == 1 && (y % 2) == 1, shifted(x, y), // red at red
+                select((x % 2 ) == 0 && (y % 2) == 0,  (shifted(x - 1, y - 1) +
+                shifted(x + 1, y - 1) +
+                shifted(x - 1, y + 1) +
+                shifted(x + 1, y + 1)) / 4,                                           // red at blue
+                select((y % 2) == 0,              // green at blue row
+                (shifted(x, y - 1) + shifted(x, y + 1)) / 2,
+                (shifted(x - 1, y) + shifted(x + 1, y)) / 2 )));
+
+        Func blue("blue");
+        blue(x, y) = select((x % 2) == 0 && (y % 2) == 0, shifted(x, y), // blue at blue
+                select((x % 2) == 1 && (y % 2) == 1,  (shifted(x - 1, y - 1) +
+                shifted(x + 1, y - 1) +
+                shifted(x - 1, y + 1) +
+                shifted(x + 1, y + 1)) / 4,                                           // blue at red
+                select((y % 2) == 1,              // green at blue row
+                (shifted(x, y - 1) + shifted(x, y + 1)) / 2,
+                (shifted(x - 1, y) + shifted(x + 1, y)) / 2 )));
+
+        Func green("green");
+        green(x, y) = select((x % 2) == (y % 2), (shifted(x - 1, y) +
+                shifted(x + 1, y) +
+                shifted(x, y - 1) +
+                shifted(x, y + 1)) / 4,                                        // green at blue or red
+                shifted(x, y));
+
+        Func bilinear("bilinear");
+        bilinear(x, y, c) =
+            select(c == 0,  blue(x, y),
+                select(c == 2, red(x, y),
+                green(x, y)));
+
+        //        deinterleaved.compile_to_c("deinterleave.cpp",
+        //            std::vector<Argument>(), "deinterleave");
+
+        Func demosaic("demosaic");
+        demosaic = bilinear;
+
+        // first convert to float
+        Func asFloat("asFloat");
+        asFloat(x, y, c) =
+            Halide::clamp((demosaic(x, y, c) - bl) / (wp - bl), 0.0f, 1.0f);                                                                                                                                              // todo: clip this result
+
+        // apply white balance
+        float wbr = ex_info.rgbCoeffients[0];
+        float wbg = ex_info.rgbCoeffients[1];
+        float wbb = ex_info.rgbCoeffients[2];
+
+        qDebug() << "WB coeffs" << wbr << "," << wbg << "," << wbb;
+
+        Func applyWhiteBalance("applyWhiteBalance");
+        applyWhiteBalance(x, y, c) =
+            select(c == 0,  asFloat(x, y, c) * wbb, // blue
+                select(c == 2, asFloat(x, y, c) * wbr, // red
+                asFloat(x, y, c) * wbg));
+
+        Image<float> mat = getMatrix();
+
+        Func toXYZmatrix("toXYZmatrix");
+        toXYZmatrix(x, y, c) = mat(0, c) * applyWhiteBalance(x, y, 2) +
+            mat(1, c) * applyWhiteBalance(x, y, 1) +
+            mat(2, c) * applyWhiteBalance(x, y, 0);
+
+        float gam = 1.8f;
+        Func  gamma("gamma");
+        gamma(x, y, c) = pow(toXYZmatrix(x, y, c), 1.0f / gam);
+
+        //(uint8_t)(pow(rawimage[pix]/255.0,1.0/gab)*255);
+        Func final ("final");
+        final (x, y, c) = toXYZmatrix(x, y, c) * 1.5f;
+
+        Var x_outer,y_outer, x_inner, y_inner, tile_index;
+        final.tile(x,y,x_outer,y_outer,x_inner,y_inner,256,256)
+                .fuse(x_outer,y_outer,tile_index)
+                .parallel(tile_index);
+
+
+        Halide::Image<float> out = final.realize(width, height, 3);
+
+        image = QImage(width, height, QImage::Format_RGB32);
+
+        float* outdata = (float*)out.data();
+
+        convertXyz65sRGB(outdata, image);
+
+        // images are stored in Halide as planar
+        //        for (int y = 0; y < height; y++)
+        //        {
+        //            uint8_t* dst = image.scanLine(y);
+
+        //            for (int x = 0; x < width; x++)
+        //            {
+        //                for (int c = 0; c < 3; c++)
+        //                    dst[x * 4 + c] =
+        //                        (uint8_t)(outdata[c * width * height + y * width + x] *
+        //                        255.0f);
+        //            }
+        //        }
+
+    }
+    return image;
+}
+
+QImage ImageFileLoader::loadRaw(const QString& path)
+{
+    QImage      image;
+
+    ExivFacade* ex = ExivFacade::createExivReader();
+
+    ex->openFile(path);
+    ExifInfo ex_info = ex->data();
+    delete(ex);
+
+    FileReader reader(strdup(path.toLocal8Bit().data()));
     FileMap*   map;
     try
     {
@@ -341,11 +656,11 @@ QImage ImageFileLoader::loadRaw()
         //            0.212671, 0.715160, 0.072169 ,
         //            0.019334, 0.119193, 0.950227  };
 
-        float xyz65_srgb[9] = {
-            3.2404542, -1.5371385, -0.4985314,
-            -0.9692660,  1.8760108,  0.0415560,
-            0.0556434, -0.2040259,  1.0572252
-        };
+//        float xyz65_srgb[9] = {
+//            3.2404542, -1.5371385, -0.4985314,
+//            -0.9692660,  1.8760108,  0.0415560,
+//            0.0556434, -0.2040259,  1.0572252
+//        };
 
         float raw_xyzd65[9];
 
@@ -360,7 +675,7 @@ QImage ImageFileLoader::loadRaw()
         }
         else if (ex_info.model == "PowerShot S30")
         {
-            //            qDebug() << "inverse for S30";
+            //   qDebug() << "inverse for S30";
             for (int i = 0; i < 9; i++)
                 powershots30[i] /= 10000;
             //  mmultm(powershots30,xyz65_srgb,raw_xyzd65);
@@ -401,12 +716,12 @@ QImage ImageFileLoader::loadRaw()
 
         // qDebug() << "Converted RGB MAX" << ex_info.RGB_mean[0] <<","<<ex_info.RGB_mean[1] <<","<<ex_info.RGB_mean[2];
 
-        for (int y = 1; y < height - 1; y++)
+        for (int y = 1; y <= height; y++)
         {
             int       line = (y - 1) * width * 4;
             uint16_t* row  = &data[y * pitch_in_bytes];
 
-            for (int x = 1; x < width - 1; x++)
+            for (int x = 1; x <= width; x++)
             {
                 int      pix = line + (x - 1) * 4;
 
@@ -544,7 +859,7 @@ QImage ImageFileLoader::loadRaw()
         // TODO: apply a constrast stretch
         delete work;
 
-        float mx = 1.0 / max(rm, max(gm, bm));
+        //float mx = 1.0 / max(rm, max(gm, bm));
         //        qDebug() << "max r,g,b" << rm <<","<<gm<<","<<bm;
         // mx = 1.0;
 
@@ -599,9 +914,11 @@ void ImageFileLoader::convertXyz65sRGB(float* src, QImage& image)
     int height = image.height();
     int width  = image.width();
 
-    for (int y = 0; y < height; y++)
-    {
-        uint8_t* row = image.scanLine(y);
-        cmsDoTransform(mHRawTransform, src + y * width * 4, row, width);
-    }
+    cmsDoTransform(mHRawTransform, src, image.bits(), width * height);
+}
+
+Job::Job(const QVariant& ref, const QString& path)
+{
+    this->ref  = ref;
+    this->path = path;
 }

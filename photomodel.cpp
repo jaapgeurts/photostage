@@ -5,7 +5,6 @@
 
 #include "constants.h"
 #include "photomodel.h"
-#include "imagefileloader.h"
 #include "widgets/tileview.h"
 
 PhotoModel::PhotoModel(QObject* parent) :
@@ -28,7 +27,11 @@ PhotoModel::PhotoModel(QObject* parent) :
     //            flag integer)")))
 
     mWorkUnit   = PhotoWorkUnit::instance();
-    mThreadPool = new QThreadPool(this);
+
+
+    mLoader = ImageFileLoader::getLoader();
+    connect(mLoader, &ImageFileLoader::dataReady, this,
+        &PhotoModel::imageLoaded);
 }
 
 PhotoModel::~PhotoModel()
@@ -59,21 +62,27 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
             QString key = QString::number(info->id);
             QImage  img = mPreviewCache.get(key);
 
+            info->setLibraryPreview(img);
+            info->setOriginal(img);
+
             if (img.isNull() && !mPhotoInfoMap.contains(index))
             {
                 // If not available return
-                // load image in background thread
-                ImageFileLoader* loader = new ImageFileLoader(index,
-                        info->srcImagePath());
-                connect(loader,
-                    &ImageFileLoader::dataReady,
-                    this,
-                    &PhotoModel::imageLoaded);
-                mThreadPool->start(loader);
+                // load image in background thread.
+                // Should kickoff single thread
+                // and add to thread queue so that only 1 instance of Halide runs
+                mLoader->addJob(index, info->srcImagePath());
                 mPhotoInfoMap.insert(index, info);
+
+                // Halide gen outside of thread
+                //                QImage image = genGradient();
+                //                QImage preview =
+                //                    image.scaled(QSize(PREVIEW_IMG_WIDTH,
+                //                        PREVIEW_IMG_HEIGHT), Qt::KeepAspectRatio,
+                //                        Qt::SmoothTransformation);
+                //                mPreviewCache.put(key, preview);
+                //                info->setLibraryPreview(preview);
             }
-            info->setLibraryPreview(img);
-            info->setOriginal(img);
         }
 
         return QVariant::fromValue<Photo*>(info);
@@ -96,6 +105,7 @@ void PhotoModel::imageLoaded(const QVariant& ref, const QImage& image)
     Photo*  info = mPhotoInfoMap.value(index);
 
     QString key = QString::number(info->id);
+
 
     mPreviewCache.put(key, preview);
 
@@ -138,7 +148,8 @@ void PhotoModel::refreshData(const QList<Photo*>& list )
 void PhotoModel::addData(const QList<long long>& idList)
 {
     // figure out what was changed, what is new and what has been added
-    int           start = rowCount(QModelIndex());
+    int start = rowCount(QModelIndex());
+
 
     QList<Photo*> list = mWorkUnit->getPhotosById(idList);
     beginInsertRows(QModelIndex(), start, list.size() - 1);

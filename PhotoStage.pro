@@ -13,7 +13,8 @@ TEMPLATE =
 
 DEPENDPATH += .
 INCLUDEPATH += . \
-               $$PWD/external/exiv2/include
+               $$PWD/external/exiv2/include \
+               $$PWD/external/halide/include
 
 # Qt uses libstdc++
 CONFIG += c++11
@@ -68,7 +69,9 @@ SOURCES += main.cpp\
     filmstriptile.cpp \
     previewcache.cpp \
     engine/colortransform.cpp \
-    image.cpp
+    image.cpp \
+    engine/pipeline.cpp \
+    engine/operation.cpp
     #processing/amaze_demosaic_RT.c
 
 HEADERS  += mainwindow.h \
@@ -123,7 +126,9 @@ HEADERS  += mainwindow.h \
     filmstriptile.h \
     previewcache.h \
     engine/colortransform.h \
-    image.h
+    image.h \
+    engine/pipeline.h \
+    engine/operation.h
 
 
 FORMS    += mainwindow.ui \
@@ -161,7 +166,6 @@ macx {
     OBJECTIVE_SOURCES +=
     LIBS += \
             -stdlib=libc++ \
-            $$PWD/external/exiv2/lib/libexiv2.a \
             /usr/lib/libiconv.dylib \
 # for release link to the dynamic lib
 #            $$PWD/external/exiv2/lib/libexiv2.13.dylib \
@@ -174,6 +178,8 @@ win32 {
 }
 
 LIBS += \
+            $$PWD/external/exiv2/lib/libexiv2.a \
+            $$PWD/external/halide/lib/libHalide.a \
 # for libexiv2
             -lexpat \
             -lz \
