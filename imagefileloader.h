@@ -13,8 +13,6 @@
 #include "engine/colortransform.h"
 #include "external/rawspeed/RawSpeed/RawSpeed-API.h"
 
-#include <Halide.h>
-
 using namespace RawSpeed;
 
 struct Job
@@ -54,7 +52,6 @@ class ImageFileLoader : public QObject, public QRunnable
 
         QMutex                  mMutexJobs;
         QQueue<Job>             mJobs;
-        cmsHTRANSFORM           mHRawTransform;
         QThread                 mThread;
 
         QImage loadRaw(const QString& path);
@@ -72,12 +69,10 @@ class ImageFileLoader : public QObject, public QRunnable
 
         //        void vmultm(float* V, float* M, float* out);
         void normalize(float* M);
-        void convertXyz65sRGB(float* src, QImage& image);
-        void createRawProfileConversion();
         QImage genThumb(const QString& path);
         Job hasMore(QQueue<Job>& queue);
-        QImage rawThumb(const QString &path);
-        Halide::Image<float> getMatrix();
+        QImage rawThumb(const QString& path);
+        void getMatrix(float *in, float*out);
 };
 
 class Metadata

@@ -19,6 +19,11 @@ INCLUDEPATH += . \
 # Qt uses libstdc++
 CONFIG += c++11
 
+QMAKE_CXXFLAGS_RELEASE -= -O2
+QMAKE_CXXFLAGS_RELEASE += -O3
+
+QMAKE_LFLAGS_RELEASE -= -O1
+
 SOURCES += main.cpp\
         mainwindow.cpp \
     imagefileloader.cpp \
@@ -70,8 +75,8 @@ SOURCES += main.cpp\
     previewcache.cpp \
     engine/colortransform.cpp \
     image.cpp \
-    engine/pipeline.cpp \
-    engine/operation.cpp
+    engine/operation.cpp \
+    engine/pipelinebuilder.cpp
     #processing/amaze_demosaic_RT.c
 
 HEADERS  += mainwindow.h \
@@ -127,8 +132,8 @@ HEADERS  += mainwindow.h \
     previewcache.h \
     engine/colortransform.h \
     image.h \
-    engine/pipeline.h \
-    engine/operation.h
+    engine/operation.h \
+    engine/pipelinebuilder.h
 
 
 FORMS    += mainwindow.ui \
@@ -156,6 +161,7 @@ LIBS += \
 
 macx {
     #QMAKE_INFO_PLIST = Info.plist
+#    QMAKE_CXXFLAGS -= -std=c++0x
     QMAKE_CXXFLAGS += \
                     -std=c++11 \
                     -stdlib=libc++ \

@@ -225,6 +225,9 @@ const QImage Exiv2Lib::loadImage()
     //     section 2.6 IFD #2
     selected = list.back();
 
+    // FIXME: crash hapened here when reading the QImage.
+    // not quite sure what caused it
+
     // load the thumbnail
     PreviewImage thumbnail = loader.getPreviewImage(selected);
 

@@ -6,12 +6,8 @@
 #include "constants.h"
 #include "imagefileloader.h"
 #include "import/exivfacade.h"
-
 #include "engine/colortransform.h"
-
-#include <Halide.h>
-
-using namespace Halide;
+#include "engine/pipelinebuilder.h"
 
 #define max(x, y)     ((x) > (y) ? (x) : (y))
 #define min(x, y)     ((x) < (y) ? (x) : (y))
@@ -52,47 +48,11 @@ ImageFileLoader::ImageFileLoader()
     //qDebug() << "worker thread " << mModelIndex.row() <<" created";
 
     setAutoDelete(false);
-
-    createRawProfileConversion();
-}
-
-void ImageFileLoader::createRawProfileConversion()
-{
-    mHRawTransform = NULL;
-
-    cmsHPROFILE hInProfile, hOutProfile;
-
-    hInProfile = cmsOpenProfileFromFile(
-        "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/D65_XYZ.icc",
-        "r");
-    hOutProfile = cmsOpenProfileFromFile(
-        "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/MelissaRGB.icc",
-        "r");
-    //    hInProfile = cmsCreateXYZProfile();
-    //    hOutProfile = cmsCreate_sRGBProfile();
-
-    // for using checking wether the input range conforms to XYZ
-#define TYPE_XYZN_FLT (FLOAT_SH(1) | COLORSPACE_SH(PT_XYZ) | EXTRA_SH(1) | \
-    CHANNELS_SH(3) | BYTES_SH(4))
-
-    mHRawTransform = cmsCreateTransform(hInProfile,
-            TYPE_RGB_FLT | PLANAR_SH(1),
-            hOutProfile,
-            TYPE_BGRA_8,
-            INTENT_PERCEPTUAL,
-            0);
-
-    cmsCloseProfile(hInProfile);
-    cmsCloseProfile(hOutProfile);
 }
 
 ImageFileLoader::~ImageFileLoader()
 {
     //qDebug() << "worker thread " << mModelIndex.row() <<" deleted";
-
-    if (mHRawTransform != NULL)
-        cmsDeleteTransform(mHRawTransform);
-
     mJobs.clear();
 }
 
@@ -124,22 +84,6 @@ int rawspeed_get_number_of_processor_cores()
 
 //gradient(x, y) = x + y;
 //gradient(x, y) = e;
-
-QImage genGradient()
-{
-    QImage image(800, 600, QImage::Format_RGB32);
-
-    Var    x, y;
-    Func   gradient;
-
-    gradient(x, y) = x + y;
-
-    Image<int32_t> output = gradient.realize(800, 600);
-
-    memcpy(image.bits(), output.raw_buffer()->host, 800 * 600 * 4);
-
-    return image;
-}
 
 Job ImageFileLoader::hasMore(QQueue<Job>& queue)
 {
@@ -177,8 +121,6 @@ QImage ImageFileLoader::genThumb(const QString& path)
     QImage image;
 
     QImage pixmap = QImage(path);
-
-    // QImage pixmap = genGradient();
 
     // convert the image to an Image;
 
@@ -321,29 +263,14 @@ void ImageFileLoader::normalize(float* M)
     }
 }
 
-Image<float> ImageFileLoader::getMatrix()
+void ImageFileLoader::getMatrix(float* in, float* out)
 {
-    float canon350d[9] =
-    { 6018, -617, -965, -8645, 15881, 2975, -1530, 1719, 7642 };
-
-    float raw_xyzd65[9];
-
-    //            qDebug() << "inverse for 350d";
     for (int i = 0; i < 9; i++)
-        canon350d[i] /= 10000;
+        in[i] /= 10000;
 
-    normalize(canon350d);
+    normalize(in);
+    compute_inverse(in, out);
 
-    compute_inverse(canon350d, raw_xyzd65);
-
-    Image<float> im(3, 3);
-
-    for (int y = 0; y < 3; y++)
-        for (int x = 0; x < 3; x++)
-            im(x, y) = raw_xyzd65[y * 3 + x];
-
-
-    return im;
 }
 
 QImage ImageFileLoader::rawThumb(const QString& path)
@@ -369,6 +296,8 @@ QImage ImageFileLoader::rawThumb(const QString& path)
         return image;
     }
 
+    // remove raw from here
+
     RawDecoder* decoder;
     try
     {
@@ -383,13 +312,10 @@ QImage ImageFileLoader::rawThumb(const QString& path)
 
     decoder->decodeRaw();
     decoder->decodeMetaData(Metadata::metaData());
-    RawImage raw = decoder->mRaw;
+    RawImage     raw = decoder->mRaw;
     //raw->scaleBlackWhite();
-    float    bl = (float)raw->blackLevel;
-    float    wp = (float)raw->whitePoint;
-
-    qDebug() << "Blacklevel" << bl;
-    qDebug() << "Whitepoint" << wp;
+    int          bl = raw->blackLevel;
+    int          wp = raw->whitePoint;
 
     int          components_per_pixel = raw->getCpp();
     int          bytes_per_pixel      = raw->getBpp();
@@ -433,111 +359,42 @@ QImage ImageFileLoader::rawThumb(const QString& path)
                 row[x] = rawdata[y * pitch_in_bytes + x];
         }
 
-        Var  x("x"), y("y"), c("c");
-
-        Func shifted("shifted");
-        shifted(x, y) = rawh(x + 1, y + 1);
-
-        Func red("red");
-        red(x, y) = select((x % 2) == 1 && (y % 2) == 1, shifted(x, y), // red at red
-                select((x % 2 ) == 0 && (y % 2) == 0,  (shifted(x - 1, y - 1) +
-                shifted(x + 1, y - 1) +
-                shifted(x - 1, y + 1) +
-                shifted(x + 1, y + 1)) / 4,                                           // red at blue
-                select((y % 2) == 0,              // green at blue row
-                (shifted(x, y - 1) + shifted(x, y + 1)) / 2,
-                (shifted(x - 1, y) + shifted(x + 1, y)) / 2 )));
-
-        Func blue("blue");
-        blue(x, y) = select((x % 2) == 0 && (y % 2) == 0, shifted(x, y), // blue at blue
-                select((x % 2) == 1 && (y % 2) == 1,  (shifted(x - 1, y - 1) +
-                shifted(x + 1, y - 1) +
-                shifted(x - 1, y + 1) +
-                shifted(x + 1, y + 1)) / 4,                                           // blue at red
-                select((y % 2) == 1,              // green at blue row
-                (shifted(x, y - 1) + shifted(x, y + 1)) / 2,
-                (shifted(x - 1, y) + shifted(x + 1, y)) / 2 )));
-
-        Func green("green");
-        green(x, y) = select((x % 2) == (y % 2), (shifted(x - 1, y) +
-                shifted(x + 1, y) +
-                shifted(x, y - 1) +
-                shifted(x, y + 1)) / 4,                                        // green at blue or red
-                shifted(x, y));
-
-        Func bilinear("bilinear");
-        bilinear(x, y, c) =
-            select(c == 0,  blue(x, y),
-                select(c == 2, red(x, y),
-                green(x, y)));
-
-        //        deinterleaved.compile_to_c("deinterleave.cpp",
-        //            std::vector<Argument>(), "deinterleave");
-
-        Func demosaic("demosaic");
-        demosaic = bilinear;
-
-        // first convert to float
-        Func asFloat("asFloat");
-        asFloat(x, y, c) =
-            Halide::clamp((demosaic(x, y, c) - bl) / (wp - bl), 0.0f, 1.0f);                                                                                                                                              // todo: clip this result
-
         // apply white balance
         float wbr = ex_info.rgbCoeffients[0];
         float wbg = ex_info.rgbCoeffients[1];
         float wbb = ex_info.rgbCoeffients[2];
 
-        qDebug() << "WB coeffs" << wbr << "," << wbg << "," << wbb;
+        float canon350d[9] =
+        { 6018, -617, -965, -8645, 15881, 2975, -1530, 1719, 7642 };
+        float powershots30[9] =
+        { 10566, -3652, -1129, -6552, 14662, 2006, -2197, 2581, 7670 };
+        float canon5DMarkII[9] =
+        { 4716, 603, -830, -7798, 15474, 2480, -1496, 1937, 6651 };
+        float eos1100d[9] =
+        { 6444, -904, -893, -4563, 12308, 2535, -903, 2016, 6728 };
 
-        Func applyWhiteBalance("applyWhiteBalance");
-        applyWhiteBalance(x, y, c) =
-            select(c == 0,  asFloat(x, y, c) * wbb, // blue
-                select(c == 2, asFloat(x, y, c) * wbr, // red
-                asFloat(x, y, c) * wbg));
+        float mat[9];
 
-        Image<float> mat = getMatrix();
+        if (ex_info.model == "EOS 350D DIGITAL")
+            getMatrix(canon350d,mat);
+        else if (ex_info.model == "PowerShot S30")
+            getMatrix(powershots30,mat);
+        else if (ex_info.model == "EOS 5D Mark II")
+            getMatrix(canon5DMarkII,mat);
+        else if (ex_info.model == "EOS REBEL T3")
+            getMatrix(eos1100d,mat);
+        else
+            getMatrix(canon5DMarkII,mat);
 
-        Func toXYZmatrix("toXYZmatrix");
-        toXYZmatrix(x, y, c) = mat(0, c) * applyWhiteBalance(x, y, 2) +
-            mat(1, c) * applyWhiteBalance(x, y, 1) +
-            mat(2, c) * applyWhiteBalance(x, y, 0);
+        PipelineBuilder pb;
+        pb.prepare();
 
-        float gam = 1.8f;
-        Func  gamma("gamma");
-        gamma(x, y, c) = pow(toXYZmatrix(x, y, c), 1.0f / gam);
+        pb.setWhiteBalance(wbr, wbg, wbb);
+        pb.setDomain(bl, wp);
+        pb.setColorConversion(mat);
+        pb.setInput(rawh);
 
-        //(uint8_t)(pow(rawimage[pix]/255.0,1.0/gab)*255);
-        Func final ("final");
-        final (x, y, c) = toXYZmatrix(x, y, c) * 1.5f;
-
-        Var x_outer,y_outer, x_inner, y_inner, tile_index;
-        final.tile(x,y,x_outer,y_outer,x_inner,y_inner,256,256)
-                .fuse(x_outer,y_outer,tile_index)
-                .parallel(tile_index);
-
-
-        Halide::Image<float> out = final.realize(width, height, 3);
-
-        image = QImage(width, height, QImage::Format_RGB32);
-
-        float* outdata = (float*)out.data();
-
-        convertXyz65sRGB(outdata, image);
-
-        // images are stored in Halide as planar
-        //        for (int y = 0; y < height; y++)
-        //        {
-        //            uint8_t* dst = image.scanLine(y);
-
-        //            for (int x = 0; x < width; x++)
-        //            {
-        //                for (int c = 0; c < 3; c++)
-        //                    dst[x * 4 + c] =
-        //                        (uint8_t)(outdata[c * width * height + y * width + x] *
-        //                        255.0f);
-        //            }
-        //        }
-
+        image = pb.execute( width, height);
     }
     return image;
 }
@@ -656,11 +513,11 @@ QImage ImageFileLoader::loadRaw(const QString& path)
         //            0.212671, 0.715160, 0.072169 ,
         //            0.019334, 0.119193, 0.950227  };
 
-//        float xyz65_srgb[9] = {
-//            3.2404542, -1.5371385, -0.4985314,
-//            -0.9692660,  1.8760108,  0.0415560,
-//            0.0556434, -0.2040259,  1.0572252
-//        };
+        //        float xyz65_srgb[9] = {
+        //            3.2404542, -1.5371385, -0.4985314,
+        //            -0.9692660,  1.8760108,  0.0415560,
+        //            0.0556434, -0.2040259,  1.0572252
+        //        };
 
         float raw_xyzd65[9];
 
@@ -854,7 +711,7 @@ QImage ImageFileLoader::loadRaw(const QString& path)
 
         //float *out = new float[width*height*4];
         // convert from xyz65 -> srgb using lcms2
-        convertXyz65sRGB(work, image);
+        //convertXyz65sRGB(work, image);
 
         // TODO: apply a constrast stretch
         delete work;
@@ -907,14 +764,6 @@ QImage ImageFileLoader::loadRaw(const QString& path)
     delete decoder;
 
     return image;
-}
-
-void ImageFileLoader::convertXyz65sRGB(float* src, QImage& image)
-{
-    int height = image.height();
-    int width  = image.width();
-
-    cmsDoTransform(mHRawTransform, src, image.bits(), width * height);
 }
 
 Job::Job(const QVariant& ref, const QString& path)
