@@ -160,10 +160,10 @@ void TileView::computeCellSize()
     if (mOrientation == Qt::Vertical)
     {
         int w = width() - mHScrollBar->width();
-        mCurrentColumnCount = w / mMinimumCellWidth;
+        mTilesPerColRow = w / mMinimumCellWidth;
 
-        if (mCurrentColumnCount != 0)
-            mComputedCellWidth = w / mCurrentColumnCount;
+        if (mTilesPerColRow != 0)
+            mComputedCellWidth = w / mTilesPerColRow;
         else
             mComputedCellWidth = mMinimumCellWidth;
         mComputedCellHeight =
@@ -172,17 +172,17 @@ void TileView::computeCellSize()
     else
     {
         int h = height() - mHScrollBar->height();
-        mCurrentRowCount = h / mMinimumCellHeight;
+        mTilesPerColRow = h / mMinimumCellHeight;
 
-        if (mCurrentRowCount == 0)
+        if (mTilesPerColRow == 0)
         {
             mComputedCellHeight = mMinimumCellHeight;
         }
         else
         {
-            if (mMaxRows > 0 && mCurrentRowCount > mMaxRows)
-                mCurrentRowCount = mMaxRows;
-            mComputedCellHeight = h / mCurrentRowCount;
+            if (mMaxRows > 0 && mTilesPerColRow > mMaxRows)
+                mTilesPerColRow = mMaxRows;
+            mComputedCellHeight = h / mTilesPerColRow;
         }
         mComputedCellWidth =
             (int)((float)mComputedCellHeight * mCellHeightRatio);
@@ -279,14 +279,14 @@ void TileView::paintEvent(QPaintEvent*/*event*/)
     {
         innerLength = width() - mHScrollBar->width();
         start       = mViewportPosition / mComputedCellHeight *
-            mCurrentColumnCount;                                               // image to start showing images
+            mTilesPerColRow;                                               // image to start showing images
         // slider pos is a pixel value
         offset = mViewportPosition %  mComputedCellHeight; // portion of the row that is outside the view (on top)
     }
     else // Horizontal
     {
         innerLength = height() - mHScrollBar->height();
-        start       = mViewportPosition / mComputedCellWidth * mCurrentRowCount; // image to start showing images
+        start       = mViewportPosition / mComputedCellWidth * mTilesPerColRow; // image to start showing images
         // slider pos is a pixel value
         offset = mViewportPosition %  mComputedCellWidth; // portion of the row that is outside the view (on top)
     }
@@ -618,15 +618,15 @@ void TileView::keyPressEvent(QKeyEvent* event)
     {
         case Qt::Key_Up:
 
-            if (oldIndex >= mCurrentColumnCount)
-                newIndex = oldIndex - mCurrentColumnCount;
+            if (oldIndex >= mTilesPerColRow)
+                newIndex = oldIndex - mTilesPerColRow;
             break;
 
         case Qt::Key_Down:
 
             if (oldIndex <
-                mListModel->rowCount(mRootIndex) - mCurrentColumnCount)
-                newIndex = oldIndex + mCurrentColumnCount;
+                mListModel->rowCount(mRootIndex) - mTilesPerColRow)
+                newIndex = oldIndex + mTilesPerColRow;
             break;
 
         case Qt::Key_Left:
@@ -655,21 +655,35 @@ void TileView::keyPressEvent(QKeyEvent* event)
 
 void TileView::ensureTileVisible(int index)
 {
-    if (mCurrentColumnCount == 0)
+    if (mTilesPerColRow == 0)
         return;
 
-    int topy = index / mCurrentColumnCount * mComputedCellHeight;
+    int top;
+    int margin;
+    int cellsize;
 
-    qDebug() << "Tile Y" << topy;
-
-    if (topy - mViewportPosition >= height())
+    if (mOrientation == Qt::Vertical)
     {
-        mHScrollBar->setValue(topy - height() + mComputedCellHeight);
-        //        sliderValueChanged(mHScrollBar->value());
+        top      = index / mTilesPerColRow * mComputedCellHeight;
+        margin   = height();
+        cellsize = mComputedCellHeight;
     }
-    else if (topy + mComputedCellHeight - mViewportPosition <= 0)
+    else if (mOrientation == Qt::Horizontal)
     {
-        mHScrollBar->setValue(topy);
+        top      = index / mTilesPerColRow * mComputedCellWidth;
+        margin   = width();
+        cellsize = mComputedCellWidth;
+    }
+
+    qDebug() << "Tile Y" << top;
+
+    if (top - mViewportPosition >= margin)
+    {
+        mHScrollBar->setValue(top - margin + cellsize);
+    }
+    else if (top + cellsize - mViewportPosition <= 0)
+    {
+        mHScrollBar->setValue(top);
     }
 }
 
@@ -683,26 +697,14 @@ TileInfo TileView::createTileInfo(int index)
     {
         info.index = index;
 
-        if (mOrientation == Qt::Vertical)
-        {
-            if (mCurrentColumnCount == 0)
-                info.row = info.column = -1;
-            else
-            {
-                info.row    = index / mCurrentColumnCount;
-                info.column = index % mCurrentColumnCount;
-            }
-        }
+        if (mTilesPerColRow == 0)
+            info.row = info.column = -1;
         else
         {
-            if (mCurrentRowCount == 0)
-                info.row = info.column = -1;
-            else
-            {
-                info.row    = index / mCurrentRowCount;
-                info.column = index % mCurrentRowCount;
-            }
+            info.row    = index / mTilesPerColRow;
+            info.column = index % mTilesPerColRow;
         }
+
         info.x          = info.column * mComputedCellWidth;
         info.y          = info.row * mComputedCellHeight;
         info.width      = mComputedCellWidth;
@@ -750,7 +752,7 @@ int TileView::posToIndex(const QPoint& pos) const
 
     int row, col;
     int pageStart;
-    int cellCount;
+    //int cellCount;
 
     // part of row out of viewport
     if (mOrientation == Qt::Vertical)
@@ -759,12 +761,12 @@ int TileView::posToIndex(const QPoint& pos) const
 
         // skip the images that are scrolled out of the view (on the top)
         pageStart = (mViewportPosition - yoff) / mComputedCellHeight *
-            mCurrentColumnCount;
+            mTilesPerColRow;
 
         // calculate the col,row of the image visible in the view
-        row       = (pos.y() + yoff) / mComputedCellHeight;
-        col       = pos.x() / mComputedCellWidth;
-        cellCount = mCurrentColumnCount;
+        row = (pos.y() + yoff) / mComputedCellHeight;
+        col = pos.x() / mComputedCellWidth;
+        //   cellCount = mCurrentColumnCount;
     }
     else
     {
@@ -772,16 +774,16 @@ int TileView::posToIndex(const QPoint& pos) const
 
         // skip the images that are scrolled out of the view (on the top)
         pageStart = (mViewportPosition - xoff) / mComputedCellWidth *
-            mCurrentRowCount;
+            mTilesPerColRow;
 
         // calculate the col,row of the image visible in the view
-        col       = (pos.x() + xoff) / mComputedCellWidth;
-        row       = pos.y() / mComputedCellHeight;
-        cellCount = mCurrentRowCount;
+        col = (pos.x() + xoff) / mComputedCellWidth;
+        row = pos.y() / mComputedCellHeight;
+        // cellCount = mTilesPerColRow;
     }
 
     // add them together
-    return pageStart + (row * mCurrentColumnCount) + col;
+    return pageStart + (row * mTilesPerColRow) + col;
 }
 
 QModelIndex TileView::posToModelIndex(const QPoint& pos) const

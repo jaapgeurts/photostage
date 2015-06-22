@@ -111,8 +111,7 @@ private:
     int mMaxRows;
 
     // number of columns in a row or rows in a column depending on orientation
-    int mCurrentColumnCount;
-    int mCurrentRowCount;
+    int mTilesPerColRow;
 
     int mHighlightedTile;
 
