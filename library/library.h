@@ -12,53 +12,61 @@
 #include "modules/shortcutmodule.h"
 #include "modules/libraryhistogrammodule.h"
 
-namespace Ui {
-class Library;
+namespace Ui
+{
+    class Library;
 }
 
-class Library : public Module
+namespace PhotoStage
 {
-    Q_OBJECT
-public:
+    class Library : public Module
+    {
+        Q_OBJECT
 
-    explicit Library(PhotoModel * const model, QWidget *parent = 0);
-    ~Library();
+        public:
 
-    QRect lightGap();
+            explicit Library(PhotoModel* const model, QWidget* parent = 0);
+            ~Library();
 
-    void setSelectionModel(QItemSelectionModel* selectionModel);
+            QRect lightGap();
 
-signals:
+            void setSelectionModel(QItemSelectionModel* selectionModel);
 
-    void photoSelectionChanged(const QList<Photo*> & list);
-    void photoSourceChanged(PhotoModel::SourceType type, long long id);
+        signals:
 
-public slots:
+            void photoSelectionChanged(const QList<Photo*>& list);
+            void photoSourceChanged(PhotoModel::SourceType type, long long id);
 
-    void onPhotoSelectionChanged(const QItemSelection &selected, const QItemSelection &);
-    void onTileDoubleClicked(const QModelIndex& index);
+        public slots:
 
-    // For clicks on the tile
-//    void rotateLeftClicked(const QModelIndex& index);
-//    void rotateRightClicked(const QModelIndex& index);
-//    void ratingClicked(const QModelIndex& index, int rating);
+            void onPhotoSelectionChanged(const QItemSelection& selected,
+                const QItemSelection&);
+            void onTileDoubleClicked(const QModelIndex& index);
 
-protected:
-    bool event(QEvent *event);
+            // For clicks on the tile
+            //    void rotateLeftClicked(const QModelIndex& index);
+            //    void rotateRightClicked(const QModelIndex& index);
+            //    void ratingClicked(const QModelIndex& index, int rating);
 
-private slots:
-    void onNewCollectionClicked();
-    void onFilesClicked(const QModelIndex&);
-    void customContextMenu(const QPoint& pos);
+        protected:
 
-private:
-        Ui::Library *ui;
-        PhotoModel * mPhotoModel;
-        PhotoWorkUnit * mPhotoWorkUnit;
-        SqlPathModel *mPathModel;
-        TaggingModule *mKeywording;
-        LibraryHistogramModule* mHistogramModule;
+            bool event(QEvent* event);
 
-};
+        private slots:
+
+            void onNewCollectionClicked();
+            void onFilesClicked(const QModelIndex&);
+            void customContextMenu(const QPoint& pos);
+
+        private:
+
+            Ui::Library*            ui;
+            PhotoModel*             mPhotoModel;
+            PhotoWorkUnit*          mPhotoWorkUnit;
+            SqlPathModel*           mPathModel;
+            TaggingModule*          mKeywording;
+            LibraryHistogramModule* mHistogramModule;
+    };
+}
 
 #endif // LIBRARY_H

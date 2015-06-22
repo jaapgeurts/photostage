@@ -7,25 +7,30 @@
 #include <QImage>
 #include <QRunnable>
 
-class PreviewFileLoader : public QObject, public QRunnable
+namespace PhotoStage
 {
-    Q_OBJECT
+    class PreviewFileLoader : public QObject, public QRunnable
+    {
+        Q_OBJECT
 
-public:
-    explicit PreviewFileLoader(const QString& path, const QModelIndex& index);
-    ~PreviewFileLoader();
+        public:
 
-    void run();
+            explicit PreviewFileLoader(const QString& path,
+                const QModelIndex& index);
+            ~PreviewFileLoader();
 
-signals:
+            void run();
 
-    void dataReady(const QModelIndex& index, const QImage& pixmap);
-    void error(QString error);
+        signals:
 
+            void dataReady(const QModelIndex& index, const QImage& pixmap);
+            void error(QString error);
 
-private:
-    QModelIndex mModelIndex;
-    QString mPath;
-};
+        private:
+
+            QModelIndex mModelIndex;
+            QString     mPath;
+    };
+}
 
 #endif // PREVIEWFILELOADER_H

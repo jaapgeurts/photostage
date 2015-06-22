@@ -2,79 +2,85 @@
 
 #include "fixedtreeview.h"
 
-
-FixedTreeView::FixedTreeView(QWidget *parent): QTreeView(parent)
+namespace PhotoStage
 {
-    connect(this,&QTreeView::expanded,this,&FixedTreeView::onItemExpanded);
-    connect(this,&QTreeView::collapsed,this,&FixedTreeView::onItemCollapsed);
-
-    header()->close();
-
-}
-
-void FixedTreeView::setModel(QAbstractItemModel* model)
-{
-    QTreeView::setModel(model);
-    setMinimumHeight(CalculateHeight());
-}
-
-QSize FixedTreeView::sizeHint() const
-{
-    return QSize(width(),CalculateHeight());
-}
-
-int FixedTreeView::CalculateHeight() const
-{
-    int h = 0;
-
-    int topLevelCount = model()->rowCount(rootIndex());
-
-    QModelIndex index;
-
-    for(int i = 0;i < topLevelCount;i++)
+    FixedTreeView::FixedTreeView(QWidget* parent) : QTreeView(parent)
     {
-        QModelIndex index = model()->index(i,0,rootIndex());
-        h += CalculateHeightRec(index);
+        connect(this, &QTreeView::expanded, this,
+            &FixedTreeView::onItemExpanded);
+        connect(this,
+            &QTreeView::collapsed,
+            this,
+            &FixedTreeView::onItemCollapsed);
+
+        header()->close();
     }
 
-    if(h != 0)
+    void FixedTreeView::setModel(QAbstractItemModel* model)
     {
-        h += header()->sizeHint().height();
-        //        setMinimumHeight(h);
-    }
-    return h;
-}
-
-int FixedTreeView::CalculateHeightRec(const QModelIndex& index) const
-{
-    if(!index.isValid())
-        return 0;
+        QTreeView::setModel(model);
 
 
-    if(!isExpanded(index))
-    {
-        return rowHeight(index);
+        setMinimumHeight(CalculateHeight());
     }
 
-    int h = sizeHintForIndex(index).height() + 2;
-    int childCount = model()->rowCount(index);
-
-    for(int i = 0; i < childCount;i++)
+    QSize FixedTreeView::sizeHint() const
     {
-        QModelIndex childIndex = model()->index(i,0,index);
-        h += CalculateHeightRec(childIndex);
+        return QSize(width(), CalculateHeight());
     }
 
-    return h;
-}
+    int FixedTreeView::CalculateHeight() const
+    {
+        int         h = 0;
 
-void FixedTreeView::onItemExpanded(const QModelIndex &/*index*/)
-{
-    setMinimumHeight(CalculateHeight());
-}
+        int         topLevelCount = model()->rowCount(rootIndex());
 
-void FixedTreeView::onItemCollapsed(const QModelIndex &/*index*/)
-{
-    setMinimumHeight(CalculateHeight());
-}
+        QModelIndex index;
 
+
+        for (int i = 0; i < topLevelCount; i++)
+        {
+            QModelIndex index = model()->index(i, 0, rootIndex());
+            h += CalculateHeightRec(index);
+        }
+
+        if (h != 0)
+        {
+            h += header()->sizeHint().height();
+            //        setMinimumHeight(h);
+        }
+        return h;
+    }
+
+    int FixedTreeView::CalculateHeightRec(const QModelIndex& index) const
+    {
+        if (!index.isValid())
+            return 0;
+
+        if (!isExpanded(index))
+        {
+            return rowHeight(index);
+        }
+
+        int h          = sizeHintForIndex(index).height() + 2;
+        int childCount = model()->rowCount(index);
+
+        for (int i = 0; i < childCount; i++)
+        {
+            QModelIndex childIndex = model()->index(i, 0, index);
+            h += CalculateHeightRec(childIndex);
+        }
+
+        return h;
+    }
+
+    void FixedTreeView::onItemExpanded(const QModelIndex& /*index*/)
+    {
+        setMinimumHeight(CalculateHeight());
+    }
+
+    void FixedTreeView::onItemCollapsed(const QModelIndex& /*index*/)
+    {
+        setMinimumHeight(CalculateHeight());
+    }
+}

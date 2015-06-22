@@ -75,11 +75,11 @@ int main(int argc, char* argv[])
 #endif
 
     // Register the Image type so that we can use it in signals and slots
-    qRegisterMetaType<Image>("Image");
+    qRegisterMetaType<PhotoStage::Image>("Image");
 
     cmsSetLogErrorHandler(lcms2ErrorFunc);
 
-    MainWindow w;
+    PhotoStage::MainWindow w;
     w.show();
 
     return a.exec();

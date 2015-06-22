@@ -6,15 +6,19 @@
 
 #include "librarymodule.h"
 
-class CollectionModule : public LibraryModule
+namespace PhotoStage
 {
-    Q_OBJECT
+    class CollectionModule : public LibraryModule
+    {
+        Q_OBJECT
 
-public:
-    CollectionModule(QWidget *parent);
+        public:
 
-private:
-    QTreeView *mTrvwCollections;
-};
+            CollectionModule(QWidget* parent);
 
+        private:
+
+            QTreeView* mTrvwCollections;
+    };
+}
 #endif // COLLECTIONMODULE_H

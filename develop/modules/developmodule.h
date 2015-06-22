@@ -4,24 +4,27 @@
 #include <QWidget>
 #include "photo.h"
 
-class DevelopModule : public QWidget
+namespace PhotoStage
 {
-    Q_OBJECT
+    class DevelopModule : public QWidget
+    {
+        Q_OBJECT
 
-    public:
+        public:
 
-        explicit DevelopModule(QWidget* parent = 0);
+            explicit DevelopModule(QWidget* parent = 0);
 
-        virtual void setPhoto(Photo* const photo);
-        const Photo* photo() const;
+            virtual void setPhoto(Photo* const photo);
+            const Photo* photo() const;
 
-signals:
-        // TODO: remove when the engine takes care of rendering
-        void parametersAdjusted();
+        signals:
 
-    protected:
+            // TODO: remove when the engine takes care of rendering
+            void parametersAdjusted();
 
-        Photo* mPhoto;
-};
+        protected:
 
+            Photo* mPhoto;
+    };
+}
 #endif // DEVELOPMODULE_H

@@ -6,20 +6,24 @@
 
 #include "librarymodule.h"
 
-class ShortcutModule : public LibraryModule
+namespace PhotoStage
 {
-    Q_OBJECT
+    class ShortcutModule : public LibraryModule
+    {
+        Q_OBJECT
 
-public:
-    explicit ShortcutModule(QWidget *parent = 0);
+        public:
 
-signals:
+            explicit ShortcutModule(QWidget* parent = 0);
 
-public slots:
+        signals:
 
-private:
-    QPushButton* mWorkCollection;
-    QComboBox* mImportHistory;
-};
+        public slots:
 
+        private:
+
+            QPushButton* mWorkCollection;
+            QComboBox*   mImportHistory;
+    };
+}
 #endif // SHORTCUTMODULE_H

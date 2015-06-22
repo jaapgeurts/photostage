@@ -4,19 +4,24 @@
 #include <QWidget>
 #include <QTreeView>
 
-class FixedTreeView : public QTreeView
+namespace PhotoStage
 {
-public:
-    FixedTreeView(QWidget *parent =0);
-    void setModel(QAbstractItemModel *model);
-    QSize sizeHint() const;
+    class FixedTreeView : public QTreeView
+    {
+        public:
 
-private:
-    int CalculateHeight() const;
-    int CalculateHeightRec(const QModelIndex & index) const;
+            FixedTreeView(QWidget* parent = 0);
+            void setModel(QAbstractItemModel* model);
+            QSize sizeHint() const;
 
-    void onItemExpanded(const QModelIndex & index);
-    void onItemCollapsed(const QModelIndex & index);
-};
+        private:
+
+            int CalculateHeight() const;
+            int CalculateHeightRec(const QModelIndex& index) const;
+
+            void onItemExpanded(const QModelIndex& index);
+            void onItemCollapsed(const QModelIndex& index);
+    };
+}
 
 #endif // FIXEDTREEVIEW_H

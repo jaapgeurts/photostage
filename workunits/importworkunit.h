@@ -5,30 +5,39 @@
 
 #include "workunits/importinfo.h"
 
-class ImportWorkUnit
+namespace PhotoStage
 {
+    class ImportWorkUnit
+    {
+        public:
 
-public:
-    static ImportWorkUnit* instance();
-    long long importPhoto(const QFileInfo& file, const ImportOptions& options);
+            static ImportWorkUnit* instance();
+            long long importPhoto(const QFileInfo& file,
+                const ImportOptions& options);
 
-    void beginImport();
-protected:
-     explicit ImportWorkUnit();
+            void beginImport();
 
-signals:
+        protected:
 
-public slots:
+            explicit ImportWorkUnit();
 
-private:
-    static ImportWorkUnit* mInstance;
+        signals:
 
-    // state variables for the import process
-    QString mLastpath;
-    long long mLastkey;
+        public slots:
 
-    int createPaths(QStringList &paths);
-    int insertPathRec(QSqlQuery &q, const QStringList &path, int pos, int parentid);
-};
+        private:
 
+            static ImportWorkUnit* mInstance;
+
+            // state variables for the import process
+            QString   mLastpath;
+            long long mLastkey;
+
+            int createPaths(QStringList& paths);
+            int insertPathRec(QSqlQuery& q,
+                const QStringList& path,
+                int pos,
+                int parentid);
+    };
+}
 #endif // IMPORTWORKUNIT_H

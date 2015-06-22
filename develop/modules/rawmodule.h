@@ -9,17 +9,20 @@ namespace Ui
     class RawModule;
 }
 
-class RawModule : public DevelopModule
+namespace PhotoStage
 {
-    Q_OBJECT
+    class RawModule : public DevelopModule
+    {
+        Q_OBJECT
 
-    public:
+        public:
 
-        RawModule(QWidget* parent = 0);
+            RawModule(QWidget* parent = 0);
 
-    private:
+        private:
 
-        Ui::RawModule* ui;
-};
+            Ui::RawModule* ui;
+    };
+}
 
 #endif // RAWMODULE_H

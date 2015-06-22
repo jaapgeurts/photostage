@@ -9,28 +9,30 @@
 
 #include "previewinfo.h"
 
-
-class ImageFileSystemModel : public QFileSystemModel
+namespace PhotoStage
 {
-    Q_OBJECT
+    class ImageFileSystemModel : public QFileSystemModel
+    {
+        Q_OBJECT
 
-public:
+        public:
 
-    ImageFileSystemModel(QObject* parent = 0);
-    ~ImageFileSystemModel();
+            ImageFileSystemModel(QObject* parent = 0);
+            ~ImageFileSystemModel();
 
-    QVariant data(const QModelIndex &index, int role) const;
+            QVariant data(const QModelIndex& index, int role) const;
 
-    void clearCache();
+            void clearCache();
 
-public slots:
+        public slots:
 
-    void imageLoaded(const QModelIndex &index, const QImage& pixmap);
-    void loaderError(QString error);
+            void imageLoaded(const QModelIndex& index, const QImage& pixmap);
+            void loaderError(QString error);
 
-private:
-    QHash<QModelIndex,PreviewInfo> *mPreviewInfoCache;
-    QThreadPool *mThreadPool;
-};
+        private:
 
+            QHash<QModelIndex, PreviewInfo>* mPreviewInfoCache;
+            QThreadPool*                     mThreadPool;
+    };
+}
 #endif // IMAGEFILESYSTEMMODEL_H

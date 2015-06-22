@@ -7,56 +7,57 @@
 #include <Halide.h>
 #include <lcms2.h>
 
-using namespace Halide;
-
-class PipelineBuilder
+namespace PhotoStage
 {
-    public:
+    class PipelineBuilder
+    {
+        public:
 
-        enum OutputIntent
-        {
-            LibraryPreview = 1,
-            DevelopPreview,
-            FinalOutput
-        };
+            enum OutputIntent
+            {
+                LibraryPreview = 1,
+                DevelopPreview,
+                FinalOutput
+            };
 
-        PipelineBuilder();
-        ~PipelineBuilder();
+            PipelineBuilder();
+            ~PipelineBuilder();
 
-        void setIntent(OutputIntent intent);
+            void setIntent(OutputIntent intent);
 
-        void setWhiteBalance(float wbr, float wbg, float wbb);
-        void setDomain(int bl, int wp);
-        void setColorConversion(float* colorMatrix);
-        void setInput(Image<uint16_t> input);
+            void setWhiteBalance(float wbr, float wbg, float wbb);
+            void setDomain(int bl, int wp);
+            void setColorConversion(float* colorMatrix);
+            void setInput(Halide::Image<uint16_t> input);
 
-        void prepare();
+            void prepare();
 
-        QImage execute(int width, int height);
+            QImage execute(int width, int height);
 
-    private:
+        private:
 
-        OutputIntent mIntent;
+            OutputIntent mIntent;
 
-        // Halide pipeline input parameters
-        ImageParam mInput;
+            // Halide pipeline input parameters
+            Halide::ImageParam mInput;
 
-        // White balance params
-        Param<float> mWBRed;
-        Param<float> mWBGreen;
-        Param<float> mWBBlue;
+            // White balance params
+            Halide::Param<float> mWBRed;
+            Halide::Param<float> mWBGreen;
+            Halide::Param<float> mWBBlue;
 
-        Param<int>   mBlacklevel;
-        Param<int>   mWhitePoint;
+            Halide::Param<int>   mBlacklevel;
+            Halide::Param<int>   mWhitePoint;
 
-        ImageParam   mColorMatrix;
+            Halide::ImageParam   mColorMatrix;
 
-        Func         mPipeline;
+            Halide::Func         mPipeline;
 
-        // Little CMS variable
-        cmsHTRANSFORM mHRawTransform;
+            // Little CMS variable
+            cmsHTRANSFORM mHRawTransform;
 
-        void createRawProfileConversion();
-};
+            void createRawProfileConversion();
+    };
+}
 
 #endif // PIPELINE_H

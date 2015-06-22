@@ -8,39 +8,47 @@
 
 #include "image.h"
 
-const QString WORKING_COLOR_SPACE = "MelissaRGB";
-
-class ColorTransform
+namespace PhotoStage
 {
-    public:
+    const QString WORKING_COLOR_SPACE = "MelissaRGB";
 
-        enum Format
-        {
-            FORMAT_FLOAT,
-            FORMAT_RGB32,  // 8bit channels (RGB channel + extra)
-            FORMAT_RGB48 //  16 bit channels RRRR GGGG BBBB
-        };
+    class ColorTransform
+    {
+        public:
 
-        // convenience functions that retain the result for future use
-        static ColorTransform getTransform(const QString& from, const QString& to, Format inFormat =  FORMAT_FLOAT, Format outFormat = FORMAT_FLOAT);
+            enum Format
+            {
+                FORMAT_FLOAT,
+                FORMAT_RGB32, // 8bit channels (RGB channel + extra)
+                FORMAT_RGB48 //  16 bit channels RRRR GGGG BBBB
+            };
 
-        ColorTransform();
-        ColorTransform(const QString& from, const QString& to, Format inFormat = FORMAT_FLOAT, Format outFormat = FORMAT_FLOAT);
-        ColorTransform(const cmsHTRANSFORM& cmsTransform);
-        ~ColorTransform();
+            // convenience functions that retain the result for future use
+            static ColorTransform getTransform(const QString& from,
+                const QString& to,
+                Format inFormat =  FORMAT_FLOAT,
+                Format outFormat = FORMAT_FLOAT);
 
-        bool isValid() const;
+            ColorTransform();
+            ColorTransform(const QString& from,
+                const QString& to,
+                Format inFormat = FORMAT_FLOAT,
+                Format outFormat = FORMAT_FLOAT);
+            ColorTransform(const cmsHTRANSFORM& cmsTransform);
+            ~ColorTransform();
 
-        Image transformImage(const Image& inImage) const;
-        QImage transformToQImage(const Image& inImage) const;
-        QImage transformQImage(const QImage& inImage) const;
-        Image transformFromQImage(const QImage& inImage) const;
+            bool isValid() const;
 
-    private:
+            Image transformImage(const Image& inImage) const;
+            QImage transformToQImage(const Image& inImage) const;
+            QImage transformQImage(const QImage& inImage) const;
+            Image transformFromQImage(const QImage& inImage) const;
 
-        static QHash<QString, ColorTransform> mTransformCache;
+        private:
 
-        QSharedPointer<char>         mHTransform;
-};
+            static QHash<QString, ColorTransform> mTransformCache;
 
+            QSharedPointer<char>                  mHTransform;
+    };
+}
 #endif // COLOR_H

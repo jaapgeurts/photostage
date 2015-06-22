@@ -3,32 +3,40 @@
 
 #include <QWidget>
 
-namespace Ui {
-class BackgroundTaskProgress;
+namespace Ui
+{
+    class BackgroundTaskProgress;
 }
 
-class BackgroundTaskProgress : public QWidget
+namespace PhotoStage
 {
-    Q_OBJECT
+    class BackgroundTaskProgress : public QWidget
+    {
+        Q_OBJECT
 
-public:
-    explicit BackgroundTaskProgress(QWidget *parent = 0);
-    ~BackgroundTaskProgress();
+        public:
 
-    void setTaskName(const QString & name);
-    const QString& taskName() const;
+            explicit BackgroundTaskProgress(QWidget* parent = 0);
+            ~BackgroundTaskProgress();
 
-    void setProgressRange(int min, int max);
+            void setTaskName(const QString& name);
+            const QString& taskName() const;
 
-public slots:
-    void updateProgress(int current);
+            void setProgressRange(int min, int max);
 
-signals:
-    void cancelClicked();
+        public slots:
 
-private:
-    Ui::BackgroundTaskProgress *ui;
-    QString mName;
-};
+            void updateProgress(int current);
+
+        signals:
+
+            void cancelClicked();
+
+        private:
+
+            Ui::BackgroundTaskProgress* ui;
+            QString                     mName;
+    };
+}
 
 #endif // BACKGROUNDTASKPROGRESS_H

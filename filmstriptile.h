@@ -3,18 +3,19 @@
 
 #include "widgets/abstracttile.h"
 
-class FilmstripTile : public AbstractTile
+namespace PhotoStage
 {
-    public:
+    class FilmstripTile : public AbstractTile
+    {
+        public:
 
-        FilmstripTile(TileView* parent = 0);
-        // AbstractCellRenderer interface
-        void render(QPainter &painter,const TileInfo &tileInfo, const QVariant &data);
+            FilmstripTile(TileView* parent = 0);
+            // AbstractCellRenderer interface
+            void render(QPainter& painter,
+                const TileInfo& tileInfo,
+                const QVariant& data);
 
-    private:
-
-        QRect resizeToFrameKeepAspectRatio(const QSize &src, const QSize &destFrame);
-
-};
-
+        private:
+    };
+}
 #endif // FILMSTRIPTILE_H

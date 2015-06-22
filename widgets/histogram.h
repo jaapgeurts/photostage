@@ -6,34 +6,38 @@
 
 #define BIN_SIZE (256)
 
-class Histogram : public QWidget
+namespace PhotoStage
 {
-    Q_OBJECT
+    class Histogram : public QWidget
+    {
+        Q_OBJECT
 
-    public:
+        public:
 
-        explicit Histogram(QWidget* parent = 0);
+            explicit Histogram(QWidget* parent = 0);
 
-        void setImageData(const QImage &image);
+            void setImageData(const QImage& image);
 
-    protected:
+        protected:
 
-        void paintEvent(QPaintEvent* event);
+            void paintEvent(QPaintEvent* event);
 
-    signals:
+        signals:
 
-    public slots:
-        void recalculate();
+        public slots:
 
-private:
+            void recalculate();
 
-        QImage        mImage;
+        private:
 
-        unsigned long mChannelRed[BIN_SIZE];
-        unsigned long mChannelGreen[BIN_SIZE];
-        unsigned long mChannelBlue[BIN_SIZE];
+            QImage        mImage;
 
-        unsigned long mMaxAll;
-};
+            unsigned long mChannelRed[BIN_SIZE];
+            unsigned long mChannelGreen[BIN_SIZE];
+            unsigned long mChannelBlue[BIN_SIZE];
+
+            unsigned long mMaxAll;
+    };
+}
 
 #endif // HISTOGRAM_H

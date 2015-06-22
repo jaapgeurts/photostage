@@ -7,45 +7,47 @@
 #include <QFile>
 #include <QSharedPointer>
 
-const int IMG_NO_CHANNELS = 3;
-
-class Image
+namespace PhotoStage
 {
-    public:
+    const int IMG_NO_CHANNELS = 3;
 
-        Image();
-        Image(int width, int height);
-        Image(const QSize& size);
-        ~Image();
+    class Image
+    {
+        public:
 
-        Image clone() const;
+            Image();
+            Image(int width, int height);
+            Image(const QSize& size);
+            ~Image();
 
-        // static convenience functions
-        static Image fromFile(const QString& filename);
-        static Image fromQImage(const QImage& image);
+            Image clone() const;
 
-        QImage toQImage() const;
-        bool saveToFile(const QString& filename) const;
+            // static convenience functions
+            static Image fromFile(const QString& filename);
+            static Image fromQImage(const QImage& image);
 
-        // getters
-        int width() const;
-        int height() const;
-        QSize size() const;
+            QImage toQImage() const;
+            bool saveToFile(const QString& filename) const;
 
-        float* data() const;
-        float* scanLine(int l) const;
+            // getters
+            int width() const;
+            int height() const;
+            QSize size() const;
 
-        bool isNull() const;
+            float* data() const;
+            float* scanLine(int l) const;
 
-    private:
+            bool isNull() const;
 
-        QSharedPointer<float> mPixels;
-        int    mWidth;
-        int    mHeight;
+        private:
 
-};
+            QSharedPointer<float> mPixels;
+            int                   mWidth;
+            int                   mHeight;
+    };
+}
 
-Q_DECLARE_METATYPE(Image)
+Q_DECLARE_METATYPE(PhotoStage::Image)
 //Q_DECLARE_METATYPE(Image*)
 
 #endif // IMAGE_H

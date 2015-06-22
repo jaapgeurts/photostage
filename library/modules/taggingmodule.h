@@ -7,28 +7,34 @@
 
 #include "librarymodule.h"
 
-
-class TaggingModule : public LibraryModule
+namespace PhotoStage
 {
-    Q_OBJECT
+    class TaggingModule : public LibraryModule
+    {
+        Q_OBJECT
 
-public:
-    explicit TaggingModule(QWidget *parent = 0);
+        public:
 
-    void setPhotos(const QList<Photo *> &list);
+            explicit TaggingModule(QWidget* parent = 0);
 
-    bool eventFilter(QObject *object, QEvent *event);
-signals:
+            void setPhotos(const QList<Photo*>& list);
 
-public slots:
+            bool eventFilter(QObject* object, QEvent* event);
 
-private slots:
-    void keywordsChanged();
-    void keywordsAdded();
+        signals:
 
-private:
-    QLineEdit* mAddKeywords;
-    QPlainTextEdit* mTxtEdtKeywords;
-};
+        public slots:
+
+        private slots:
+
+            void keywordsChanged();
+            void keywordsAdded();
+
+        private:
+
+            QLineEdit*      mAddKeywords;
+            QPlainTextEdit* mTxtEdtKeywords;
+    };
+}
 
 #endif // KEYWORDINGMODULE_H

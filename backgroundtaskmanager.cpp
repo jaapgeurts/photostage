@@ -2,36 +2,54 @@
 
 #include "backgroundtaskmanager.h"
 
-BackgroundTaskManager::BackgroundTaskManager(QWidget* const container, QObject* parent) : QObject(parent)
+namespace PhotoStage
 {
-    mContainer = container;
-}
+    BackgroundTaskManager::BackgroundTaskManager(QWidget* const container,
+        QObject* parent) : QObject(parent)
+    {
+        mContainer = container;
+    }
 
-BackgroundTaskManager::~BackgroundTaskManager()
-{
-}
+    BackgroundTaskManager::~BackgroundTaskManager()
+    {
+    }
 
-void BackgroundTaskManager::addRunnable(BackgroundTask* const task)
-{
-    BackgroundTaskProgress* progress = new BackgroundTaskProgress(mContainer);
-    progress->setProgressRange(task->progressMinimum(), task->progressMaximum());
-    progress->setTaskName(task->description());
+    void BackgroundTaskManager::addRunnable(BackgroundTask* const task)
+    {
+        BackgroundTaskProgress* progress =
+            new BackgroundTaskProgress(mContainer);
 
-    // connect task signals to the interface
-    connect(task,&BackgroundTask::taskFinished,this,&BackgroundTaskManager::taskFinished);
-    connect(task,&BackgroundTask::progressUpdated,progress,&BackgroundTaskProgress::updateProgress);
 
-    // connection interface signal to the task
-    connect(progress,&BackgroundTaskProgress::cancelClicked,task,&BackgroundTask::cancel);
-    mDict.insert(task,progress);
-    mContainer->layout()->addWidget(progress);
-}
+        progress->setProgressRange(
+            task->progressMinimum(), task->progressMaximum());
+        progress->setTaskName(task->description());
 
-void BackgroundTaskManager::taskFinished(BackgroundTask* task)
-{
-    BackgroundTaskProgress* progress = mDict.value(task);
+        // connect task signals to the interface
+        connect(task,
+            &BackgroundTask::taskFinished,
+            this,
+            &BackgroundTaskManager::taskFinished);
+        connect(task,
+            &BackgroundTask::progressUpdated,
+            progress,
+            &BackgroundTaskProgress::updateProgress);
 
-    mContainer->layout()->removeWidget(progress);
+        // connection interface signal to the task
+        connect(progress,
+            &BackgroundTaskProgress::cancelClicked,
+            task,
+            &BackgroundTask::cancel);
+        mDict.insert(task, progress);
+        mContainer->layout()->addWidget(progress);
+    }
 
-    progress->deleteLater();
+    void BackgroundTaskManager::taskFinished(BackgroundTask* task)
+    {
+        BackgroundTaskProgress* progress = mDict.value(task);
+
+
+        mContainer->layout()->removeWidget(progress);
+
+        progress->deleteLater();
+    }
 }

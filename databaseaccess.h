@@ -1,23 +1,27 @@
 #ifndef DATABASEACCESS_H
 #define DATABASEACCESS_H
+
 #include <QtSql>
-class DatabaseAccess : public QObject
+
+namespace PhotoStage
 {
-    Q_OBJECT
+    class DatabaseAccess : public QObject
+    {
+        Q_OBJECT
 
-    public:
+        public:
 
-        explicit DatabaseAccess(QObject* parent = 0);
-        const QSqlDatabase &getDb();
+            explicit DatabaseAccess(QObject* parent = 0);
+            const QSqlDatabase& getDb();
 
-    signals:
+        signals:
 
-    public slots:
+        public slots:
 
-    private:
+        private:
 
-        QSqlDatabase mDB;
-        void initDb();
-};
-
+            QSqlDatabase mDB;
+            void initDb();
+    };
+}
 #endif // DATABASEACCESS_H

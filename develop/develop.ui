@@ -41,7 +41,7 @@
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
-      <widget class="ModulePanel" name="HistoryPanel">
+      <widget class="PhotoStage::ModulePanel" name="HistoryPanel">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -52,12 +52,12 @@
        </property>
       </widget>
      </widget>
-     <widget class="LoupeView" name="developView" native="true"/>
+     <widget class="PhotoStage::LoupeView" name="developView" native="true"/>
      <widget class="QScrollArea" name="scrollArea_2">
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
-      <widget class="ModulePanel" name="DevelopPanel">
+      <widget class="PhotoStage::ModulePanel" name="DevelopPanel">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -74,13 +74,13 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>ModulePanel</class>
+   <class>PhotoStage::ModulePanel</class>
    <extends>QWidget</extends>
    <header>widgets/modulepanel.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>LoupeView</class>
+   <class>PhotoStage::LoupeView</class>
    <extends>QWidget</extends>
    <header>widgets/loupeview.h</header>
    <container>1</container>

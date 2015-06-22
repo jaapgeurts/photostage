@@ -1,15 +1,18 @@
 #include "developmodule.h"
 
-DevelopModule::DevelopModule(QWidget* parent) : QWidget(parent)
+namespace PhotoStage
 {
-}
+    DevelopModule::DevelopModule(QWidget* parent) : QWidget(parent)
+    {
+    }
 
-void DevelopModule::setPhoto(Photo* const photo)
-{
-    mPhoto = photo;
-}
+    void DevelopModule::setPhoto(Photo* const photo)
+    {
+        mPhoto = photo;
+    }
 
-const Photo* DevelopModule::photo() const
-{
-    return mPhoto;
+    const Photo* DevelopModule::photo() const
+    {
+        return mPhoto;
+    }
 }

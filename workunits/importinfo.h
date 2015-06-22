@@ -4,23 +4,31 @@
 #include <QList>
 #include <QFileInfo>
 #include <QString>
+
 #include "importoptions.h"
 
-class ImportInfo
+namespace PhotoStage
 {
+    class ImportInfo
+    {
+        public:
 
-public:
-    ImportInfo() {}
-    ImportInfo(const ImportInfo& src);
-    explicit ImportInfo(const QList<QFileInfo> & sourceFiles, const QFileInfo &destinationPath, ImportOptions::ImportMode mode);
+            ImportInfo()
+            {
+            }
 
-    const QList<QFileInfo>& files() const;
-    const ImportOptions options() const;
+            ImportInfo(const ImportInfo& src);
+            explicit ImportInfo(const QList<QFileInfo>& sourceFiles,
+                const QFileInfo& destinationPath,
+                ImportOptions::ImportMode mode);
 
-private:
-    QList<QFileInfo> mSourceFiles;
-    ImportOptions mOptions;
+            const QList<QFileInfo>& files() const;
+            const ImportOptions options() const;
 
-};
+        private:
 
+            QList<QFileInfo> mSourceFiles;
+            ImportOptions    mOptions;
+    };
+}
 #endif // IMPORTINFO_H

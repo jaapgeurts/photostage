@@ -24,131 +24,135 @@ QMAKE_CXXFLAGS_RELEASE += -O3
 
 QMAKE_LFLAGS_RELEASE -= -O1
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    imagefileloader.cpp \
-    preferencesdialog.cpp \
-    databaseaccess.cpp \
-    sqlpathmodel.cpp \
-    sqlkeywordmodel.cpp \
+SOURCES += \
     aboutdialog.cpp \
-    timeadjustdialog.cpp \
-    workunits/photoworkunit.cpp \
-    workunits/importinfo.cpp \
-    workunits/importworkunit.cpp \
-    library/imagedbtile.cpp \
-    library/modules/librarymodule.cpp \
-    widgets/modulepanel.cpp \
-    widgets/abstracttile.cpp \
-    widgets/fixedtreeview.cpp \
-    widgets/tileview.cpp \
-    widgets/translucentwindow.cpp \
-    import/importdialog.cpp \
-    import/imagefiletile.cpp \
-    import/previewfileloader.cpp \
-    import/exivfacade.cpp \
-    import/exiv2lib.cpp \
-    import/imagefilesystemmodel.cpp \
-    import/previewinfo.cpp \
-    library/library.cpp \
-    develop/develop.cpp \
-    map/map.cpp \
-    widgets/backgroundtaskprogress.cpp \
-    backgroundtaskmanager.cpp \
     backgroundtask.cpp \
+    backgroundtaskmanager.cpp \
+    databaseaccess.cpp \
+    develop/develop.cpp \
+    develop/modules/basicmodule.cpp \
+    develop/modules/develophistogrammodule.cpp \
+    develop/modules/developmodule.cpp \
+    develop/modules/rawmodule.cpp \
+    engine/colortransform.cpp \
+    engine/engineutils.cpp \
+    engine/operation.cpp \
+    engine/pipelinebuilder.cpp \
+    filmstriptile.cpp \
+    image.cpp \
+    imagefileloader.cpp \
+    import/exiv2lib.cpp \
+    import/exivfacade.cpp \
+    import/imagefilesystemmodel.cpp \
+    import/imagefiletile.cpp \
     import/importbackgroundtask.cpp \
-    workunits/importoptions.cpp \
+    import/importdialog.cpp \
+    import/previewfileloader.cpp \
+    import/previewinfo.cpp \
+    library/imagedbtile.cpp \
+    library/library.cpp \
+    library/modules/collectionmodule.cpp \
+    library/modules/libraryhistogrammodule.cpp \
+    library/modules/librarymodule.cpp \
+    library/modules/shortcutmodule.cpp \
+    library/modules/taggingmodule.cpp \
+    main.cpp\
+    mainwindow.cpp \
+    map/map.cpp \
     photo.cpp \
     photomodel.cpp \
     preferences.cpp \
-    library/modules/collectionmodule.cpp \
-    library/modules/shortcutmodule.cpp \
-    widgets/histogram.cpp \
-    library/modules/taggingmodule.cpp \
-    widgets/loupeview.cpp \
-    develop/modules/rawmodule.cpp \
-    library/modules/libraryhistogrammodule.cpp \
-    develop/modules/develophistogrammodule.cpp \
-    develop/modules/developmodule.cpp \
-    develop/modules/basicmodule.cpp \
-    filmstriptile.cpp \
+    preferencesdialog.cpp \
     previewcache.cpp \
-    engine/colortransform.cpp \
-    image.cpp \
-    engine/operation.cpp \
-    engine/pipelinebuilder.cpp \
-    engine/utils.cpp
+    sqlkeywordmodel.cpp \
+    sqlpathmodel.cpp \
+    timeadjustdialog.cpp \
+    utils.cpp \
+    widgets/abstracttile.cpp \
+    widgets/backgroundtaskprogress.cpp \
+    widgets/fixedtreeview.cpp \
+    widgets/histogram.cpp \
+    widgets/loupeview.cpp \
+    widgets/modulepanel.cpp \
+    widgets/tileview.cpp \
+    widgets/translucentwindow.cpp \
+    workunits/importinfo.cpp \
+    workunits/importoptions.cpp \
+    workunits/importworkunit.cpp \
+    workunits/photoworkunit.cpp
     #processing/amaze_demosaic_RT.c
 
-HEADERS  += mainwindow.h \
-    constants.h \
-    imagefileloader.h \
-    preferencesdialog.h \
-    databaseaccess.h \
-    sqlpathmodel.h \
-    sqlkeywordmodel.h \
+HEADERS  += \
     aboutdialog.h \
-    timeadjustdialog.h \
-    workunits/photoworkunit.h \
-    workunits/importinfo.h \
-    workunits/importworkunit.h \
-    library/imagedbtile.h \
-    library/modules/librarymodule.h \
-    widgets/modulepanel.h \
-    widgets/fixedtreeview.h \
-    widgets/abstracttile.h \
-    widgets/tileview.h \
-    widgets/translucentwindow.h \
-    import/importdialog.h \
-    import/imagefilesystemmodel.h \
-    import/imagefiletile.h \
-    import/previewfileloader.h \
-    import/exivfacade.h \
-    import/exiv2lib.h \
-    import/previewinfo.h \
-    library/library.h \
-    module.h \
-    develop/develop.h \
-    map/map.h \
-    widgets/backgroundtaskprogress.h \
-    backgroundtaskmanager.h \
     backgroundtask.h \
-    import/importbackgroundtask.h \
-    workunits/importoptions.h \
-    photo.h \
-    photomodel.h \
-    preferences.h \
-    library/modules/collectionmodule.h \
-    library/modules/shortcutmodule.h \
-    widgets/histogram.h \
-    library/modules/taggingmodule.h \
-    photodata.h \
-    widgets/loupeview.h \
-    develop/modules/rawmodule.h \
-    library/modules/libraryhistogrammodule.h \
+    backgroundtaskmanager.h \
+    constants.h \
+    databaseaccess.h \
+    develop/develop.h \
+    develop/modules/basicmodule.h \
     develop/modules/develophistogrammodule.h \
     develop/modules/developmodule.h \
-    develop/modules/basicmodule.h \
-    filmstriptile.h \
-    previewcache.h \
+    develop/modules/rawmodule.h \
     engine/colortransform.h \
-    image.h \
+    engine/engineutils.h \
     engine/operation.h \
     engine/pipelinebuilder.h \
-    engine/utils.h
+    filmstriptile.h \
+    image.h \
+    imagefileloader.h \
+    import/exiv2lib.h \
+    import/exivfacade.h \
+    import/imagefilesystemmodel.h \
+    import/imagefiletile.h \
+    import/importbackgroundtask.h \
+    import/importdialog.h \
+    import/previewfileloader.h \
+    import/previewinfo.h \
+    library/imagedbtile.h \
+    library/library.h \
+    library/modules/collectionmodule.h \
+    library/modules/libraryhistogrammodule.h \
+    library/modules/librarymodule.h \
+    library/modules/shortcutmodule.h \
+    library/modules/taggingmodule.h \
+    mainwindow.h \
+    map/map.h \
+    module.h \
+    photo.h \
+    photodata.h \
+    photomodel.h \
+    preferences.h \
+    preferencesdialog.h \
+    previewcache.h \
+    sqlkeywordmodel.h \
+    sqlpathmodel.h \
+    timeadjustdialog.h \
+    utils.h \
+    widgets/abstracttile.h \
+    widgets/backgroundtaskprogress.h \
+    widgets/fixedtreeview.h \
+    widgets/histogram.h \
+    widgets/loupeview.h \
+    widgets/modulepanel.h \
+    widgets/tileview.h \
+    widgets/translucentwindow.h \
+    workunits/importinfo.h \
+    workunits/importoptions.h \
+    workunits/importworkunit.h \
+    workunits/photoworkunit.h
 
-
-FORMS    += mainwindow.ui \
-    preferencesdialog.ui \
+FORMS    += \
+    mainwindow.ui \
     aboutdialog.ui \
-    timeadjustdialog.ui \
+    develop/develop.ui \
+    develop/modules/basicmodule.ui \
+    develop/modules/rawmodule.ui \
     import/importdialog.ui \
     library/library.ui \
-    develop/develop.ui \
     map/map.ui \
-    widgets/backgroundtaskprogress.ui \
-    develop/modules/rawmodule.ui \
-    develop/modules/basicmodule.ui
+    preferencesdialog.ui \
+    timeadjustdialog.ui \
+    widgets/backgroundtaskprogress.ui
 
 DISTFILES += \
     Info.plist

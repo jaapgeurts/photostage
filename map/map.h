@@ -3,22 +3,27 @@
 
 #include "module.h"
 
-namespace Ui {
-class Map;
+namespace Ui
+{
+    class Map;
 }
 
-class Map : public Module
+namespace PhotoStage
 {
-    Q_OBJECT
+    class Map : public Module
+    {
+        Q_OBJECT
 
-public:
-    explicit Map(QWidget *parent = 0);
-    ~Map();
+        public:
 
-    QRect lightGap();
+            explicit Map(QWidget* parent = 0);
+            ~Map();
 
-private:
-    Ui::Map *ui;
-};
+            QRect lightGap();
 
+        private:
+
+            Ui::Map* ui;
+    };
+}
 #endif // MAP_H

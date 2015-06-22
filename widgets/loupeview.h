@@ -6,36 +6,55 @@
 
 #include "photo.h"
 
-class LoupeView : public QWidget
+namespace PhotoStage
 {
-    Q_OBJECT
+    class LoupeView : public QWidget
+    {
+        Q_OBJECT
 
-    public:
+        public:
 
-        explicit LoupeView(QWidget* parent = 0);
+            enum ZoomMode
+            {
+                ZoomFit = 1,
+                Zoom25,
+                Zoom50,
+                Zoom100,
+                Zoom150,
+                Zoom200,
+                Zoom300
+            };
 
-    signals:
+            explicit LoupeView(QWidget* parent = 0);
 
-    public slots:
+            void setZoomMode(ZoomMode zoomMode);
 
-        void setPhoto(Photo* photo);
+        signals:
 
-    protected:
+        public slots:
 
-        void paintEvent(QPaintEvent* event);
+            void setPhoto(Photo* photo);
 
-        //    void enterEvent(QEvent *event);
-        //    void leaveEvent(QEvent* event);
-        void mousePressEvent(QMouseEvent* event);
-        void mouseReleaseEvent(QMouseEvent* event);
-        void mouseMoveEvent(QMouseEvent* event);
+        protected:
 
-    private:
+            void paintEvent(QPaintEvent* event);
 
-        Photo*         mPhoto;
-        bool           mPanning;
-        QPoint         mMousePressLocation;
-        QPoint         mPhotoTopLeft;
-};
+            //    void enterEvent(QEvent *event);
+            //    void leaveEvent(QEvent* event);
+            void mousePressEvent(QMouseEvent* event);
+            void mouseReleaseEvent(QMouseEvent* event);
+            void mouseMoveEvent(QMouseEvent* event);
+
+        private:
+
+            Photo*   mPhoto;
+            bool     mPanning;
+            QPoint   mMousePressLocation;
+            QPoint   mPhotoTopLeft;
+            ZoomMode mZoomMode;
+
+            void ensureBestPosition();
+    };
+}
 
 #endif // LOUPEVIEW_H

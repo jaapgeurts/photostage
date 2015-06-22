@@ -2,24 +2,33 @@
 #define LIBRARYMODULE
 
 #include <QWidget>
+
 #include "photo.h"
 
-class LibraryModule : public QWidget
+namespace PhotoStage
 {
-    Q_OBJECT
+    class LibraryModule : public QWidget
+    {
+        Q_OBJECT
 
-public:
+        public:
 
-    LibraryModule(QWidget* parent=0);
+            LibraryModule(QWidget* parent = 0);
 
-    virtual void setPhotos(const QList<Photo*>& list) { mPhotoInfoList = list; }
-    const QList<Photo*>& photos() const { return mPhotoInfoList; }
+            virtual void setPhotos(const QList<Photo*>& list)
+            {
+                mPhotoInfoList = list;
+            }
 
-protected:
-    QList<Photo*> mPhotoInfoList;
+            const QList<Photo*>& photos() const
+            {
+                return mPhotoInfoList;
+            }
 
+        protected:
 
-};
+            QList<Photo*> mPhotoInfoList;
+    };
+}
 
 #endif // LIBRARYMODULE
-

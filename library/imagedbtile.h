@@ -5,43 +5,45 @@
 #include <QHash>
 
 #include "widgets/abstracttile.h"
-#include "engine/colortransform.h"
 
 #define CHAR_STAR (0x2605)
 
-class ImageDbTile : public AbstractTile
+namespace PhotoStage
 {
-    Q_OBJECT
+    class ImageDbTile : public AbstractTile
+    {
+        Q_OBJECT
 
-    public:
+        public:
 
-        ImageDbTile(TileView* parent = 0);
+            ImageDbTile(TileView* parent = 0);
 
-        // AbstractCellRenderer interface
-        void render(QPainter &painter,const TileInfo &tileInfo, const QVariant &data);
+            // AbstractCellRenderer interface
+            void render(QPainter& painter,
+                const TileInfo& tileInfo,
+                const QVariant& data);
 
-        void mouseMoveEvent(QMouseEvent* event, const TileInfo &info);
-        void mouseReleaseEvent(QMouseEvent* event, const TileInfo &info);
+            void mouseMoveEvent(QMouseEvent* event, const TileInfo& info);
+            void mouseReleaseEvent(QMouseEvent* event, const TileInfo& info);
 
-        void mouseEnterEvent(const TileInfo &info);
-        void mouseLeaveEvent(const TileInfo &info);
+            void mouseEnterEvent(const TileInfo& info);
+            void mouseLeaveEvent(const TileInfo& info);
 
-    signals:
+        signals:
 
-        //   void rotateLeftClicked(const QModelIndex & index);
-        //   void rotateRightClicked(const QModelIndex & index);
+            //   void rotateLeftClicked(const QModelIndex & index);
+            //   void rotateRightClicked(const QModelIndex & index);
 
-        //    void ratingClicked(const QModelIndex &index, int rating);
+            //    void ratingClicked(const QModelIndex &index, int rating);
 
-    private:
+        private:
 
-        QRect resizeToFrameKeepAspectRatio(const QSize &src, const QSize &destFrame);
-
-        QFont           mFontFoundIcons;
-        // Hover states for rotate
-        QHash<int,bool> mLeftHover;
-        QHash<int,bool> mRightHover;
-        QHash<int,int>  mRatingHover;
-};
+            QFont            mFontFoundIcons;
+            // Hover states for rotate
+            QHash<int, bool> mLeftHover;
+            QHash<int, bool> mRightHover;
+            QHash<int, int>  mRatingHover;
+    };
+}
 
 #endif // IMAGEDBCELLRENDERER_H

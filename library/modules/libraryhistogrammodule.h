@@ -6,18 +6,21 @@
 #include "librarymodule.h"
 #include "widgets/histogram.h"
 
-
-class LibraryHistogramModule : public LibraryModule
+namespace PhotoStage
 {
-public:
-    LibraryHistogramModule(QWidget * parent);
+    class LibraryHistogramModule : public LibraryModule
+    {
+        public:
 
-    void setPhotos(const QList<Photo *> &list);
+            LibraryHistogramModule(QWidget* parent);
 
-private:
-    Histogram *mHistogram;
+            void setPhotos(const QList<Photo*>& list);
 
-//    PhotoData loadImage(const QImage &inImage);
-};
+        private:
 
+            Histogram* mHistogram;
+
+            //    PhotoData loadImage(const QImage &inImage);
+    };
+}
 #endif // LIBRARYHISTOGRAMMODULE_H

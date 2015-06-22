@@ -7,29 +7,37 @@
 #include "backgroundtask.h"
 #include "workunits/importworkunit.h"
 
-
-class ImportBackgroundTask : public BackgroundTask, public QRunnable
+namespace PhotoStage
 {
-public:
-    ImportBackgroundTask(const ImportInfo & info);
+    class ImportBackgroundTask : public BackgroundTask, public QRunnable
+    {
+        public:
 
-    int progressMinimum();
-    int progressMaximum();
-    void run();
+            ImportBackgroundTask(const ImportInfo& info);
 
-    const QList<long long>& resultList() { return mIdList; }
+            int progressMinimum();
+            int progressMaximum();
+            void run();
 
-public slots:
-    void start();
-    void cancel();
+            const QList<long long>& resultList()
+            {
+                return mIdList;
+            }
 
-private:
-    QString mName;
-    ImportInfo mInfo;
+        public slots:
 
-    QList<long long> mIdList;
-    ImportWorkUnit * mWorkUnit;
-    std::atomic<bool> mRunning;
-};
+            void start();
+            void cancel();
+
+        private:
+
+            QString           mName;
+            ImportInfo        mInfo;
+
+            QList<long long>  mIdList;
+            ImportWorkUnit*   mWorkUnit;
+            std::atomic<bool> mRunning;
+    };
+}
 
 #endif // IMPORTBACKGROUNDTASK_H

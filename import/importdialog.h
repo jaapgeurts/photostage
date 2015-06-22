@@ -9,43 +9,49 @@
 
 #include "workunits/importinfo.h"
 
-namespace Ui {
-class ImportDialog;
+namespace Ui
+{
+    class ImportDialog;
 }
 
-class ImportDialog : public QDialog
+namespace PhotoStage
 {
-    Q_OBJECT
+    class ImportDialog : public QDialog
+    {
+        Q_OBJECT
 
-public:
-    explicit ImportDialog(QWidget *parent = 0);
-    ~ImportDialog();
+        public:
 
-    ImportInfo importInfo();
+            explicit ImportDialog(QWidget* parent = 0);
+            ~ImportDialog();
 
+            ImportInfo importInfo();
 
-private slots:
-    void onSourceDirClicked(const QModelIndex& index);
-    void onDestinationDirClicked(const QModelIndex& index);
-    void onImportModeCopy();
+        private slots:
 
-    void onImportModeMove();
-    void onImportModeAdd();
-    void onFilesSelected(const QItemSelection &, const QItemSelection &);
+            void onSourceDirClicked(const QModelIndex& index);
+            void onDestinationDirClicked(const QModelIndex& index);
+            void onImportModeCopy();
 
-private:
-    Ui::ImportDialog *ui;
-    QFileSystemModel *mSourceDrivesModel;
-    QFileSystemModel *mDestinationDrivesModel;
-    QModelIndex mDestinationModelIndex;
-    ImageFileSystemModel *mFilesModel;
-    TileView * mCfvPhotos;
-    ImportOptions::ImportMode mImportMode;
-    QItemSelectionModel *mFilesSelectionModel;
+            void onImportModeMove();
+            void onImportModeAdd();
+            void onFilesSelected(const QItemSelection&, const QItemSelection&);
 
-    void expandTreeRec(const QModelIndex &index);
+        private:
 
-    void validateForm();
-};
+            Ui::ImportDialog*         ui;
+            QFileSystemModel*         mSourceDrivesModel;
+            QFileSystemModel*         mDestinationDrivesModel;
+            QModelIndex               mDestinationModelIndex;
+            ImageFileSystemModel*     mFilesModel;
+            TileView*                 mCfvPhotos;
+            ImportOptions::ImportMode mImportMode;
+            QItemSelectionModel*      mFilesSelectionModel;
+
+            void expandTreeRec(const QModelIndex& index);
+
+            void validateForm();
+    };
+}
 
 #endif // IMPORTDIALOG_H

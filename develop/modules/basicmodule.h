@@ -10,22 +10,24 @@ namespace Ui
     class BasicModule;
 }
 
-class BasicModule : public DevelopModule
+namespace PhotoStage
 {
-    Q_OBJECT
+    class BasicModule : public DevelopModule
+    {
+        Q_OBJECT
 
-    public:
+        public:
 
-        explicit BasicModule(QWidget* parent = 0);
-        ~BasicModule();
+            explicit BasicModule(QWidget* parent = 0);
+            ~BasicModule();
 
-    public slots:
+        public slots:
 
-        void onExposureChanged(int value);
+            void onExposureChanged(int value);
 
-    private:
+        private:
 
-        Ui::BasicModule* ui;
-};
-
+            Ui::BasicModule* ui;
+    };
+}
 #endif // BASIC_H

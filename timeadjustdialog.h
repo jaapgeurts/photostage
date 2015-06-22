@@ -1,22 +1,28 @@
 #ifndef TIMEADJUSTDIALOG_H
 #define TIMEADJUSTDIALOG_H
+
 #include <QDialog>
+
 namespace Ui
 {
     class TimeAdjustDialog;
 }
-class TimeAdjustDialog : public QDialog
+
+namespace PhotoStage
 {
-    Q_OBJECT
+    class TimeAdjustDialog : public QDialog
+    {
+        Q_OBJECT
 
-    public:
+        public:
 
-        explicit TimeAdjustDialog(QWidget* parent = 0);
-        ~TimeAdjustDialog();
+            explicit TimeAdjustDialog(QWidget* parent = 0);
+            ~TimeAdjustDialog();
 
-    private:
+        private:
 
-        Ui::TimeAdjustDialog* ui;
-};
+            Ui::TimeAdjustDialog* ui;
+    };
+}
 
 #endif // TIMEADJUSTDIALOG_H

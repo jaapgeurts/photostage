@@ -5,16 +5,21 @@
 #include <QImage>
 #include <QMetaType>
 
-class PreviewInfo
+namespace PhotoStage
 {
-public:
-    PreviewInfo() {};
-    PreviewInfo(const QImage& img, const QString& path);
+    class PreviewInfo
+    {
+        public:
 
-    QImage image;
-    QString filePath;
-};
+            PreviewInfo()
+            {
+            };
+            PreviewInfo(const QImage& img, const QString& path);
 
-Q_DECLARE_METATYPE(PreviewInfo)
+            QImage  image;
+            QString filePath;
+    };
+}
+Q_DECLARE_METATYPE(PhotoStage::PreviewInfo)
 
 #endif // PREVIEWINFO_H

@@ -2,13 +2,14 @@
 
 #include "exiv2lib.h"
 
-ExivFacade *ExivFacade::createExivReader()
+namespace PhotoStage
 {
-  return new Exiv2Lib();
+    ExivFacade* ExivFacade::createExivReader()
+    {
+        return new Exiv2Lib();
+    }
+
+    ExivFacade::ExivFacade()
+    {
+    }
 }
-
-ExivFacade::ExivFacade()
-{
-
-}
-

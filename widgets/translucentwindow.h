@@ -4,19 +4,23 @@
 #include <QWidget>
 #include <QRect>
 
-class TranslucentWindow : public QWidget
+namespace PhotoStage
 {
-public:
-    TranslucentWindow(QWidget * parent = 0);
+    class TranslucentWindow : public QWidget
+    {
+        public:
 
-    void setGapGeometry(const QRect &rect);
+            TranslucentWindow(QWidget* parent = 0);
 
-protected:
-    virtual void paintEvent(QPaintEvent *paintEvent);
+            void setGapGeometry(const QRect& rect);
 
-private:
-    QRect mGapRect;
+        protected:
 
-};
+            virtual void paintEvent(QPaintEvent* paintEvent);
 
+        private:
+
+            QRect mGapRect;
+    };
+}
 #endif // TRANSLUCENTWINDOW_H

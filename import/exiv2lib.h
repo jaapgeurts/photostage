@@ -6,25 +6,26 @@
 #include "exiv2/image.hpp"
 #include "exiv2/preview.hpp"
 
-using namespace Exiv2;
-
-
-class Exiv2Lib : public ExivFacade
+namespace PhotoStage
 {
-public:
-    Exiv2Lib();
+    class Exiv2Lib : public ExivFacade
+    {
+        public:
 
-    void openFile(const QString& path);
-    ExifInfo data();
+            Exiv2Lib();
 
-private:
-    ExifInfo mExifData;
+            void openFile(const QString& path);
+            ExifInfo data();
 
-    Image::AutoPtr mImageFile;
+        private:
 
+            ExifInfo              mExifData;
 
-    const QImage loadImage();
-    void setWhiteBalanceCoeffs(ExifData &data, float wb[]);
-};
+            Exiv2::Image::AutoPtr mImageFile;
+
+            const QImage loadImage();
+            void setWhiteBalanceCoeffs(Exiv2::ExifData& data, float wb[]);
+    };
+}
 
 #endif // EXIV2_H

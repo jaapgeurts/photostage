@@ -6,32 +6,41 @@
 #include <QMenu>
 #include <QHash>
 
-struct PanelInfo {
-    QString title;
-    QWidget* header;
-    QPushButton* btnMenu;
-    QMenu* menu;
-    QWidget* panel;
-};
-
-class ModulePanel : public QWidget
+namespace PhotoStage
 {
-    Q_OBJECT
-public:
-    explicit ModulePanel(QWidget *parent = 0);
-    ~ModulePanel();
+    struct PanelInfo
+    {
+        QString title;
+        QWidget* header;
+        QPushButton* btnMenu;
+        QMenu* menu;
+        QWidget* panel;
+    };
 
-    void addPanel(const QString& title, QWidget* panel, QMenu *menu=0);
-    void removePanel(const QString& title);
+    class ModulePanel : public QWidget
+    {
+        Q_OBJECT
 
-signals:
+        public:
 
-private slots:
-    void onHeaderClicked();
-    void onMenuClicked(bool);
+            explicit ModulePanel(QWidget* parent = 0);
+            ~ModulePanel();
 
-private:
-    QHash<QString,PanelInfo> mPanels;
-};
+            void addPanel(const QString& title, QWidget* panel,
+                QMenu* menu = 0);
+            void removePanel(const QString& title);
+
+        signals:
+
+        private slots:
+
+            void onHeaderClicked();
+            void onMenuClicked(bool);
+
+        private:
+
+            QHash<QString, PanelInfo> mPanels;
+    };
+}
 
 #endif // MODULEPANEL_H

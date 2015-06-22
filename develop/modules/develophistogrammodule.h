@@ -4,23 +4,25 @@
 #include "developmodule.h"
 #include "widgets/histogram.h"
 
-class DevelopHistogramModule : public DevelopModule
+namespace PhotoStage
 {
-    Q_OBJECT
+    class DevelopHistogramModule : public DevelopModule
+    {
+        Q_OBJECT
 
-    public:
+        public:
 
-        DevelopHistogramModule(QWidget* parent = 0);
+            DevelopHistogramModule(QWidget* parent = 0);
 
-        void setPhoto(Photo* const photo);
+            void setPhoto(Photo* const photo);
 
-    public slots:
+        public slots:
 
-        void recalculate();
+            void recalculate();
 
-    private:
+        private:
 
-        Histogram* mHistogram;
-};
-
+            Histogram* mHistogram;
+    };
+}
 #endif // DEVELOPHISTOGRAMMODULE_H

@@ -299,7 +299,7 @@
          </widget>
         </item>
         <item>
-         <widget class="TileView" name="filmStrip" native="true">
+         <widget class="PhotoStage::TileView" name="filmStrip" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
             <horstretch>0</horstretch>
@@ -846,7 +846,7 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
-   <class>TileView</class>
+   <class>PhotoStage::TileView</class>
    <extends>QWidget</extends>
    <header>widgets/tileview.h</header>
    <container>1</container>

@@ -7,63 +7,98 @@
 #include <QMouseEvent>
 #include <QModelIndex>
 
-class TileView;
-
-struct TileInfo
+namespace PhotoStage
 {
-    enum TileState {
-        TileStateNone      = 0x000,
-        TileStateSelected  = 0x001,
-        TileStateActive    = 0x002,
-        TileStateChecked   = 0x004,
-        TileStateUnchecked = 0x008
+    class TileView;
+
+    struct TileInfo
+    {
+        enum TileState
+        {
+            TileStateNone      = 0x000,
+            TileStateSelected  = 0x001,
+            TileStateActive    = 0x002,
+            TileStateChecked   = 0x004,
+            TileStateUnchecked = 0x008
+        };
+
+        TileInfo()
+        {
+            tileState = TileStateNone;
+        }
+
+        // the ordinal number in the list
+        int index;
+        // the matrix position in the grid
+        int row;
+        int column;
+        // the pixel position in the view (relative to the viewport)
+        int x;
+        int y;
+        int width;
+        int height;
+
+        QModelIndex modelIndex;
+
+        TileState tileState;
     };
 
-    TileInfo() { tileState = TileStateNone; }
+    class AbstractTile : public QObject
+    {
+        Q_OBJECT
 
-    // the ordinal number in the list
-    int index;
-    // the matrix position in the grid
-    int row;
-    int column;
-    // the pixel position in the view (relative to the viewport)
-    int x;
-    int y;
-    int width;
-    int height;
+        public:
 
-    QModelIndex modelIndex;
+            AbstractTile(TileView* parent = 0);
+            virtual ~AbstractTile()
+            {
+            }
 
-    TileState tileState;
+            void setSize(const QSize& size)
+            {
+                mSize = size;
+            }
 
-};
+            QSize size()
+            {
+                return mSize;
+            }
 
-class AbstractTile : public QObject
-{
-    Q_OBJECT
+            virtual void render(QPainter& painter,
+                const TileInfo& info,
+                const QVariant& data) = 0;
 
-public:
+            virtual void mouseMoveEvent(QMouseEvent* e, const TileInfo&)
+            {
+                e->ignore();
+            }
 
-    AbstractTile(TileView* parent=0);
-    virtual ~AbstractTile() {}
+            virtual void mousePressEvent(QMouseEvent* e, const TileInfo&)
+            {
+                e->ignore();
+            }
 
-    void setSize(const QSize& size) { mSize = size; }
-    QSize size() { return mSize; }
+            virtual void mouseReleaseEvent(QMouseEvent* e, const TileInfo&)
+            {
+                e->ignore();
+            }
 
-    virtual void render(QPainter& painter,  const TileInfo& info, const QVariant& data) = 0;
-    virtual void mouseMoveEvent(QMouseEvent*e, const  TileInfo&) { e->ignore();  }
-    virtual void mousePressEvent(QMouseEvent*e, const  TileInfo&) { e->ignore();  }
-    virtual void mouseReleaseEvent(QMouseEvent*e, const  TileInfo&) { e->ignore(); }
-    virtual void mouseEnterEvent(const TileInfo&) {}
-    virtual void mouseLeaveEvent(const TileInfo&) {}
+            virtual void mouseEnterEvent(const TileInfo&)
+            {
+            }
 
+            virtual void mouseLeaveEvent(const TileInfo&)
+            {
+            }
 
-protected:
-    void update();
+        protected:
 
-private:
-    QSize mSize;
+            void update();
 
-};
+        private:
+
+            QSize mSize;
+    };
+}
 
 #endif // ABSTRACTCELLRENDERER_H
