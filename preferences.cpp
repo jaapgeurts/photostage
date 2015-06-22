@@ -6,38 +6,36 @@
 
 namespace PhotoStage
 {
-    Preferences* Preferences::mPreferences = NULL;
+Preferences* Preferences::mPreferences = NULL;
 
-    Preferences* Preferences::instance()
-    {
-        if (mPreferences == NULL)
-            mPreferences = new Preferences(NULL);
-        return mPreferences;
-    }
+Preferences* Preferences::instance()
+{
+    if (mPreferences == NULL)
+        mPreferences = new Preferences(NULL);
+    return mPreferences;
+}
 
-    void Preferences::load()
-    {
-        QSettings settings;
+void Preferences::load()
+{
+    QSettings settings;
 
+    library_include_subfolders =
+        settings.value(LIBRARY_INCLUDE_SUBFOLDERS).toBool();
+}
 
-        library_include_subfolders =
-            settings.value(LIBRARY_INCLUDE_SUBFOLDERS).toBool();
-    }
+void Preferences::save()
+{
+    QSettings settings;
 
-    void Preferences::save()
-    {
-        QSettings settings;
+    settings.setValue(LIBRARY_INCLUDE_SUBFOLDERS,
+        library_include_subfolders);
+}
 
+Preferences::Preferences(QObject* parent) : QObject(parent)
+{
+    // set defaults;
+    library_include_subfolders = true;
 
-        settings.setValue(LIBRARY_INCLUDE_SUBFOLDERS,
-            library_include_subfolders);
-    }
-
-    Preferences::Preferences(QObject* parent) : QObject(parent)
-    {
-        // set defaults;
-        library_include_subfolders = true;
-
-        load();
-    }
+    load();
+}
 }

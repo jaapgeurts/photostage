@@ -5,28 +5,28 @@
 
 namespace PhotoStage
 {
-    class Preferences : public QObject
-    {
-        Q_OBJECT
+class Preferences : public QObject
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            static Preferences* instance();
+        static Preferences* instance();
 
-            // Library section
-            bool library_include_subfolders;
+        // Library section
+        bool library_include_subfolders;
 
-        signals:
+    signals:
 
-        public slots:
+    public slots:
 
-            void load();
-            void save();
+        void load();
+        void save();
 
-        private:
+    private:
 
-            static Preferences* mPreferences;
-            explicit Preferences(QObject* parent = 0);
-    };
+        static Preferences* mPreferences;
+        explicit Preferences(QObject* parent = 0);
+};
 }
 #endif // PREFERENCES_H

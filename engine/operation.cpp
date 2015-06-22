@@ -2,7 +2,7 @@
 
 namespace PhotoStage
 {
-    Operation::Operation()
-    {
-    }
+Operation::Operation()
+{
+}
 }

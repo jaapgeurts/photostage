@@ -6,27 +6,27 @@
 
 namespace PhotoStage
 {
-    class BackgroundTaskManager : public QObject
-    {
-        Q_OBJECT
+class BackgroundTaskManager : public QObject
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            explicit BackgroundTaskManager(QWidget* const container,
-                QObject* parent = 0);
-            ~BackgroundTaskManager();
-            void addRunnable(BackgroundTask* const task);
+        explicit BackgroundTaskManager(QWidget* const container,
+            QObject* parent = 0);
+        ~BackgroundTaskManager();
+        void addRunnable(BackgroundTask* const task);
 
-        signals:
+    signals:
 
-        public slots:
+    public slots:
 
-            void taskFinished(BackgroundTask* task);
+        void taskFinished(BackgroundTask* task);
 
-        private:
+    private:
 
-            QWidget*                                        mContainer;
-            QHash<BackgroundTask*, BackgroundTaskProgress*> mDict;
-    };
+        QWidget*                                        mContainer;
+        QHash<BackgroundTask*, BackgroundTaskProgress*> mDict;
+};
 }
 #endif // BACKGROUNDTASKMANAGER_H

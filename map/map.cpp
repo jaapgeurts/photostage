@@ -3,20 +3,20 @@
 
 namespace PhotoStage
 {
-    Map::Map(QWidget* parent) :
-        Module(parent),
-        ui(new Ui::Map)
-    {
-        ui->setupUi(this);
-    }
+Map::Map(QWidget* parent) :
+    Module(parent),
+    ui(new Ui::Map)
+{
+    ui->setupUi(this);
+}
 
-    Map::~Map()
-    {
-        delete ui;
-    }
+Map::~Map()
+{
+    delete ui;
+}
 
-    QRect Map::lightGap()
-    {
-        // TODO: implement this
-    }
+QRect Map::lightGap()
+{
+    // TODO: implement this
+}
 }

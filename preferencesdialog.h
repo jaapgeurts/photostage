@@ -6,28 +6,28 @@
 
 namespace Ui
 {
-    class PreferencesDialog;
+class PreferencesDialog;
 }
 
 namespace PhotoStage
 {
-    class PreferencesDialog : public QDialog
-    {
-        Q_OBJECT
+class PreferencesDialog : public QDialog
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            explicit PreferencesDialog(QWidget* parent = 0);
-            ~PreferencesDialog();
+        explicit PreferencesDialog(QWidget* parent = 0);
+        ~PreferencesDialog();
 
-        public slots:
+    public slots:
 
-            void onLibraryShowSubdirsClicked(bool state);
+        void onLibraryShowSubdirsClicked(bool state);
 
-        private:
+    private:
 
-            Ui::PreferencesDialog* ui;
-            Preferences*           mPreferences;
-    };
+        Ui::PreferencesDialog* ui;
+        Preferences*           mPreferences;
+};
 }
 #endif // PREFERENCESDIALOG_H

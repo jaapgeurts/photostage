@@ -6,14 +6,14 @@
 
 namespace PhotoStage
 {
-    /**
-     * @brief Fits the source frame into the destination frame.
-     *        Keeps aspect ratio and centers the frame
-     * @param src
-     * @param destFrame
-     * @return
-     */
-    QRect fitFrame(const QSize& src, const QSize& destFrame);
+/**
+ * @brief Fits the source frame into the destination frame.
+ *        Keeps aspect ratio and centers the frame
+ * @param src
+ * @param destFrame
+ * @return
+ */
+QRect fitFrame(const QSize& src, const QSize& dst);
 }
 
 #endif // PHOTOSTAGE_UTILS_H

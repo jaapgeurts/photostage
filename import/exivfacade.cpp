@@ -4,12 +4,12 @@
 
 namespace PhotoStage
 {
-    ExivFacade* ExivFacade::createExivReader()
-    {
-        return new Exiv2Lib();
-    }
+ExivFacade* ExivFacade::createExivReader()
+{
+    return new Exiv2Lib();
+}
 
-    ExivFacade::ExivFacade()
-    {
-    }
+ExivFacade::ExivFacade()
+{
+}
 }

@@ -9,42 +9,42 @@
 
 namespace PhotoStage
 {
-    const int IMG_NO_CHANNELS = 3;
+const int IMG_NO_CHANNELS = 3;
 
-    class Image
-    {
-        public:
+class Image
+{
+    public:
 
-            Image();
-            Image(int width, int height);
-            Image(const QSize& size);
-            ~Image();
+        Image();
+        Image(int width, int height);
+        Image(const QSize& size);
+        ~Image();
 
-            Image clone() const;
+        Image clone() const;
 
-            // static convenience functions
-            static Image fromFile(const QString& filename);
-            static Image fromQImage(const QImage& image);
+        // static convenience functions
+        static Image fromFile(const QString& filename);
+        static Image fromQImage(const QImage& image);
 
-            QImage toQImage() const;
-            bool saveToFile(const QString& filename) const;
+        QImage toQImage() const;
+        bool saveToFile(const QString& filename) const;
 
-            // getters
-            int width() const;
-            int height() const;
-            QSize size() const;
+        // getters
+        int width() const;
+        int height() const;
+        QSize size() const;
 
-            float* data() const;
-            float* scanLine(int l) const;
+        float* data() const;
+        float* scanLine(int l) const;
 
-            bool isNull() const;
+        bool isNull() const;
 
-        private:
+    private:
 
-            QSharedPointer<float> mPixels;
-            int                   mWidth;
-            int                   mHeight;
-    };
+        QSharedPointer<float> mPixels;
+        int                   mWidth;
+        int                   mHeight;
+};
 }
 
 Q_DECLARE_METATYPE(PhotoStage::Image)

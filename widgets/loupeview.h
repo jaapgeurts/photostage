@@ -52,6 +52,7 @@ namespace PhotoStage
             QPoint   mMousePressLocation;
             QPoint   mPhotoTopLeft;
             ZoomMode mZoomMode;
+//            QBrush   mCheckeredBrush;
 
             void ensureBestPosition();
     };

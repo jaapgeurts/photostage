@@ -7,24 +7,24 @@
 
 namespace PhotoStage
 {
-    class PreviewCache : public QObject
-    {
-        Q_OBJECT
+class PreviewCache : public QObject
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            explicit PreviewCache(const QString& baseDir, QObject* parent = 0);
+        explicit PreviewCache(const QString& baseDir, QObject* parent = 0);
 
-            QImage get(const QString& key);
-            void put(const QString& key, const QImage& image);
+        QImage get(const QString& key);
+        void put(const QString& key, const QImage& image);
 
-        public slots:
+    public slots:
 
-        private:
+    private:
 
-            QString            mBaseDir;
-            QCryptographicHash mHash;
-            std::pair<QString, QString> dirFromKey(const QString& key);
-    };
+        QString            mBaseDir;
+        QCryptographicHash mHash;
+        std::pair<QString, QString> dirFromKey(const QString& key);
+};
 }
 #endif // PREVIEWCACHE_H

@@ -3,10 +3,10 @@
 
 namespace PhotoStage
 {
-    RawModule::RawModule(QWidget* parent) :
-        DevelopModule(parent),
-        ui(new Ui::RawModule)
-    {
-        ui->setupUi(this);
-    }
+RawModule::RawModule(QWidget* parent) :
+    DevelopModule(parent),
+    ui(new Ui::RawModule)
+{
+    ui->setupUi(this);
+}
 }
