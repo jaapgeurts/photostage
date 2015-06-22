@@ -12,10 +12,17 @@ TARGET = PhotoStage
 TEMPLATE =
 
 DEPENDPATH += .
-INCLUDEPATH += .
+INCLUDEPATH += . \
+               $$PWD/external/exiv2/include \
+               $$PWD/external/halide/include
 
 # Qt uses libstdc++
 CONFIG += c++11
+
+QMAKE_CXXFLAGS_RELEASE -= -O2
+QMAKE_CXXFLAGS_RELEASE += -O3
+
+QMAKE_LFLAGS_RELEASE -= -O1
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -58,9 +65,19 @@ SOURCES += main.cpp\
     library/modules/shortcutmodule.cpp \
     widgets/histogram.cpp \
     library/modules/taggingmodule.cpp \
-    library/modules/histogrammodule.cpp \
-    photodata.cpp \
-    widgets/loupeview.cpp
+    widgets/loupeview.cpp \
+    develop/modules/rawmodule.cpp \
+    library/modules/libraryhistogrammodule.cpp \
+    develop/modules/develophistogrammodule.cpp \
+    develop/modules/developmodule.cpp \
+    develop/modules/basicmodule.cpp \
+    filmstriptile.cpp \
+    previewcache.cpp \
+    engine/colortransform.cpp \
+    image.cpp \
+    engine/operation.cpp \
+    engine/pipelinebuilder.cpp \
+    engine/utils.cpp
     #processing/amaze_demosaic_RT.c
 
 HEADERS  += mainwindow.h \
@@ -105,9 +122,20 @@ HEADERS  += mainwindow.h \
     library/modules/shortcutmodule.h \
     widgets/histogram.h \
     library/modules/taggingmodule.h \
-    library/modules/histogrammodule.h \
     photodata.h \
-    widgets/loupeview.h
+    widgets/loupeview.h \
+    develop/modules/rawmodule.h \
+    library/modules/libraryhistogrammodule.h \
+    develop/modules/develophistogrammodule.h \
+    develop/modules/developmodule.h \
+    develop/modules/basicmodule.h \
+    filmstriptile.h \
+    previewcache.h \
+    engine/colortransform.h \
+    image.h \
+    engine/operation.h \
+    engine/pipelinebuilder.h \
+    engine/utils.h
 
 
 FORMS    += mainwindow.ui \
@@ -118,7 +146,9 @@ FORMS    += mainwindow.ui \
     library/library.ui \
     develop/develop.ui \
     map/map.ui \
-    widgets/backgroundtaskprogress.ui
+    widgets/backgroundtaskprogress.ui \
+    develop/modules/rawmodule.ui \
+    develop/modules/basicmodule.ui
 
 DISTFILES += \
     Info.plist
@@ -133,18 +163,17 @@ LIBS += \
 
 macx {
     #QMAKE_INFO_PLIST = Info.plist
+#    QMAKE_CXXFLAGS -= -std=c++0x
     QMAKE_CXXFLAGS += \
                     -std=c++11 \
                     -stdlib=libc++ \
                     -fms-extensions \
                     -Wignored-attributes
     ICON = resources/appicon.icns
-    INCLUDEPATH += /opt/local/include \
-                += $$PWD/external/exiv2/include
+    INCLUDEPATH += /opt/local/include
     OBJECTIVE_SOURCES +=
     LIBS += \
             -stdlib=libc++ \
-            $$PWD/external/exiv2/lib/libexiv2.a \
             /usr/lib/libiconv.dylib \
 # for release link to the dynamic lib
 #            $$PWD/external/exiv2/lib/libexiv2.13.dylib \
@@ -157,11 +186,14 @@ win32 {
 }
 
 LIBS += \
+            $$PWD/external/exiv2/lib/libexiv2.a \
+            $$PWD/external/halide/lib/libHalide.a \
 # for libexiv2
             -lexpat \
             -lz \
 # end libexiv2
             -ljpeg \
+            -lpng \
             -llcms2
 
 RESOURCES += \

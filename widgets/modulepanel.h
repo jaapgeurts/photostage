@@ -28,7 +28,7 @@ signals:
 
 private slots:
     void onHeaderClicked();
-    void onMenuClicked(bool checked);
+    void onMenuClicked(bool);
 
 private:
     QHash<QString,PanelInfo> mPanels;

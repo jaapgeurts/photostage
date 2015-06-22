@@ -7,6 +7,5 @@ BackgroundTask::BackgroundTask(const QString & name)
 
 void BackgroundTask::setDescription(const QString &description)
 {
-  mDescription = description;
+    mDescription = description;
 }
-

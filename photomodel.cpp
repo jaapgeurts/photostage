@@ -1,14 +1,17 @@
 #include <QImage>
 #include <QDir>
+#include <QStandardPaths>
+#include <QDebug>
 
 #include "constants.h"
 #include "photomodel.h"
-#include "imagefileloader.h"
 #include "widgets/tileview.h"
 
-PhotoModel::PhotoModel(QObject *parent): QAbstractListModel(parent)
+PhotoModel::PhotoModel(QObject* parent) :
+    QAbstractListModel(parent),
+    mPreviewCache(QStandardPaths::writableLocation(
+            QStandardPaths::CacheLocation), parent)
 {
-
     //
     // create table photo (
     //    id integer primary key AUTOINCREMENT,
@@ -23,29 +26,24 @@ PhotoModel::PhotoModel(QObject *parent): QAbstractListModel(parent)
     //            color integer,
     //            flag integer)")))
 
-    mWorkUnit = PhotoWorkUnit::instance();
+    mWorkUnit   = PhotoWorkUnit::instance();
 
-    mPhotoInfoCache = new QHash<QModelIndex,Photo*>();
-    mThreadPool = new QThreadPool(this);
 
+    mLoader = ImageFileLoader::getLoader();
+    connect(mLoader, &ImageFileLoader::dataReady, this,
+        &PhotoModel::imageLoaded);
 }
 
 PhotoModel::~PhotoModel()
 {
     qDeleteAll(mPhotoInfoList);
     mPhotoInfoList.clear();
-
-    mPhotoInfoCache->clear();
-    delete mPhotoInfoCache;
 }
 
-
-QVariant PhotoModel::data(const QModelIndex &index, int role) const
+QVariant PhotoModel::data(const QModelIndex& index, int role) const
 {
-
     if (!index.isValid())
         return QVariant();
-
 
     if (index.row() > mPhotoInfoList.size())
     {
@@ -53,30 +51,40 @@ QVariant PhotoModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    Photo *info;
+    Photo* info;
 
-    if ( role == TileView::PhotoRole)
+    if (role == TileView::PhotoRole)
     {
+        info = mPhotoInfoList.at(index.row());
 
-        if (mPhotoInfoCache->contains(index))
+        if (info->libraryPreview().isNull())
         {
-            // return cached image
-            info = mPhotoInfoCache->value(index);
+            QString key = QString::number(info->id);
+            QImage  img = mPreviewCache.get(key);
+
+            info->setLibraryPreview(img);
+            info->setOriginal(img);
+
+            if (img.isNull() && !mPhotoInfoMap.contains(index))
+            {
+                // If not available return
+                // load image in background thread.
+                // Should kickoff single thread
+                // and add to thread queue so that only 1 instance of Halide runs
+                mLoader->addJob(index, info->srcImagePath());
+                mPhotoInfoMap.insert(index, info);
+
+                // Halide gen outside of thread
+                //                QImage image = genGradient();
+                //                QImage preview =
+                //                    image.scaled(QSize(PREVIEW_IMG_WIDTH,
+                //                        PREVIEW_IMG_HEIGHT), Qt::KeepAspectRatio,
+                //                        Qt::SmoothTransformation);
+                //                mPreviewCache.put(key, preview);
+                //                info->setLibraryPreview(preview);
+            }
         }
-        else
-        {
-            info = mPhotoInfoList.at(index.row());
 
-            // load image in background thread
-            ImageFileLoader* loader = new ImageFileLoader(info->srcImagePath(),index);
-            connect(loader,&ImageFileLoader::dataReady,this,&PhotoModel::imageLoaded);
-            mThreadPool->start(loader);
-
-            // Insert the dummy image here so that the we know the loader thread has been started
-            mPhotoInfoCache->insert(index,info);
-
-            return QVariant();
-        }
         return QVariant::fromValue<Photo*>(info);
     }
     else if (role == Qt::DisplayRole)
@@ -87,56 +95,65 @@ QVariant PhotoModel::data(const QModelIndex &index, int role) const
         return QVariant();
 }
 
-void PhotoModel::imageLoaded(const QModelIndex &index, const QImage& image)
+void PhotoModel::imageLoaded(const QVariant& ref, const QImage& image)
 {
+    QModelIndex index   = ref.value<QModelIndex>();
+    QImage      preview =
+        image.scaled(QSize(PREVIEW_IMG_WIDTH,
+            PREVIEW_IMG_HEIGHT), Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    Photo* info = mPhotoInfoCache->value(index);
+    Photo*  info = mPhotoInfoMap.value(index);
 
-    QImage preview = image.scaled(QSize(PREVIEW_IMG_WIDTH,PREVIEW_IMG_HEIGHT),Qt::KeepAspectRatio);
+    QString key = QString::number(info->id);
 
-    info->setPreview(preview);
-    info->setRawImage(image);
-    mPhotoInfoCache->insert(index,info);
+
+    mPreviewCache.put(key, preview);
+
+    // TODO: original = null
+    info->setLibraryPreview(preview);
+    mPhotoInfoMap.remove(index);
+
     QVector<int> roles;
-    //roles.append(ImageFileSystemModel::FileImageRole);
-    emit dataChanged(index,index,roles);
+    emit         dataChanged(index, index, roles);
 }
 
-void PhotoModel::onReloadPhotos(PhotoModel::SourceType source, long long id)
+void PhotoModel::onReloadPhotos(PhotoModel::SourceType source, long long pathId)
 {
     beginResetModel();
+
     if (source == SourceFiles)
     {
-        mPhotoInfoList = mWorkUnit->getPhotosByPath(id);
+        mPhotoInfoList = mWorkUnit->getPhotosByPath(pathId);
     }
     else if (source == SourceCollection)
     {
         // TODO: not yet implemented
         //mPhotoInfoList = mWorkUnit->getPhotosByCollection(id);
     }
-    mPhotoInfoCache->clear();
+    // should also cancel all open threads
     endResetModel();
-
 }
 
-bool PComp(const Photo* const & a, const Photo* const & b)
+bool PComp(const Photo* const& a, const Photo* const& b)
 {
     return a->id < b->id;
 }
 
-void PhotoModel::refreshData(const QList<Photo *> &list )
+void PhotoModel::refreshData(const QList<Photo*>& list )
 {
     // for now just emit that all data has changed. the tileview doesnt check anyway
-    emit dataChanged(index(0,0),index(rowCount(QModelIndex())-1,0));
+    emit dataChanged(index(0, 0), index(rowCount(QModelIndex()) - 1, 0));
 }
 
 void PhotoModel::addData(const QList<long long>& idList)
 {
     // figure out what was changed, what is new and what has been added
     int start = rowCount(QModelIndex());
+
+
     QList<Photo*> list = mWorkUnit->getPhotosById(idList);
-    beginInsertRows(QModelIndex(),start,list.size()-1);
-    Photo *info;
+    beginInsertRows(QModelIndex(), start, list.size() - 1);
+    Photo*        info;
     foreach(info, list)
     {
         mPhotoInfoList.append(info);
@@ -145,12 +162,14 @@ void PhotoModel::addData(const QList<long long>& idList)
     endInsertRows();
 }
 
-QVariant PhotoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int /*role*/) const
+QVariant PhotoModel::headerData(int /*section*/,
+    Qt::Orientation /*orientation*/,
+    int /*role*/) const
 {
     return QVariant();
 }
 
-int PhotoModel::rowCount(const QModelIndex &/*parent*/) const
+int PhotoModel::rowCount(const QModelIndex& /*parent*/) const
 {
     return mPhotoInfoList.size();
 }

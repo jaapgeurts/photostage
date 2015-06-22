@@ -1,64 +1,78 @@
 #ifndef PHOTO
 #define PHOTO
 
-#include <QImage>
 #include <QString>
 #include <QMetaType>
 #include <QSqlQuery>
 
+#include "image.h"
+
+#include "engine/colortransform.h"
+
 class Photo
 {
+    public:
 
-public:
+        enum ColorLabel
+        {
+            LabelNoColor = 0,
+            LabelRed     = 1,
+            LabelGreen   = 2,
+            LabelBlue    = 3,
+            LabelYellow  = 4,
+            LabelPurple  = 5,
+            LabelOrange  = 6
+        };
 
-    enum ColorLabel { LabelNoColor =0, LabelRed =1, LabelGreen=2, LabelBlue=3, LabelYellow=4, LabelPurple=5, LabelOrange=6  };
-    enum Flag {  FlagNone = 0, FlagPick = 1, FlagReject = 2 };
+        enum Flag
+        {
+            FlagNone   = 0,
+            FlagPick   = 1,
+            FlagReject = 2
+        };
 
-    Photo();
-    Photo(const Photo& info);
-    Photo(const QImage& image, const QString& filename, long long id);
-    Photo(QSqlQuery & query);
-    virtual ~Photo();
+        // Constructors
+        Photo();
+        Photo(const Photo& info);
+        Photo(const QImage &image, const QString& filename, long long id);
+        Photo(QSqlQuery& query);
+        virtual ~Photo();
 
-    void setPreview(const QImage& image);
-    const QImage& preview();
+        // getters & setters
+        void setOriginal(const QImage& image);
+        const QImage& original() const;
+        void setLibraryPreview(const QImage& image);
+        const QImage& libraryPreview();
+        const QImage& libraryPreviewsRGB();
 
-    void setSrcImagePath(const QString &path);
-    const QString& srcImagePath();
+        void setSrcImagePath(const QString& path);
+        const QString& srcImagePath();
 
-    void setPreviewCachePath(const QString &path);
-    const QString& previewCachePath();
+        void setRating(int rating);
+        int rating();
 
-    void setRating(int rating);
-    int rating();
+        void setColorLabel(ColorLabel label);
+        ColorLabel colorLabel();
 
-    void setColorLabel(ColorLabel label);
-    ColorLabel colorLabel();
+        void setFlag(Flag flag);
+        Flag flag();
 
-    void setFlag(Flag flag);
-    Flag flag();
+    public:
 
-    QImage rawImage() { return mRawImage; }
-    void setRawImage(const QImage& image) { mRawImage = image; }
+        long long id;
 
-public:
-    long long id;
+    private:
 
-private:
-    int mRating;
-    ColorLabel mColorLabel;
-    Flag mFlag;
-    QString mSrcImagePath;
-    QString mPreviewCachePath;
-
-    QImage mPreview;
-    QImage mRawImage;
-
-
+        int        mRating;
+        ColorLabel mColorLabel;
+        Flag       mFlag;
+        QImage     mLibraryPreview;
+        QImage     mLibraryPreviewsRGB;
+        QImage     mOriginal;
+        QString    mSrcImagePath;
 };
 
 Q_DECLARE_METATYPE(Photo)
 Q_DECLARE_METATYPE(Photo*)
 
 #endif // PHOTO
-

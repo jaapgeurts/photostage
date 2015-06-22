@@ -10,7 +10,7 @@
 #include "modules/taggingmodule.h"
 #include "modules/collectionmodule.h"
 #include "modules/shortcutmodule.h"
-#include "modules/histogrammodule.h"
+#include "modules/libraryhistogrammodule.h"
 
 namespace Ui {
 class Library;
@@ -26,6 +26,8 @@ public:
 
     QRect lightGap();
 
+    void setSelectionModel(QItemSelectionModel* selectionModel);
+
 signals:
 
     void photoSelectionChanged(const QList<Photo*> & list);
@@ -33,7 +35,7 @@ signals:
 
 public slots:
 
-    void onPhotoSelectionChanged();
+    void onPhotoSelectionChanged(const QItemSelection &selected, const QItemSelection &);
     void onTileDoubleClicked(const QModelIndex& index);
 
     // For clicks on the tile
@@ -55,7 +57,7 @@ private:
         PhotoWorkUnit * mPhotoWorkUnit;
         SqlPathModel *mPathModel;
         TaggingModule *mKeywording;
-        HistogramModule* mHistogramModule;
+        LibraryHistogramModule* mHistogramModule;
 
 };
 

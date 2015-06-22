@@ -1,7 +1,7 @@
 #include "timeadjustdialog.h"
 #include "ui_timeadjustdialog.h"
 
-TimeAdjustDialog::TimeAdjustDialog(QWidget *parent) :
+TimeAdjustDialog::TimeAdjustDialog(QWidget* parent) :
     QDialog(parent),
     ui(new Ui::TimeAdjustDialog)
 {

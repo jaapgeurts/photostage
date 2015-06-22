@@ -8,12 +8,17 @@ class Module : public QWidget
 {
     Q_OBJECT
 
-public:
-    Module(QWidget* parent =0) : QWidget(parent) {}
-    virtual ~Module() {}
+    public:
 
-    virtual QRect lightGap() = 0;
+        Module(QWidget* parent = 0) : QWidget(parent)
+        {
+        }
+
+        virtual ~Module()
+        {
+        }
+
+        virtual QRect lightGap() = 0;
 };
 
 #endif // MODULE_H
-

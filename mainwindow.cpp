@@ -23,17 +23,16 @@
 
 #include "backgroundtask.h"
 #include "import/importbackgroundtask.h"
+#include "filmstriptile.h"
 
-#define SETTINGS_WINDOW_LOCATION "mainwindow/location"
+#define SETTINGS_WINDOW_LOCATION          "mainwindow/location"
 #define SETTINGS_SPLITTER_FILMSTRIP_SIZES "mainwindow/splitter_filmstrip"
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
-
-
-    QApplication::setFont(QFont(QString("verdana"),10));
+    QApplication::setFont(QFont(QString("verdana"), 10));
 
     ui->setupUi(this);
 
@@ -45,28 +44,58 @@ MainWindow::MainWindow(QWidget *parent) :
     move(settings.value(SETTINGS_WINDOW_LOCATION).toPoint());
 
     QList<int> l;
+
     if (settings.contains(SETTINGS_SPLITTER_FILMSTRIP_SIZES))
     {
-        foreach(QVariant v, settings.value(SETTINGS_SPLITTER_FILMSTRIP_SIZES).toList())
+        foreach(QVariant v, settings.value(
+                SETTINGS_SPLITTER_FILMSTRIP_SIZES).toList())
         {
             l << v.toInt();
         }
-    } else
+    }
+    else
     {
         l << 600 << 200;
     }
     ui->splitter->setSizes(l);
 
     mPhotoModel = new PhotoModel(this);
-    connect(mPhotoModel,&PhotoModel::modelReset,this,&MainWindow::onModelReset);
-    connect(mPhotoModel,&PhotoModel::rowsInserted,this,&MainWindow::onModelRowsInserted);
-    connect(mPhotoModel,&PhotoModel::rowsRemoved,this,&MainWindow::onModelRowsRemoved);
+    connect(mPhotoModel,
+        &PhotoModel::modelReset,
+        this,
+        &MainWindow::onModelReset);
+    connect(mPhotoModel,
+        &PhotoModel::rowsInserted,
+        this,
+        &MainWindow::onModelRowsInserted);
+    connect(mPhotoModel,
+        &PhotoModel::rowsRemoved,
+        this,
+        &MainWindow::onModelRowsRemoved);
+
+    mPhotoSelection = new QItemSelectionModel(mPhotoModel, this);
+    connect(mPhotoSelection,
+        &QItemSelectionModel::selectionChanged,
+        this,
+        &MainWindow::onSelectionChanged);
 
     // Create the Library Module
-    mLibrary = new Library(mPhotoModel,this);
-    connect(mLibrary,&Library::photoSelectionChanged, this, &MainWindow::onSelectionChanged);
-    connect(mLibrary,&Library::photoSourceChanged, mPhotoModel, &PhotoModel::onReloadPhotos);
+    mLibrary = new Library(mPhotoModel, this);
+    mLibrary->setSelectionModel(mPhotoSelection);
+    connect(mLibrary,
+        &Library::photoSourceChanged,
+        mPhotoModel,
+        &PhotoModel::onReloadPhotos);
     ui->stackedWidget->addWidget(mLibrary);
+
+    ui->filmStrip->setModel(mPhotoModel);
+    FilmstripTile* fsTile = new FilmstripTile(ui->filmStrip);
+    ui->filmStrip->setTileFlyweight(fsTile);
+    ui->filmStrip->setMinimumCellHeight(80);
+    ui->filmStrip->setMaxRows(1);
+    ui->filmStrip->setCheckBoxMode(false);
+    ui->filmStrip->setOrientation(Qt::Horizontal);
+    ui->filmStrip->setSelectionModel(mPhotoSelection);
 
     // Create the Develop Module
     mDevelop = new Develop(this);
@@ -81,28 +110,38 @@ MainWindow::MainWindow(QWidget *parent) :
 
     mPhotoWorkUnit = PhotoWorkUnit::instance();
 
-    mBackgroundTaskManager = new BackgroundTaskManager(ui->scrollAreaWidgetContents, this);
-
+    mBackgroundTaskManager = new BackgroundTaskManager(
+        ui->scrollAreaWidgetContents,
+        this);
 }
 
 MainWindow::~MainWindow()
 {
     //QDesktopWidget * desktop = QApplication::desktop();
     QSettings settings;
-    settings.setValue(SETTINGS_WINDOW_LOCATION,pos());
+
+    settings.setValue(SETTINGS_WINDOW_LOCATION, pos());
     QVariantList list;
     foreach(int size, ui->splitter->sizes())
     {
         list << size;
     }
-    settings.setValue(SETTINGS_SPLITTER_FILMSTRIP_SIZES,list);
+    settings.setValue(SETTINGS_SPLITTER_FILMSTRIP_SIZES, list);
     delete ui;
     delete mDatabaseAccess;
 }
 
-void MainWindow::onSelectionChanged(const QList<Photo*> &list)
+void MainWindow::onSelectionChanged(const QItemSelection& selected,
+    const QItemSelection& /*deselected*/)
 {
-    mCurrentSelection = list;
+    Photo*      photo = NULL;
+    QModelIndex index = mPhotoSelection->currentIndex();
+
+    if (index.isValid())
+    {
+        photo = mPhotoModel->data(index, TileView::PhotoRole).value<Photo*>();
+        mDevelop->setPhoto(photo);
+    }
     updateInformationBar();
 }
 
@@ -123,37 +162,43 @@ void MainWindow::onModeMapClicked()
 
 void MainWindow::onActionImportTriggered()
 {
+    ImportDialog* importDialog = new ImportDialog(this);
+    int           resultCode   = importDialog->exec();
 
-    ImportDialog * importDialog = new ImportDialog(this);
-    int resultCode = importDialog->exec();
     if (resultCode == QDialog::Accepted)
     {
-        ImportBackgroundTask *r = new ImportBackgroundTask(importDialog->importInfo());
+        ImportBackgroundTask* r = new ImportBackgroundTask(
+            importDialog->importInfo());
         mBackgroundTaskManager->addRunnable(r);
         r->start();
-        connect(r,&ImportBackgroundTask::taskFinished,this,&MainWindow::importFinished);
+        connect(r,
+            &ImportBackgroundTask::taskFinished,
+            this,
+            &MainWindow::importFinished);
     }
     delete importDialog;
 }
 
 void MainWindow::onActionAboutTriggered()
 {
-    AboutDialog * aboutDialog = new AboutDialog(this);
-    /*int code = */aboutDialog->exec();
+    AboutDialog* aboutDialog = new AboutDialog(this);
+
+    /*int code = */ aboutDialog->exec();
     delete aboutDialog;
 }
-
 
 void MainWindow::onActionEditTimeTriggered()
 {
     TimeAdjustDialog* timeAdjustDialog = new TimeAdjustDialog(this);
-    /*int code = */timeAdjustDialog->exec();
+
+    /*int code = */ timeAdjustDialog->exec();
     delete timeAdjustDialog;
 }
 
 void MainWindow::onActionPreferences()
 {
     PreferencesDialog prefs(this);
+
     prefs.exec();
 }
 
@@ -237,18 +282,17 @@ void MainWindow::onActionColorPurple()
     setColorLabel(Photo::LabelPurple);
 }
 
-
 void MainWindow::onActionLightsOff()
 {
-
     //w->showFullScreen();
-    QDesktopWidget * d = QApplication::desktop();
-    for(int i =0; i < d->screenCount(); i++)
+    QDesktopWidget* d = QApplication::desktop();
+
+    for (int i = 0; i < d->screenCount(); i++)
     {
         qDebug() << "Lights off on screen:" << i;
-        TranslucentWindow* w = new TranslucentWindow();
-        QRect rect = d->screenGeometry(i);
-        qDebug() << "Window"<<i<<"size:"<<rect;
+        TranslucentWindow* w    = new TranslucentWindow();
+        QRect              rect = d->screenGeometry(i);
+        qDebug() << "Window" << i << "size:" << rect;
         w->move(rect.topLeft());
         w->resize(rect.size());
         // ask the module for the rectangle
@@ -261,9 +305,10 @@ void MainWindow::onActionLightsOff()
     }
 }
 
-void MainWindow::importFinished(BackgroundTask *task)
+void MainWindow::importFinished(BackgroundTask* task)
 {
-    ImportBackgroundTask * t = static_cast<ImportBackgroundTask*>(task);
+    ImportBackgroundTask* t = static_cast<ImportBackgroundTask*>(task);
+
     mPhotoModel->addData(t->resultList());
 
     // update the files tree as well and the collection tree
@@ -276,12 +321,16 @@ void MainWindow::onModelReset()
     updateInformationBar();
 }
 
-void MainWindow::onModelRowsInserted(const QModelIndex &parent, int start, int end)
+void MainWindow::onModelRowsInserted(const QModelIndex& /*parent*/,
+    int /*start*/,
+    int /*end*/)
 {
     updateInformationBar();
 }
 
-void MainWindow::onModelRowsRemoved(const QModelIndex &parent, int start, int end)
+void MainWindow::onModelRowsRemoved(const QModelIndex& /*parent*/,
+    int /*start*/,
+    int /*end*/)
 {
     updateInformationBar();
 }
@@ -289,37 +338,47 @@ void MainWindow::onModelRowsRemoved(const QModelIndex &parent, int start, int en
 void MainWindow::updateInformationBar()
 {
     QString info;
-    int count = mPhotoModel->rowCount(QModelIndex());
-    int selCount = mCurrentSelection.size();
-    ui->lblInformation->setText(QString::number(selCount)+"/"+QString::number(count));
+    int     count    = mPhotoModel->rowCount(QModelIndex());
+    int     selCount = mPhotoSelection->selectedIndexes().size();
+
+    ui->lblInformation->setText(QString::number(
+            selCount) + "/" + QString::number(count));
 }
 
 void MainWindow::setRating(int rating)
 {
-    mPhotoWorkUnit->setRating(mCurrentSelection,rating);
+    QList<Photo*>   list;
+    QModelIndexList indexes = mPhotoSelection->selectedIndexes();
+    foreach (QModelIndex index, indexes)
+    list.append(mPhotoModel->data(index, TileView::PhotoRole).value<Photo*>());
+    mPhotoWorkUnit->setRating(list, rating);
     QVector<int> roles;
     roles.append(TileView::PhotoRole);
-    mPhotoModel->refreshData(mCurrentSelection);
+    mPhotoModel->refreshData(list);
 }
 
 void MainWindow::setFlag(Photo::Flag flag)
 {
-    mPhotoWorkUnit->setFlag(mCurrentSelection,flag);
+    QList<Photo*>   list;
+    QModelIndexList indexes = mPhotoSelection->selectedIndexes();
+    foreach (QModelIndex index, indexes)
+    list.append(mPhotoModel->data(index, TileView::PhotoRole).value<Photo*>());
+
+    mPhotoWorkUnit->setFlag(list, flag);
     QVector<int> roles;
     roles.append(TileView::PhotoRole);
-    mPhotoModel->refreshData(mCurrentSelection);
-
+    mPhotoModel->refreshData(list);
 }
 
 void MainWindow::setColorLabel(Photo::ColorLabel color)
 {
-    mPhotoWorkUnit->setColorLabel(mCurrentSelection,color);
+    QList<Photo*>   list;
+    QModelIndexList indexes = mPhotoSelection->selectedIndexes();
+    foreach (QModelIndex index, indexes)
+    list.append(mPhotoModel->data(index, TileView::PhotoRole).value<Photo*>());
+
+    mPhotoWorkUnit->setColorLabel(list, color);
     QVector<int> roles;
     roles.append(TileView::PhotoRole);
-    mPhotoModel->refreshData(mCurrentSelection);
+    mPhotoModel->refreshData(list);
 }
-
-
-
-
-

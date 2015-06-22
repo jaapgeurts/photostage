@@ -2,17 +2,18 @@
 
 #include "sqlkeywordmodel.h"
 
-SqlKeywordModel::SqlKeywordModel(QObject *parent) : QAbstractItemModel(parent)
+SqlKeywordModel::SqlKeywordModel(QObject* parent) :
+    QAbstractItemModel(parent),
+    mRootItem(NULL)
 {
-
     // Construct the file tree
     createKeywordItems();
-
 }
 
 SqlKeywordModel::~SqlKeywordModel()
 {
-    deleteKeywordItems(mRootItem);
+    if (mRootItem != NULL)
+        deleteKeywordItems(mRootItem);
 }
 
 void SqlKeywordModel::createKeywordItems()
@@ -25,29 +26,30 @@ void SqlKeywordModel::createKeywordItems()
     // first create the root item
     QSqlQuery query;
 
-    QString queryText = QString("select id,keyword,parent_id from keyword where parent_id is NULL");
+    QString   queryText = QString("select id,keyword,parent_id from keyword where parent_id is NULL");
 
     if (!query.exec(queryText))
         qDebug() << query.lastError();
 
-    if (!query.first())
-        qDebug() << "No records";
-
-    mRootItem = new KeywordItem(query.value(0).toLongLong(),query.value(1).toString(),query.value(2).toLongLong());
-
-    createKeywordItemsRec(mRootItem);
+    if (query.first())
+    {
+        mRootItem = new KeywordItem(query.value(0).toLongLong(),query.value(1).toString(),query.value(2).toLongLong());
+        createKeywordItemsRec(mRootItem);
+    }
 }
 
 bool KComp(const KeywordItem* const & a, const KeywordItem* const & b)
 {
     int c = QString::compare(a->keyword, b->keyword,Qt::CaseInsensitive);
+
     return c < 0;
 }
 
 void SqlKeywordModel::createKeywordItemsRec(KeywordItem* root)
 {
     QSqlQuery query;
-    QString queryText = QString("select id,keyword,parent_id from keyword where parent_id = :parent_id");
+    QString   queryText = QString("select id,keyword,parent_id from keyword where parent_id = :parent_id");
+
     query.prepare(queryText);
 
     KeywordItem* item;
@@ -55,21 +57,21 @@ void SqlKeywordModel::createKeywordItemsRec(KeywordItem* root)
     query.bindValue(":parent_id",root->id);
     query.exec();
 
-    while(query.next())
+    while (query.next())
     {
-        item = new KeywordItem(query.value(0).toLongLong(),query.value(1).toString(), query.value(1).toLongLong());
+        item         = new KeywordItem(query.value(0).toLongLong(),query.value(1).toString(), query.value(1).toLongLong());
         item->parent = root;
         root->children.append(item);
         createKeywordItemsRec(item);
     }
     // sort the children
     std::sort(root->children.begin(),root->children.end(),KComp);
-
 }
 
-void SqlKeywordModel::deleteKeywordItems(KeywordItem *root)
+void SqlKeywordModel::deleteKeywordItems(KeywordItem* root)
 {
     KeywordItem* item;
+
     foreach(item, root->children)
     {
         deleteKeywordItems(item);
@@ -78,13 +80,13 @@ void SqlKeywordModel::deleteKeywordItems(KeywordItem *root)
     delete root;
 }
 
-
 QModelIndex SqlKeywordModel::index(int row, int column, const QModelIndex &parent) const
 {
     if (!hasIndex(row,column,parent))
         return QModelIndex();
 
     KeywordItem* parentItem;
+
     if (!parent.isValid())
         parentItem = mRootItem;
     else
@@ -113,22 +115,27 @@ QModelIndex SqlKeywordModel::parent(const QModelIndex &index) const
 int SqlKeywordModel::rowCount(const QModelIndex &parent) const
 {
     KeywordItem* item;
+
     if (!parent.isValid())
         item = mRootItem;
     else
         item = static_cast<KeywordItem*>(parent.internalPointer());
 
-    return item->children.size();
+    if (item != NULL)
+        return item->children.size();
+    else
+        return 0;
 }
 
-int SqlKeywordModel::columnCount(const QModelIndex &/*parent*/) const
+int SqlKeywordModel::columnCount(const QModelIndex & /*parent*/) const
 {
     return 1;
 }
 
 QVariant SqlKeywordModel::data(const QModelIndex &index, int role) const
 {
-    if (!index.isValid()) {
+    if (!index.isValid())
+    {
         qDebug() << "Requested item invalid";
         return QVariant();
     }
@@ -145,11 +152,9 @@ QVariant SqlKeywordModel::data(const QModelIndex &index, int role) const
 //{
 //}
 
-
 QVariant SqlKeywordModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const
 {
     if (role == Qt::DisplayRole)
         return QString("Keywords");
     return QVariant();
 }
-

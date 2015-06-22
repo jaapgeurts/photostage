@@ -9,20 +9,33 @@
 class LoupeView : public QWidget
 {
     Q_OBJECT
-public:
-    explicit LoupeView(QWidget *parent = 0);
 
-signals:
+    public:
 
-public slots:
+        explicit LoupeView(QWidget* parent = 0);
 
-    void setPhoto(Photo * photo);
+    signals:
 
-protected:
-    void paintEvent(QPaintEvent *event);
+    public slots:
 
-private:
-    Photo * mPhoto;
+        void setPhoto(Photo* photo);
+
+    protected:
+
+        void paintEvent(QPaintEvent* event);
+
+        //    void enterEvent(QEvent *event);
+        //    void leaveEvent(QEvent* event);
+        void mousePressEvent(QMouseEvent* event);
+        void mouseReleaseEvent(QMouseEvent* event);
+        void mouseMoveEvent(QMouseEvent* event);
+
+    private:
+
+        Photo*         mPhoto;
+        bool           mPanning;
+        QPoint         mMousePressLocation;
+        QPoint         mPhotoTopLeft;
 };
 
 #endif // LOUPEVIEW_H
