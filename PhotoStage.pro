@@ -76,7 +76,8 @@ SOURCES += main.cpp\
     engine/colortransform.cpp \
     image.cpp \
     engine/operation.cpp \
-    engine/pipelinebuilder.cpp
+    engine/pipelinebuilder.cpp \
+    engine/utils.cpp
     #processing/amaze_demosaic_RT.c
 
 HEADERS  += mainwindow.h \
@@ -133,7 +134,8 @@ HEADERS  += mainwindow.h \
     engine/colortransform.h \
     image.h \
     engine/operation.h \
-    engine/pipelinebuilder.h
+    engine/pipelinebuilder.h \
+    engine/utils.h
 
 
 FORMS    += mainwindow.ui \

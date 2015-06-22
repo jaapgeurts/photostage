@@ -34,7 +34,6 @@ MainWindow::MainWindow(QWidget* parent) :
 {
     QApplication::setFont(QFont(QString("verdana"), 10));
 
-
     ui->setupUi(this);
 
     setWindowIcon(QIcon(":/appicon.png"));
@@ -121,7 +120,6 @@ MainWindow::~MainWindow()
     //QDesktopWidget * desktop = QApplication::desktop();
     QSettings settings;
 
-
     settings.setValue(SETTINGS_WINDOW_LOCATION, pos());
     QVariantList list;
     foreach(int size, ui->splitter->sizes())
@@ -139,10 +137,11 @@ void MainWindow::onSelectionChanged(const QItemSelection& selected,
     Photo*      photo = NULL;
     QModelIndex index = mPhotoSelection->currentIndex();
 
-
     if (index.isValid())
+    {
         photo = mPhotoModel->data(index, TileView::PhotoRole).value<Photo*>();
-    mDevelop->setPhoto(photo);
+        mDevelop->setPhoto(photo);
+    }
     updateInformationBar();
 }
 
@@ -166,7 +165,6 @@ void MainWindow::onActionImportTriggered()
     ImportDialog* importDialog = new ImportDialog(this);
     int           resultCode   = importDialog->exec();
 
-
     if (resultCode == QDialog::Accepted)
     {
         ImportBackgroundTask* r = new ImportBackgroundTask(
@@ -185,7 +183,6 @@ void MainWindow::onActionAboutTriggered()
 {
     AboutDialog* aboutDialog = new AboutDialog(this);
 
-
     /*int code = */ aboutDialog->exec();
     delete aboutDialog;
 }
@@ -194,7 +191,6 @@ void MainWindow::onActionEditTimeTriggered()
 {
     TimeAdjustDialog* timeAdjustDialog = new TimeAdjustDialog(this);
 
-
     /*int code = */ timeAdjustDialog->exec();
     delete timeAdjustDialog;
 }
@@ -202,7 +198,6 @@ void MainWindow::onActionEditTimeTriggered()
 void MainWindow::onActionPreferences()
 {
     PreferencesDialog prefs(this);
-
 
     prefs.exec();
 }
@@ -292,7 +287,6 @@ void MainWindow::onActionLightsOff()
     //w->showFullScreen();
     QDesktopWidget* d = QApplication::desktop();
 
-
     for (int i = 0; i < d->screenCount(); i++)
     {
         qDebug() << "Lights off on screen:" << i;
@@ -314,7 +308,6 @@ void MainWindow::onActionLightsOff()
 void MainWindow::importFinished(BackgroundTask* task)
 {
     ImportBackgroundTask* t = static_cast<ImportBackgroundTask*>(task);
-
 
     mPhotoModel->addData(t->resultList());
 
@@ -347,7 +340,6 @@ void MainWindow::updateInformationBar()
     QString info;
     int     count    = mPhotoModel->rowCount(QModelIndex());
     int     selCount = mPhotoSelection->selectedIndexes().size();
-
 
     ui->lblInformation->setText(QString::number(
             selCount) + "/" + QString::number(count));

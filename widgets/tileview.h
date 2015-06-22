@@ -139,6 +139,7 @@ private:
     void computeCellSize();
     TileInfo createTileInfo(int index);
 
+    void ensureTileVisible(int index);
 };
 
 #endif // CELLFLOWVIEW_H

@@ -16,6 +16,7 @@ LoupeView::LoupeView(QWidget* parent)
 void LoupeView::setPhoto(Photo* photo)
 {
     mPhoto = photo;
+    update();
 }
 
 void LoupeView::paintEvent(QPaintEvent* event)
