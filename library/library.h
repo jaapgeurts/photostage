@@ -32,15 +32,15 @@ class Library : public Module
 
         void setSelectionModel(QItemSelectionModel* selectionModel);
 
-        void showLoupe(Photo* photo);
-        void showGrid();
-
     signals:
 
         void photoSelectionChanged(const QList<Photo*>& list);
         void photoSourceChanged(PhotoModel::SourceType type, long long id);
 
     public slots:
+
+        void showLoupe();
+        void showGrid();
 
         void onPhotoSelectionChanged(const QItemSelection& selected,
             const QItemSelection&);
@@ -58,6 +58,7 @@ class Library : public Module
         void onNewCollectionClicked();
         void onFilesClicked(const QModelIndex&);
         void customContextMenu(const QPoint& pos);
+        void thumbSizeChanged(int newValue);
 
     private:
 
@@ -67,6 +68,8 @@ class Library : public Module
         SqlPathModel*           mPathModel;
         TaggingModule*          mKeywording;
         LibraryHistogramModule* mHistogramModule;
+        QFont                   mFontAccessFoundIcons;
+        Photo*                  mCurrentPhoto;
 };
 }
 

@@ -5,7 +5,9 @@
     </qresource>
     <qresource prefix="/fonts">
         <file alias="font-awesome.ttf">resources/fontawesome-webfont.ttf</file>
-        <file alias="foundation-icons-general.ttf">resources/foundation-icons-general.ttf</file>
+        <file alias="foundation-icons.ttf">resources/foundation-icons3.ttf</file>
+        <file alias="foundation-icons-general.ttf">resources/general_foundicons.ttf</file>
+        <file alias="foundation-icons-accessibility.ttf">resources/accessibility_foundicons.ttf</file>
     </qresource>
     <qresource prefix="/icons"/>
 </RCC>

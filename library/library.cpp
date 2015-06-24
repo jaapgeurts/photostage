@@ -15,7 +15,8 @@ namespace PhotoStage
 {
 Library::Library(PhotoModel* const model, QWidget* parent) :
     Module(parent),
-    ui(new Ui::Library)
+    ui(new Ui::Library),
+    mFontAccessFoundIcons(QFont("Accessibility Foundicons", 15))
 {
     mPhotoModel = model;
 
@@ -161,6 +162,11 @@ void Library::customContextMenu(const QPoint& pos)
     //    m->exec();
 }
 
+void Library::thumbSizeChanged(int newValue)
+{
+    // todo: change the number of columns here.
+}
+
 /*void Library::rotateLeftClicked(const QModelIndex &index)
    {
     // todo: must check if there is a selection in the view.
@@ -203,11 +209,11 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected,
     // TODO: just take the first one in the selection
     if (!photos.isEmpty())
     {
-        Photo* photo = photos.first();
+        mCurrentPhoto = photos.first();
 
         if (ui->scrollArea_3->isVisible())
         {
-            showLoupe(photo);
+            showLoupe();
         }
     }
 
@@ -216,15 +222,15 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected,
 
 void Library::onTileDoubleClicked(const QModelIndex& index)
 {
-    Photo* photo =
-        mPhotoModel->data(index, TileView::PhotoRole).value<Photo*>();
+    //    mCurrentPhoto =
+    //        mPhotoModel->data(index, TileView::PhotoRole).value<Photo*>();
 
-    showLoupe(photo);
+    showLoupe();
 }
 
-void Library::showLoupe(Photo* photo)
+void Library::showLoupe()
 {
-    ui->mLoupeView->setPhoto(photo);
+    ui->mLoupeView->setPhoto(mCurrentPhoto);
     ui->StackedWidget_1->setCurrentWidget(ui->scrollArea_3);
 }
 

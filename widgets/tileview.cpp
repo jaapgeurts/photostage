@@ -38,7 +38,7 @@ TileView::TileView(QWidget* parent) : QWidget(parent)
     setMinimumCellWidth(50);
     setMaximumCellWidth(50);
 
-    setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     setFocusPolicy(Qt::StrongFocus);
 
     mCheckBox = new QCheckBox(this);
@@ -118,7 +118,7 @@ void TileView::resetView()
 {
     computeCellSize();
     mSelectionModel->clear();
-    mCheckedList->clear();    
+    mCheckedList->clear();
     computeScrollBarValues(mListModel->rowCount(mRootIndex));
     //    emit selectionChanged();
     update();
@@ -405,17 +405,19 @@ void TileView::paintEvent(QPaintEvent*/*event*/)
 
 void TileView::resizeEvent(QResizeEvent* /*event*/)
 {
-
-    qDebug() << "TileView::resizeEvent(QResizeEvent*)";
     computeCellSize();
 
     // reposition the scrollbar
     int sbSize = qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
 
     if (mOrientation == Qt::Vertical)
+    {
         mScrollBar->setGeometry(width() - sbSize, 0, sbSize, height());
+    }
     else
+    {
         mScrollBar->setGeometry(0, height() - sbSize, width(), sbSize);
+    }
 
     // recalc scrollbar values
     if (mListModel != NULL)
@@ -650,6 +652,9 @@ void TileView::keyPressEvent(QKeyEvent* event)
             if (oldIndex < mListModel->rowCount(mRootIndex) - 1)
                 newIndex = oldIndex + 1;
             break;
+
+        default:
+            QWidget::keyPressEvent(event);
     }
 
     if (newIndex != oldIndex)
@@ -701,7 +706,7 @@ void TileView::ensureTileVisible(int index)
 
         QPropertyAnimation* animation =
             new QPropertyAnimation(mScrollBar, "value");
-        animation->setDuration(100);
+        animation->setDuration(ANIMATION_DURATION);
         animation->setStartValue(currentValue);
         animation->setEndValue(newValue);
 
@@ -821,8 +826,10 @@ void TileView::computeScrollBarValues(int count)
 
         if (cols == 0)
             return;
-        int max = ( count / cols ) * mComputedCellHeight +
-            mComputedCellHeight;
+        int max = ( count / cols ) * mComputedCellHeight;
+
+        if (count % cols > 0)
+            max += mComputedCellHeight;
         mScrollBar->setMinimum(0);
         int step = max < height() ? max : height();
         mScrollBar->setMaximum( max - step );
@@ -835,8 +842,11 @@ void TileView::computeScrollBarValues(int count)
 
         if (rows == 0)
             return;
-        int max = ( count / rows ) * mComputedCellWidth +
-            mComputedCellWidth;
+        int max = ( count / rows ) * mComputedCellWidth;
+
+        if (count % rows > 0)
+            max += mComputedCellWidth;
+
         mScrollBar->setMinimum(0);
         int step = max < width() ? max : width();
         mScrollBar->setMaximum( max - step );

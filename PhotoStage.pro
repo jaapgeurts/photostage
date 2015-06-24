@@ -79,7 +79,9 @@ SOURCES += \
     workunits/importinfo.cpp \
     workunits/importoptions.cpp \
     workunits/importworkunit.cpp \
-    workunits/photoworkunit.cpp
+    workunits/photoworkunit.cpp \
+    engine/platform.cpp
+
     #processing/amaze_demosaic_RT.c
 
 HEADERS  += \
@@ -139,7 +141,9 @@ HEADERS  += \
     workunits/importinfo.h \
     workunits/importoptions.h \
     workunits/importworkunit.h \
-    workunits/photoworkunit.h
+    workunits/photoworkunit.h \
+    engine/platform_mac.h \
+    engine/platform.h
 
 FORMS    += \
     mainwindow.ui \
@@ -173,6 +177,8 @@ macx {
                     -stdlib=libc++ \
                     -fms-extensions \
                     -Wignored-attributes
+    SOURCES += \
+        engine/platform_mac.c
     ICON = resources/appicon.icns
     INCLUDEPATH += /opt/local/include
     OBJECTIVE_SOURCES +=

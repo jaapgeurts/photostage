@@ -1,11 +1,15 @@
+#include <QDir>
 #include <QDebug>
 
 #include "colortransform.h"
+
+#include "platform.h"
 
 namespace PhotoStage
 {
 // init static variables
 QHash<QString, ColorTransform> ColorTransform::mTransformCache;
+QString                        ColorTransform::mMonitorProfilePath;
 
 ColorTransform ColorTransform::getTransform(const QString& from,
     const QString& to,
@@ -24,6 +28,15 @@ ColorTransform ColorTransform::getTransform(const QString& from,
         mTransformCache.insert(key, transform );
         return transform;
     }
+}
+
+QString ColorTransform::getMonitorProfilePath()
+{
+    // TODO: currently only return the profile for the primary monitor
+    if (mMonitorProfilePath.isNull())
+        mMonitorProfilePath = Platform::getMonitorProfilePath();
+
+    return mMonitorProfilePath;
 }
 
 ColorTransform::ColorTransform() :
@@ -49,9 +62,17 @@ ColorTransform::ColorTransform(const QString& from,
         "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" +
         from +
         ".icc";
-    QString toProfile =
-        "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + to +
-        ".icc";
+
+    QString toProfile;
+
+    if (to.at(0) == QDir::separator()) {
+        toProfile = to;
+            qDebug() << "Loading monitor profile";
+    }
+    else
+        toProfile =
+            "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + to +
+            ".icc";
 
     hInProfile  = cmsOpenProfileFromFile(fromProfile.toLocal8Bit().data(), "r");
     hOutProfile =
@@ -131,6 +152,7 @@ QImage ColorTransform::transformToQImage(const Image& inImage) const
 QImage ColorTransform::transformQImage(const QImage& inImage) const
 {
     QImage outImage(inImage.size(), QImage::Format_RGB32);
+
     int    width  = outImage.width();
     int    height = outImage.height();
 
@@ -141,11 +163,12 @@ QImage ColorTransform::transformQImage(const QImage& inImage) const
 
         cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inLine, outLine,
             width);
+
         // TODO: optimization.. littleCMS can convert in place
         // when source and dest image format organization are the same
         // set alpha value
-        for (int x=0;x<width;x++)
-            outLine[x*4+3] = 0xff;
+        for (int x = 0; x < width; x++)
+            outLine[x * 4 + 3] = inLine[x * 4 + 3];
     }
     return outImage;
 }

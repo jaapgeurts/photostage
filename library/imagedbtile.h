@@ -10,40 +10,42 @@
 
 namespace PhotoStage
 {
-    class ImageDbTile : public AbstractTile
-    {
-        Q_OBJECT
+class ImageDbTile : public AbstractTile
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            ImageDbTile(TileView* parent = 0);
+        ImageDbTile(TileView* parent = 0);
 
-            // AbstractCellRenderer interface
-            void render(QPainter& painter,
-                const TileInfo& tileInfo,
-                const QVariant& data);
+        // AbstractCellRenderer interface
+        void render(QPainter& painter,
+            const TileInfo& tileInfo,
+            const QVariant& data);
 
-            void mouseMoveEvent(QMouseEvent* event, const TileInfo& info);
-            void mouseReleaseEvent(QMouseEvent* event, const TileInfo& info);
+        void mouseMoveEvent(QMouseEvent* event, const TileInfo& info);
+        void mouseReleaseEvent(QMouseEvent* event, const TileInfo& info);
 
-            void mouseEnterEvent(const TileInfo& info);
-            void mouseLeaveEvent(const TileInfo& info);
+        void mouseEnterEvent(const TileInfo& info);
+        void mouseLeaveEvent(const TileInfo& info);
 
-        signals:
+    signals:
 
-            //   void rotateLeftClicked(const QModelIndex & index);
-            //   void rotateRightClicked(const QModelIndex & index);
+        //   void rotateLeftClicked(const QModelIndex & index);
+        //   void rotateRightClicked(const QModelIndex & index);
 
-            //    void ratingClicked(const QModelIndex &index, int rating);
+        //    void ratingClicked(const QModelIndex &index, int rating);
 
-        private:
+    private:
 
-            QFont            mFontFoundIcons;
-            // Hover states for rotate
-            QHash<int, bool> mLeftHover;
-            QHash<int, bool> mRightHover;
-            QHash<int, int>  mRatingHover;
-    };
+        const float      IMAGE_TO_TILE_RATIO = 0.80f;
+
+        QFont            mFontGeneralFoundIcons;
+        // Hover states for rotate
+        QHash<int, bool> mLeftHover;
+        QHash<int, bool> mRightHover;
+        QHash<int, int>  mRatingHover;
+};
 }
 
 #endif // IMAGEDBCELLRENDERER_H

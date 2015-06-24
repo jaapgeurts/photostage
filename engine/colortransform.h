@@ -29,6 +29,8 @@ class ColorTransform
             Format inFormat =  FORMAT_FLOAT,
             Format outFormat = FORMAT_FLOAT);
 
+        static QString getMonitorProfilePath();
+
         ColorTransform();
         ColorTransform(const QString& from,
             const QString& to,
@@ -47,6 +49,7 @@ class ColorTransform
     private:
 
         static QHash<QString, ColorTransform> mTransformCache;
+        static QString                        mMonitorProfilePath;
 
         QSharedPointer<char>                  mHTransform;
 };

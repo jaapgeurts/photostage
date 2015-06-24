@@ -14,140 +14,143 @@
 
 namespace PhotoStage
 {
-    class TileView : public QWidget
-    {
-        Q_OBJECT
+class TileView : public QWidget
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            enum ModelRole { PhotoRole = Qt::UserRole + 1 };
+        enum ModelRole { PhotoRole = Qt::UserRole + 1 };
 
-            explicit TileView(QWidget* parent = 0);
-            ~TileView();
+        explicit TileView(QWidget* parent = 0);
+        ~TileView();
 
-            void setModel(QAbstractItemModel* model);
-            void setSelectionModel(QItemSelectionModel* selectionModel);
-            QItemSelectionModel* selectionModel() const;
+        void setModel(QAbstractItemModel* model);
+        void setSelectionModel(QItemSelectionModel* selectionModel);
+        QItemSelectionModel* selectionModel() const;
 
-            void setRootIndex(const QModelIndex& index);
+        void setRootIndex(const QModelIndex& index);
 
-            /*! set the celrenderer for this view
-             * the CellFlowView will take ownership of the renderer and delete it upon destruction
-             */
-            void setTileFlyweight(AbstractTile* const renderer);
+        /*! set the celrenderer for this view
+         * the CellFlowView will take ownership of the renderer and delete it upon destruction
+         */
+        void setTileFlyweight(AbstractTile* const renderer);
 
-            void setMinimumCellWidth(int minWidth);
-            void setMaximumCellWidth(int maxWidth);
-            void setCellHeightRatio(float ratio);
+        void setMinimumCellWidth(int minWidth);
+        void setMaximumCellWidth(int maxWidth);
+        void setCellHeightRatio(float ratio);
 
-            void setCellMargins(int left, int top, int right, int bottom);
-            void setCellMargins(const QMargins& margins);
+        void setCellMargins(int left, int top, int right, int bottom);
+        void setCellMargins(const QMargins& margins);
 
-            QSize sizeHint() const;
-            QSize minimumSizeHint() const;
-            QSize minimumSize() const;
+        QSize sizeHint() const;
+        QSize minimumSizeHint() const;
+        QSize minimumSize() const;
 
-            QModelIndex posToModelIndex(const QPoint& pos) const;
-            QPoint mapToTile(const QPoint& coords) const;
-            int posToIndex(const QPoint& pos) const;
+        QModelIndex posToModelIndex(const QPoint& pos) const;
+        QPoint mapToTile(const QPoint& coords) const;
+        int posToIndex(const QPoint& pos) const;
 
-            void setCheckBoxMode(bool mode);
-            bool pointInCheckBox(const QPoint& coords) const;
+        void setCheckBoxMode(bool mode);
+        bool pointInCheckBox(const QPoint& coords) const;
 
-            const QList<QModelIndex>& checkedItems() const;
+        const QList<QModelIndex>& checkedItems() const;
 
-            //    const QList<QModelIndex>& selection() const;
+        //    const QList<QModelIndex>& selection() const;
 
-            void setOrientation(Qt::Orientation orientation);
-            Qt::Orientation orientation() const;
+        void setOrientation(Qt::Orientation orientation);
+        Qt::Orientation orientation() const;
 
-            void setMaxRows(int maxRows);
-            int maxRows() const;
-            void setMaxColumns(int maxColumns);
-            int maxColumns() const;
+        void setMaxRows(int maxRows);
+        int maxRows() const;
+        void setMaxColumns(int maxColumns);
+        int maxColumns() const;
 
-            void setMinimumCellHeight(int minHeight);
+        void setMinimumCellHeight(int minHeight);
 
-            // TODO: move these to a different place
-            void selectAll();
-            void clearSelection();
+        // TODO: move these to a different place
+        void selectAll();
+        void clearSelection();
 
-        signals:
+    signals:
 
-            void doubleClickTile(const QModelIndex& index);
+        void doubleClickTile(const QModelIndex& index);
 
-        public slots:
+    public slots:
 
-            void newRowsAvailable(const QModelIndex& parent, int first, int);
-            void updateCellContents(const QModelIndex& topleft,
-                const QModelIndex& bottomright,
-                const QVector<int>& roles);
-            void onSelectionChanged(const QItemSelection&,
-                const QItemSelection&);
+        void newRowsAvailable(const QModelIndex& parent, int first, int);
+        void updateCellContents(const QModelIndex& topleft,
+            const QModelIndex& bottomright,
+            const QVector<int>& roles);
+        void onSelectionChanged(const QItemSelection&,
+            const QItemSelection&);
 
-        private slots:
+    private slots:
 
-            // slots for slider events
-            void sliderValueChanged(int newValue);
+        // slots for slider events
+        void sliderValueChanged(int newValue);
 
-            // reinitialize the view =>
-            // clear selection clear model data
-            void resetView();
+        // reinitialize the view =>
+        // clear selection clear model data
+        void resetView();
 
-        protected:
+    protected:
 
-            void paintEvent(QPaintEvent* event) Q_DECL_OVERRIDE;
-            void wheelEvent(QWheelEvent* event) Q_DECL_OVERRIDE;
-            void resizeEvent(QResizeEvent* event) Q_DECL_OVERRIDE;
-            void mouseReleaseEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
-            void mouseDoubleClickEvent(QMouseEvent*) Q_DECL_OVERRIDE;
-            void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
-            void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
+        void paintEvent(QPaintEvent* event) Q_DECL_OVERRIDE;
+        void wheelEvent(QWheelEvent* event) Q_DECL_OVERRIDE;
+        void resizeEvent(QResizeEvent* event) Q_DECL_OVERRIDE;
+        void mouseReleaseEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
+        void mouseDoubleClickEvent(QMouseEvent*) Q_DECL_OVERRIDE;
+        void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
+        void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
 
-        private:
+    private:
 
-            // Tile Sizes
-            int   mMinimumCellWidth;
-            int   mMinimumCellHeight;
-            int   mMaximumCellWidth;
-            int   mComputedCellWidth;
-            int   mComputedCellHeight;
-            float mCellHeightRatio;
+        // Animation duration in ms
+        const int ANIMATION_DURATION = 150;
 
-            // other properties
-            Qt::Orientation mOrientation;
-            int             mMaxColumns;
-            int             mMaxRows;
+        // Tile Sizes
+        int   mMinimumCellWidth;
+        int   mMinimumCellHeight;
+        int   mMaximumCellWidth;
+        int   mComputedCellWidth;
+        int   mComputedCellHeight;
+        float mCellHeightRatio;
 
-            // number of columns in a row or rows in a column depending on orientation
-            int                 mTilesPerColRow;
+        // other properties
+        Qt::Orientation mOrientation;
+        int             mMaxColumns;
+        int             mMaxRows;
 
-            int                 mHighlightedTile;
+        // number of columns in a row or rows in a column depending on orientation
+        int                 mTilesPerColRow;
 
-            QMargins            mCellMargins;
-            AbstractTile*       mTile;
-            QAbstractItemModel* mListModel;
-            QModelIndex         mRootIndex;
-            QScrollBar*         mScrollBar;
+        int                 mHighlightedTile;
 
-            // selections
-            //    QList<QModelIndex> *mSelection;
-            QItemSelectionModel* mSelectionModel;
-            //    QModelIndex mLastSelection;
+        QMargins            mCellMargins;
+        AbstractTile*       mTile;
+        QAbstractItemModel* mListModel;
+        QModelIndex         mRootIndex;
+        QScrollBar*         mScrollBar;
 
-            // checkbox
-            bool                mIsCheckBoxMode;
-            QCheckBox*          mCheckBox; // flyweight for checked lists
-            QList<QModelIndex>* mCheckedList;
+        // selections
+        //    QList<QModelIndex> *mSelection;
+        QItemSelectionModel* mSelectionModel;
+        //    QModelIndex mLastSelection;
 
-            // for scrolling
-            int mViewportPosition; // contains the top x position of the scroll area
+        // checkbox
+        bool                mIsCheckBoxMode;
+        QCheckBox*          mCheckBox;     // flyweight for checked lists
+        QList<QModelIndex>* mCheckedList;
 
-            void computeScrollBarValues(int count);
-            void computeCellSize();
-            TileInfo createTileInfo(int index);
+        // for scrolling
+        int mViewportPosition;     // contains the top x position of the scroll area
 
-            void ensureTileVisible(int index);
-    };
+        void computeScrollBarValues(int count);
+        void computeCellSize();
+        TileInfo createTileInfo(int index);
+
+        void ensureTileVisible(int index);
+};
 }
 #endif // CELLFLOWVIEW_H

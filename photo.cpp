@@ -75,7 +75,7 @@ const QImage& Photo::libraryPreviewsRGB()
         //qDebug() << "Converting image to RGB";
         ColorTransform transform = ColorTransform::getTransform(
             WORKING_COLOR_SPACE,
-            "sRGB",
+            ColorTransform::getMonitorProfilePath(),
             ColorTransform::FORMAT_RGB32,
             ColorTransform::FORMAT_RGB32);
         mLibraryPreviewsRGB = transform.transformQImage(mLibraryPreview);

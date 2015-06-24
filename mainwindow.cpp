@@ -137,7 +137,6 @@ bool MainWindow::event(QEvent* event)
 {
     if (event->type() == QEvent::KeyPress)
     {
-        qDebug() << "MainWindow::eventFilter(QObject *obj, QEvent *event)";
         QKeyEvent* ke = static_cast<QKeyEvent*>(event);
 
         switch (ke->key())
@@ -148,14 +147,14 @@ bool MainWindow::event(QEvent* event)
 
             case Qt::Key_Return:
             case Qt::Key_Enter:
-                mLibrary->showLoupe(currentPhoto());
+                mLibrary->showLoupe();
                 return true;
         }
     }
     return QMainWindow::event(event);
 }
 
-void MainWindow::onSelectionChanged(const QItemSelection& selected,
+void MainWindow::onSelectionChanged(const QItemSelection& /*selected*/,
     const QItemSelection& /*deselected*/)
 {
     QModelIndex index = mPhotoSelection->currentIndex();
@@ -358,7 +357,6 @@ void MainWindow::onModelRowsRemoved(const QModelIndex& /*parent*/,
 
 void MainWindow::onShowGrid()
 {
-    qDebug() << "MainWindow::onShowGrid()";
     // force library module to the front
     onModeLibraryClicked();
     mLibrary->showGrid();
@@ -366,17 +364,9 @@ void MainWindow::onShowGrid()
 
 void MainWindow::onShowLoupe()
 {
-    qDebug() << "MainWindow::onShowLoupe()";
-
     // force library module to the front
     onModeLibraryClicked();
-
-    QModelIndex index = mPhotoSelection->currentIndex();
-
-    if (index.isValid())
-        mLibrary->showLoupe(currentPhoto());
-    else
-        qDebug() << "No valid index";
+    mLibrary->showLoupe();
 }
 
 void MainWindow::updateInformationBar()

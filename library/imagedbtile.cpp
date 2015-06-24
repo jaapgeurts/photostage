@@ -11,7 +11,7 @@ namespace PhotoStage
 {
 ImageDbTile::ImageDbTile(TileView* parent) :
     AbstractTile(parent),
-    mFontFoundIcons(QFont("General Foundicons", 15))
+    mFontGeneralFoundIcons(QFont("General Foundicons", 15))
 {
 }
 
@@ -68,7 +68,7 @@ void ImageDbTile::render(QPainter& painter,
 
         if (!image.isNull())
         {
-            float ratio = 0.70f;
+            float ratio = IMAGE_TO_TILE_RATIO;
             int   wf    = (int)(w * ratio);     // width frame
             int   hf    = (int)(h * ratio);     // height frame
 
@@ -86,7 +86,7 @@ void ImageDbTile::render(QPainter& painter,
             if (info->flag() != Photo::FlagNone)
             {
                 QPen pen;
-                painter.setFont(mFontFoundIcons);
+                painter.setFont(mFontGeneralFoundIcons);
 
                 if (info->flag() == Photo::FlagPick)
                 {

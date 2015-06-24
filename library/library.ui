@@ -6,26 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>840</width>
-    <height>581</height>
+    <width>702</width>
+    <height>467</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Library</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout">
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
-    <number>0</number>
-   </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QSplitter" name="splitterMain">
      <property name="orientation">
@@ -47,49 +35,219 @@
          <x>0</x>
          <y>0</y>
          <width>148</width>
-         <height>579</height>
+         <height>441</height>
         </rect>
        </property>
       </widget>
      </widget>
-     <widget class="QStackedWidget" name="StackedWidget_1">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-        <horstretch>1</horstretch>
-        <verstretch>1</verstretch>
-       </sizepolicy>
+     <widget class="QFrame" name="frame">
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
       </property>
-      <property name="currentIndex">
+      <property name="lineWidth">
        <number>0</number>
       </property>
-      <widget class="PhotoStage::TileView" name="mClvPhotos"/>
-      <widget class="QScrollArea" name="scrollArea_3">
-       <property name="frameShape">
-        <enum>QFrame::NoFrame</enum>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="leftMargin">
+        <number>0</number>
        </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QAbstractScrollArea::AdjustToContents</enum>
+       <property name="topMargin">
+        <number>0</number>
        </property>
-       <property name="widgetResizable">
-        <bool>true</bool>
+       <property name="rightMargin">
+        <number>0</number>
        </property>
-       <widget class="PhotoStage::LoupeView" name="mLoupeView">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>526</width>
-          <height>581</height>
-         </rect>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
-      </widget>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
+       <item>
+        <widget class="QStackedWidget" name="StackedWidget_1">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+           <horstretch>1</horstretch>
+           <verstretch>1</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="currentIndex">
+          <number>1</number>
+         </property>
+         <widget class="PhotoStage::TileView" name="mClvPhotos"/>
+         <widget class="QScrollArea" name="scrollArea_3">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="sizeAdjustPolicy">
+           <enum>QAbstractScrollArea::AdjustToContents</enum>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="PhotoStage::LoupeView" name="mLoupeView">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>364</width>
+             <height>389</height>
+            </rect>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+          </widget>
+         </widget>
+        </widget>
+       </item>
+       <item>
+        <widget class="QFrame" name="frame_2">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>32</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::NoFrame</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Plain</enum>
+         </property>
+         <property name="lineWidth">
+          <number>0</number>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>2</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>2</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="pbShowGrid">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>PushButton</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>5</width>
+              <height>32</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbShowLoupe">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>PushButton</string>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>127</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QSlider" name="hsThumbSize">
+            <property name="maximum">
+             <number>8</number>
+            </property>
+            <property name="pageStep">
+             <number>0</number>
+            </property>
+            <property name="value">
+             <number>4</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
      </widget>
      <widget class="QScrollArea" name="scrollArea_2">
       <property name="minimumSize">
@@ -107,7 +265,7 @@
          <x>0</x>
          <y>0</y>
          <width>148</width>
-         <height>579</height>
+         <height>441</height>
         </rect>
        </property>
       </widget>
@@ -141,5 +299,59 @@
   </customwidget>
  </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>pbShowGrid</sender>
+   <signal>clicked()</signal>
+   <receiver>Library</receiver>
+   <slot>showGrid()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>184</x>
+     <y>433</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pbShowLoupe</sender>
+   <signal>clicked()</signal>
+   <receiver>Library</receiver>
+   <slot>showLoupe()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>233</x>
+     <y>432</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>5</x>
+     <y>329</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>hsThumbSize</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>Library</receiver>
+   <slot>thumbSizeChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>439</x>
+     <y>432</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>699</x>
+     <y>425</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>showGrid()</slot>
+  <slot>showLoupe()</slot>
+  <slot>thumbSizeChanged(int)</slot>
+ </slots>
 </ui>

@@ -25,7 +25,11 @@ int main(int argc, char* argv[])
     int         id = QFontDatabase::addApplicationFont(
         ":/fonts/foundation-icons-general.ttf");
     QStringList l = QFontDatabase::applicationFontFamilies(id);
+    qDebug() << "Loaded fonts:" << l;
 
+    id = QFontDatabase::addApplicationFont(
+        ":/fonts/foundation-icons-accessibility.ttf");
+    l = QFontDatabase::applicationFontFamilies(id);
     qDebug() << "Loaded fonts:" << l;
 
     // Setup application details
