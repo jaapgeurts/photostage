@@ -133,18 +133,36 @@ MainWindow::~MainWindow()
     delete mDatabaseAccess;
 }
 
+bool MainWindow::event(QEvent* event)
+{
+    if (event->type() == QEvent::KeyPress)
+    {
+        qDebug() << "MainWindow::eventFilter(QObject *obj, QEvent *event)";
+        QKeyEvent* ke = static_cast<QKeyEvent*>(event);
+
+        switch (ke->key())
+        {
+            case Qt::Key_Escape:
+                mLibrary->showGrid();
+                return true;
+
+            case Qt::Key_Return:
+            case Qt::Key_Enter:
+                mLibrary->showLoupe(currentPhoto());
+                return true;
+        }
+    }
+    return QMainWindow::event(event);
+}
+
 void MainWindow::onSelectionChanged(const QItemSelection& selected,
     const QItemSelection& /*deselected*/)
 {
-    Photo*      photo = NULL;
     QModelIndex index = mPhotoSelection->currentIndex();
 
     if (index.isValid())
-    {
-        photo =
-            mPhotoModel->data(index, TileView::PhotoRole).value<Photo*>();
-        mDevelop->setPhoto(photo);
-    }
+        mDevelop->setPhoto(currentPhoto());
+
     updateInformationBar();
 }
 
@@ -338,6 +356,29 @@ void MainWindow::onModelRowsRemoved(const QModelIndex& /*parent*/,
     updateInformationBar();
 }
 
+void MainWindow::onShowGrid()
+{
+    qDebug() << "MainWindow::onShowGrid()";
+    // force library module to the front
+    onModeLibraryClicked();
+    mLibrary->showGrid();
+}
+
+void MainWindow::onShowLoupe()
+{
+    qDebug() << "MainWindow::onShowLoupe()";
+
+    // force library module to the front
+    onModeLibraryClicked();
+
+    QModelIndex index = mPhotoSelection->currentIndex();
+
+    if (index.isValid())
+        mLibrary->showLoupe(currentPhoto());
+    else
+        qDebug() << "No valid index";
+}
+
 void MainWindow::updateInformationBar()
 {
     QString info;
@@ -346,6 +387,13 @@ void MainWindow::updateInformationBar()
 
     ui->lblInformation->setText(QString::number(
             selCount) + "/" + QString::number(count));
+}
+
+Photo* MainWindow::currentPhoto()
+{
+    return mPhotoModel->data(
+        mPhotoSelection->currentIndex(),
+        TileView::PhotoRole).value<Photo*>();
 }
 
 void MainWindow::setRating(int rating)

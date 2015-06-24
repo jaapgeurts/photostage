@@ -25,6 +25,10 @@ class MainWindow : public QMainWindow
         explicit MainWindow(QWidget* parent = 0);
         ~MainWindow();
 
+    protected:
+
+        bool event(QEvent* event);
+
     private slots:
 
         // Modules
@@ -75,6 +79,9 @@ class MainWindow : public QMainWindow
             int start,
             int end);
 
+        void onShowGrid();
+        void onShowLoupe();
+
     private:
 
         Ui::MainWindow*        ui;
@@ -94,6 +101,8 @@ class MainWindow : public QMainWindow
         void setColorLabel(Photo::ColorLabel color);
         void setFlag(Photo::Flag flag);
         void updateInformationBar();
+
+        Photo* currentPhoto();
 };
 }
 

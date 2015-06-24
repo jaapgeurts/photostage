@@ -53,8 +53,7 @@ ColorTransform::ColorTransform(const QString& from,
         "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + to +
         ".icc";
 
-    hInProfile = cmsOpenProfileFromFile(
-        fromProfile.toLocal8Bit().data(), "r");
+    hInProfile  = cmsOpenProfileFromFile(fromProfile.toLocal8Bit().data(), "r");
     hOutProfile =
         cmsOpenProfileFromFile(toProfile.toLocal8Bit().data(), "r");
 
@@ -142,6 +141,11 @@ QImage ColorTransform::transformQImage(const QImage& inImage) const
 
         cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inLine, outLine,
             width);
+        // TODO: optimization.. littleCMS can convert in place
+        // when source and dest image format organization are the same
+        // set alpha value
+        for (int x=0;x<width;x++)
+            outLine[x*4+3] = 0xff;
     }
     return outImage;
 }

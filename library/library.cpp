@@ -104,7 +104,7 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     trvwKeywords->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->ModulePanel_2->addPanel("Keyword List", trvwKeywords);
 
-    ui->StackedWidget_1->setCurrentWidget(ui->mClvPhotos);
+    showGrid();
 
     mPhotoWorkUnit = PhotoWorkUnit::instance();
 }
@@ -151,7 +151,7 @@ void Library::onFilesClicked(const QModelIndex& index)
 
 void Library::customContextMenu(const QPoint& pos)
 {
-    QModelIndex index = ui->mClvPhotos->posToModelIndex(pos);
+    //QModelIndex index = ui->mClvPhotos->posToModelIndex(pos);
     // check if there is a single selection or a list.
     //    Photo* info = mPhotoModel->data(index,TileView::PhotoRole).value<Photo*>();
 
@@ -207,8 +207,7 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected,
 
         if (ui->scrollArea_3->isVisible())
         {
-            ui->mLoupeView->setPhoto(photo);
-            ui->StackedWidget_1->setCurrentWidget(ui->scrollArea_3);
+            showLoupe(photo);
         }
     }
 
@@ -220,23 +219,18 @@ void Library::onTileDoubleClicked(const QModelIndex& index)
     Photo* photo =
         mPhotoModel->data(index, TileView::PhotoRole).value<Photo*>();
 
+    showLoupe(photo);
+}
+
+void Library::showLoupe(Photo* photo)
+{
     ui->mLoupeView->setPhoto(photo);
     ui->StackedWidget_1->setCurrentWidget(ui->scrollArea_3);
 }
 
-bool Library::event(QEvent* event)
+void Library::showGrid()
 {
-    if (event->type() == QEvent::KeyPress)
-    {
-        QKeyEvent* ke = static_cast<QKeyEvent*>(event);
-
-        if (ke->key() == Qt::Key_Escape)
-        {
-            ui->StackedWidget_1->setCurrentWidget(ui->mClvPhotos);
-            return true;
-        }
-    }
-    return Module::event(event);
+    ui->StackedWidget_1->setCurrentWidget(ui->mClvPhotos);
 }
 
 void Library::onNewCollectionClicked()

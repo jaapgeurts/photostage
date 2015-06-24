@@ -6,6 +6,7 @@
 #include <QScroller>
 #include <QStyleOptionButton>
 #include <QStyle>
+#include <QPropertyAnimation>
 
 #include <QWheelEvent>
 
@@ -26,9 +27,9 @@ TileView::TileView(QWidget* parent) : QWidget(parent)
 
     mHighlightedTile = -1;
 
-    mHScrollBar = new QScrollBar(mOrientation, this);
-    mHScrollBar->setMinimum(0);
-    mHScrollBar->setMaximum(0);
+    mScrollBar = new QScrollBar(mOrientation, this);
+    mScrollBar->setMinimum(0);
+    mScrollBar->setMaximum(0);
     // mHScrollBar->
 
     // Set sensible defaults;
@@ -47,7 +48,7 @@ TileView::TileView(QWidget* parent) : QWidget(parent)
 
     //    mLastSelection = QModelIndex();
 
-    connect(mHScrollBar,
+    connect(mScrollBar,
         &QScrollBar::valueChanged,
         this,
         &TileView::sliderValueChanged);
@@ -115,9 +116,10 @@ QItemSelectionModel* TileView::selectionModel() const
 
 void TileView::resetView()
 {
+    computeCellSize();
     mSelectionModel->clear();
-    mCheckedList->clear();
-    computeScrollBarValues(mListModel->rowCount(QModelIndex()));
+    mCheckedList->clear();    
+    computeScrollBarValues(mListModel->rowCount(mRootIndex));
     //    emit selectionChanged();
     update();
 }
@@ -162,7 +164,7 @@ void TileView::computeCellSize()
 {
     if (mOrientation == Qt::Vertical)
     {
-        int w = width() - mHScrollBar->width();
+        int w = width() - mScrollBar->width();
         mTilesPerColRow = w / mMinimumCellWidth;
 
         if (mTilesPerColRow != 0)
@@ -174,7 +176,7 @@ void TileView::computeCellSize()
     }
     else
     {
-        int h = height() - mHScrollBar->height();
+        int h = height() - mScrollBar->height();
         mTilesPerColRow = h / mMinimumCellHeight;
 
         if (mTilesPerColRow == 0)
@@ -211,7 +213,7 @@ void TileView::setCellMargins(const QMargins& margins)
 void TileView::setOrientation(Qt::Orientation orientation)
 {
     mOrientation = orientation;
-    mHScrollBar->setOrientation(mOrientation);
+    mScrollBar->setOrientation(mOrientation);
     computeCellSize();
 }
 
@@ -280,7 +282,7 @@ void TileView::paintEvent(QPaintEvent*/*event*/)
 
     if (mOrientation == Qt::Vertical)
     {
-        innerLength = width() - mHScrollBar->width();
+        innerLength = width() - mScrollBar->width();
         start       = mViewportPosition / mComputedCellHeight *
             mTilesPerColRow;                                               // image to start showing images
         // slider pos is a pixel value
@@ -288,7 +290,7 @@ void TileView::paintEvent(QPaintEvent*/*event*/)
     }
     else     // Horizontal
     {
-        innerLength = height() - mHScrollBar->height();
+        innerLength = height() - mScrollBar->height();
         start       = mViewportPosition / mComputedCellWidth *
             mTilesPerColRow;                                                    // image to start showing images
         // slider pos is a pixel value
@@ -403,15 +405,17 @@ void TileView::paintEvent(QPaintEvent*/*event*/)
 
 void TileView::resizeEvent(QResizeEvent* /*event*/)
 {
+
+    qDebug() << "TileView::resizeEvent(QResizeEvent*)";
     computeCellSize();
 
     // reposition the scrollbar
     int sbSize = qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
 
     if (mOrientation == Qt::Vertical)
-        mHScrollBar->setGeometry(width() - sbSize, 0, sbSize, height());
+        mScrollBar->setGeometry(width() - sbSize, 0, sbSize, height());
     else
-        mHScrollBar->setGeometry(0, height() - sbSize, width(), sbSize);
+        mScrollBar->setGeometry(0, height() - sbSize, width(), sbSize);
 
     // recalc scrollbar values
     if (mListModel != NULL)
@@ -435,7 +439,7 @@ void TileView::wheelEvent(QWheelEvent* event)
     {
         // increase the current top x position with the calcualted amount
         //        mHScrollBar->setValue(mViewportXPosition + mHScrollBar->singleStep()*-steps);
-        mHScrollBar->setValue(mViewportPosition + delta);
+        mScrollBar->setValue(mViewportPosition + delta);
         event->accept();
     }
     else
@@ -664,6 +668,8 @@ void TileView::ensureTileVisible(int index)
     if (mTilesPerColRow == 0)
         return;
 
+    int currentValue = mScrollBar->value();
+
     int top;
     int margin;
     int cellsize;
@@ -674,22 +680,32 @@ void TileView::ensureTileVisible(int index)
         margin   = height();
         cellsize = mComputedCellHeight;
     }
-    else if (mOrientation == Qt::Horizontal)
+    else
     {
         top      = index / mTilesPerColRow * mComputedCellWidth;
         margin   = width();
         cellsize = mComputedCellWidth;
     }
 
-    qDebug() << "Tile Y" << top;
+    int newValue = currentValue;
 
     if (top - mViewportPosition >= margin)
-    {
-        mHScrollBar->setValue(top - margin + cellsize);
-    }
+        newValue = top - margin + cellsize;
     else if (top + cellsize - mViewportPosition <= 0)
+        newValue = top;
+
+    if (newValue != currentValue)
     {
-        mHScrollBar->setValue(top);
+        // mHScrollBar->setValue(newValue);
+        //qDebug() << "Cur" << currentValue << "New" << newValue;
+
+        QPropertyAnimation* animation =
+            new QPropertyAnimation(mScrollBar, "value");
+        animation->setDuration(100);
+        animation->setStartValue(currentValue);
+        animation->setEndValue(newValue);
+
+        animation->start(QAbstractAnimation::DeleteWhenStopped);
     }
 }
 
@@ -801,31 +817,31 @@ void TileView::computeScrollBarValues(int count)
 {
     if (mOrientation == Qt::Vertical)
     {
-        int cols = (width() - mHScrollBar->width()) / mComputedCellWidth;
+        int cols = (width() - mScrollBar->width()) / mComputedCellWidth;
 
         if (cols == 0)
             return;
         int max = ( count / cols ) * mComputedCellHeight +
             mComputedCellHeight;
-        mHScrollBar->setMinimum(0);
+        mScrollBar->setMinimum(0);
         int step = max < height() ? max : height();
-        mHScrollBar->setMaximum( max - step );
-        mHScrollBar->setPageStep(step);
-        mHScrollBar->setSingleStep(mComputedCellHeight / 3);
+        mScrollBar->setMaximum( max - step );
+        mScrollBar->setPageStep(step);
+        mScrollBar->setSingleStep(mComputedCellHeight / 3);
     }
     else
     {
-        int rows = (height() - mHScrollBar->height()) / mComputedCellHeight;
+        int rows = (height() - mScrollBar->height()) / mComputedCellHeight;
 
         if (rows == 0)
             return;
         int max = ( count / rows ) * mComputedCellWidth +
             mComputedCellWidth;
-        mHScrollBar->setMinimum(0);
+        mScrollBar->setMinimum(0);
         int step = max < width() ? max : width();
-        mHScrollBar->setMaximum( max - step );
-        mHScrollBar->setPageStep(step);
-        mHScrollBar->setSingleStep(mComputedCellWidth / 3);
+        mScrollBar->setMaximum( max - step );
+        mScrollBar->setPageStep(step);
+        mScrollBar->setSingleStep(mComputedCellWidth / 3);
     }
 }
 

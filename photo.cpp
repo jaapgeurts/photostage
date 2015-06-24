@@ -70,10 +70,9 @@ const QImage& Photo::libraryPreviewsRGB()
     if (mLibraryPreviewsRGB.isNull())
     {
         // run this in a thread so the UI is fast.
-        //        Image FileLoader* loader = new ImageFileLoader(index, info->srcImagePath());
-        //        conne ct(loader,&ImageFileLoader::dataReady,this,&PhotoModel::imageLoaded);
-        //        mThr eadPool->start(loader);
+
         // convert the image to sRGB
+        //qDebug() << "Converting image to RGB";
         ColorTransform transform = ColorTransform::getTransform(
             WORKING_COLOR_SPACE,
             "sRGB",

@@ -128,7 +128,7 @@ namespace PhotoStage
             AbstractTile*       mTile;
             QAbstractItemModel* mListModel;
             QModelIndex         mRootIndex;
-            QScrollBar*         mHScrollBar;
+            QScrollBar*         mScrollBar;
 
             // selections
             //    QList<QModelIndex> *mSelection;

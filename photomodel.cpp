@@ -68,21 +68,11 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
 
             if (img.isNull() && !mPhotoInfoMap.contains(index))
             {
-                // If not available return
                 // load image in background thread.
-                // Should kickoff single thread
-                // and add to thread queue so that only 1 instance of Halide runs
+                // add to thread queue so that only 1 instance of Halide runs
                 mLoader->addJob(index, info->srcImagePath());
                 mPhotoInfoMap.insert(index, info);
 
-                // Halide gen outside of thread
-                //                QImage image = genGradient();
-                //                QImage preview =
-                //                    image.scaled(QSize(PREVIEW_IMG_WIDTH,
-                //                        PREVIEW_IMG_HEIGHT), Qt::KeepAspectRatio,
-                //                        Qt::SmoothTransformation);
-                //                mPreviewCache.put(key, preview);
-                //                info->setLibraryPreview(preview);
             }
         }
 

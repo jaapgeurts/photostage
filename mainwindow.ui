@@ -472,6 +472,10 @@
     <property name="title">
      <string>View</string>
     </property>
+    <addaction name="actionShowGrid"/>
+    <addaction name="actionShowLoupe"/>
+    <addaction name="separator"/>
+    <addaction name="actionShowDevelop"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -840,6 +844,30 @@
   <action name="actionLights_On">
    <property name="text">
     <string>Lights On</string>
+   </property>
+  </action>
+  <action name="actionShowGrid">
+   <property name="text">
+    <string>Library Grid</string>
+   </property>
+   <property name="shortcut">
+    <string>G</string>
+   </property>
+  </action>
+  <action name="actionShowLoupe">
+   <property name="text">
+    <string>Library Loupe</string>
+   </property>
+   <property name="shortcut">
+    <string>E</string>
+   </property>
+  </action>
+  <action name="actionShowDevelop">
+   <property name="text">
+    <string>Develop</string>
+   </property>
+   <property name="shortcut">
+    <string>D</string>
    </property>
   </action>
  </widget>
@@ -1240,6 +1268,54 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionShowGrid</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onShowGrid()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShowDevelop</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onModeDevelopClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionShowLoupe</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onShowLoupe()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onActionImportTriggered()</slot>
@@ -1266,6 +1342,8 @@
   <slot>onActionColorYellow()</slot>
   <slot>onActionColorOrange()</slot>
   <slot>onActionColorPurple()</slot>
+  <slot>onShowGrid()</slot>
+  <slot>onShowLoupe()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="moduleNavGroup"/>

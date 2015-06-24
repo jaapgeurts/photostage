@@ -14,59 +14,60 @@
 
 namespace Ui
 {
-    class Library;
+class Library;
 }
 
 namespace PhotoStage
 {
-    class Library : public Module
-    {
-        Q_OBJECT
+class Library : public Module
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            explicit Library(PhotoModel* const model, QWidget* parent = 0);
-            ~Library();
+        explicit Library(PhotoModel* const model, QWidget* parent = 0);
+        ~Library();
 
-            QRect lightGap();
+        QRect lightGap();
 
-            void setSelectionModel(QItemSelectionModel* selectionModel);
+        void setSelectionModel(QItemSelectionModel* selectionModel);
 
-        signals:
+        void showLoupe(Photo* photo);
+        void showGrid();
 
-            void photoSelectionChanged(const QList<Photo*>& list);
-            void photoSourceChanged(PhotoModel::SourceType type, long long id);
+    signals:
 
-        public slots:
+        void photoSelectionChanged(const QList<Photo*>& list);
+        void photoSourceChanged(PhotoModel::SourceType type, long long id);
 
-            void onPhotoSelectionChanged(const QItemSelection& selected,
-                const QItemSelection&);
-            void onTileDoubleClicked(const QModelIndex& index);
+    public slots:
 
-            // For clicks on the tile
-            //    void rotateLeftClicked(const QModelIndex& index);
-            //    void rotateRightClicked(const QModelIndex& index);
-            //    void ratingClicked(const QModelIndex& index, int rating);
+        void onPhotoSelectionChanged(const QItemSelection& selected,
+            const QItemSelection&);
+        void onTileDoubleClicked(const QModelIndex& index);
 
-        protected:
+        // For clicks on the tile
+        //    void rotateLeftClicked(const QModelIndex& index);
+        //    void rotateRightClicked(const QModelIndex& index);
+        //    void ratingClicked(const QModelIndex& index, int rating);
 
-            bool event(QEvent* event);
+    protected:
 
-        private slots:
+    private slots:
 
-            void onNewCollectionClicked();
-            void onFilesClicked(const QModelIndex&);
-            void customContextMenu(const QPoint& pos);
+        void onNewCollectionClicked();
+        void onFilesClicked(const QModelIndex&);
+        void customContextMenu(const QPoint& pos);
 
-        private:
+    private:
 
-            Ui::Library*            ui;
-            PhotoModel*             mPhotoModel;
-            PhotoWorkUnit*          mPhotoWorkUnit;
-            SqlPathModel*           mPathModel;
-            TaggingModule*          mKeywording;
-            LibraryHistogramModule* mHistogramModule;
-    };
+        Ui::Library*            ui;
+        PhotoModel*             mPhotoModel;
+        PhotoWorkUnit*          mPhotoWorkUnit;
+        SqlPathModel*           mPathModel;
+        TaggingModule*          mKeywording;
+        LibraryHistogramModule* mHistogramModule;
+};
 }
 
 #endif // LIBRARY_H
