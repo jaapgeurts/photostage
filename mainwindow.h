@@ -25,12 +25,17 @@ class MainWindow : public QMainWindow
         explicit MainWindow(QWidget* parent = 0);
         ~MainWindow();
 
-        void selectNext();
-        void selectPrevious();
+    public slots:
+
+        bool selectNext();
+        bool selectPrevious();
+        bool selectUp();
+        bool selectDown();
 
     protected:
 
         bool eventFilter(QObject* obj, QEvent* event);
+
         //bool event(QEvent* event);
 
     private slots:
@@ -86,9 +91,9 @@ class MainWindow : public QMainWindow
         void onShowGrid();
         void onShowLoupe();
 
-        void onTileDoubleClicked(const QModelIndex &);
+        void onTileDoubleClicked(const QModelIndex&);
 
-private:
+    private:
 
         Ui::MainWindow*        ui;
         BackgroundTaskManager* mBackgroundTaskManager;

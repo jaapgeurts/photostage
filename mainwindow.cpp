@@ -149,41 +149,17 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
 
         switch (ke->key())
         {
-            case Qt::UpArrow:
+            case Qt::Key_Up:
+                return selectUp();
 
-                if (mLibrary->canSelectUpDown())
-                {
-                    selectUp();
-                    return true;
-                }
-                break;
-
-            case Qt::DownArrow:
-
-                if (mLibrary->canSelectUpDown())
-                {
-                    selectDown();
-                    return true;
-                }
-                break;
+            case Qt::Key_Down:
+                return selectDown();
 
             case Qt::Key_Left:
-
-                if (mLibrary->canSelectionChange())
-                {
-                    selectPrevious();
-                    return true;
-                }
-                break;
+                return selectPrevious();
 
             case Qt::Key_Right:
-
-                if (mLibrary->canSelectionChange())
-                {
-                    selectNext();
-                    return true;
-                }
-                break;
+                return selectNext();
 
             case Qt::Key_Escape:
                 mLibrary->showGrid();
@@ -199,52 +175,113 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
     //    return QMainWindow::event(event);
 }
 
-void MainWindow::selectNext()
+bool MainWindow::selectNext()
 {
+
+    if (!mLibrary->canSelectionChange() && !ui->filmStrip->hasFocus())
+        return false;
+
     QModelIndex index = mPhotoSelection->currentIndex();
 
     if (index.isValid())
     {
-        if (index.row() + 1 < mPhotoModel->rowCount(QModelIndex()))
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(index.row() +
-                1), QItemSelectionModel::ClearAndSelect);
+        qDebug() << "Next";
+        int oldIndex = index.row();
+        int newIndex = oldIndex;
+
+        if (index.row()  < mPhotoModel->rowCount(QModelIndex()) - 1)
+        {
+            newIndex = oldIndex + 1;
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex),
+                QItemSelectionModel::ClearAndSelect);
+            return true;
+        }
     }
+    return false;
 }
 
-void MainWindow::selectPrevious()
+bool MainWindow::selectPrevious()
 {
+
+    if (!mLibrary->canSelectionChange() && !ui->filmStrip->hasFocus())
+        return false;
+
     QModelIndex index = mPhotoSelection->currentIndex();
 
     if (index.isValid())
     {
-        if (index.row() > 0)
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(index.row() -
-                1), QItemSelectionModel::ClearAndSelect);
+        qDebug() << "Prev";
+
+        int oldIndex = index.row();
+        int newIndex = oldIndex;
+
+        if (oldIndex > 0)
+        {
+            newIndex = oldIndex - 1;
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex),
+                QItemSelectionModel::ClearAndSelect);
+            return true;
+        }
     }
+    return false;
 }
 
-void MainWindow::selectUp()
+bool MainWindow::selectUp()
 {
+    qDebug() << "Up";
+
+    if (!mLibrary->canSelectionChange() && !mLibrary->canSelectUpDown())
+        return false;
+
     QModelIndex index = mPhotoSelection->currentIndex();
 
     if (index.isValid())
     {
-        int diff = mLibrary->tilesPerRowOrCol();
-        mPhotoSelection->setCurrentIndex(mPhotoModel->index(index.row() - diff),
-            QItemSelectionModel::ClearAndSelect);
+
+        int oldIndex = index.row();
+        int newIndex = oldIndex;
+
+        int tilesPerColRow = mLibrary->tilesPerRowOrCol();
+
+        if (oldIndex >= tilesPerColRow)
+        {
+            newIndex = oldIndex - tilesPerColRow;
+
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex),
+                QItemSelectionModel::ClearAndSelect);
+            return true;
+        }
     }
+    return false;
 }
 
-void MainWindow::selectDown()
+bool MainWindow::selectDown()
 {
+    qDebug() << "Down";
+
+    if (!mLibrary->canSelectionChange() && !mLibrary->canSelectUpDown())
+        return false;
+
     QModelIndex index = mPhotoSelection->currentIndex();
 
     if (index.isValid())
     {
-        int diff = mLibrary->tilesPerRowOrCol();
-        mPhotoSelection->setCurrentIndex(mPhotoModel->index(index.row() - diff),
-            QItemSelectionModel::ClearAndSelect);
+        int oldIndex = index.row();
+        int newIndex = oldIndex;
+
+        int tilesPerColRow = mLibrary->tilesPerRowOrCol();
+
+        if (oldIndex <
+            mPhotoModel->rowCount(QModelIndex()) - tilesPerColRow)
+        {
+            newIndex = oldIndex + tilesPerColRow;
+
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex),
+                QItemSelectionModel::ClearAndSelect);
+            return true;
+        }
     }
+    return false;
 }
 
 void MainWindow::onTileDoubleClicked(const QModelIndex&)

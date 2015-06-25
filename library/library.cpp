@@ -140,7 +140,7 @@ bool Library::canSelectionChange()
 
 bool Library::canSelectUpDown()
 {
-    return ui->mClvPhotos->hasFocus();
+    return ui->mClvPhotos->isVisible();
 }
 
 int Library::tilesPerRowOrCol()
