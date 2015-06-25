@@ -132,6 +132,22 @@ QRect Library::lightGap()
     return gap;
 }
 
+bool Library::canSelectionChange()
+{
+    //    qDebug() << qApp->focusWidget()->objectName();
+    return ui->mClvPhotos->hasFocus() || ui->mLoupeScrollView->hasFocus();
+}
+
+bool Library::canSelectUpDown()
+{
+    return ui->mClvPhotos->hasFocus();
+}
+
+int Library::tilesPerRowOrCol()
+{
+    return ui->mClvPhotos->tilesPerRowOrCol();
+}
+
 void Library::setSelectionModel(QItemSelectionModel* selectionModel)
 {
     ui->mClvPhotos->setSelectionModel(selectionModel);
@@ -211,7 +227,7 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected,
     {
         mCurrentPhoto = photos.first();
 
-        if (ui->scrollArea_3->isVisible())
+        if (ui->mLoupeScrollView->isVisible())
         {
             showLoupe();
         }
@@ -222,16 +238,13 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected,
 
 void Library::onTileDoubleClicked(const QModelIndex& index)
 {
-    //    mCurrentPhoto =
-    //        mPhotoModel->data(index, TileView::PhotoRole).value<Photo*>();
-
     showLoupe();
 }
 
 void Library::showLoupe()
 {
     ui->mLoupeView->setPhoto(mCurrentPhoto);
-    ui->StackedWidget_1->setCurrentWidget(ui->scrollArea_3);
+    ui->StackedWidget_1->setCurrentWidget(ui->mLoupeScrollView);
 }
 
 void Library::showGrid()

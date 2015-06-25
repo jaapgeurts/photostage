@@ -38,7 +38,10 @@ class SqlPathModel : public QAbstractItemModel
 {
     public:
 
-        enum DataRole { Path = 1 };
+        enum DataRole
+        {
+            Path = Qt::UserRole + 1
+        };
         SqlPathModel(QObject* parent = 0);
         ~SqlPathModel();
 

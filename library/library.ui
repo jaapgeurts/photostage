@@ -72,7 +72,7 @@
           <number>1</number>
          </property>
          <widget class="PhotoStage::TileView" name="mClvPhotos"/>
-         <widget class="QScrollArea" name="scrollArea_3">
+         <widget class="QScrollArea" name="mLoupeScrollView">
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
           </property>

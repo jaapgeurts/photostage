@@ -20,7 +20,10 @@ class TileView : public QWidget
 
     public:
 
-        enum ModelRole { PhotoRole = Qt::UserRole + 1 };
+        enum ModelRole
+        {
+            PhotoRole = Qt::UserRole + 1
+        };
 
         explicit TileView(QWidget* parent = 0);
         ~TileView();
@@ -56,8 +59,6 @@ class TileView : public QWidget
 
         const QList<QModelIndex>& checkedItems() const;
 
-        //    const QList<QModelIndex>& selection() const;
-
         void setOrientation(Qt::Orientation orientation);
         Qt::Orientation orientation() const;
 
@@ -72,7 +73,8 @@ class TileView : public QWidget
         void selectAll();
         void clearSelection();
 
-    signals:
+        int tilesPerRowOrCol();
+signals:
 
         void doubleClickTile(const QModelIndex& index);
 
@@ -134,9 +136,7 @@ class TileView : public QWidget
         QScrollBar*         mScrollBar;
 
         // selections
-        //    QList<QModelIndex> *mSelection;
         QItemSelectionModel* mSelectionModel;
-        //    QModelIndex mLastSelection;
 
         // checkbox
         bool                mIsCheckBoxMode;

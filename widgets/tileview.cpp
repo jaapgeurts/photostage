@@ -222,6 +222,11 @@ Qt::Orientation TileView::orientation() const
     return mOrientation;
 }
 
+int TileView::tilesPerRowOrCol()
+{
+    return mTilesPerColRow;
+}
+
 // row or column count = 0 means no limit
 void TileView::setMaxRows(int maxRows)
 {
@@ -462,8 +467,8 @@ void TileView::mouseDoubleClickEvent(QMouseEvent* event)
     if (!index.isValid())
         return;
 
-    mSelectionModel->clear();
-    mSelectionModel->select(index, QItemSelectionModel::SelectCurrent);
+    mSelectionModel->setCurrentIndex(index,
+        QItemSelectionModel::ClearAndSelect);
     // qDebug() << "No modifiers";
     //    mLastSelection = index;
     //    emit selectionChanged();
@@ -501,7 +506,7 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
     {
         if (event->button() == Qt::LeftButton)
         {
-            if (pointInCheckBox(event->pos()))
+            if (mIsCheckBoxMode && pointInCheckBox(event->pos()))
             {
                 // toggle the checkbox
                 if (mCheckedList->contains(index))
@@ -509,7 +514,7 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
                     if (mSelectionModel->isSelected(index))
                         foreach(QModelIndex idx,
                             mSelectionModel->selectedRows())
-                        mCheckedList->removeAll(idx);
+                            mCheckedList->removeAll(idx);
                     else
                         mCheckedList->removeAll(index);
                 }
@@ -518,12 +523,10 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
                     if (mSelectionModel->isSelected(index))
                         foreach(QModelIndex idx,
                             mSelectionModel->selectedRows())
-                        {
                             mCheckedList->append(idx);
-                        }
-                        else
-                            mCheckedList->append(index);
 
+                    else
+                        mCheckedList->append(index);
                 }
             }
             else
@@ -626,15 +629,23 @@ void TileView::keyPressEvent(QKeyEvent* event)
     int oldIndex = mSelectionModel->currentIndex().row();
     int newIndex = oldIndex;
 
+    event->ignore();
+
     switch (event->key())
     {
         case Qt::Key_Up:
+
+            if (mOrientation == Qt::Horizontal  && mTilesPerColRow == 1)
+                break;
 
             if (oldIndex >= mTilesPerColRow)
                 newIndex = oldIndex - mTilesPerColRow;
             break;
 
         case Qt::Key_Down:
+
+            if (mOrientation == Qt::Horizontal && mTilesPerColRow == 1)
+                break;
 
             if (oldIndex <
                 mListModel->rowCount(mRootIndex) - mTilesPerColRow)
@@ -643,28 +654,30 @@ void TileView::keyPressEvent(QKeyEvent* event)
 
         case Qt::Key_Left:
 
+            if (mOrientation == Qt::Vertical && mTilesPerColRow == 1)
+                break;
+
             if (oldIndex > 0)
                 newIndex = oldIndex - 1;
             break;
 
         case Qt::Key_Right:
 
+            if (mOrientation == Qt::Vertical && mTilesPerColRow == 1)
+                break;
+
             if (oldIndex < mListModel->rowCount(mRootIndex) - 1)
                 newIndex = oldIndex + 1;
             break;
-
-        default:
-            QWidget::keyPressEvent(event);
     }
 
     if (newIndex != oldIndex)
     {
-        //        mSelectionModel->clear();
-        //        mLastSelection = mListModel->index(newIndex,0,mRootIndex);
         mSelectionModel->setCurrentIndex(mListModel->index(newIndex, 0,
             mRootIndex), QItemSelectionModel::ClearAndSelect);
+        event->accept();
+
         update();
-        //        emit selectionChanged();
     }
 }
 

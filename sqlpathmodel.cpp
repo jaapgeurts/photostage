@@ -144,18 +144,20 @@ QVariant SqlPathModel::data(const QModelIndex& index, int role) const
 
     PathItem* item = static_cast<PathItem*>(index.internalPointer());
 
-    if (role == Qt::DisplayRole)
+    switch (role)
     {
-        return QString("%1 (%2/%3)").arg(item->path,
-                   QString::number(item->count),
-                   QString::number(item->cumulative));
+        case Qt::DisplayRole:
+            return QString("%1 (%2/%3)").arg(item->path,
+                       QString::number(item->count),
+                       QString::number(item->cumulative));
+
+        case SqlPathModel::Path:
+            return QVariant::fromValue<PathItem*>(item);
+
+        case Qt::DecorationRole:
+        default:
+            return QVariant();
     }
-    else if (role == SqlPathModel::Path)
-    {
-        return QVariant::fromValue<PathItem*>(item);
-    }
-    else
-        return QVariant();
 }
 
 //bool SqlPathModel::hasChildren(const QModelIndex &parent) const

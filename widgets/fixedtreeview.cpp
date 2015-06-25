@@ -12,7 +12,7 @@ FixedTreeView::FixedTreeView(QWidget* parent) : QTreeView(parent)
         &QTreeView::collapsed,
         this,
         &FixedTreeView::onItemCollapsed);
-
+    setAnimated(true);
     header()->close();
 }
 

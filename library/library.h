@@ -32,7 +32,10 @@ class Library : public Module
 
         void setSelectionModel(QItemSelectionModel* selectionModel);
 
-    signals:
+        bool canSelectionChange();
+        bool canSelectUpDown();
+        int tilesPerRowOrCol();
+signals:
 
         void photoSelectionChanged(const QList<Photo*>& list);
         void photoSourceChanged(PhotoModel::SourceType type, long long id);

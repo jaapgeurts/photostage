@@ -99,6 +99,11 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->filmStrip->setOrientation(Qt::Horizontal);
     ui->filmStrip->setSelectionModel(mPhotoSelection);
 
+    connect(ui->filmStrip,
+        &TileView::doubleClickTile,
+        this,
+        &MainWindow::onTileDoubleClicked);
+
     // Create the Develop Module
     mDevelop = new Develop(this);
     ui->stackedWidget->addWidget(mDevelop);
@@ -115,6 +120,8 @@ MainWindow::MainWindow(QWidget* parent) :
     mBackgroundTaskManager = new BackgroundTaskManager(
         ui->scrollAreaWidgetContents,
         this);
+
+    qApp->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
@@ -133,7 +140,8 @@ MainWindow::~MainWindow()
     delete mDatabaseAccess;
 }
 
-bool MainWindow::event(QEvent* event)
+bool MainWindow::eventFilter(QObject* obj, QEvent* event)
+//bool MainWindow::event(QEvent* event)
 {
     if (event->type() == QEvent::KeyPress)
     {
@@ -141,6 +149,42 @@ bool MainWindow::event(QEvent* event)
 
         switch (ke->key())
         {
+            case Qt::UpArrow:
+
+                if (mLibrary->canSelectUpDown())
+                {
+                    selectUp();
+                    return true;
+                }
+                break;
+
+            case Qt::DownArrow:
+
+                if (mLibrary->canSelectUpDown())
+                {
+                    selectDown();
+                    return true;
+                }
+                break;
+
+            case Qt::Key_Left:
+
+                if (mLibrary->canSelectionChange())
+                {
+                    selectPrevious();
+                    return true;
+                }
+                break;
+
+            case Qt::Key_Right:
+
+                if (mLibrary->canSelectionChange())
+                {
+                    selectNext();
+                    return true;
+                }
+                break;
+
             case Qt::Key_Escape:
                 mLibrary->showGrid();
                 return true;
@@ -151,7 +195,61 @@ bool MainWindow::event(QEvent* event)
                 return true;
         }
     }
-    return QMainWindow::event(event);
+    return false;
+    //    return QMainWindow::event(event);
+}
+
+void MainWindow::selectNext()
+{
+    QModelIndex index = mPhotoSelection->currentIndex();
+
+    if (index.isValid())
+    {
+        if (index.row() + 1 < mPhotoModel->rowCount(QModelIndex()))
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(index.row() +
+                1), QItemSelectionModel::ClearAndSelect);
+    }
+}
+
+void MainWindow::selectPrevious()
+{
+    QModelIndex index = mPhotoSelection->currentIndex();
+
+    if (index.isValid())
+    {
+        if (index.row() > 0)
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(index.row() -
+                1), QItemSelectionModel::ClearAndSelect);
+    }
+}
+
+void MainWindow::selectUp()
+{
+    QModelIndex index = mPhotoSelection->currentIndex();
+
+    if (index.isValid())
+    {
+        int diff = mLibrary->tilesPerRowOrCol();
+        mPhotoSelection->setCurrentIndex(mPhotoModel->index(index.row() - diff),
+            QItemSelectionModel::ClearAndSelect);
+    }
+}
+
+void MainWindow::selectDown()
+{
+    QModelIndex index = mPhotoSelection->currentIndex();
+
+    if (index.isValid())
+    {
+        int diff = mLibrary->tilesPerRowOrCol();
+        mPhotoSelection->setCurrentIndex(mPhotoModel->index(index.row() - diff),
+            QItemSelectionModel::ClearAndSelect);
+    }
+}
+
+void MainWindow::onTileDoubleClicked(const QModelIndex&)
+{
+    mLibrary->showLoupe();
 }
 
 void MainWindow::onSelectionChanged(const QItemSelection& /*selected*/,
