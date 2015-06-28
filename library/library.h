@@ -11,6 +11,7 @@
 #include "modules/collectionmodule.h"
 #include "modules/shortcutmodule.h"
 #include "modules/libraryhistogrammodule.h"
+#include "widgets/fixedtreeview.h"
 
 namespace Ui
 {
@@ -35,7 +36,8 @@ class Library : public Module
         bool canSelectionChange();
         bool canSelectUpDown();
         int tilesPerRowOrCol();
-signals:
+
+    signals:
 
         void photoSelectionChanged(const QList<Photo*>& list);
         void photoSourceChanged(PhotoModel::SourceType type, long long id);
@@ -73,6 +75,7 @@ signals:
         LibraryHistogramModule* mHistogramModule;
         QFont                   mFontAccessFoundIcons;
         Photo*                  mCurrentPhoto;
+        FixedTreeView*          mTrvwFiles;
 };
 }
 

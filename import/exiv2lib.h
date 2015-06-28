@@ -24,7 +24,8 @@ namespace PhotoStage
             Exiv2::Image::AutoPtr mImageFile;
 
             const QImage loadImage();
-            void setWhiteBalanceCoeffs(Exiv2::ExifData& data, float wb[]);
+            void setWhiteBalanceCoeffsCanon(Exiv2::ExifData& data, float wb[]);
+            void setWhiteBalanceCoeffsNikon(Exiv2::ExifData &data, float wb[]);
     };
 }
 

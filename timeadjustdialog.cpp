@@ -7,6 +7,8 @@ TimeAdjustDialog::TimeAdjustDialog(QWidget* parent) :
     QDialog(parent),
     ui(new Ui::TimeAdjustDialog)
 {
+    setWindowIcon(QIcon());
+
     ui->setupUi(this);
 }
 

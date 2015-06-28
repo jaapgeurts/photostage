@@ -99,6 +99,29 @@ QModelIndex SqlPathModel::index(int row,
     return createIndex(row, column, newItem);
 }
 
+// Short cut to return the model index for a particular pathitem id.
+QModelIndex SqlPathModel::index(long long pathid) const
+{
+    return findItemRec(mRootItem, 0, pathid);
+}
+
+QModelIndex SqlPathModel::findItemRec(PathItem* item, int row, long long pathid) const
+{
+    if (item->id == pathid)
+        return createIndex(row, 0, item);
+
+    int j = 0;
+    foreach(PathItem * i, item->children)
+    {
+        QModelIndex idx = findItemRec(i, j, pathid);
+
+        if (idx.isValid())
+            return idx;
+        j++;
+    }
+    return QModelIndex();
+}
+
 QModelIndex SqlPathModel::parent(const QModelIndex& index) const
 {
     if (!index.isValid())

@@ -1,11 +1,13 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 #include <QMainWindow>
+#include <QActionGroup>
 #include <QPoint>
 // modules
 #include "module.h"
 #include "library/library.h"
 #include "develop/develop.h"
+#include "widgets/actionstategroup.h"
 #include "map/map.h"
 #include "databaseaccess.h"
 #include "backgroundtaskmanager.h"
@@ -78,6 +80,7 @@ class MainWindow : public QMainWindow
         void importFinished(BackgroundTask* task);
         void onSelectionChanged(const QItemSelection&,
             const QItemSelection&);
+        void onCurrentChanged(const QModelIndex& current, const QModelIndex&);
 
         // model changes
         void onModelReset();
@@ -106,6 +109,7 @@ class MainWindow : public QMainWindow
         PhotoModel*            mPhotoModel;
         PhotoWorkUnit*         mPhotoWorkUnit;
         QItemSelectionModel*   mPhotoSelection;
+        ActionStateGroup       mActionStatePhoto;
 
         //    QList<Photo*> mCurrentSelection;
         void setRating(int rating);
@@ -114,6 +118,7 @@ class MainWindow : public QMainWindow
         void updateInformationBar();
 
         Photo* currentPhoto();
+        void setPhotoActionsAvailability(bool enabled);
 };
 }
 

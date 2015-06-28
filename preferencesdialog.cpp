@@ -8,6 +8,9 @@ PreferencesDialog::PreferencesDialog(QWidget* parent) :
     ui(new Ui::PreferencesDialog)
 {
     ui->setupUi(this);
+
+    setWindowIcon(QIcon());
+
     mPreferences = Preferences::instance();
 
     ui->cbIncludeSubdirs->setChecked(

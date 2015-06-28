@@ -38,8 +38,6 @@ MainWindow::MainWindow(QWidget* parent) :
 
     ui->setupUi(this);
 
-    setWindowIcon(QIcon(":/appicon.png"));
-
     mDatabaseAccess = new DatabaseAccess();
 
     QSettings settings;
@@ -80,6 +78,10 @@ MainWindow::MainWindow(QWidget* parent) :
         &QItemSelectionModel::selectionChanged,
         this,
         &MainWindow::onSelectionChanged);
+    connect(mPhotoSelection,
+        &QItemSelectionModel::currentChanged,
+        this,
+        &MainWindow::onCurrentChanged);
 
     // Create the Library Module
     mLibrary = new Library(mPhotoModel, this);
@@ -120,6 +122,43 @@ MainWindow::MainWindow(QWidget* parent) :
     mBackgroundTaskManager = new BackgroundTaskManager(
         ui->scrollAreaWidgetContents,
         this);
+
+    // Put all actions in groups.
+    mActionStatePhoto.addAction(ui->actionColorBlue);
+    mActionStatePhoto.addAction(ui->actionColorGreen);
+    mActionStatePhoto.addAction(ui->actionColorNone);
+    mActionStatePhoto.addAction(ui->actionColorOrange);
+    mActionStatePhoto.addAction(ui->actionColorPurple);
+    mActionStatePhoto.addAction(ui->actionColorRed);
+    mActionStatePhoto.addAction(ui->actionColorYellow);
+
+    mActionStatePhoto.addAction(ui->actionRating1);
+    mActionStatePhoto.addAction(ui->actionRating2);
+    mActionStatePhoto.addAction(ui->actionRating3);
+    mActionStatePhoto.addAction(ui->actionRating4);
+    mActionStatePhoto.addAction(ui->actionRating5);
+    mActionStatePhoto.addAction(ui->actionRatingNone);
+    mActionStatePhoto.addAction(ui->actionDecrease_Rating);
+    mActionStatePhoto.addAction(ui->actionIncrease_rating);
+
+    mActionStatePhoto.addAction(ui->actionFlagNone);
+    mActionStatePhoto.addAction(ui->actionFlagPick);
+    mActionStatePhoto.addAction(ui->actionFlagReject);
+
+    mActionStatePhoto.addAction(ui->actionRotate_Left);
+    mActionStatePhoto.addAction(ui->actionRotate_Right);
+    mActionStatePhoto.addAction(ui->actionFlip_Horizontal);
+    mActionStatePhoto.addAction(ui->actionFlip_Vertical);
+
+    mActionStatePhoto.addAction(ui->actionShow_in_Finder);
+    mActionStatePhoto.addAction(ui->actionDelete_Photo);
+    mActionStatePhoto.addAction(ui->actionDelete_Rejected_Photos);
+
+    mActionStatePhoto.addAction(ui->actionAdd_to_Quick_Collection);
+
+    mActionStatePhoto.addAction(ui->actionEdit_Capture_Time);
+
+    mActionStatePhoto.disableAll(true);
 
     qApp->installEventFilter(this);
 }
@@ -177,7 +216,6 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
 
 bool MainWindow::selectNext()
 {
-
     if (!mLibrary->canSelectionChange() && !ui->filmStrip->hasFocus())
         return false;
 
@@ -185,7 +223,6 @@ bool MainWindow::selectNext()
 
     if (index.isValid())
     {
-        qDebug() << "Next";
         int oldIndex = index.row();
         int newIndex = oldIndex;
 
@@ -202,7 +239,6 @@ bool MainWindow::selectNext()
 
 bool MainWindow::selectPrevious()
 {
-
     if (!mLibrary->canSelectionChange() && !ui->filmStrip->hasFocus())
         return false;
 
@@ -210,8 +246,6 @@ bool MainWindow::selectPrevious()
 
     if (index.isValid())
     {
-        qDebug() << "Prev";
-
         int oldIndex = index.row();
         int newIndex = oldIndex;
 
@@ -228,8 +262,6 @@ bool MainWindow::selectPrevious()
 
 bool MainWindow::selectUp()
 {
-    qDebug() << "Up";
-
     if (!mLibrary->canSelectionChange() && !mLibrary->canSelectUpDown())
         return false;
 
@@ -237,7 +269,6 @@ bool MainWindow::selectUp()
 
     if (index.isValid())
     {
-
         int oldIndex = index.row();
         int newIndex = oldIndex;
 
@@ -257,8 +288,6 @@ bool MainWindow::selectUp()
 
 bool MainWindow::selectDown()
 {
-    qDebug() << "Down";
-
     if (!mLibrary->canSelectionChange() && !mLibrary->canSelectUpDown())
         return false;
 
@@ -292,10 +321,18 @@ void MainWindow::onTileDoubleClicked(const QModelIndex&)
 void MainWindow::onSelectionChanged(const QItemSelection& /*selected*/,
     const QItemSelection& /*deselected*/)
 {
-    QModelIndex index = mPhotoSelection->currentIndex();
+    updateInformationBar();
+}
 
-    if (index.isValid())
+void MainWindow::onCurrentChanged(const QModelIndex& current,
+    const QModelIndex& /*previous*/)
+{
+    setPhotoActionsAvailability(current.isValid());
+
+    if (current.isValid())
+    {
         mDevelop->setPhoto(currentPhoto());
+    }
 
     updateInformationBar();
 }
@@ -473,6 +510,7 @@ void MainWindow::importFinished(BackgroundTask* task)
 
 void MainWindow::onModelReset()
 {
+    setPhotoActionsAvailability(false);
     updateInformationBar();
 }
 
@@ -510,8 +548,13 @@ void MainWindow::updateInformationBar()
     int     count    = mPhotoModel->rowCount(QModelIndex());
     int     selCount = mPhotoSelection->selectedIndexes().size();
 
+    QString imagePath;
+    Photo*  photo = currentPhoto();
+
+    if (photo != NULL)
+        imagePath = " " + photo->srcImagePath();
     ui->lblInformation->setText(QString::number(
-            selCount) + "/" + QString::number(count));
+            selCount) + "/" + QString::number(count) + imagePath);
 }
 
 Photo* MainWindow::currentPhoto()
@@ -560,5 +603,10 @@ void MainWindow::setColorLabel(Photo::ColorLabel color)
     QVector<int> roles;
     roles.append(TileView::PhotoRole);
     mPhotoModel->refreshData(list);
+}
+
+void MainWindow::setPhotoActionsAvailability(bool enabled)
+{
+    mActionStatePhoto.enableAll(enabled);
 }
 }

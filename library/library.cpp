@@ -6,17 +6,16 @@
 // models
 #include "sqlkeywordmodel.h"
 
-// widgets
-#include "widgets/fixedtreeview.h"
-
 #define SETTINGS_SPLITTER_LIBRARY_SIZES "librarymodule/splitter_main"
+#define SETTINGS_LIBRARY_FILES_PATHITEM "librarymodule/files/pathitem"
 
 namespace PhotoStage
 {
 Library::Library(PhotoModel* const model, QWidget* parent) :
     Module(parent),
     ui(new Ui::Library),
-    mFontAccessFoundIcons(QFont("Accessibility Foundicons", 15))
+    mFontAccessFoundIcons(QFont("Accessibility Foundicons", 15)),
+    mCurrentPhoto(NULL)
 {
     mPhotoModel = model;
 
@@ -72,12 +71,12 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     ui->ModulePanel_1->addPanel("Shortcuts", sm);
 
     // Files module
-    FixedTreeView* trvwFiles = new FixedTreeView(ui->ModulePanel_1);
+    mTrvwFiles = new FixedTreeView(ui->ModulePanel_1);
     mPathModel = new SqlPathModel(this);
-    trvwFiles->setModel(mPathModel);
-    trvwFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    ui->ModulePanel_1->addPanel("Folders", trvwFiles);
-    connect(trvwFiles,
+    mTrvwFiles->setModel(mPathModel);
+    mTrvwFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    ui->ModulePanel_1->addPanel("Folders", mTrvwFiles);
+    connect(mTrvwFiles,
         &FixedTreeView::clicked,
         this,
         &Library::onFilesClicked);
@@ -108,6 +107,20 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     showGrid();
 
     mPhotoWorkUnit = PhotoWorkUnit::instance();
+
+    // open up the last path location
+    long long pathid =
+        settings.value(SETTINGS_LIBRARY_FILES_PATHITEM).toLongLong();
+
+    QModelIndex index = mPathModel->index(pathid);
+    do
+    {
+        mTrvwFiles->expand(index);
+        index = index.parent();
+    }
+    while (index.isValid());
+
+    emit photoSourceChanged(PhotoModel::SourceFiles, pathid);
 }
 
 Library::~Library()
@@ -120,6 +133,11 @@ Library::~Library()
         list << size;
     }
     settings.setValue(SETTINGS_SPLITTER_LIBRARY_SIZES, list);
+
+    QModelIndex index = mTrvwFiles->currentIndex();
+    QVariant    v     = mPathModel->data(index, SqlPathModel::Path);
+    PathItem*   item  = v.value<PathItem*>();
+    settings.setValue(SETTINGS_LIBRARY_FILES_PATHITEM, item->id);
 
     delete ui;
 }
@@ -243,8 +261,11 @@ void Library::onTileDoubleClicked(const QModelIndex& index)
 
 void Library::showLoupe()
 {
-    ui->mLoupeView->setPhoto(mCurrentPhoto);
-    ui->StackedWidget_1->setCurrentWidget(ui->mLoupeScrollView);
+    if (mCurrentPhoto != NULL)
+    {
+        ui->mLoupeView->setPhoto(mCurrentPhoto);
+        ui->StackedWidget_1->setCurrentWidget(ui->mLoupeScrollView);
+    }
 }
 
 void Library::showGrid()

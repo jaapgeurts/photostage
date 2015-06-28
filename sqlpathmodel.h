@@ -51,6 +51,7 @@ class SqlPathModel : public QAbstractItemModel
         // minimum set to implement
         QModelIndex index(int row, int column,
             const QModelIndex& parent) const;
+        QModelIndex index(long long pathid) const;
         QModelIndex parent(const QModelIndex& index) const;
         int rowCount(const QModelIndex& parent) const;
         int columnCount(const QModelIndex& parent) const;
@@ -69,6 +70,7 @@ class SqlPathModel : public QAbstractItemModel
         PathItem* mRootItem;
         void createPathtemsRec(PathItem* root);
         void createPathItems();
+        QModelIndex findItemRec(PathItem *item, int row, long long pathid) const;
 };
 }
 Q_DECLARE_METATYPE(PhotoStage::PathItem)

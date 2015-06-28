@@ -80,7 +80,8 @@ SOURCES += \
     workunits/importoptions.cpp \
     workunits/importworkunit.cpp \
     workunits/photoworkunit.cpp \
-    engine/platform.cpp
+    engine/platform.cpp \
+    widgets/actionstategroup.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -143,7 +144,8 @@ HEADERS  += \
     workunits/importworkunit.h \
     workunits/photoworkunit.h \
     engine/platform_mac.h \
-    engine/platform.h
+    engine/platform.h \
+    widgets/actionstategroup.h
 
 FORMS    += \
     mainwindow.ui \

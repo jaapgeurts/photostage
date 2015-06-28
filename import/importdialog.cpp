@@ -17,6 +17,8 @@ ImportDialog::ImportDialog(QWidget* parent) :
 {
     ui->setupUi(this);
 
+    setWindowIcon(QIcon());
+
     // add our own CellFlowView
     mCfvPhotos = new TileView(ui->frmMain);
     mCfvPhotos->setTileFlyweight(new ImageFileTile());
@@ -43,7 +45,7 @@ ImportDialog::ImportDialog(QWidget* parent) :
     ui->trvwSource->expand(srcindex);
     QSettings   settings;
     QString     str = settings.value("importdialog/sourcepath").toString();
-    qDebug() << "show dir" << str;
+
     QModelIndex index    = mSourceDrivesModel->index(str);
     QModelIndex dirIndex = index;
     do

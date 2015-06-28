@@ -16,6 +16,14 @@
 
 using namespace Exiv2;
 
+static inline float max3(float a, float b, float c)
+{
+    if (a > b)
+        return a > c ? a : c;
+    else
+        return b > c ? b : c;
+}
+
 namespace PhotoStage
 {
 struct __attribute__((packed)) WhiteBalanceEntry
@@ -29,7 +37,7 @@ struct __attribute__((packed)) Canon_ColorData
     union
     {
         // This version for the 20D & 350D
-        struct Canon_ColorData_V1
+        struct V1
         {
             uint16_t bytecount;
             uint16_t _unknown[24];
@@ -38,7 +46,7 @@ struct __attribute__((packed)) Canon_ColorData
         V1;
 
         // this version is for the 1D Mark II and the 1Ds Mark II
-        struct Canon_ColorData_V2
+        struct V2
         {
             //    uint16_t bytecount1;
             //    uint16_t values[4]; // Some RGGB values
@@ -47,8 +55,8 @@ struct __attribute__((packed)) Canon_ColorData
             struct WhiteBalanceEntry WhiteBalanceTable[10];
         }
         V2;
-        // this version is for the G10
-        struct Canon_ColorData_V3
+        // this version is for the G10 and the Powershot S110
+        struct V3
         {
             uint16_t bytecount;
             uint16_t _unknown[70];
@@ -56,14 +64,14 @@ struct __attribute__((packed)) Canon_ColorData
         }
         V3;
         // this is the default for canon
-        struct Canon_ColorData_V4
+        struct V4
         {
             uint16_t bytecount;
             uint16_t _unknown[62];
             struct WhiteBalanceEntry WhiteBalanceTable[10];
         }
         V4;
-        struct Canon_ColorData_V5
+        struct V5
         {
             uint16_t bytecount;
             uint16_t _unknown[49];
@@ -74,6 +82,13 @@ struct __attribute__((packed)) Canon_ColorData
             WhiteBalanceTable[3];
         }
         V5;
+        struct V7
+        {
+            uint16_t version;
+            uint16_t _unknown[62];
+            struct WhiteBalanceEntry WhiteBalanceTable[10];
+        }
+        V7;
     };
 };
 
@@ -115,14 +130,18 @@ void Exiv2Lib::openFile(const QString& path)
         // for canon chop off the name "Canon"
         mExifData.model = QString::fromStdString(pos->toString());
 
-        if (mExifData.make == "Canon")
+        if (mExifData.make.startsWith("Canon"))
         {
             mExifData.model = mExifData.model.remove(0, 6);
+            setWhiteBalanceCoeffsCanon(data, mExifData.rgbCoeffients);
+        }
+        else if (mExifData.make.startsWith("NIKON"))
+        {
+            mExifData.model = mExifData.model.remove(0, 6);
+            setWhiteBalanceCoeffsNikon(data, mExifData.rgbCoeffients);
         }
     }
     mExifData.thumbnail = loadImage();
-
-    setWhiteBalanceCoeffs(data, mExifData.rgbCoeffients);
 }
 
 ExifInfo Exiv2Lib::data()
@@ -130,7 +149,78 @@ ExifInfo Exiv2Lib::data()
     return mExifData;
 }
 
-void Exiv2Lib::setWhiteBalanceCoeffs(ExifData& data, float wb[3])
+void Exiv2Lib::setWhiteBalanceCoeffsNikon(ExifData& data, float wb[3])
+{
+    ExifData::const_iterator pos;
+
+    /*
+     * This seems to be unnecessary as the multipliers are also
+     * available as rational numbers in the WB_RBLevels tag
+     */
+    /*
+       pos = data.findKey(ExifKey("Exif.Nikon3.Version"));
+
+       int makerNoteVersion = -1;
+
+       if (pos != data.end())
+       {
+           char*   buf =  new char[pos->size()];
+           pos->copy((unsigned char*)buf, littleEndian);
+           QString val(buf);
+           qDebug() << val;
+           delete [] buf;
+
+           makerNoteVersion = val.toInt();
+       }
+       qDebug() << "Nikon makenote version:" << makerNoteVersion;
+
+       if (makerNoteVersion >= 200)
+       {
+        qDebug() << "Decrypt Nikon Color Balance";
+       }
+
+     */
+    pos = data.findKey(ExifKey("Exif.Nikon3.WB_RBLevels"));
+
+    if (pos != data.end())
+    {
+        if (mExifData.model == "D300")
+        {
+            wb[0] = 1.0f;
+            wb[1] = 1.0f;
+            wb[2] = 1.0f;
+            //            wb[0] = colorData->V3.WhiteBalanceTable[WB_AsShot].RGGB[0];
+            //            wb[1] =
+            //                ((colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[1] +
+            //                colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[2]) / 2);
+            //            wb[2] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[3];
+            qDebug() << "White balance for model Nikon D300";
+
+            if (pos != data.end())
+            {
+                wb[0] = pos->toFloat(0);
+                wb[1] = 1.0f;
+                wb[2] = pos->toFloat(1);
+                qDebug() << "Nikon: RGB" << wb[0] << "," << wb[1] << "," <<
+                    wb[2];
+            }
+        }
+        float mx = max3(wb[0], wb[1], wb[2]);
+
+        wb[0] /= mx;
+        wb[1] /= mx;
+        wb[2] /= mx;
+    }
+    else
+    {
+        qDebug () << "Nikon: Color balance data not available";
+        wb[0] = 1.0f;
+        wb[1] = 1.0f;
+        wb[2] = 1.0f;
+    }
+}
+
+void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
 {
     ExifData::const_iterator pos;
 
@@ -157,23 +247,14 @@ void Exiv2Lib::setWhiteBalanceCoeffs(ExifData& data, float wb[3])
             wb[2] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[3];
 
             //            qDebug() << "WB EOS 350D DIGITAL RGGB" << wb[0] << ","<<wb[1]<<","<<wb[2];
-
-#define max(x, y) ((x) > (y) ? (x) : (y))
-
-            float mx = max(wb[0], max(wb[1], wb[2]));
-            // TODO: this should be an option.
-            // In fact send this info raw to the processor. don't compute here.
-            //            mx = wb[1];
-
-            wb[0] /= mx;
-            wb[1] /= mx;
-            wb[2] /= mx;
         }
         else if (mExifData.model == "EOS 1D Mark II")     // || 1Ds Mark II
         {
+            qDebug() << "Whitebalance info unavailable";
         }
         else if (mExifData.model == "G10")
         {
+            qDebug() << "Whitebalance info unavailable";
         }
         else if (mExifData.model == "PowerShot S30")
         {
@@ -187,34 +268,41 @@ void Exiv2Lib::setWhiteBalanceCoeffs(ExifData& data, float wb[3])
                 (colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[0] +
                 colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[3]) / 2;
             wb[2] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[2];
+        }
+        else if (mExifData.model == "PowerShot S110")
+        {
+            wb[0] = colorData->V3.WhiteBalanceTable[WB_AsShot].RGGB[0];
+            wb[1] =
+                (colorData->V3.WhiteBalanceTable[WB_AsShot].RGGB[1] +
+                colorData->V3.WhiteBalanceTable[WB_AsShot].RGGB[2]) / 2;
+            wb[2] = colorData->V3.WhiteBalanceTable[WB_AsShot].RGGB[3];
 
-            float mx = max(wb[0], max(wb[1], wb[2]));
-            //mx = wb[1];
-
-            wb[0] /= mx;
-            wb[1] /= mx;
-            wb[2] /= mx;
+            qDebug() << "S110 Levels" << wb[0] << "," << wb[1] << "," <<
+                wb[2];
         }
         else     // attempt to read at the default position at V4
         {
-            qDebug() << "Unknown model. Attempting default";
+            qDebug() <<
+                "Model unknown, Parsing whitebalance using canon default format";
+            qDebug() << "Color data version: " << colorData->V7.version;
             // optimize with bitshifs later
-            wb[0] = colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[0];
+            wb[0] = colorData->V7.WhiteBalanceTable[WB_AsShot].RGGB[0];
             wb[1] =
-                (colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[1] +
-                colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[2]) / 2;
-            wb[2] = colorData->V4.WhiteBalanceTable[WB_AsShot].RGGB[3];
+                (colorData->V7.WhiteBalanceTable[WB_AsShot].RGGB[1] +
+                colorData->V7.WhiteBalanceTable[WB_AsShot].RGGB[2]) / 2;
+            wb[2] = colorData->V7.WhiteBalanceTable[WB_AsShot].RGGB[3];
 
             qDebug() << "WB RGGB Levels" << wb[0] << "," << wb[1] << "," <<
                 wb[2];
-
-            float mx = max(wb[0], max(wb[1], wb[2]));
-            //mx = wb[1];
-            wb[0] /= mx;
-            wb[1] /= mx;
-            wb[2] /= mx;
         }
-        delete cdata;
+
+        float mx = max3(wb[0], wb[1], wb[2]);
+
+        wb[0] /= mx;
+        wb[1] /= mx;
+        wb[2] /= mx;
+
+        delete [] cdata;
     }
     else
     {
@@ -229,7 +317,7 @@ void Exiv2Lib::setWhiteBalanceCoeffs(ExifData& data, float wb[3])
 
 const QImage Exiv2Lib::loadImage()
 {
-    PreviewManager loader(*mImageFile);
+    PreviewManager        loader(*mImageFile);
     PreviewPropertiesList list = loader.getPreviewProperties();
 
     if (list.empty())
@@ -249,17 +337,17 @@ const QImage Exiv2Lib::loadImage()
     // not quite sure what caused it
 
     // load the thumbnail
-    PreviewImage thumbnail = loader.getPreviewImage(selected);
+    PreviewImage         thumbnail = loader.getPreviewImage(selected);
 
-    const unsigned char* tmp = thumbnail.pData();
-    size_t size              = thumbnail.size();
+    const unsigned char* tmp  = thumbnail.pData();
+    size_t               size = thumbnail.size();
 
-    QImage thumb;
+    QImage               thumb;
 
     thumb.loadFromData(tmp, size);
 
     // Read the EXIF orientation flag and rotate the image accordingly.
-    ExifData& data = mImageFile->exifData();
+    ExifData&                data = mImageFile->exifData();
     ExifData::const_iterator pos;
     pos = data.findKey(ExifKey("Exif.Image.Orientation"));
 

@@ -33,6 +33,7 @@ PhotoModel::PhotoModel(QObject* parent) :
     mLoader = ImageFileLoader::getLoader();
     connect(mLoader, &ImageFileLoader::dataReady, this,
         &PhotoModel::imageLoaded);
+    // connect(mLoader, &ImageFileLoader::error, this, &PhotoModel::onImageFailed);
 }
 
 PhotoModel::~PhotoModel()
@@ -72,7 +73,6 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
                 // add to thread queue so that only 1 instance of Halide runs
                 mLoader->addJob(index, info->srcImagePath());
                 mPhotoInfoMap.insert(index, info);
-
             }
         }
 
@@ -88,7 +88,12 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
 
 void PhotoModel::imageLoaded(const QVariant& ref, const QImage& image)
 {
-    QModelIndex index   = ref.value<QModelIndex>();
+    if (image.isNull())
+        return;
+
+
+    QModelIndex index = ref.value<QModelIndex>();
+
     QImage      preview =
         image.scaled(QSize(PREVIEW_IMG_WIDTH,
             PREVIEW_IMG_HEIGHT), Qt::KeepAspectRatio,

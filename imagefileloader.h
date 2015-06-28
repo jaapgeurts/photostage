@@ -54,8 +54,6 @@ class ImageFileLoader : public QObject, public QRunnable
         QQueue<Job>             mJobs;
         QThread                 mThread;
 
-        QImage loadRaw(const QString& path);
-
         /**
          * @brief ImageFileLoader::compute_inverse computes the inverse of a matrix
          * @param src the input matrix

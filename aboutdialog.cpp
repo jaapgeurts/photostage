@@ -8,6 +8,7 @@ AboutDialog::AboutDialog(QWidget* parent) :
     ui(new Ui::AboutDialog)
 {
     ui->setupUi(this);
+    setWindowIcon(QIcon());
 }
 
 AboutDialog::~AboutDialog()

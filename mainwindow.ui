@@ -57,6 +57,15 @@
        </property>
        <item>
         <widget class="QLabel" name="logo">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="maximumSize">
           <size>
            <width>64</width>
@@ -70,7 +79,7 @@
           <pixmap resource="resources.qrc">:/appicon_small.png</pixmap>
          </property>
          <property name="scaledContents">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -650,6 +659,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>None</string>
    </property>
@@ -660,6 +672,9 @@
   <action name="actionRating1">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>★</string>
@@ -672,6 +687,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>★★</string>
    </property>
@@ -682,6 +700,9 @@
   <action name="actionRating3">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
    </property>
    <property name="text">
     <string>★★★</string>
@@ -694,6 +715,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>★★★★</string>
    </property>
@@ -705,6 +729,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>★★★★★</string>
    </property>
@@ -713,21 +740,33 @@
    </property>
   </action>
   <action name="actionIncrease_rating">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Increase Rating</string>
    </property>
   </action>
   <action name="actionDecrease_Rating">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Decrease Rating</string>
    </property>
   </action>
   <action name="actionColorNone">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>None</string>
    </property>
   </action>
   <action name="actionColorRed">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Red</string>
    </property>
@@ -736,6 +775,9 @@
    </property>
   </action>
   <action name="actionColorGreen">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Green</string>
    </property>
@@ -744,6 +786,9 @@
    </property>
   </action>
   <action name="actionColorBlue">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Blue</string>
    </property>
@@ -752,6 +797,9 @@
    </property>
   </action>
   <action name="actionColorYellow">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Yellow</string>
    </property>
@@ -760,11 +808,17 @@
    </property>
   </action>
   <action name="actionColorPurple">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Purple</string>
    </property>
   </action>
   <action name="actionColorOrange">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Orange</string>
    </property>
