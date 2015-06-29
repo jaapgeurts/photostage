@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql positioning
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -81,7 +81,8 @@ SOURCES += \
     workunits/importworkunit.cpp \
     workunits/photoworkunit.cpp \
     engine/platform.cpp \
-    widgets/actionstategroup.cpp
+    widgets/actionstategroup.cpp \
+    library/modules/metadatamodule.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -145,7 +146,8 @@ HEADERS  += \
     workunits/photoworkunit.h \
     engine/platform_mac.h \
     engine/platform.h \
-    widgets/actionstategroup.h
+    widgets/actionstategroup.h \
+    library/modules/metadatamodule.h
 
 FORMS    += \
     mainwindow.ui \
@@ -158,7 +160,8 @@ FORMS    += \
     map/map.ui \
     preferencesdialog.ui \
     timeadjustdialog.ui \
-    widgets/backgroundtaskprogress.ui
+    widgets/backgroundtaskprogress.ui \
+    library/modules/metadatamodule.ui
 
 DISTFILES += \
     Info.plist

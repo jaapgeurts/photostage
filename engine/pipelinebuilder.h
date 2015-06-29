@@ -9,55 +9,60 @@
 
 namespace PhotoStage
 {
-    class PipelineBuilder
-    {
-        public:
+class PipelineBuilder
+{
+    public:
 
-            enum OutputIntent
-            {
-                LibraryPreview = 1,
-                DevelopPreview,
-                FinalOutput
-            };
+        enum OutputIntent
+        {
+            LibraryPreview = 1,
+            DevelopPreview,
+            FinalOutput
+        };
 
-            PipelineBuilder();
-            ~PipelineBuilder();
+        PipelineBuilder();
+        ~PipelineBuilder();
 
-            void setIntent(OutputIntent intent);
+        void setIntent(OutputIntent intent);
 
-            void setWhiteBalance(float wbr, float wbg, float wbb);
-            void setDomain(int bl, int wp);
-            void setColorConversion(float* colorMatrix);
-            void setInput(Halide::Image<uint16_t> input);
+        void setWhiteBalance(float wbr, float wbg, float wbb);
+        void setDomain(int bl, int wp);
+        void setColorConversion(float* colorMatrix);
+        void setInput(Halide::Image<uint16_t> input);
+        void setCFAStart(int dcraw_filter_id);
 
-            void prepare();
+        void prepare();
 
-            QImage execute(int width, int height);
+        QImage execute(int width, int height);
 
-        private:
+    private:
 
-            OutputIntent mIntent;
+        OutputIntent mIntent;
 
-            // Halide pipeline input parameters
-            Halide::ImageParam mInput;
+        // Halide pipeline input parameters
+        Halide::ImageParam mInput;
 
-            // White balance params
-            Halide::Param<float> mWBRed;
-            Halide::Param<float> mWBGreen;
-            Halide::Param<float> mWBBlue;
+        Halide::Param<bool>  mIsSRaw;
 
-            Halide::Param<int>   mBlacklevel;
-            Halide::Param<int>   mWhitePoint;
+        // White balance params
+        Halide::Param<float> mWBRed;
+        Halide::Param<float> mWBGreen;
+        Halide::Param<float> mWBBlue;
 
-            Halide::ImageParam   mColorMatrix;
+        Halide::Param<int>   mBlacklevel;
+        Halide::Param<int>   mWhitePoint;
+        Halide::Param<uint8_t>   mCol;
+        Halide::Param<uint8_t>   mRow;
 
-            Halide::Func         mPipeline;
+        Halide::ImageParam   mColorMatrix;
 
-            // Little CMS variable
-            cmsHTRANSFORM mHRawTransform;
+        Halide::Func         mPipeline;
 
-            void createRawProfileConversion();
-    };
+        // Little CMS variable
+        cmsHTRANSFORM mHRawTransform;
+
+        void createRawProfileConversion();
+};
 }
 
 #endif // PIPELINE_H

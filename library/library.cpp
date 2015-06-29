@@ -104,6 +104,9 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     trvwKeywords->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->ModulePanel_2->addPanel("Keyword List", trvwKeywords);
 
+    mMetaDataModule = new MetaDataModule(ui->ModulePanel_2);
+    ui->ModulePanel_2->addPanel("Meta Data", mMetaDataModule);
+
     showGrid();
 
     mPhotoWorkUnit = PhotoWorkUnit::instance();
@@ -135,10 +138,15 @@ Library::~Library()
     settings.setValue(SETTINGS_SPLITTER_LIBRARY_SIZES, list);
 
     QModelIndex index = mTrvwFiles->currentIndex();
-    QVariant    v     = mPathModel->data(index, SqlPathModel::Path);
-    PathItem*   item  = v.value<PathItem*>();
-    settings.setValue(SETTINGS_LIBRARY_FILES_PATHITEM, item->id);
 
+    if (index.isValid())
+    {
+        QVariant  v    = mPathModel->data(index, SqlPathModel::Path);
+        PathItem* item = v.value<PathItem*>();
+
+        if (item != NULL)
+            settings.setValue(SETTINGS_LIBRARY_FILES_PATHITEM, item->id);
+    }
     delete ui;
 }
 

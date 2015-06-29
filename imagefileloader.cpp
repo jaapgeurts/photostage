@@ -90,7 +90,6 @@ Job ImageFileLoader::hasMore(QQueue<Job>& queue)
 {
     Job ret;
 
-
     mMutexJobs.lock();
 
     if (!queue.isEmpty())
@@ -102,7 +101,6 @@ Job ImageFileLoader::hasMore(QQueue<Job>& queue)
 void ImageFileLoader::run()
 {
     Job j;
-
 
     qDebug() << "Thread started";
 
@@ -124,7 +122,6 @@ QImage ImageFileLoader::genThumb(const QString& path)
     QImage  image;
 
     QString suffix = QFileInfo(path).suffix().toUpper();
-
 
     if (suffix == "NEF" || suffix == "CR2" || suffix == "CRW")
     {
@@ -166,7 +163,6 @@ QImage ImageFileLoader::genThumb(const QString& path)
 bool ImageFileLoader::compute_inverse(const float src[9], float dst[9])
 {
     bool result = false;
-
 
     memset(dst, 0, 9 * sizeof(float));
 
@@ -210,7 +206,6 @@ void ImageFileLoader::dump_matrix(const QString& name, float m[9])
 {
     QString space = QString(name.length(), ' ');
 
-
     qDebug() << space << "┌";
     qDebug() << space << "│" << m[0] << " " << m[1] << " " << m[2];
     qDebug() << name << "│" << m[3] << " " << m[4] << " " << m[5];
@@ -223,7 +218,6 @@ int ImageFileLoader::compute_cct(float R, float G, float B)
     // see here for more details
     // http://dsp.stackexchange.com/questions/8949/how-do-i-calculate-the-color-temperature-of-the-light-source-illuminating-an-ima
     float X, Y, Z;
-
 
     X = (-0.14282) * (R)+(1.54924) * (G) + (-0.95641) * (B);
     Y = (-0.32466) * (R)+(1.57837) * (G) + (-0.73191) * (B);
@@ -261,7 +255,6 @@ void ImageFileLoader::normalize(float* M)
 {
     float sum;
 
-
     for (int i = 0; i < 3; i++)
     {
         sum = 0;
@@ -288,7 +281,6 @@ QImage ImageFileLoader::rawThumb(const QString& path)
     QImage      image;
 
     ExivFacade* ex = ExivFacade::createExivReader();
-
 
     ex->openFile(path);
     ExifInfo ex_info = ex->data();
@@ -377,7 +369,7 @@ QImage ImageFileLoader::rawThumb(const QString& path)
         {
             uint16_t* row = &data[y * raw->dim.x];
 
-            // planar is not a problem now since we only have one plane
+            // planar is not a problem now since raw only contains one plane
             for (int x = 0; x < raw->dim.x; x++)
                 row[x] = rawdata[y * pitch_in_bytes + x];
         }
@@ -396,26 +388,34 @@ QImage ImageFileLoader::rawThumb(const QString& path)
         float eos1100d[9] =
         { 6444, -904, -893, -4563, 12308, 2535, -903, 2016, 6728 };
         float nikonD300[9] =
-        {9030, -1992, -715, -8465, 16302, 2255, -2689, 3217, 8069};
+        { 9030, -1992, -715, -8465, 16302, 2255, -2689, 3217, 8069 };
+        float powershots110[9] =
+        { 8039, -2643, -654, -3783, 11230, 2930, -206, 690, 4194 };
+        float identity[9] =
+        { 10000, 0, 0, 0, 10000, 0, 0, 0, 10000 };
 
         float mat[9];
 
-        if (ex_info.model == "EOS 350D DIGITAL")
+        if (ex_info.model == "Canon EOS 350D DIGITAL")
             getMatrix(canon350d, mat);
-        else if (ex_info.model == "PowerShot S30")
+        else if (ex_info.model == "Canon PowerShot S30")
             getMatrix(powershots30, mat);
-        else if (ex_info.model == "EOS 5D Mark II")
+        else if (ex_info.model == "Canon EOS 5D Mark II")
             getMatrix(canon5DMarkII, mat);
-        else if (ex_info.model == "EOS REBEL T3")
+        else if (ex_info.model == "Canon EOS REBEL T3")
             getMatrix(eos1100d, mat);
-        else if (ex_info.model == "D300")
+        else if (ex_info.model == "NIKON D300")
             getMatrix(nikonD300, mat);
+        else if (ex_info.model == "Canon PowerShot S110")
+            getMatrix(powershots110, mat);
         else
         {
             qDebug() << "Color conversion matrix for camera model" <<
-                    ex_info.model << "unavailable.";
-            getMatrix(canon5DMarkII, mat);
+                ex_info.model << "unavailable.";
+            getMatrix(identity, mat);
         }
+
+        qDebug () << "Using WB factors" << wbr << "," << wbg << "," << wbb;
 
         PipelineBuilder pb;
         pb.prepare();
@@ -424,8 +424,9 @@ QImage ImageFileLoader::rawThumb(const QString& path)
         pb.setDomain(bl, wp);
         pb.setColorConversion(mat);
         pb.setInput(rawh);
+        pb.setCFAStart(cfa_layout);
 
-        image = pb.execute( width, height);
+        image = pb.execute(width, height);
     }
     return image;
 }

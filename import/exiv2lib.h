@@ -8,25 +8,29 @@
 
 namespace PhotoStage
 {
-    class Exiv2Lib : public ExivFacade
-    {
-        public:
+class Exiv2Lib : public ExivFacade
+{
+    public:
 
-            Exiv2Lib();
+        Exiv2Lib();
 
-            void openFile(const QString& path);
-            ExifInfo data();
+        void openFile(const QString& path);
+        QImage getPreview();
+        ExifInfo data();
 
-        private:
+    private:
 
-            ExifInfo              mExifData;
+        ExifInfo              mExifInfo;
 
-            Exiv2::Image::AutoPtr mImageFile;
+        Exiv2::Image::AutoPtr mImageFile;
 
-            const QImage loadImage();
-            void setWhiteBalanceCoeffsCanon(Exiv2::ExifData& data, float wb[]);
-            void setWhiteBalanceCoeffsNikon(Exiv2::ExifData &data, float wb[]);
-    };
+        void setWhiteBalanceCoeffsCanon(Exiv2::ExifData& data, float wb[]);
+        void setWhiteBalanceCoeffsNikon(Exiv2::ExifData& data, float wb[]);
+        void readCanonNotes(Exiv2::ExifData& data);
+        void readNikonNotes(Exiv2::ExifData& data);
+        template<typename T>
+        T getExifValue(Exiv2::ExifData &data, QString key, T defValue);
+};
 }
 
 #endif // EXIV2_H

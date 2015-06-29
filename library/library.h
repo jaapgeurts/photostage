@@ -11,6 +11,7 @@
 #include "modules/collectionmodule.h"
 #include "modules/shortcutmodule.h"
 #include "modules/libraryhistogrammodule.h"
+#include "modules/metadatamodule.h"
 #include "widgets/fixedtreeview.h"
 
 namespace Ui
@@ -73,6 +74,7 @@ class Library : public Module
         SqlPathModel*           mPathModel;
         TaggingModule*          mKeywording;
         LibraryHistogramModule* mHistogramModule;
+        MetaDataModule*         mMetaDataModule;
         QFont                   mFontAccessFoundIcons;
         Photo*                  mCurrentPhoto;
         FixedTreeView*          mTrvwFiles;

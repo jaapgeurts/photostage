@@ -25,7 +25,9 @@ void PreviewFileLoader::run()
 
     exiv->openFile(mPath);
     qDebug() << "Reading image:" << mPath;
-    QImage pixmap = exiv->data().thumbnail;
+
+    QImage pixmap = exiv->getPreview();
+
 
     // if the image contained no thumbnail attempt to load it from disk directly
     if (pixmap.isNull())
