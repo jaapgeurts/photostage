@@ -14,8 +14,8 @@ namespace PhotoStage
 
             explicit DevelopModule(QWidget* parent = 0);
 
-            virtual void setPhoto(Photo* const photo);
-            const Photo* photo() const;
+            virtual void setPhoto(Photo photo);
+            const Photo photo() const;
 
         signals:
 
@@ -24,7 +24,7 @@ namespace PhotoStage
 
         protected:
 
-            Photo* mPhoto;
+            Photo mPhoto;
     };
 }
 #endif // DEVELOPMODULE_H

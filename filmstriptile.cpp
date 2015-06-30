@@ -45,19 +45,19 @@ void FilmstripTile::render(QPainter& painter,
         painter.drawLine(w - 1, 0, w - 1, h - 1);    // right side
         painter.drawLine(w - 1, h - 1, 0, h - 1);     // bottom side
 
-        Photo* info = data.value<Photo*>();
+        Photo info = data.value<Photo>();
 
         // draw the id text
         painter.save();
         painter.setPen(QColor(Qt::darkGray).lighter(110));
         painter.setFont(QFont(QString("Verdana"), 24, QFont::Bold));
         int fontHeight = painter.fontMetrics().height();
-        painter.drawText(5, fontHeight - 5, QString::number(info->id));
+        painter.drawText(5, fontHeight - 5, QString::number(info.id()));
 
         painter.restore();
 
         // draw the image.
-        QImage image = info->libraryPreviewsRGB();
+        QImage image = info.libraryPreviewsRGB();
         QRect  photoFinalDimension;
 
         if (!image.isNull())

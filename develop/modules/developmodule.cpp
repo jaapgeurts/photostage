@@ -6,12 +6,12 @@ DevelopModule::DevelopModule(QWidget* parent) : QWidget(parent)
 {
 }
 
-void DevelopModule::setPhoto(Photo* const photo)
+void DevelopModule::setPhoto(Photo photo)
 {
     mPhoto = photo;
 }
 
-const Photo* DevelopModule::photo() const
+const Photo DevelopModule::photo() const
 {
     return mPhoto;
 }

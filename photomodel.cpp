@@ -38,7 +38,6 @@ PhotoModel::PhotoModel(QObject* parent) :
 
 PhotoModel::~PhotoModel()
 {
-    qDeleteAll(mPhotoInfoList);
     mPhotoInfoList.clear();
 }
 
@@ -53,34 +52,34 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
         return QVariant();
     }
 
-    Photo* info;
+    Photo info;
 
     if (role == TileView::PhotoRole)
     {
         info = mPhotoInfoList.at(index.row());
 
-        if (info->libraryPreview().isNull())
+        if (info.libraryPreview().isNull())
         {
-            QString key = QString::number(info->id);
+            QString key = QString::number(info.id());
             QImage  img = mPreviewCache.get(key);
 
-            info->setLibraryPreview(img);
-            info->setOriginal(img);
+            info.setLibraryPreview(img);
+            info.setOriginal(img);
 
             if (img.isNull() && !mPhotoInfoMap.contains(index))
             {
                 // load image in background thread.
                 // add to thread queue so that only 1 instance of Halide runs
-                mLoader->addJob(index, info->srcImagePath());
+                mLoader->addJob(index, info.srcImagePath());
                 mPhotoInfoMap.insert(index, info);
             }
         }
 
-        return QVariant::fromValue<Photo*>(info);
+        return QVariant::fromValue<Photo>(info);
     }
     else if (role == Qt::DisplayRole)
     {
-        return QString(mPhotoInfoList.at(index.row())->srcImagePath());
+        return QString(mPhotoInfoList.at(index.row()).srcImagePath());
     }
     else
         return QVariant();
@@ -99,14 +98,14 @@ void PhotoModel::imageLoaded(const QVariant& ref, const QImage& image)
             PREVIEW_IMG_HEIGHT), Qt::KeepAspectRatio,
             Qt::SmoothTransformation);
 
-    Photo*  info = mPhotoInfoMap.value(index);
+    Photo  info = mPhotoInfoMap.value(index);
 
-    QString key = QString::number(info->id);
+    QString key = QString::number(info.id());
 
     mPreviewCache.put(key, preview);
 
     // TODO: original = null
-    info->setLibraryPreview(preview);
+    info.setLibraryPreview(preview);
     mPhotoInfoMap.remove(index);
 
     QVector<int> roles;
@@ -131,12 +130,12 @@ void PhotoModel::onReloadPhotos(PhotoModel::SourceType source,
     endResetModel();
 }
 
-bool PComp(const Photo* const& a, const Photo* const& b)
+bool PComp(const Photo & a, const Photo & b)
 {
-    return a->id < b->id;
+    return a.id() < b.id();
 }
 
-void PhotoModel::refreshData(const QList<Photo*>& list )
+void PhotoModel::refreshData(const QList<Photo>& list )
 {
     // for now just emit that all data has changed. the tileview doesnt check anyway
     emit dataChanged(index(0, 0), index(rowCount(QModelIndex()) - 1, 0));
@@ -147,9 +146,9 @@ void PhotoModel::addData(const QList<long long>& idList)
     // figure out what was changed, what is new and what has been added
     int           start = rowCount(QModelIndex());
 
-    QList<Photo*> list = mWorkUnit->getPhotosById(idList);
+    QList<Photo> list = mWorkUnit->getPhotosById(idList);
     beginInsertRows(QModelIndex(), start, list.size() - 1);
-    Photo*        info;
+    Photo        info;
     foreach(info, list)
     {
         mPhotoInfoList.append(info);

@@ -13,7 +13,7 @@ DevelopHistogramModule::DevelopHistogramModule(QWidget* parent) :
     layout()->addWidget(mHistogram);
 }
 
-void DevelopHistogramModule::setPhoto(Photo* const photo)
+void DevelopHistogramModule::setPhoto(Photo photo)
 {
     DevelopModule::setPhoto(photo);
 

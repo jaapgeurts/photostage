@@ -22,18 +22,18 @@ PhotoWorkUnit::PhotoWorkUnit()
 {
 }
 
-void PhotoWorkUnit::setRating(const QList<Photo*>& list, int rating)
+void PhotoWorkUnit::setRating(const QList<Photo>& list, int rating)
 {
     QSqlQuery q;
     QString   query = "update photo set rating=:rating where id in (:id)";
 
     QString   ids;
-    Photo*    info;
+    Photo    info;
 
     foreach(info, list)
     {
-        ids += QString::number(info->id) + ",";
-        info->setRating(rating);
+        ids += QString::number(info.id()) + ",";
+        info.setRating(rating);
     }
     ids.chop(1);
     query.replace(":id", ids);
@@ -42,18 +42,18 @@ void PhotoWorkUnit::setRating(const QList<Photo*>& list, int rating)
     q.exec();
 }
 
-void PhotoWorkUnit::setFlag(const QList<Photo*>& list, Photo::Flag flag)
+void PhotoWorkUnit::setFlag(const QList<Photo>& list, Photo::Flag flag)
 {
     QSqlQuery q;
     QString   query = ("update photo set flag=:flag where id in (:id)");
 
     QString   ids;
-    Photo*    info;
+    Photo    info;
 
     foreach(info, list)
     {
-        ids += QString::number(info->id) + ",";
-        info->setFlag(flag);
+        ids += QString::number(info.id()) + ",";
+        info.setFlag(flag);
     }
     ids.chop(1);
     query.replace(":id", ids);
@@ -62,19 +62,19 @@ void PhotoWorkUnit::setFlag(const QList<Photo*>& list, Photo::Flag flag)
     q.exec();
 }
 
-void PhotoWorkUnit::setColorLabel(const QList<Photo*>& list,
+void PhotoWorkUnit::setColorLabel(const QList<Photo> &list,
     Photo::ColorLabel color)
 {
     QSqlQuery q;
     QString   query = ("update photo set color=:color where id in (:id)");
 
     QString   ids;
-    Photo*    info;
+    Photo    info;
 
     foreach(info, list)
     {
-        ids += QString::number(info->id) + ",";
-        info->setColorLabel(color);
+        ids += QString::number(info.id()) + ",";
+        info.setColorLabel(color);
     }
     ids.chop(1);
     query.replace(":id", ids);
@@ -130,7 +130,7 @@ void PhotoWorkUnit::insertKeywords(const QStringList& words)
 }
 
 void PhotoWorkUnit::assignKeywords(const QStringList& words,
-    const QList<Photo*>& list)
+    const QList<Photo>& list)
 {
     QSqlQuery q;
     QString   word;
@@ -141,10 +141,10 @@ void PhotoWorkUnit::assignKeywords(const QStringList& words,
               select :photo_id, k.id \
               from keyword k \
               where k.keyword = :keyword");
-    Photo* info;
+    Photo info;
     foreach(info, list)
     {
-        q.bindValue(":photo_id", info->id);
+        q.bindValue(":photo_id", info.id());
         foreach(word, words)
         {
             q.bindValue(":keyword", word);
@@ -155,7 +155,7 @@ void PhotoWorkUnit::assignKeywords(const QStringList& words,
 }
 
 void PhotoWorkUnit::removeKeywordsExcept(const QStringList& words,
-    const QList<Photo*>& list)
+    const QList<Photo>& list)
 {
     QSqlQuery q;
 
@@ -165,12 +165,12 @@ void PhotoWorkUnit::removeKeywordsExcept(const QStringList& words,
             and keyword_id not in  \
             ( select id from keyword where keyword in (':keywords'))";
 
-    Photo*  info;
+    Photo  info;
     QString photo_id;
 
     foreach(info, list)
     {
-        photo_id += QString::number(info->id) + ",";
+        photo_id += QString::number(info.id()) + ",";
     }
     photo_id.chop(1);
     QString keywords = words.join("','");
@@ -186,7 +186,7 @@ void PhotoWorkUnit::removeKeywordsExcept(const QStringList& words,
 }
 
 QMap<QString,
-int> PhotoWorkUnit::getPhotoKeywords(const QList<Photo*>& list) const
+int> PhotoWorkUnit::getPhotoKeywords(const QList<Photo>& list) const
 {
     QSqlQuery q;
     QString   query =
@@ -195,10 +195,10 @@ int> PhotoWorkUnit::getPhotoKeywords(const QList<Photo*>& list) const
             where pk.photo_id in (:photo_ids) \
             group by k.keyword order by k.keyword ";
     QString   photo_ids;
-    Photo*    info;
+    Photo    info;
 
     foreach(info, list)
-    photo_ids += QString::number(info->id) + ",";
+    photo_ids += QString::number(info.id()) + ",";
     photo_ids.chop(1);
     query.replace(":photo_ids", photo_ids);
 
@@ -217,9 +217,9 @@ int> PhotoWorkUnit::getPhotoKeywords(const QList<Photo*>& list) const
     return dict;
 }
 
-QList<Photo*> PhotoWorkUnit::getPhotosById(QList<long long> idList)
+QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
 {
-    QList<Photo*> list;
+    QList<Photo> list;
 
     QSqlQuery     q;
     QString       query = QString(
@@ -251,17 +251,17 @@ QList<Photo*> PhotoWorkUnit::getPhotosById(QList<long long> idList)
     if (!q.exec())
         qDebug() << "SqlPhotoModel error" << q.lastError();
 
-    QList<Photo*> photoInfoList;
+    QList<Photo> photoInfoList;
 
     while (q.next())
     {
-        photoInfoList.append(new Photo(q));
+        photoInfoList.append(Photo(q));
     }
     return photoInfoList;
 }
 
 // TODO: make path_id work and option to include
-QList<Photo*> PhotoWorkUnit::getPhotosByPath(long long path_id,
+QList<Photo> PhotoWorkUnit::getPhotosByPath(long long path_id,
     bool includeSubDirs)
 {
     QSqlQuery q;
@@ -325,12 +325,11 @@ QList<Photo*> PhotoWorkUnit::getPhotosByPath(long long path_id,
 
     //qDebug() << q.lastQuery();
 
-    QList<Photo*> photoInfoList;
+    QList<Photo> photoInfoList;
 
     while (q.next())
     {
-        Photo* info = new Photo(q);
-        photoInfoList.append(info);
+        photoInfoList.append(Photo(q));
     }
     return photoInfoList;
 }

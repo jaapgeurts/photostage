@@ -51,19 +51,19 @@ void ImageDbTile::render(QPainter& painter,
         painter.drawLine(w - 1, 0, w - 1, h - 1);    // right side
         painter.drawLine(w - 1, h - 1, 0, h - 1);     // bottom side
 
-        Photo* info = data.value<Photo*>();
+        Photo info = data.value<Photo>();
 
         // draw the id text
         painter.save();
         painter.setPen(QColor(Qt::darkGray).lighter(110));
         painter.setFont(QFont(QString("Verdana"), 24, QFont::Bold));
         int fontHeight = painter.fontMetrics().height();
-        painter.drawText(5, fontHeight - 5, QString::number(info->id));
+        painter.drawText(5, fontHeight - 5, QString::number(info.id()));
 
         painter.restore();
 
         // draw the image.
-        QImage image = info->libraryPreviewsRGB();
+        QImage image = info.libraryPreviewsRGB();
         QRect  photoFinalDimension;
 
         if (!image.isNull())
@@ -83,16 +83,16 @@ void ImageDbTile::render(QPainter& painter,
             painter.drawRect(photoFinalDimension);
 
             // draw a flag over the image if one is set
-            if (info->flag() != Photo::FlagNone)
+            if (info.flag() != Photo::FlagNone)
             {
                 QPen pen;
                 painter.setFont(mFontGeneralFoundIcons);
 
-                if (info->flag() == Photo::FlagPick)
+                if (info.flag() == Photo::FlagPick)
                 {
                     pen.setColor(Qt::white);
                 }
-                else if (info->flag() == Photo::FlagReject)
+                else if (info.flag() == Photo::FlagReject)
                 {
                     pen.setColor(Qt::black);
                 }
@@ -103,11 +103,11 @@ void ImageDbTile::render(QPainter& painter,
             }
 
             // draw the color label
-            if (info->colorLabel() != Photo::LabelNoColor)
+            if (info.colorLabel() != Photo::LabelNoColor)
             {
                 QColor color;
 
-                switch (info->colorLabel())
+                switch (info.colorLabel())
                 {
                     case Photo::LabelBlue:
                         color = QColor(Qt::blue);
@@ -172,7 +172,7 @@ void ImageDbTile::render(QPainter& painter,
         QFont   font = painter.font();
         font.setPointSize(12);
         painter.setFont(font);
-        rating.fill(QChar(CHAR_STAR), info->rating());
+        rating.fill(QChar(CHAR_STAR), info.rating());
         painter.setPen(QColor(Qt::black));
         painter.drawText(30, h - 1 - 10, rating);
 
@@ -184,7 +184,7 @@ void ImageDbTile::render(QPainter& painter,
             painter.drawText(30,h-1-10,rating);
            }
          */
-        if (info->flag() == Photo::FlagReject &&
+        if (info.flag() == Photo::FlagReject &&
             !(tileInfo.tileState & TileInfo::TileStateSelected))
         {
             painter.fillRect(0, 0, w, h, QBrush(QColor(0, 0, 0, 80)));

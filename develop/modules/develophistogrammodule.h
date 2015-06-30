@@ -14,7 +14,7 @@ namespace PhotoStage
 
             DevelopHistogramModule(QWidget* parent = 0);
 
-            void setPhoto(Photo* const photo);
+            void setPhoto(Photo photo);
 
         public slots:
 

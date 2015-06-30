@@ -33,7 +33,7 @@ namespace PhotoStage
 
         public slots:
 
-            void setPhoto(Photo* photo);
+            void setPhoto(Photo photo);
 
         protected:
 
@@ -47,7 +47,7 @@ namespace PhotoStage
 
         private:
 
-            Photo*   mPhoto;
+            Photo   mPhoto;
             bool     mPanning;
             QPoint   mMousePressLocation;
             QPoint   mPhotoTopLeft;

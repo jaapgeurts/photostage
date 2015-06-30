@@ -549,28 +549,28 @@ void MainWindow::updateInformationBar()
     int     selCount = mPhotoSelection->selectedIndexes().size();
 
     QString imagePath;
-    Photo*  photo = currentPhoto();
+    Photo  photo = currentPhoto();
 
-    if (photo != NULL)
-        imagePath = " " + photo->srcImagePath();
+    if (!photo .isNull())
+        imagePath = " " + photo.srcImagePath();
     ui->lblInformation->setText(QString::number(
             selCount) + "/" + QString::number(count) + imagePath);
 }
 
-Photo* MainWindow::currentPhoto()
+Photo MainWindow::currentPhoto()
 {
     return mPhotoModel->data(
         mPhotoSelection->currentIndex(),
-        TileView::PhotoRole).value<Photo*>();
+        TileView::PhotoRole).value<Photo>();
 }
 
 void MainWindow::setRating(int rating)
 {
-    QList<Photo*>   list;
+    QList<Photo>   list;
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
     list.append(mPhotoModel->data(index,
-        TileView::PhotoRole).value<Photo*>());
+        TileView::PhotoRole).value<Photo>());
     mPhotoWorkUnit->setRating(list, rating);
     QVector<int> roles;
     roles.append(TileView::PhotoRole);
@@ -579,11 +579,11 @@ void MainWindow::setRating(int rating)
 
 void MainWindow::setFlag(Photo::Flag flag)
 {
-    QList<Photo*>   list;
+    QList<Photo>   list;
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
     list.append(mPhotoModel->data(index,
-        TileView::PhotoRole).value<Photo*>());
+        TileView::PhotoRole).value<Photo>());
 
     mPhotoWorkUnit->setFlag(list, flag);
     QVector<int> roles;
@@ -593,11 +593,11 @@ void MainWindow::setFlag(Photo::Flag flag)
 
 void MainWindow::setColorLabel(Photo::ColorLabel color)
 {
-    QList<Photo*>   list;
+    QList<Photo>   list;
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
     list.append(mPhotoModel->data(index,
-        TileView::PhotoRole).value<Photo*>());
+        TileView::PhotoRole).value<Photo>());
 
     mPhotoWorkUnit->setColorLabel(list, color);
     QVector<int> roles;

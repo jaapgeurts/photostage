@@ -82,7 +82,8 @@ SOURCES += \
     workunits/photoworkunit.cpp \
     engine/platform.cpp \
     widgets/actionstategroup.cpp \
-    library/modules/metadatamodule.cpp
+    library/modules/metadatamodule.cpp \
+    photodata.cpp
 
     #processing/amaze_demosaic_RT.c
 

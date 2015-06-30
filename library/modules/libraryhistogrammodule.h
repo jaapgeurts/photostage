@@ -14,7 +14,7 @@ namespace PhotoStage
 
             LibraryHistogramModule(QWidget* parent);
 
-            void setPhotos(const QList<Photo*>& list);
+            void setPhotos(const QList<Photo>& list);
 
         private:
 

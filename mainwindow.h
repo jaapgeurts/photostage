@@ -111,13 +111,13 @@ class MainWindow : public QMainWindow
         QItemSelectionModel*   mPhotoSelection;
         ActionStateGroup       mActionStatePhoto;
 
-        //    QList<Photo*> mCurrentSelection;
+        //    QList<Photo> mCurrentSelection;
         void setRating(int rating);
         void setColorLabel(Photo::ColorLabel color);
         void setFlag(Photo::Flag flag);
         void updateInformationBar();
 
-        Photo* currentPhoto();
+        Photo currentPhoto();
         void setPhotoActionsAvailability(bool enabled);
 };
 }

@@ -9,7 +9,6 @@ namespace PhotoStage
 {
 LoupeView::LoupeView(QWidget* parent)
     : QWidget(parent),
-    mPhoto(NULL),
     mPanning(false),
     mPhotoTopLeft(0, 0),
     mZoomMode(ZoomFit)
@@ -35,7 +34,7 @@ void LoupeView::setZoomMode(LoupeView::ZoomMode zoomMode)
     update();
 }
 
-void LoupeView::setPhoto(Photo* photo)
+void LoupeView::setPhoto(Photo photo)
 {
     mPhoto = photo;
     ensureBestPosition();
@@ -46,18 +45,18 @@ void LoupeView::paintEvent(QPaintEvent* event)
 {
     QPainter painter(this);
 
-    if (mPhoto == NULL)
+    if (mPhoto.isNull())
         return;
 
     //    painter.fillRect(QRect(0,0,width(),height()),mCheckeredBrush);
     painter.fillRect(QRect(0, 0, width(), height()), Qt::darkGray);
 
     // TODO: should convert to the monitor profile here.
-    QImage img = mPhoto->libraryPreviewsRGB();
+    QImage img = mPhoto.libraryPreviewsRGB();
     QRect  rect;
     float  zoomFitScale = 0.9;
 
-    if (mPhoto != NULL && !img.isNull())
+    if (!img.isNull())
     {
         switch (mZoomMode)
         {
@@ -171,8 +170,8 @@ void LoupeView::ensureBestPosition()
     if (mPhotoTopLeft.y() > 0)
         mPhotoTopLeft.setY(0);
 
-    int hiddenx = width() - mPhoto->libraryPreviewsRGB().width();
-    int hiddeny = height() - mPhoto->libraryPreviewsRGB().height();
+    int hiddenx = width() - mPhoto.libraryPreviewsRGB().width();
+    int hiddeny = height() - mPhoto.libraryPreviewsRGB().height();
 
     if (mPhotoTopLeft.x() < hiddenx)
         mPhotoTopLeft.setX(hiddenx);

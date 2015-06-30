@@ -1,30 +1,55 @@
-#ifndef PHOTODATA
-#define PHOTODATA
-#include <cstdint>
-#include <QSize>
-#include <QSharedPointer>
-#define NUM_CHANNELS (3)
+#ifndef PHOTODATA_H
+#define PHOTODATA_H
+
+#include <QImage>
+#include "photo.h"
+
+namespace PhotoStage
+{
 class PhotoData
 {
     public:
 
+        // Constructors
         PhotoData();
-        explicit PhotoData(const int w, const int h);
-        explicit PhotoData(const QSize& size);
-        ~PhotoData();
-        uint16_t* data();
-        const uint16_t* constData() const;
-        uint16_t* scanLine(int i);
-        int width() const;
-        int height() const;
-        int length() const;
-        PhotoData& operator=(const PhotoData& other);
+        PhotoData(const Photo& info);
+        PhotoData(const QImage& image, const QString& filename, long long mId);
+        PhotoData(QSqlQuery& query);
+        virtual ~PhotoData();
+
+        // getters & setters
+        void setOriginal(const QImage& image);
+        const QImage& original() const;
+        void setLibraryPreview(const QImage& image);
+        const QImage& libraryPreview() const;
+        const QImage& libraryPreviewsRGB();
+
+        void setSrcImagePath(const QString& path);
+        const QString& srcImagePath() const;
+
+        void setRating(int rating);
+        int rating() const;
+
+        void setColorLabel(Photo::ColorLabel label);
+        Photo::ColorLabel colorLabel() const;
+
+        void setFlag(Photo::Flag flag);
+        Photo::Flag flag() const;
+
+        long long id() const;
 
     private:
 
-        QSharedPointer<uint16_t> mData;
-        int                      mWidth;
-        int                      mHeight;
-};
+        long long         mId;
 
-#endif // PHOTODATA
+        int               mRating;
+        Photo::ColorLabel mColorLabel;
+        Photo::Flag       mFlag;
+        QImage            mLibraryPreview;
+        QImage            mLibraryPreviewsRGB;
+        QImage            mOriginal;
+        QString           mSrcImagePath;
+};
+}
+
+#endif // PHOTODATA_H

@@ -40,7 +40,7 @@ class Library : public Module
 
     signals:
 
-        void photoSelectionChanged(const QList<Photo*>& list);
+        void photoSelectionChanged(const QList<Photo>& list);
         void photoSourceChanged(PhotoModel::SourceType type, long long id);
 
     public slots:
@@ -76,7 +76,7 @@ class Library : public Module
         LibraryHistogramModule* mHistogramModule;
         MetaDataModule*         mMetaDataModule;
         QFont                   mFontAccessFoundIcons;
-        Photo*                  mCurrentPhoto;
+        Photo                  mCurrentPhoto;
         FixedTreeView*          mTrvwFiles;
 };
 }

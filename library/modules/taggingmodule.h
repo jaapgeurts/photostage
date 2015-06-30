@@ -17,7 +17,7 @@ namespace PhotoStage
 
             explicit TaggingModule(QWidget* parent = 0);
 
-            void setPhotos(const QList<Photo*>& list);
+            void setPhotos(const QList<Photo>& list);
 
             bool eventFilter(QObject* object, QEvent* event);
 

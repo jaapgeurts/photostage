@@ -70,13 +70,8 @@ QRect Develop::lightGap()
     // TODO: implement this
 }
 
-void Develop::setPhoto(Photo* photo)
+void Develop::setPhoto(Photo photo)
 {
-    if (photo == NULL)
-    {
-        qDebug() << "Develop::setPhoto(Photo*) called with NULL argument";
-        return;
-    }
     // determine visibility
 
     mPhoto = photo;
@@ -105,7 +100,7 @@ void Develop::showEvent(QShowEvent*)
     }
 }
 
-void Develop::doSetPhoto(Photo* photo)
+void Develop::doSetPhoto(Photo photo)
 {
     ui->developView->setPhoto(photo);
     mHistogramModule->setPhoto(photo);

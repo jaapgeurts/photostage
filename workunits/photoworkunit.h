@@ -14,26 +14,26 @@ namespace PhotoStage
         public:
 
             static PhotoWorkUnit* instance();
-            void setRating(const QList<Photo*>& list, int rating);
-            void setFlag(const QList<Photo*>& list, Photo::Flag flag);
-            void setColorLabel(const QList<Photo*>& list,
+            void setRating(const QList<Photo> &list, int rating);
+            void setFlag(const QList<Photo>& list, Photo::Flag flag);
+            void setColorLabel(const QList<Photo>& list,
                 Photo::ColorLabel color);
 
             void insertKeywords(const QStringList& words);
             void assignKeywords(const QStringList& words,
-                const QList<Photo*>& list);
+                const QList<Photo>& list);
             void removeKeywordsExcept(const QStringList& words,
-                const QList<Photo*>& list);
+                const QList<Photo>& list);
 
             QMap<QString,
-            int> getPhotoKeywords(const QList<Photo*>& list) const;
+            int> getPhotoKeywords(const QList<Photo>& list) const;
 
             // Photo Items are created here.
             // ownership is transferred to the caller who should call delete on the objects
-            QList<Photo*> getPhotosByPath(long long path_id,
+            QList<Photo> getPhotosByPath(long long path_id,
                 bool includeSubDirs = true);
 
-            QList<Photo*> getPhotosById(QList<long long> idList);
+            QList<Photo> getPhotosById(QList<long long> idList);
 
         protected:
 

@@ -1,13 +1,13 @@
-#include <QDir>
 #include <QDebug>
 
 #include "photo.h"
+#include "photodata.h"
 
 namespace PhotoStage
 {
-Photo::Photo() :
-    mLibraryPreviewsRGB()
+Photo::Photo()
 {
+
 }
 
 Photo::Photo(const Photo& info)
@@ -15,116 +15,89 @@ Photo::Photo(const Photo& info)
     *this = info;
 }
 
-Photo::Photo(const QImage& image, const QString& filename, long long id) :
-    mLibraryPreviewsRGB(),
-    mLibraryPreview(image),
-    mSrcImagePath(filename),
-    id(id)
+Photo::Photo(const QImage& image, const QString& filename, long long id)
 {
+    d = QSharedPointer<PhotoData>(new PhotoData(image, filename, id));
 }
 
-Photo::Photo(QSqlQuery& q) :
-    mLibraryPreviewsRGB()
+Photo::Photo(QSqlQuery& q)
 {
-    id = q.value(0).toInt();
-    QString filename = q.value(1).toString();
-    QString path     = q.value(2).toString();
-    mSrcImagePath = path + QDir::separator() + filename;
-
-    if (q.value(3).isNull())
-        setRating(0);
-    else
-        setRating(q.value(3).toInt());
-    setColorLabel((Photo::ColorLabel)q.value(4).toInt());
-    setFlag((Photo::Flag)q.value(5).toInt());
+    d = QSharedPointer<PhotoData>(new PhotoData(q));
 }
 
-Photo::~Photo()
+long long Photo::id() const
 {
+    return d->id();
 }
 
-void Photo::setOriginal(const QImage& image)
+void Photo::setOriginal(const QImage &image)
 {
-    mOriginal = image;
+    d->setOriginal(image);
 }
 
-const QImage& Photo::original() const
+const QImage &Photo::original() const
 {
-    return mOriginal;
+    return d->original();
 }
 
-void Photo::setLibraryPreview(const QImage& image)
+void Photo::setLibraryPreview(const QImage &image)
 {
-    mLibraryPreview = image;
-    // force regeneration of the display image
-    mLibraryPreviewsRGB = QImage();
+    d->setLibraryPreview(image);
 }
 
-const QImage& Photo::libraryPreview()
+const QImage &Photo::libraryPreview() const
 {
-    return mLibraryPreview;
+    return d->libraryPreview();
 }
 
-const QImage& Photo::libraryPreviewsRGB()
+const QImage &Photo::libraryPreviewsRGB() const
 {
-    if (mLibraryPreviewsRGB.isNull())
-    {
-        // run this in a thread so the UI is fast.
-
-        // convert the image to sRGB
-        //qDebug() << "Converting image to RGB";
-        ColorTransform transform = ColorTransform::getTransform(
-            WORKING_COLOR_SPACE,
-            ColorTransform::getMonitorProfilePath(),
-            ColorTransform::FORMAT_RGB32,
-            ColorTransform::FORMAT_RGB32);
-        mLibraryPreviewsRGB = transform.transformQImage(mLibraryPreview);
-    }
-    return mLibraryPreviewsRGB;
+    return d->libraryPreviewsRGB();
 }
 
-void Photo::setSrcImagePath(const QString& path)
+void Photo::setSrcImagePath(const QString &path)
 {
-    mSrcImagePath = path;
+    d->setSrcImagePath(path);
 }
 
-const QString& Photo::srcImagePath()
+const QString &Photo::srcImagePath() const
 {
-    return mSrcImagePath;
+    return d->srcImagePath();
 }
 
 void Photo::setRating(int rating)
 {
-    if (rating < 0 || rating > 5)
-    {
-        qDebug() << "Invalid rating:" << rating;
-        return;
-    }
-    mRating = rating;
+    d->setRating(rating);
 }
 
-int Photo::rating()
+int Photo::rating() const
 {
-    return mRating;
+    return d->rating();
 }
 
-void Photo::setColorLabel(Photo::ColorLabel label)
+void Photo::setColorLabel(ColorLabel label)
 {
-    mColorLabel = label;
+    d->setColorLabel(label);
 }
 
-Photo::ColorLabel Photo::colorLabel()
+Photo::ColorLabel Photo::colorLabel() const
 {
-    return mColorLabel;
+    return d->colorLabel();
 }
 
-void Photo::setFlag(Photo::Flag flag)
+void Photo::setFlag(Flag flag)
 {
-    mFlag = flag;
+    d->setFlag(flag);
 }
 
-Photo::Flag Photo::flag()
+Photo::Flag Photo::flag() const
 {
-    return mFlag;
+    return d->flag();
 }
+
+bool Photo::isNull() const
+{
+    return d.isNull();
+}
+
 }

@@ -1,16 +1,16 @@
-#ifndef PHOTO
-#define PHOTO
+#ifndef PHOTO_H
+#define PHOTO_H
 
 #include <QString>
 #include <QMetaType>
 #include <QSqlQuery>
-
-#include "image.h"
-
-#include "engine/colortransform.h"
+#include <QSharedPointer>
 
 namespace PhotoStage
 {
+
+class PhotoData;
+
 class Photo
 {
     public:
@@ -33,48 +33,39 @@ class Photo
             FlagReject = 2
         };
 
-        // Constructors
         Photo();
         Photo(const Photo& info);
         Photo(const QImage& image, const QString& filename, long long id);
         Photo(QSqlQuery& query);
-        virtual ~Photo();
+
+        long long id() const;
 
         // getters & setters
         void setOriginal(const QImage& image);
         const QImage& original() const;
         void setLibraryPreview(const QImage& image);
-        const QImage& libraryPreview();
-        const QImage& libraryPreviewsRGB();
+        const QImage& libraryPreview() const;
+        const QImage& libraryPreviewsRGB() const;
 
         void setSrcImagePath(const QString& path);
-        const QString& srcImagePath();
+        const QString& srcImagePath() const;
 
         void setRating(int rating);
-        int rating();
+        int rating() const;
 
         void setColorLabel(ColorLabel label);
-        ColorLabel colorLabel();
+        ColorLabel colorLabel() const;
 
         void setFlag(Flag flag);
-        Flag flag();
+        Flag flag() const;
 
-    public:
-
-        long long id;
+        bool isNull() const;
 
     private:
 
-        int        mRating;
-        ColorLabel mColorLabel;
-        Flag       mFlag;
-        QImage     mLibraryPreview;
-        QImage     mLibraryPreviewsRGB;
-        QImage     mOriginal;
-        QString    mSrcImagePath;
+        QSharedPointer<PhotoData> d;
 };
 }
 Q_DECLARE_METATYPE(PhotoStage::Photo)
-Q_DECLARE_METATYPE(PhotoStage::Photo*)
 
 #endif // PHOTO

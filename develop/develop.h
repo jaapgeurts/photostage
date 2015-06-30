@@ -25,7 +25,7 @@ namespace PhotoStage
 
             QRect lightGap();
 
-            void setPhoto(Photo* photo);
+            void setPhoto(Photo photo);
 
         public slots:
 
@@ -41,12 +41,12 @@ namespace PhotoStage
             DevelopHistogramModule* mHistogramModule;
             RawModule*              mRawModule;
             BasicModule*            mBasicModule;
-            Photo*                  mPhoto;
+            Photo                  mPhoto;
             bool                    mLoadPhoto;
 
             // QWidget interface
 
-            void doSetPhoto(Photo* photo);
+            void doSetPhoto(Photo photo);
     };
 }
 

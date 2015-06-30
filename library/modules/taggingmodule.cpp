@@ -102,7 +102,7 @@ void TaggingModule::keywordsChanged()
     workUnit->assignKeywords(wordList, mPhotoInfoList);
 }
 
-void TaggingModule::setPhotos(const QList<Photo*>& list)
+void TaggingModule::setPhotos(const QList<Photo>& list)
 {
     LibraryModule::setPhotos(list);
     PhotoWorkUnit* workUnit = PhotoWorkUnit::instance();

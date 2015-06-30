@@ -158,11 +158,6 @@ void BasicModule::onExposureChanged(int value)
 {
     qDebug() << "exposure value" << value;
 
-    if (mPhoto == NULL)
-    {
-        qDebug() << "Photo is NULL";
-        return;
-    }
 
     //    Image img = mPhoto->original().clone();
 

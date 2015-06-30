@@ -14,8 +14,7 @@ namespace PhotoStage
 Library::Library(PhotoModel* const model, QWidget* parent) :
     Module(parent),
     ui(new Ui::Library),
-    mFontAccessFoundIcons(QFont("Accessibility Foundicons", 15)),
-    mCurrentPhoto(NULL)
+    mFontAccessFoundIcons(QFont("Accessibility Foundicons", 15))
 {
     mPhotoModel = model;
 
@@ -196,7 +195,7 @@ void Library::customContextMenu(const QPoint& pos)
 {
     //QModelIndex index = ui->mClvPhotos->posToModelIndex(pos);
     // check if there is a single selection or a list.
-    //    Photo* info = mPhotoModel->data(index,TileView::PhotoRole).value<Photo*>();
+    //    Photo info = mPhotoModel->data(index,TileView::PhotoRole).value<Photo>();
 
     // TODO: FIXME: fix popup
     //    QMenu *m = ui->menuPhoto;
@@ -240,10 +239,10 @@ void Library::thumbSizeChanged(int newValue)
 void Library::onPhotoSelectionChanged(const QItemSelection& selected,
     const QItemSelection& /*deselected*/)
 {
-    QList<Photo*> photos;
+    QList<Photo> photos;
     foreach (QModelIndex index, selected.indexes())
     photos.append(mPhotoModel->data(index,
-        TileView::PhotoRole).value<Photo*>());
+        TileView::PhotoRole).value<Photo>());
 
     mKeywording->setPhotos(photos);
     mHistogramModule->setPhotos(photos);
@@ -269,7 +268,7 @@ void Library::onTileDoubleClicked(const QModelIndex& index)
 
 void Library::showLoupe()
 {
-    if (mCurrentPhoto != NULL)
+    if (!mCurrentPhoto.isNull())
     {
         ui->mLoupeView->setPhoto(mCurrentPhoto);
         ui->StackedWidget_1->setCurrentWidget(ui->mLoupeScrollView);

@@ -42,7 +42,7 @@ class PhotoModel : public QAbstractListModel
            bool insertRows(int row, int count, const QModelIndex &parent);
            bool removeRows(int row, int count, const QModelIndex &parent);
          */
-        void refreshData(const QList<Photo*>&);
+        void refreshData(const QList<Photo>&);
         void addData(const QList<long long>& idList);
 
     public slots:
@@ -59,9 +59,9 @@ class PhotoModel : public QAbstractListModel
         ImageFileLoader* mLoader;
         // The mPhotoInfoList is the main container for the Photo Objects.
         // Delete is required on it's contents
-        QList<Photo*>                      mPhotoInfoList;
-        mutable QHash<QModelIndex, Photo*> mPhotoInfoMap;
-        mutable PreviewCache               mPreviewCache;
+        QList<Photo>                      mPhotoInfoList;
+        mutable QHash<QModelIndex, Photo> mPhotoInfoMap;
+        mutable PreviewCache              mPreviewCache;
 };
 }
 
