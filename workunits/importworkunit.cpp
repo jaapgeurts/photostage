@@ -4,6 +4,8 @@
 #include <QSqlQuery>
 
 #include "importworkunit.h"
+#include "import/exivfacade.h"
+#include "previewcache.h"
 
 namespace PhotoStage
 {
@@ -81,23 +83,63 @@ long long ImportWorkUnit::importPhoto(const QFileInfo& file,
         mLastkey = createPaths(pathlist);
     }
 
-    //(id integer primary key AUTOINCREMENT, path integer,
-    // filename varchar, iso integer, shutter_speed float,
-    // float focal_length, datetime_taken text, hash varchar,
-    // rating integer, color integer, flag integer"));
+    // read all exif data.
+    ExivFacade* ex = ExivFacade::createExivReader();
+
+    ExifInfo    ei;
+
+    if (!ex->openFile(srcpath))
+    {
+        qDebug() << "Skipping exif info";
+    }
+    else
+    {
+        ei = ex->data();
+    }
+    delete(ex);
+
     QSqlQuery q;
     q.prepare(
-        "insert into photo (path_id,filename) values (:path, :filename)");
+        "insert into photo (path_id,filename, iso, exposure_time, \
+        focal_length, datetime_original, datetime_digitized, rotation, \
+        longitude, lattitude, copyright, artist, aperture, flash, lens_name,  \
+        make, model ) \
+        values (:path, :filename,:iso,:exposure_time,:focal_length,\
+            :datetime_original,:datetime_digitized,:rotation,:longitude, \
+            :lattitude,:copyright,:artist,:aperture,:flash,:lens_name, \
+            :make, :model)");
     q.bindValue(":path", mLastkey);
     q.bindValue(":filename", fileName);
+    q.bindValue(":iso", ei.isoSpeed);
+    q.bindValue(":exposure_time", ei.exposureTime);
+    q.bindValue(":focal_length", ei.focalLength);
+    q.bindValue(":datetime_original", ei.dateTimeOriginal);
+    q.bindValue(":datetime_digitized", ei.dateTimeDigitized);
+    q.bindValue(":rotation", ei.rotation);
+    q.bindValue(":longitude", ei.location.longitude());
+    q.bindValue(":lattitude", ei.location.latitude());
+    q.bindValue(":copyright", ei.copyright);
+    q.bindValue(":artist", ei.artist);
+    q.bindValue(":aperture", ei.aperture);
+    q.bindValue(":flash", ei.flash);
+    q.bindValue(":lens_name", ei.lensName);
+    q.bindValue(":make", ei.make);
+    q.bindValue(":model", ei.model);
 
     if (!q.exec())
+    {
         qDebug() << "Can't insert" << fileName << "into DB";
+        qDebug() << q.lastError();
+    }
     else
+    {
         ret = q.lastInsertId().toLongLong();
+        PreviewCache::globalCache()->remove(QString::number(ret));
+    }
 
 #ifdef QT_DEBUG
     // simulate that each import takes 1 s
+    // FIXIT: remove me
     QThread::sleep(1);
 #endif
 

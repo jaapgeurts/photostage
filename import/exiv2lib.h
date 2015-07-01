@@ -14,7 +14,7 @@ class Exiv2Lib : public ExivFacade
 
         Exiv2Lib();
 
-        void openFile(const QString& path);
+        bool openFile(const QString& path);
         QImage getPreview();
         ExifInfo data();
 

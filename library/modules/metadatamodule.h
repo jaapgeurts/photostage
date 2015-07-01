@@ -20,6 +20,13 @@ class MetaDataModule : public LibraryModule
 
         MetaDataModule(QWidget* parent = 0);
 
+        // LibraryModule interface
+        void setPhotos(const QList<Photo>& list);
+
+    public slots:
+
+        void setMetaData(const Photo& p);
+
     private:
 
         Ui::MetaDataModule* ui;

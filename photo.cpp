@@ -65,6 +65,16 @@ const QString &Photo::srcImagePath() const
     return d->srcImagePath();
 }
 
+void Photo::setExifInfo(const ExifInfo &exifInfo)
+{
+    d->setExifInfo(exifInfo);
+}
+
+const ExifInfo &Photo::exifInfo() const
+{
+    return d->exifInfo();
+}
+
 void Photo::setRating(int rating)
 {
     d->setRating(rating);

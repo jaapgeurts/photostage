@@ -27,6 +27,9 @@ class PhotoData
         void setSrcImagePath(const QString& path);
         const QString& srcImagePath() const;
 
+        void setExifInfo(const ExifInfo& exifInfo);
+        const ExifInfo& exifInfo() const;
+
         void setRating(int rating);
         int rating() const;
 
@@ -49,6 +52,7 @@ class PhotoData
         QImage            mLibraryPreviewsRGB;
         QImage            mOriginal;
         QString           mSrcImagePath;
+        ExifInfo          mExifInfo;
 };
 }
 

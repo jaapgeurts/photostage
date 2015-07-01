@@ -48,9 +48,7 @@ TileView::TileView(QWidget* parent) : QWidget(parent)
 
     //    mLastSelection = QModelIndex();
 
-    connect(mScrollBar,
-        &QScrollBar::valueChanged,
-        this,
+    connect(mScrollBar, &QScrollBar::valueChanged, this,
         &TileView::sliderValueChanged);
 
     setMouseTracking(true);
@@ -441,6 +439,7 @@ void TileView::wheelEvent(QWheelEvent* event)
     QPoint deltaP = event->pixelDelta();
     int    delta  = -deltaP.y();
 
+
     //    int steps = delta / 8 / 15;
     if (event->orientation() == Qt::Vertical)
     {
@@ -458,6 +457,7 @@ void TileView::wheelEvent(QWheelEvent* event)
 void TileView::mouseDoubleClickEvent(QMouseEvent* event)
 {
     int idx = posToIndex(event->pos());
+
 
     if (idx == -1)
         return;
@@ -481,6 +481,7 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
     QPoint pos = event->pos();
 
     int    idx = posToIndex(pos);
+
 
     if (idx == -1)
         return;
@@ -512,22 +513,38 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
                 if (mCheckedList->contains(index))
                 {
                     if (mSelectionModel->isSelected(index))
+                    {
+                        qDebug() << "indexes:" <<
+                                mSelectionModel->selectedIndexes().size();
                         foreach(QModelIndex idx,
-                            mSelectionModel->selectedRows())
+                            mSelectionModel->selectedIndexes())
+                        {
                             mCheckedList->removeAll(idx);
+                        }
+                    }
                     else
+                    {
                         mCheckedList->removeAll(index);
+                    }
                 }
                 else
                 {
                     if (mSelectionModel->isSelected(index))
+                    {
+                        qDebug() << "indexes:" <<
+                                mSelectionModel->selectedIndexes().size();
                         foreach(QModelIndex idx,
-                            mSelectionModel->selectedRows())
+                            mSelectionModel->selectedIndexes())
+                        {
                             mCheckedList->append(idx);
-
+                        }
+                    }
                     else
+                    {
                         mCheckedList->append(index);
+                    }
                 }
+                emit checkedItemsChanged();
             }
             else
             {
@@ -579,7 +596,7 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
                 {
                     //  qDebug() << "Control/Command";
                     mSelectionModel->setCurrentIndex(index,
-                        QItemSelectionModel::SelectCurrent);
+                        QItemSelectionModel::Select);
                 }
                 //                emit selectionChanged();
             }
@@ -599,6 +616,7 @@ void TileView::mouseMoveEvent(QMouseEvent* event)
             event->buttons(), event->modifiers());
 
     int index = posToIndex(pos);
+
 
     if (index == -1)
         return;
@@ -731,6 +749,7 @@ TileInfo TileView::createTileInfo(int index)
 {
     TileInfo info;
 
+
     info.index = -1;
 
     if (index != -1)
@@ -758,6 +777,7 @@ bool TileView::pointInCheckBox(const QPoint& coords) const
 {
     QPoint rel = mapToTile(coords);
 
+
     // check if the coords fall within the checkbox.
     return (rel.x() - 5 < 20 && rel.y() - 5 < 20);
 }
@@ -766,6 +786,7 @@ QPoint TileView::mapToTile(const QPoint& coords) const
 {
     // part of row out of viewport
     int rely, relx;
+
 
     if (mOrientation == Qt::Vertical)
     {
@@ -895,6 +916,7 @@ void TileView::onSelectionChanged(const QItemSelection& /*selected*/,
     const QItemSelection& /*deselected*/)
 {
     int newIndex = mSelectionModel->currentIndex().row();
+
 
     ensureTileVisible(newIndex);
 

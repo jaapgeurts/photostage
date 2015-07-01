@@ -1,6 +1,5 @@
 #include <QImage>
 #include <QDir>
-#include <QStandardPaths>
 #include <QDebug>
 
 #include "constants.h"
@@ -10,9 +9,7 @@
 namespace PhotoStage
 {
 PhotoModel::PhotoModel(QObject* parent) :
-    QAbstractListModel(parent),
-    mPreviewCache(QStandardPaths::writableLocation(
-            QStandardPaths::CacheLocation), parent)
+    QAbstractListModel(parent)
 {
     //
     // create table photo (
@@ -29,6 +26,8 @@ PhotoModel::PhotoModel(QObject* parent) :
     //            flag integer)")))
 
     mWorkUnit = PhotoWorkUnit::instance();
+
+    mPreviewCache = PreviewCache::globalCache();
 
     mLoader = ImageFileLoader::getLoader();
     connect(mLoader, &ImageFileLoader::dataReady, this,
@@ -61,7 +60,7 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
         if (info.libraryPreview().isNull())
         {
             QString key = QString::number(info.id());
-            QImage  img = mPreviewCache.get(key);
+            QImage  img = mPreviewCache->get(key);
 
             info.setLibraryPreview(img);
             info.setOriginal(img);
@@ -102,7 +101,7 @@ void PhotoModel::imageLoaded(const QVariant& ref, const QImage& image)
 
     QString key = QString::number(info.id());
 
-    mPreviewCache.put(key, preview);
+    mPreviewCache->put(key, preview);
 
     // TODO: original = null
     info.setLibraryPreview(preview);

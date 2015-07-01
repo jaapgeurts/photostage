@@ -44,7 +44,7 @@ void DatabaseAccess::initDb()
     list <<
         "create table if not exists path (id integer primary key AUTOINCREMENT, directory varchar, parent_id integer)";
     list <<
-        "create table if not exists photo (id integer primary key AUTOINCREMENT, path_id integer, filename varchar, iso integer, shutter_speed float, float focal_length, datetime_taken text, hash varchar, rating integer, color integer, flag integer)";
+        "CREATE TABLE if not exists photo(id integer PRIMARY KEY AUTOINCREMENT, path_id integer, filename TEXT, iso integer, exposure_time float, focal_length float, datetime_original TEXT, photo_hash TEXT, rating integer, color integer, flag integer, rotation INTEGER, longitude float, lattitude float, datetime_digitized TEXT, copyright TEXT, artist TEXT, aperture float, flash BOOLEAN, lens_name TEXT, make TEXT, model TEXT);";
     list <<
         "create table if not exists keyword (id integer primary key AUTOINCREMENT, keyword varchar, parent_id integer)";
     list <<

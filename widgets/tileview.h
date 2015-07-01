@@ -74,9 +74,11 @@ class TileView : public QWidget
         void clearSelection();
 
         int tilesPerRowOrCol();
-signals:
+
+    signals:
 
         void doubleClickTile(const QModelIndex& index);
+        void checkedItemsChanged();
 
     public slots:
 

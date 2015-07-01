@@ -1,15 +1,38 @@
 #include <QDir>
 #include <QDebug>
+#include <QStandardPaths>
 
 #include "previewcache.h"
 
 namespace PhotoStage
 {
+PreviewCache* PreviewCache::mGlobalCache = NULL;
+
+PreviewCache* PreviewCache::globalCache()
+{
+    if (mGlobalCache == NULL)
+        mGlobalCache = new PreviewCache(QStandardPaths::writableLocation(
+                    QStandardPaths::CacheLocation), NULL);
+    return mGlobalCache;
+}
+
 PreviewCache::PreviewCache(const QString& baseDir, QObject* parent) :
     QObject(parent),
     mBaseDir(baseDir + QDir::separator() + "previews"),
     mHash(QCryptographicHash::Md5)
 {
+}
+
+void PreviewCache::remove(const QString& key)
+{
+    std::pair<QString, QString> pair = dirFromKey(key);
+    QString                     dir  = pair.first;
+    QString                     hash = pair.second;
+
+    QString                     fileName = dir + QDir::separator() + hash;
+
+    if (!QFile::remove(fileName))
+        qDebug() << "Can't remove preview cache file";
 }
 
 QImage PreviewCache::get(const QString& key)

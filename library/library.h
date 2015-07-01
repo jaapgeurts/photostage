@@ -50,6 +50,8 @@ class Library : public Module
 
         void onPhotoSelectionChanged(const QItemSelection& selected,
             const QItemSelection&);
+        void onPathModelRowsAdded(const QModelIndex&, int, int);
+        void onPathModelRowsRemoved(const QModelIndex&, int, int);
         void onTileDoubleClicked(const QModelIndex& index);
 
         // For clicks on the tile
@@ -76,7 +78,7 @@ class Library : public Module
         LibraryHistogramModule* mHistogramModule;
         MetaDataModule*         mMetaDataModule;
         QFont                   mFontAccessFoundIcons;
-        Photo                  mCurrentPhoto;
+        Photo                   mCurrentPhoto;
         FixedTreeView*          mTrvwFiles;
 };
 }

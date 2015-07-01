@@ -9,4 +9,31 @@ MetaDataModule::MetaDataModule(QWidget* parent) :
 {
     ui->setupUi(this);
 }
+
+void MetaDataModule::setPhotos(const QList<Photo>& list)
+{
+    if (list.size() > 0)
+    {
+        Photo p = list.at(0);
+        setMetaData(p);
+    }
+}
+
+void MetaDataModule::setMetaData(const Photo& p)
+{
+    ExifInfo ei = p.exifInfo();
+
+    ui->leAperture->setText(QString::number(ei.aperture));
+    ui->leArtist->setText(ei.artist);
+    ui->leCameraMake->setText(ei.make);
+    ui->leCameraModel->setText(ei.model);
+    ui->leCopyright->setText(ei.copyright);
+    ui->leDateTime->setText(ei.dateTimeDigitized.toString());
+    ui->leDateTimeOriginal->setText(ei.dateTimeOriginal.toString());
+    ui->leExposure->setText(QString::number(ei.exposureTime));
+    ui->leFlash->setText(ei.flash ? "Fired" : "Didn't fire");
+    ui->leFocalLength->setText(QString::number(ei.focalLength));
+    ui->leISO->setText(QString::number(ei.isoSpeed));
+    ui->leLens->setText(ei.lensName);
+}
 }

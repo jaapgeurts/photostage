@@ -84,10 +84,10 @@ class MainWindow : public QMainWindow
 
         // model changes
         void onModelReset();
-        void onModelRowsInserted(const QModelIndex& parent,
+        void onPhotoModelRowsInserted(const QModelIndex& parent,
             int start,
             int end);
-        void onModelRowsRemoved(const QModelIndex& parent,
+        void onPhotoModelRowsRemoved(const QModelIndex& parent,
             int start,
             int end);
 

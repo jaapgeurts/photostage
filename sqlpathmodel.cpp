@@ -1,4 +1,4 @@
-#include "sqlpathmodel.h"
+ #include "sqlpathmodel.h"
 
 namespace PhotoStage
 {
@@ -29,6 +29,7 @@ void SqlPathModel::createPathItems()
     QString   queryText = QString(
         "select id,directory,parent_id from path where parent_id is NULL");
 
+
     if (!query.exec(queryText))
         qDebug() << query.lastError();
 
@@ -45,6 +46,7 @@ void SqlPathModel::createPathtemsRec(PathItem* root)
     QSqlQuery query;
     QString   queryText = QString(
         "select p.id, p.directory, p.parent_id, count(f.id) from path p left outer join photo f on p.id = f.path_id where  parent_id = :parent_id group by p.id, p.directory, p.parent_id");
+
 
     query.prepare(queryText);
 
@@ -71,6 +73,7 @@ void SqlPathModel::createPathtemsRec(PathItem* root)
 void SqlPathModel::deletePathItems(PathItem* root)
 {
     PathItem* item;
+
 
     foreach(item, root->children)
     {
@@ -102,10 +105,13 @@ QModelIndex SqlPathModel::index(int row,
 // Short cut to return the model index for a particular pathitem id.
 QModelIndex SqlPathModel::index(long long pathid) const
 {
+    if (mRootItem == NULL)
+        return QModelIndex(); // root has not been set yet.
     return findItemRec(mRootItem, 0, pathid);
 }
 
-QModelIndex SqlPathModel::findItemRec(PathItem* item, int row, long long pathid) const
+QModelIndex SqlPathModel::findItemRec(PathItem* item, int row,
+    long long pathid) const
 {
     if (item->id == pathid)
         return createIndex(row, 0, item);
@@ -114,6 +120,7 @@ QModelIndex SqlPathModel::findItemRec(PathItem* item, int row, long long pathid)
     foreach(PathItem * i, item->children)
     {
         QModelIndex idx = findItemRec(i, j, pathid);
+
 
         if (idx.isValid())
             return idx;
@@ -140,6 +147,7 @@ QModelIndex SqlPathModel::parent(const QModelIndex& index) const
 int SqlPathModel::rowCount(const QModelIndex& parent) const
 {
     PathItem* item;
+
 
     if (!parent.isValid())
         item = mRootItem;
@@ -194,5 +202,12 @@ QVariant SqlPathModel::headerData(int /*section*/,
     if (role == Qt::DisplayRole)
         return QString("Location");
     return QVariant();
+}
+
+void SqlPathModel::reload()
+{
+    beginResetModel();
+    createPathItems();
+    endResetModel();
 }
 }

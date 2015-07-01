@@ -1,4 +1,5 @@
 #include <QDebug>
+#include <QFileInfo>
 
 #include "exiv2lib.h"
 #include "constants.h"
@@ -203,22 +204,30 @@ QDateTime Exiv2Lib::getExifValue(ExifData& data, QString key,
     return defValue;
 }
 
-void Exiv2Lib::openFile(const QString& path)
+bool Exiv2Lib::openFile(const QString& path)
 {
+    QFileInfo fi(path);
+
+    if (!fi.isFile())
+    {
+        qDebug() << "Error exiv2lib:" << path << "is not a regular file";
+        return false;
+    }
+
     try
     {
         mImageFile = ImageFactory::open(path.toStdString());
     }
     catch (BasicError<char> e)
     {
-        qDebug() << "Exiv2::" << e.what();
-        return;
+        qDebug() << "Error Exiv2" << e.what();
+        return false;
     }
 
     if (mImageFile.get() == NULL)
     {
         qDebug() << "Exiv2:: no image";
-        return;
+        return false;
     }
     mImageFile->readMetadata();
 
@@ -269,6 +278,8 @@ void Exiv2Lib::openFile(const QString& path)
         readCanonNotes(data);
     else if (mExifInfo.make.startsWith("NIKON"))
         readNikonNotes(data);
+
+    return true;
 }
 
 ExifInfo Exiv2Lib::data()
@@ -361,6 +372,31 @@ void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
 {
     ExifData::const_iterator pos;
 
+    if (mExifInfo.model == "Canon EOS 300D DIGITAL" ||
+        mExifInfo.model == "Canon EOS DIGITAL REBEL")
+    {
+        pos = data.findKey(ExifKey("Exif.Canon.WhiteBalanceTable"));
+
+        if (pos != data.end())
+        {
+            qDebug() << "Reading EOS 300D tags";
+            uint16_t* cdata = new uint16_t[pos->size() / 2];
+            pos->copy((unsigned char*)cdata, littleEndian);
+
+            wb[0] = cdata[1];
+            wb[1] = (cdata[2] + cdata[3]) / 2;
+            wb[2] = cdata[4];
+            float mx = max3(wb[0], wb[1], wb[2]);
+
+            wb[0] /= mx;
+            wb[1] /= mx;
+            wb[2] /= mx;
+
+            delete [] cdata;
+            return;
+        }
+    }
+
     pos = data.findKey(ExifKey("Exif.Canon.ColorData"));
 
     if (pos != data.end())
@@ -396,11 +432,6 @@ void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
         }
         else if (mExifInfo.model == "Canon PowerShot S30")
         {
-            uint16_t* s;
-            s = &colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[0];
-            //            qDebug() <<"****V5 WB values" << s[1] <<","<<s[0]<<","<<s[3]<<","<<s[2];
-
-            // optimize with bitshifs later
             wb[0] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[1];
             wb[1] =
                 (colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[0] +

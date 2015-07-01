@@ -23,7 +23,11 @@ void PreviewFileLoader::run()
 {
     ExivFacade* exiv = ExivFacade::createExivReader();
 
-    exiv->openFile(mPath);
+    if (!exiv->openFile(mPath))
+    {
+        qDebug() << "Failed to load embedded preview";
+        return;
+    }
     qDebug() << "Reading image:" << mPath;
 
     QImage pixmap = exiv->getPreview();

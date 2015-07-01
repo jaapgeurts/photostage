@@ -282,7 +282,11 @@ QImage ImageFileLoader::rawThumb(const QString& path)
 
     ExivFacade* ex = ExivFacade::createExivReader();
 
-    ex->openFile(path);
+    if (!ex->openFile(path))
+    {
+        qDebug() << "Error loading exif data from image";
+        return image;
+    }
     ExifInfo ex_info = ex->data();
     delete(ex);
 
@@ -379,6 +383,8 @@ QImage ImageFileLoader::rawThumb(const QString& path)
         float wbg = ex_info.rgbCoeffients[1];
         float wbb = ex_info.rgbCoeffients[2];
 
+        float canon300d[9] =
+        { 8197, -2000, -1118, -6714, 14335, 2592, -2536, 3178, 8266 };
         float canon350d[9] =
         { 6018, -617, -965, -8645, 15881, 2975, -1530, 1719, 7642 };
         float powershots30[9] =
@@ -398,6 +404,8 @@ QImage ImageFileLoader::rawThumb(const QString& path)
 
         if (ex_info.model == "Canon EOS 350D DIGITAL")
             getMatrix(canon350d, mat);
+        else if (ex_info.model == "Canon EOS 300D DIGITAL" || ex_info.model == "Canon EOS DIGITAL REBEL")
+            getMatrix(canon300d, mat);
         else if (ex_info.model == "Canon PowerShot S30")
             getMatrix(powershots30, mat);
         else if (ex_info.model == "Canon EOS 5D Mark II")

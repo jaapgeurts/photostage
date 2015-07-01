@@ -63,6 +63,10 @@ class SqlPathModel : public QAbstractItemModel
         // implement when rowCount is expensive
         //    bool hasChildren(const QModelIndex &parent) const;
 
+
+public slots:
+        void reload();
+
     private:
 
         void deletePathItems(PathItem* root);

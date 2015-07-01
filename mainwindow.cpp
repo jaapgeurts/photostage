@@ -67,11 +67,11 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(mPhotoModel,
         &PhotoModel::rowsInserted,
         this,
-        &MainWindow::onModelRowsInserted);
+        &MainWindow::onPhotoModelRowsInserted);
     connect(mPhotoModel,
         &PhotoModel::rowsRemoved,
         this,
-        &MainWindow::onModelRowsRemoved);
+        &MainWindow::onPhotoModelRowsRemoved);
 
     mPhotoSelection = new QItemSelectionModel(mPhotoModel, this);
     connect(mPhotoSelection,
@@ -503,9 +503,11 @@ void MainWindow::importFinished(BackgroundTask* task)
 
     mPhotoModel->addData(t->resultList());
 
+    task->deleteLater();
     // update the files tree as well and the collection tree
 
-    task->deleteLater();
+    mLibrary->onPathModelRowsAdded(QModelIndex(),0,0);
+
 }
 
 void MainWindow::onModelReset()
@@ -514,14 +516,14 @@ void MainWindow::onModelReset()
     updateInformationBar();
 }
 
-void MainWindow::onModelRowsInserted(const QModelIndex& /*parent*/,
+void MainWindow::onPhotoModelRowsInserted(const QModelIndex& /*parent*/,
     int /*start*/,
     int /*end*/)
 {
     updateInformationBar();
 }
 
-void MainWindow::onModelRowsRemoved(const QModelIndex& /*parent*/,
+void MainWindow::onPhotoModelRowsRemoved(const QModelIndex& /*parent*/,
     int /*start*/,
     int /*end*/)
 {

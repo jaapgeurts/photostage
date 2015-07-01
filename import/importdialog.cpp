@@ -43,9 +43,30 @@ ImportDialog::ImportDialog(QWidget* parent) :
     ui->trvwSource->hideColumn(2);
     ui->trvwSource->hideColumn(3);
     ui->trvwSource->expand(srcindex);
-    QSettings   settings;
-    QString     str = settings.value("importdialog/sourcepath").toString();
+    QSettings settings;
+    QString   str = settings.value("importdialog/sourcepath").toString();
 
+    mImportMode = ImportOptions::ImportCopy;
+
+    mImportMode = (ImportOptions::ImportMode)settings.value(
+        "importdialog/importmode").toInt();
+
+    switch (mImportMode)
+    {
+        case ImportOptions::ImportAdd:
+            ui->rbAdd->setChecked(true);
+            break;
+
+        case ImportOptions::ImportCopy:
+            ui->rbCopy->setChecked(true);
+            break;
+
+        case ImportOptions::ImportMove:
+            ui->rbMove->setChecked(true);
+            break;
+    }
+
+    qDebug() << "Setting path:" << str;
     QModelIndex index    = mSourceDrivesModel->index(str);
     QModelIndex dirIndex = index;
     do
@@ -54,7 +75,7 @@ ImportDialog::ImportDialog(QWidget* parent) :
         index = index.parent();
     }
     while (index.isValid());
-    ui->trvwSource->selectionModel()->select(dirIndex,
+    ui->trvwSource->selectionModel()->setCurrentIndex(dirIndex,
         QItemSelectionModel::ClearAndSelect);
 
     mDestinationDrivesModel =  new QFileSystemModel(this);
@@ -86,8 +107,6 @@ ImportDialog::ImportDialog(QWidget* parent) :
     //    mFilesSelectionModel = new QItemSelectionModel(mFilesModel,this);
     //    mCfvPhotos->setSelectionModel(mFilesSelectionModel);
 
-    mImportMode = ImportOptions::ImportCopy;
-
     mCfvPhotos->setRootIndex(mFilesModel->setRootPath(str));
     ui->btnImport->setEnabled(false);
     ui->btnImport->setToolTip(
@@ -97,6 +116,9 @@ ImportDialog::ImportDialog(QWidget* parent) :
     connect(
         mCfvPhotos->selectionModel(), &QItemSelectionModel::selectionChanged, this,
         &ImportDialog::onFilesSelected);
+
+    connect(mCfvPhotos, &TileView::checkedItemsChanged, this,
+        &ImportDialog::onCheckedItemsChanged);
 }
 
 ImportDialog::~ImportDialog()
@@ -105,11 +127,18 @@ ImportDialog::~ImportDialog()
     {
         QSettings   settings;
         QModelIndex index = ui->trvwSource->currentIndex();
-        QString     path  =
-            mSourceDrivesModel->fileInfo(index).absoluteFilePath();
-        settings.setValue("importdialog/sourcepath", path);
-        delete ui;
+
+        if (index.isValid())
+        {
+            QString path =
+                mSourceDrivesModel->fileInfo(index).absoluteFilePath();
+            settings.setValue("importdialog/sourcepath", path);
+            qDebug() << "Saving last path" << path;
+        }
+        // TODO: save importmode
+        settings.setValue("importdialog/importmode", (int)mImportMode);
     }
+    delete ui;
 }
 
 void ImportDialog::onSourceDirClicked(const QModelIndex& index)
@@ -123,6 +152,11 @@ void ImportDialog::onSourceDirClicked(const QModelIndex& index)
 
 void ImportDialog::onFilesSelected(const QItemSelection& /*selected*/,
     const QItemSelection& /*deselected*/)
+{
+    validateForm();
+}
+
+void ImportDialog::onCheckedItemsChanged()
 {
     validateForm();
 }

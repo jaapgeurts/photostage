@@ -75,10 +75,12 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     mTrvwFiles->setModel(mPathModel);
     mTrvwFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->ModulePanel_1->addPanel("Folders", mTrvwFiles);
-    connect(mTrvwFiles,
-        &FixedTreeView::clicked,
-        this,
+    connect(mTrvwFiles, &FixedTreeView::clicked, this,
         &Library::onFilesClicked);
+    connect(mPathModel, &SqlPathModel::rowsInserted, this,
+        &Library::onPathModelRowsAdded);
+    connect(mPathModel, &SqlPathModel::rowsRemoved, this,
+        &Library::onPathModelRowsRemoved);
 
     // collections module
     CollectionModule* cm   = new CollectionModule(ui->ModulePanel_1);
@@ -130,6 +132,7 @@ Library::~Library()
     QSettings    settings;
     QVariantList list;
 
+
     foreach(int size, ui->splitterMain->sizes())
     {
         list << size;
@@ -153,6 +156,7 @@ QRect Library::lightGap()
 {
     QPoint pos = ui->mClvPhotos->mapToGlobal(QPoint(0, 0));
     QRect  gap = QRect(pos, ui->mClvPhotos->size());
+
 
     return gap;
 }
@@ -246,6 +250,7 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected,
 
     mKeywording->setPhotos(photos);
     mHistogramModule->setPhotos(photos);
+    mMetaDataModule->setPhotos(photos);
 
     // TODO: just take the first one in the selection
     if (!photos.isEmpty())
@@ -259,6 +264,20 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected,
     }
 
     emit photoSelectionChanged(photos);
+}
+
+void Library::onPathModelRowsAdded(const QModelIndex& /*parent*/,
+    int /*start*/,
+    int /*end*/)
+{
+    mPathModel->reload();
+}
+
+void Library::onPathModelRowsRemoved(const QModelIndex& /*parent*/,
+    int /*start*/,
+    int /*end*/)
+{
+    mPathModel->reload();
 }
 
 void Library::onTileDoubleClicked(const QModelIndex& index)

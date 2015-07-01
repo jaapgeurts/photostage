@@ -6,9 +6,10 @@
 #include <QSqlQuery>
 #include <QSharedPointer>
 
+#include "import/exivfacade.h"
+
 namespace PhotoStage
 {
-
 class PhotoData;
 
 class Photo
@@ -49,6 +50,9 @@ class Photo
 
         void setSrcImagePath(const QString& path);
         const QString& srcImagePath() const;
+
+        void setExifInfo(const ExifInfo& exifInfo);
+        const ExifInfo& exifInfo() const;
 
         void setRating(int rating);
         int rating() const;

@@ -61,7 +61,7 @@ class PhotoModel : public QAbstractListModel
         // Delete is required on it's contents
         QList<Photo>                      mPhotoInfoList;
         mutable QHash<QModelIndex, Photo> mPhotoInfoMap;
-        mutable PreviewCache              mPreviewCache;
+        mutable PreviewCache*              mPreviewCache;
 };
 }
 

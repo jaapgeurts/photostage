@@ -28,7 +28,7 @@ void PhotoWorkUnit::setRating(const QList<Photo>& list, int rating)
     QString   query = "update photo set rating=:rating where id in (:id)";
 
     QString   ids;
-    Photo    info;
+    Photo     info;
 
     foreach(info, list)
     {
@@ -48,7 +48,7 @@ void PhotoWorkUnit::setFlag(const QList<Photo>& list, Photo::Flag flag)
     QString   query = ("update photo set flag=:flag where id in (:id)");
 
     QString   ids;
-    Photo    info;
+    Photo     info;
 
     foreach(info, list)
     {
@@ -62,14 +62,14 @@ void PhotoWorkUnit::setFlag(const QList<Photo>& list, Photo::Flag flag)
     q.exec();
 }
 
-void PhotoWorkUnit::setColorLabel(const QList<Photo> &list,
+void PhotoWorkUnit::setColorLabel(const QList<Photo>& list,
     Photo::ColorLabel color)
 {
     QSqlQuery q;
     QString   query = ("update photo set color=:color where id in (:id)");
 
     QString   ids;
-    Photo    info;
+    Photo     info;
 
     foreach(info, list)
     {
@@ -165,7 +165,7 @@ void PhotoWorkUnit::removeKeywordsExcept(const QStringList& words,
             and keyword_id not in  \
             ( select id from keyword where keyword in (':keywords'))";
 
-    Photo  info;
+    Photo   info;
     QString photo_id;
 
     foreach(info, list)
@@ -195,7 +195,7 @@ int> PhotoWorkUnit::getPhotoKeywords(const QList<Photo>& list) const
             where pk.photo_id in (:photo_ids) \
             group by k.keyword order by k.keyword ";
     QString   photo_ids;
-    Photo    info;
+    Photo     info;
 
     foreach(info, list)
     photo_ids += QString::number(info.id()) + ",";
@@ -219,10 +219,8 @@ int> PhotoWorkUnit::getPhotoKeywords(const QList<Photo>& list) const
 
 QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
 {
-    QList<Photo> list;
-
-    QSqlQuery     q;
-    QString       query = QString(
+    QSqlQuery q;
+    QString   query = QString(
         "with recursive cte as ( \
                             select id,directory \
                             from path \
@@ -231,7 +229,10 @@ QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
                             select t.id as id , cte.directory || :separator || t.directory as directory \
                             from cte, path t \
                             where cte.id = t.parent_id \
-            ) select p.id, p.filename, c.directory,p.rating,p.color,p.flag \
+            ) select p.id, p.filename, c.directory,p.rating,p.color,p.flag, \
+              p.iso, p.exposure_time, p.focal_length, p.datetime_original, \
+              p.datetime_digitized, p.rotation, p.longitude, p.lattitude, \
+              p.copyright, p.artist, p.aperture, p.flash, p.lens_name, p.make, p.model \
             from cte c, photo p \
             where c.id = p.path_id \
             and p.id in (:photoids) \
@@ -248,10 +249,13 @@ QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
     q.prepare(query);
     q.bindValue(":separator", QDir::separator());
 
-    if (!q.exec())
-        qDebug() << "SqlPhotoModel error" << q.lastError();
-
     QList<Photo> photoInfoList;
+
+    if (!q.exec())
+    {
+        qDebug() << "PhotoWorkUnit::getPhotosById() error" << q.lastError();
+        return photoInfoList;
+    }
 
     while (q.next())
     {

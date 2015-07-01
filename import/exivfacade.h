@@ -55,7 +55,7 @@ class ExivFacade
         {
         };
 
-        virtual void openFile(const QString& path) = 0;
+        virtual bool openFile(const QString& path) = 0;
         virtual QImage getPreview()                = 0;
         virtual ExifInfo data()                    = 0;
 
