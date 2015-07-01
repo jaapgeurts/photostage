@@ -404,7 +404,8 @@ QImage ImageFileLoader::rawThumb(const QString& path)
 
         if (ex_info.model == "Canon EOS 350D DIGITAL")
             getMatrix(canon350d, mat);
-        else if (ex_info.model == "Canon EOS 300D DIGITAL" || ex_info.model == "Canon EOS DIGITAL REBEL")
+        else if (ex_info.model == "Canon EOS 300D DIGITAL" ||
+            ex_info.model == "Canon EOS DIGITAL REBEL")
             getMatrix(canon300d, mat);
         else if (ex_info.model == "Canon PowerShot S30")
             getMatrix(powershots30, mat);
@@ -433,6 +434,20 @@ QImage ImageFileLoader::rawThumb(const QString& path)
         pb.setColorConversion(mat);
         pb.setInput(rawh);
         pb.setCFAStart(cfa_layout);
+
+        switch (ex_info.rotation)
+        {
+            case ExifInfo::Rotate90CCW:
+                pb.setRotation(-1);
+                break;
+
+            case ExifInfo::Rotate90CW:
+                pb.setRotation(1);
+                break;
+
+            default:
+                qDebug() << "Unimplemented rotation value";
+        }
 
         image = pb.execute(width, height);
     }

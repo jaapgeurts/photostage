@@ -29,7 +29,8 @@ class Exiv2Lib : public ExivFacade
         void readCanonNotes(Exiv2::ExifData& data);
         void readNikonNotes(Exiv2::ExifData& data);
         template<typename T>
-        T getExifValue(Exiv2::ExifData &data, QString key, T defValue);
+        T getExifValue(Exiv2::ExifData &data,const QString& key, T defValue);
+        bool getExifBytes(Exiv2::ExifData &data, const QString &key, uint8_t *buf, size_t size);
 };
 }
 

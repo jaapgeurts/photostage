@@ -42,23 +42,24 @@ PhotoData::PhotoData(QSqlQuery& q) :
     setFlag((Photo::Flag)q.value(5).toInt());
 
     // p.id, p.filename, c.directory,p.rating,p.color,p.flag, \
-    // p.iso, p.exposure_time, p.focal_length, p.datetime_original, \
-    // p.datetime_digitized, p.rotatation, p.longitude, p.lattitude, \
-    // p.copyright, p.artist, p.aperture, p.flash, p.lens_name
-    mExifInfo.aperture = q.value(6).toInt();
-    mExifInfo.exposureTime = q.value(7).toFloat();
-    mExifInfo.focalLength = q.value(8).toFloat();
-    mExifInfo.dateTimeOriginal = q.value(9).toDateTime();
-    mExifInfo.dateTimeDigitized = q.value(10).toDateTime();
-    mExifInfo.rotation = (ExifInfo::Rotation)q.value(11).toInt();
-    mExifInfo.location = QGeoCoordinate(q.value(13).toDouble(),q.value(12).toDouble());
-    mExifInfo.copyright = q.value(14).toString();
-    mExifInfo.artist = q.value(15).toString();
-    mExifInfo.aperture = q.value(16).toFloat();
-    mExifInfo.flash = q.value(17).toBool();
-    mExifInfo.lensName = q.value(18).toString();
-    mExifInfo.make = q.value(19).toString();
-    mExifInfo.model = q.value(20).toString();
+    // p.iso, p.aperture, p.exposure_time, p.focal_length, p.datetime_original,\
+    // p.datetime_digitized, p.rotatation, p.lattitude, p.longitude, \
+    // p.copyright, p.artist, p.flash, p.lens_name, p.make, p.model
+    mExifInfo.isoSpeed          = q.value(6).toInt();
+    mExifInfo.aperture          = q.value(7).toInt();
+    mExifInfo.exposureTime      = q.value(8).toFloat();
+    mExifInfo.focalLength       = q.value(9).toFloat();
+    mExifInfo.dateTimeOriginal  = q.value(10).toDateTime();
+    mExifInfo.dateTimeDigitized = q.value(11).toDateTime();
+    mExifInfo.rotation          = (ExifInfo::Rotation)q.value(12).toInt();
+    mExifInfo.location          = QGeoCoordinate(q.value(13)
+            .toDouble(), q.value(14).toDouble());
+    mExifInfo.copyright = q.value(15).toString();
+    mExifInfo.artist    = q.value(16).toString();
+    mExifInfo.flash     = q.value(17).toBool();
+    mExifInfo.lensName  = q.value(18).toString();
+    mExifInfo.make      = q.value(19).toString();
+    mExifInfo.model     = q.value(20).toString();
 }
 
 PhotoData::~PhotoData()

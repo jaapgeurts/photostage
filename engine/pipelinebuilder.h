@@ -30,6 +30,7 @@ class PipelineBuilder
         void setColorConversion(float* colorMatrix);
         void setInput(Halide::Image<uint16_t> input);
         void setCFAStart(int dcraw_filter_id);
+        void setRotation(int dir);
 
         void prepare();
 
@@ -40,23 +41,27 @@ class PipelineBuilder
         OutputIntent mIntent;
 
         // Halide pipeline input parameters
-        Halide::ImageParam mInput;
+        Halide::ImageParam  mInput;
 
-        Halide::Param<bool>  mIsSRaw;
+        Halide::Param<bool> mIsSRaw;
+        int                 mRotation;
 
         // White balance params
-        Halide::Param<float> mWBRed;
-        Halide::Param<float> mWBGreen;
-        Halide::Param<float> mWBBlue;
+        Halide::Param<float>   mWBRed;
+        Halide::Param<float>   mWBGreen;
+        Halide::Param<float>   mWBBlue;
 
-        Halide::Param<int>   mBlacklevel;
-        Halide::Param<int>   mWhitePoint;
-        Halide::Param<uint8_t>   mCol;
-        Halide::Param<uint8_t>   mRow;
+        Halide::Param<int>     mBlacklevel;
+        Halide::Param<int>     mWhitePoint;
+        Halide::Param<uint8_t> mCol;
+        Halide::Param<uint8_t> mRow;
 
-        Halide::ImageParam   mColorMatrix;
+        Halide::ImageParam     mColorMatrix;
 
-        Halide::Func         mPipeline;
+        Halide::Func           mPipeline;
+
+        int                    mWidth;
+        int                    mHeight;
 
         // Little CMS variable
         cmsHTRANSFORM mHRawTransform;

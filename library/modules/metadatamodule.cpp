@@ -23,16 +23,16 @@ void MetaDataModule::setMetaData(const Photo& p)
 {
     ExifInfo ei = p.exifInfo();
 
-    ui->leAperture->setText(QString::number(ei.aperture));
+    ui->leAperture->setText("ƒ / "+QString::number(ei.aperture));
     ui->leArtist->setText(ei.artist);
     ui->leCameraMake->setText(ei.make);
     ui->leCameraModel->setText(ei.model);
     ui->leCopyright->setText(ei.copyright);
     ui->leDateTime->setText(ei.dateTimeDigitized.toString());
     ui->leDateTimeOriginal->setText(ei.dateTimeOriginal.toString());
-    ui->leExposure->setText(QString::number(ei.exposureTime));
+    ui->leExposure->setText("⅟ "+QString::number((int)(1.0f/ei.exposureTime))+"s");
     ui->leFlash->setText(ei.flash ? "Fired" : "Didn't fire");
-    ui->leFocalLength->setText(QString::number(ei.focalLength));
+    ui->leFocalLength->setText(QString::number(ei.focalLength)+"mm");
     ui->leISO->setText(QString::number(ei.isoSpeed));
     ui->leLens->setText(ei.lensName);
 }

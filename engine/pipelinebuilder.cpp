@@ -1,5 +1,6 @@
 #include <QDebug>
 
+#include "math.h"
 #include "pipelinebuilder.h"
 
 using namespace Halide;
@@ -10,7 +11,8 @@ PipelineBuilder::PipelineBuilder() :
     mInput(type_of<uint16_t>(), 2),
     mColorMatrix(type_of<float>(), 2),
     mHRawTransform(NULL),
-    mIsSRaw(false)
+    mIsSRaw(false),
+    mRotation(0)
 {
     createRawProfileConversion();
 }
@@ -117,6 +119,11 @@ void PipelineBuilder::setCFAStart(int dcraw_filter_id)
     }
 }
 
+void PipelineBuilder::setRotation(int dir)
+{
+    mRotation = dir;
+}
+
 Expr upperHalf(Expr x, Expr E)
 {
     return 1.0f - 0.5f * pow(2.0f - 2.0f * x, E);
@@ -125,6 +132,62 @@ Expr upperHalf(Expr x, Expr E)
 Expr lowerHalf(Expr x, Expr E)
 {
     return 0.5f * pow(2.0f * x, E);
+}
+
+//bicubic interpolation
+Expr getValue(Expr p0, Expr p1, Expr p2, Expr p3, Expr coo)
+{
+    return p1 + 0.5f * coo *
+           (p2 - p0 + coo *
+           (2.0f * p0 - 5.0f * p1 + 4.0f * p2 - p3 + coo *
+           (3.0f * (p1 - p2) + p3 - p0)));
+}
+
+Expr bicubic(Func f, Expr x, Expr y)
+{
+    Expr one = x - cast<int>(x);
+    Expr two = y - cast<int>(y);
+    Expr a1  =
+        getValue(f(cast<int>(x) - 1, cast<int>(y) - 1),
+            f(cast<int>(x), cast<int>(y) - 1),
+            f(cast<int>(x) + 1, cast<int>(y) - 1),
+            f(cast<int>(x) + 2, cast<int>(y) - 1), one);
+    Expr a2 =
+        getValue(f(cast<int>(x) - 1, cast<int>(y)),
+            f(cast<int>(x), cast<int>(y)),
+            f(cast<int>(x) + 1, cast<int>(y)), f(cast<int>(x) + 2, cast<int>(
+                y)), one);
+    Expr a3 =
+        getValue(f(cast<int>(x) - 1, cast<int>(y) + 1),
+            f(cast<int>(x), cast<int>(y) + 1),
+            f(cast<int>(x) + 1, cast<int>(y) + 1),
+            f(cast<int>(x) + 2, cast<int>(y) + 1), one);
+    Expr a4 =
+        getValue(f(cast<int>(x) - 1, cast<int>(y) + 2),
+            f(cast<int>(x), cast<int>(y) + 2),
+            f(cast<int>(x) + 1, cast<int>(y) + 2),
+            f(cast<int>(x) + 2, cast<int>(y) + 2), one);
+
+    return getValue(a1, a2, a3, a4, two);
+}
+
+Func rotate(Func f, Expr angle, Expr centerX, Expr centerY)
+{
+    Var  x, y;
+    Expr temp;
+
+    temp    = centerX;
+    centerX = centerY;
+    centerY = temp;
+    Func out;
+    Expr newX = (x - centerX) * cos(angle) - sin(angle) * (y - centerY) +
+        centerX;
+    Expr newY = sin(angle) * (x - centerX) + cos(angle) * (y - centerY) +
+        centerY;
+
+    // out(x, y) = bicubic(f, newX, newY);
+    out(x, y) = f(y, x);
+    return out;
 }
 
 void PipelineBuilder::prepare()
@@ -213,20 +276,59 @@ void PipelineBuilder::prepare()
     Func final ("final");
     final (x, y, c) = cast<uint16_t>(contrast(x, y, c) * 65535.0f);
 
-    Var x_outer, y_outer, x_inner, y_inner, tile_index;
-    final.tile(x, y, x_outer, y_outer, x_inner, y_inner, 256, 256)
-    .fuse(x_outer, y_outer, tile_index)
-    .parallel(tile_index);
 
     mPipeline = final;
 }
 
 QImage PipelineBuilder::execute(int width, int height)
 {
-    QImage          image = QImage(width, height, QImage::Format_RGB32);
+    QImage          image;
 
-    Image<uint16_t> out     = mPipeline.realize(width, height, 3);
-    uint16_t*       outdata = (uint16_t*)out.data();
+    Image<uint16_t> out;
+
+    Var             x, y, c;
+
+    if (mRotation == -1)
+    {
+        image = QImage(height, width, QImage::Format_RGB32);
+        Func mrot("mrot");
+        mrot(x, y, c) = mPipeline(width - 1 - y,  x, c);
+
+        Var x_outer, y_outer, x_inner, y_inner, tile_index;
+        mrot.tile(x, y, x_outer, y_outer, x_inner, y_inner, 256, 256)
+        .fuse(x_outer, y_outer, tile_index)
+        .parallel(tile_index);
+
+        out = mrot.realize(height, width, 3);
+    }
+    else if (mRotation == 1)
+    {
+        image = QImage(height, width, QImage::Format_RGB32);
+        Func mrot("mrot");
+        mrot(x, y, c) = mPipeline(y, height - 1 - x, c);
+
+        Var x_outer, y_outer, x_inner, y_inner, tile_index;
+        mrot.tile(x, y, x_outer, y_outer, x_inner, y_inner, 256, 256)
+        .fuse(x_outer, y_outer, tile_index)
+        .parallel(tile_index);
+
+        out = mrot.realize(height, width, 3);
+    }
+    else
+    {
+        image = QImage(width, height, QImage::Format_RGB32);
+
+        Func mrot;
+        mrot(x,y,c) = mPipeline(x,y,c);
+        Var x_outer, y_outer, x_inner, y_inner, tile_index;
+        mrot.tile(x, y, x_outer, y_outer, x_inner, y_inner, 256, 256)
+        .fuse(x_outer, y_outer, tile_index)
+        .parallel(tile_index);
+
+        out = mrot.realize(width, height, 3);
+    }
+
+    uint16_t* outdata = (uint16_t*)out.data();
 
     cmsDoTransform(mHRawTransform, outdata, image.bits(), width * height);
 

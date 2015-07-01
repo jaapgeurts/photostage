@@ -230,9 +230,9 @@ QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
                             from cte, path t \
                             where cte.id = t.parent_id \
             ) select p.id, p.filename, c.directory,p.rating,p.color,p.flag, \
-              p.iso, p.exposure_time, p.focal_length, p.datetime_original, \
-              p.datetime_digitized, p.rotation, p.longitude, p.lattitude, \
-              p.copyright, p.artist, p.aperture, p.flash, p.lens_name, p.make, p.model \
+              p.iso, p.aperture, p.exposure_time, p.focal_length, p.datetime_original, \
+              p.datetime_digitized, p.rotation, p.lattitude, p.longitude, \
+              p.copyright, p.artist, p.flash, p.lens_name, p.make, p.model \
             from cte c, photo p \
             where c.id = p.path_id \
             and p.id in (:photoids) \
@@ -308,7 +308,11 @@ QList<Photo> PhotoWorkUnit::getPhotosByPath(long long path_id,
                     select t.id as id , cte.directory || :separator || t.directory as directory \
                     from cte, path t \
                     where cte.id = t.parent_id \
-            ) select p.id, p.filename, c.directory,p.rating,p.color,p.flag,c.id \
+            ) select p.id, p.filename, c.directory,p.rating,p.color,p.flag, \
+              p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
+              p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
+              p.copyright, p.artist, p.flash, p.lens_name, p.make,\
+              p.model, c.id \
             from cte c, photo p \
             where c.id = p.path_id and :top_or_include \
             order by p.id");
