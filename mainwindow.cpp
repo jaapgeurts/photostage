@@ -60,36 +60,24 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->splitter->setSizes(l);
 
     mPhotoModel = new PhotoModel(this);
-    connect(mPhotoModel,
-        &PhotoModel::modelReset,
-        this,
-        &MainWindow::onModelReset);
-    connect(mPhotoModel,
-        &PhotoModel::rowsInserted,
-        this,
-        &MainWindow::onPhotoModelRowsInserted);
-    connect(mPhotoModel,
-        &PhotoModel::rowsRemoved,
-        this,
-        &MainWindow::onPhotoModelRowsRemoved);
+    connect(mPhotoModel, &PhotoModel::modelReset,
+        this, &MainWindow::onModelReset);
+    connect(mPhotoModel, &PhotoModel::rowsInserted,
+        this, &MainWindow::onPhotoModelRowsInserted);
+    connect(mPhotoModel, &PhotoModel::rowsRemoved,
+        this, &MainWindow::onPhotoModelRowsRemoved);
 
     mPhotoSelection = new QItemSelectionModel(mPhotoModel, this);
-    connect(mPhotoSelection,
-        &QItemSelectionModel::selectionChanged,
-        this,
-        &MainWindow::onSelectionChanged);
-    connect(mPhotoSelection,
-        &QItemSelectionModel::currentChanged,
-        this,
-        &MainWindow::onCurrentChanged);
+    connect(mPhotoSelection, &QItemSelectionModel::selectionChanged,
+        this, &MainWindow::onSelectionChanged);
+    connect(mPhotoSelection, &QItemSelectionModel::currentChanged,
+        this, &MainWindow::onCurrentChanged);
 
     // Create the Library Module
     mLibrary = new Library(mPhotoModel, this);
     mLibrary->setSelectionModel(mPhotoSelection);
-    connect(mLibrary,
-        &Library::photoSourceChanged,
-        mPhotoModel,
-        &PhotoModel::onReloadPhotos);
+    connect(mLibrary, &Library::photoSourceChanged,
+        mPhotoModel, &PhotoModel::onReloadPhotos);
     ui->stackedWidget->addWidget(mLibrary);
 
     ui->filmStrip->setModel(mPhotoModel);
@@ -101,10 +89,8 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->filmStrip->setOrientation(Qt::Horizontal);
     ui->filmStrip->setSelectionModel(mPhotoSelection);
 
-    connect(ui->filmStrip,
-        &TileView::doubleClickTile,
-        this,
-        &MainWindow::onTileDoubleClicked);
+    connect(ui->filmStrip, &TileView::doubleClickTile,
+        this, &MainWindow::onTileDoubleClicked);
 
     // Create the Develop Module
     mDevelop = new Develop(this);
@@ -179,7 +165,7 @@ MainWindow::~MainWindow()
     delete mDatabaseAccess;
 }
 
-bool MainWindow::eventFilter(QObject* obj, QEvent* event)
+bool MainWindow::eventFilter(QObject* /*obj*/, QEvent* event)
 //bool MainWindow::event(QEvent* event)
 {
     if (event->type() == QEvent::KeyPress)
@@ -506,8 +492,7 @@ void MainWindow::importFinished(BackgroundTask* task)
     task->deleteLater();
     // update the files tree as well and the collection tree
 
-    mLibrary->onPathModelRowsAdded(QModelIndex(),0,0);
-
+    mLibrary->onPathModelRowsAdded(QModelIndex(), 0, 0);
 }
 
 void MainWindow::onModelReset()
@@ -551,9 +536,9 @@ void MainWindow::updateInformationBar()
     int     selCount = mPhotoSelection->selectedIndexes().size();
 
     QString imagePath;
-    Photo  photo = currentPhoto();
+    Photo   photo = currentPhoto();
 
-    if (!photo .isNull())
+    if (!photo.isNull())
         imagePath = " " + photo.srcImagePath();
     ui->lblInformation->setText(QString::number(
             selCount) + "/" + QString::number(count) + imagePath);
@@ -568,7 +553,7 @@ Photo MainWindow::currentPhoto()
 
 void MainWindow::setRating(int rating)
 {
-    QList<Photo>   list;
+    QList<Photo>    list;
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
     list.append(mPhotoModel->data(index,
@@ -581,7 +566,7 @@ void MainWindow::setRating(int rating)
 
 void MainWindow::setFlag(Photo::Flag flag)
 {
-    QList<Photo>   list;
+    QList<Photo>    list;
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
     list.append(mPhotoModel->data(index,
@@ -595,7 +580,7 @@ void MainWindow::setFlag(Photo::Flag flag)
 
 void MainWindow::setColorLabel(Photo::ColorLabel color)
 {
-    QList<Photo>   list;
+    QList<Photo>    list;
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
     list.append(mPhotoModel->data(index,

@@ -7,28 +7,34 @@
 
 namespace PhotoStage
 {
-    class LibraryModule : public QWidget
-    {
-        Q_OBJECT
+class LibraryModule : public QWidget
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            LibraryModule(QWidget* parent = 0);
+        LibraryModule(QWidget* parent = 0);
 
-            virtual void setPhotos(const QList<Photo>& list)
-            {
-                mPhotoInfoList = list;
-            }
+        virtual void setPhotos(const QList<Photo>& list)
+        {
+            mPhotoInfoList = list;
+        }
 
-            const QList<Photo>& photos() const
-            {
-                return mPhotoInfoList;
-            }
+        virtual void setPhoto(const Photo& photo)
+        {
+            mPhoto = photo;
+        }
 
-        protected:
+        const QList<Photo>& photos() const
+        {
+            return mPhotoInfoList;
+        }
 
-            QList<Photo> mPhotoInfoList;
-    };
+    protected:
+
+        QList<Photo> mPhotoInfoList;
+        Photo        mPhoto;
+};
 }
 
 #endif // LIBRARYMODULE

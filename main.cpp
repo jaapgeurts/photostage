@@ -7,7 +7,7 @@
 
 #include <lcms2.h>
 
-void lcms2ErrorFunc(cmsContext ContextID, cmsUInt32Number ErrorCode,
+void lcms2ErrorFunc(cmsContext /*ContextID*/, cmsUInt32Number ErrorCode,
     const char* Text)
 {
     qDebug() << "Little CMS error(" << ErrorCode << ")" << Text;

@@ -14,19 +14,14 @@ LibraryHistogramModule::LibraryHistogramModule(QWidget* parent) :
     layout()->addWidget(mHistogram);
 }
 
-void LibraryHistogramModule::setPhotos(const QList<Photo>& list)
+void LibraryHistogramModule::setPhoto(const Photo& photo)
 {
-    LibraryModule::setPhotos(list);
+    LibraryModule::setPhoto(photo);
 
-    if (list.size() == 1)
+    if (!photo.libraryPreview().isNull())
     {
-        Photo photo = list.at(0);
-
-        if (!photo.libraryPreview().isNull())
-        {
-            //PhotoData image = loadImage(photo->libraryPreview());
-            mHistogram->setImageData(photo.libraryPreview());
-        }
+        //PhotoData image = loadImage(photo->libraryPreview());
+        mHistogram->setImageData(photo.libraryPreview());
     }
 }
 }

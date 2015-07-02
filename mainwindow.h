@@ -36,7 +36,7 @@ class MainWindow : public QMainWindow
 
     protected:
 
-        bool eventFilter(QObject* obj, QEvent* event);
+        bool eventFilter(QObject*, QEvent* event);
 
         //bool event(QEvent* event);
 

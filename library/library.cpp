@@ -48,14 +48,10 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     ui->mClvPhotos->setCheckBoxMode(false);
 
     ui->mClvPhotos->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->mClvPhotos,
-        &TileView::customContextMenuRequested,
-        this,
-        &Library::customContextMenu);
-    connect(ui->mClvPhotos,
-        &TileView::doubleClickTile,
-        this,
-        &Library::onTileDoubleClicked);
+    connect(ui->mClvPhotos, &TileView::customContextMenuRequested,
+        this, &Library::customContextMenu);
+    connect(ui->mClvPhotos, &TileView::doubleClickTile,
+        this, &Library::onTileDoubleClicked);
 
     // These models are auto deleted by the QObject hierarchy
     ui->mClvPhotos->setModel(mPhotoModel);
@@ -132,7 +128,6 @@ Library::~Library()
     QSettings    settings;
     QVariantList list;
 
-
     foreach(int size, ui->splitterMain->sizes())
     {
         list << size;
@@ -157,7 +152,6 @@ QRect Library::lightGap()
     QPoint pos = ui->mClvPhotos->mapToGlobal(QPoint(0, 0));
     QRect  gap = QRect(pos, ui->mClvPhotos->size());
 
-
     return gap;
 }
 
@@ -180,10 +174,10 @@ int Library::tilesPerRowOrCol()
 void Library::setSelectionModel(QItemSelectionModel* selectionModel)
 {
     ui->mClvPhotos->setSelectionModel(selectionModel);
-    connect(selectionModel,
-        &QItemSelectionModel::selectionChanged,
-        this,
-        &Library::onPhotoSelectionChanged);
+    connect(selectionModel, &QItemSelectionModel::selectionChanged,
+        this, &Library::onPhotoSelectionChanged);
+    connect(selectionModel, &QItemSelectionModel::currentChanged,
+        this, &Library::onCurrentPhotoChanged);
 }
 
 void Library::onFilesClicked(const QModelIndex& index)
@@ -195,7 +189,7 @@ void Library::onFilesClicked(const QModelIndex& index)
     emit      photoSourceChanged(PhotoModel::SourceFiles, item->id);
 }
 
-void Library::customContextMenu(const QPoint& pos)
+void Library::customContextMenu(const QPoint& /*pos*/)
 {
     //QModelIndex index = ui->mClvPhotos->posToModelIndex(pos);
     // check if there is a single selection or a list.
@@ -207,7 +201,7 @@ void Library::customContextMenu(const QPoint& pos)
     //    m->exec();
 }
 
-void Library::thumbSizeChanged(int newValue)
+void Library::thumbSizeChanged(int /*newValue*/)
 {
     // todo: change the number of columns here.
 }
@@ -249,21 +243,22 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected,
         TileView::PhotoRole).value<Photo>());
 
     mKeywording->setPhotos(photos);
-    mHistogramModule->setPhotos(photos);
     mMetaDataModule->setPhotos(photos);
 
-    // TODO: just take the first one in the selection
-    if (!photos.isEmpty())
-    {
-        mCurrentPhoto = photos.first();
+  //  emit photoSelectionChanged(photos);
+}
 
-        if (ui->mLoupeScrollView->isVisible())
-        {
-            showLoupe();
-        }
-    }
+void Library::onCurrentPhotoChanged(const QModelIndex& current,
+    const QModelIndex& /*previous*/)
+{
+    Photo photo =
+        mPhotoModel->data(current, TileView::PhotoRole).value<Photo>();
 
-    emit photoSelectionChanged(photos);
+    mCurrentPhoto = photo;
+    mHistogramModule->setPhoto(photo);
+
+    if (ui->mLoupeScrollView->isVisible())
+        showLoupe();
 }
 
 void Library::onPathModelRowsAdded(const QModelIndex& /*parent*/,
@@ -280,7 +275,7 @@ void Library::onPathModelRowsRemoved(const QModelIndex& /*parent*/,
     mPathModel->reload();
 }
 
-void Library::onTileDoubleClicked(const QModelIndex& index)
+void Library::onTileDoubleClicked(const QModelIndex& /*index*/)
 {
     showLoupe();
 }

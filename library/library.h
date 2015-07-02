@@ -40,7 +40,7 @@ class Library : public Module
 
     signals:
 
-        void photoSelectionChanged(const QList<Photo>& list);
+       // void photoSelectionChanged(const QList<Photo>& list);
         void photoSourceChanged(PhotoModel::SourceType type, long long id);
 
     public slots:
@@ -50,9 +50,10 @@ class Library : public Module
 
         void onPhotoSelectionChanged(const QItemSelection& selected,
             const QItemSelection&);
+        void onCurrentPhotoChanged(const QModelIndex& current, const QModelIndex&);
         void onPathModelRowsAdded(const QModelIndex&, int, int);
         void onPathModelRowsRemoved(const QModelIndex&, int, int);
-        void onTileDoubleClicked(const QModelIndex& index);
+        void onTileDoubleClicked(const QModelIndex&);
 
         // For clicks on the tile
         //    void rotateLeftClicked(const QModelIndex& index);
@@ -65,8 +66,8 @@ class Library : public Module
 
         void onNewCollectionClicked();
         void onFilesClicked(const QModelIndex&);
-        void customContextMenu(const QPoint& pos);
-        void thumbSizeChanged(int newValue);
+        void customContextMenu(const QPoint&);
+        void thumbSizeChanged(int);
 
     private:
 
