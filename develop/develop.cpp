@@ -68,6 +68,7 @@ Develop::~Develop()
 QRect Develop::lightGap()
 {
     // TODO: implement this
+    return QRect();
 }
 
 void Develop::setPhoto(Photo photo)

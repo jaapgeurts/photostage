@@ -21,10 +21,8 @@ TaggingModule::TaggingModule(QWidget* parent) : LibraryModule(parent)
     vbLayout->setSpacing(0);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    connect(mAddKeywords,
-        &QLineEdit::returnPressed,
-        this,
-        &TaggingModule::keywordsAdded);
+    connect(mAddKeywords, &QLineEdit::returnPressed,
+        this, &TaggingModule::keywordsAdded);
 
     mTxtEdtKeywords->installEventFilter(this);
 }

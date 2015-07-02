@@ -8,36 +8,36 @@
 
 namespace PhotoStage
 {
-    class Histogram : public QWidget
-    {
-        Q_OBJECT
+class Histogram : public QWidget
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            explicit Histogram(QWidget* parent = 0);
+        explicit Histogram(QWidget* parent = 0);
 
-            void setImageData(const QImage& image);
+        void setImageData(const QImage& image);
 
-        protected:
+    protected:
 
-            void paintEvent(QPaintEvent* event);
+        void paintEvent(QPaintEvent*);
 
-        signals:
+    signals:
 
-        public slots:
+    public slots:
 
-            void recalculate();
+        void recalculate();
 
-        private:
+    private:
 
-            QImage        mImage;
+        QImage   mImage;
 
-            unsigned long mChannelRed[BIN_SIZE];
-            unsigned long mChannelGreen[BIN_SIZE];
-            unsigned long mChannelBlue[BIN_SIZE];
+        uint32_t mChannelRed[BIN_SIZE];
+        uint32_t mChannelGreen[BIN_SIZE];
+        uint32_t mChannelBlue[BIN_SIZE];
 
-            unsigned long mMaxAll;
-    };
+        uint32_t mMaxAll;
+};
 }
 
 #endif // HISTOGRAM_H

@@ -13,9 +13,9 @@ Histogram::Histogram(QWidget* parent) : QWidget(parent)
     setMaximumHeight(120);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    memset(mChannelRed, 0, sizeof(unsigned long) * BIN_SIZE);
-    memset(mChannelBlue, 0, sizeof(unsigned long) * BIN_SIZE);
-    memset(mChannelGreen, 0, sizeof(unsigned long) * BIN_SIZE);
+    memset(mChannelRed, 0, sizeof(uint32_t) * BIN_SIZE);
+    memset(mChannelBlue, 0, sizeof(uint32_t) * BIN_SIZE);
+    memset(mChannelGreen, 0, sizeof(uint32_t)  * BIN_SIZE);
 
     mMaxAll = 0;
 }
@@ -31,11 +31,12 @@ void Histogram::recalculate()
 {
     // the default BIN_SIZE = 256
     //set all values to 0
-    memset(mChannelRed, 0, sizeof(unsigned long) * BIN_SIZE);
-    memset(mChannelBlue, 0, sizeof(unsigned long) * BIN_SIZE);
-    memset(mChannelGreen, 0, sizeof(unsigned long) * BIN_SIZE);
+    memset(mChannelRed, 0, sizeof(uint32_t) * BIN_SIZE);
+    memset(mChannelBlue, 0, sizeof(uint32_t) * BIN_SIZE);
+    memset(mChannelGreen, 0, sizeof(uint32_t) * BIN_SIZE);
 
     mMaxAll = 0;
+    int pos = 0;
 
     // first do uniform distribution (linear transform)
     // TODO: do we need to count all or just 1/2 or 1/4 of the pic (skip 2 or 4)
@@ -53,28 +54,39 @@ void Histogram::recalculate()
             int green = pixels[i * 4 + 1];
             int blue  = pixels[i * 4 + 0];
 
-            // TODO: consider how to handle values outside range
-            //if (red > 0.0 && red < 1.0)
             mChannelRed[(int)(red * factor)]++;
-
-            //if (green > 0.0 && green < 1.0)
             mChannelGreen[(int)(green * factor)]++;
-
-            // if (blue > 0.0 && blue < 1.0)
             mChannelBlue[(int)(blue * factor)]++;
 
             // use green as the average luminance.
             // use this value to scale the y axis of the histogram when painting
 
-            // if (green > 0.0 && green < 1.0)
-            if (mMaxAll < mChannelGreen[(int)((double)green * factor)])
-                mMaxAll = mChannelGreen[(int)((double)green * factor)];
+            pos = (int)(green * factor);
+
+            // skip blown out or fully black areas
+            if (pos > 5 && pos < 250 && mMaxAll < mChannelGreen[pos])
+                mMaxAll = mChannelGreen[pos];
         }
     }
+    mMaxAll = (float)mMaxAll * 1.05f;
+    qDebug() << "Counts of red[0]" << mChannelRed[0];
+    qDebug() << "Counts of green[0]" << mChannelGreen[0];
+    qDebug() << "Counts of blue[0]" << mChannelBlue[0];
+    qDebug() << "Maxall" << mMaxAll << "pos" << pos;
     update();
 }
 
-void Histogram::paintEvent(QPaintEvent* event)
+uint32_t getHistValue(uint32_t* buf, int pos, int fromsize)
+{
+    // weighted interpolation between two values
+    float loc    = (float)pos / (float)fromsize * (float)(BIN_SIZE - 1);
+    float frac   = loc - (int)loc;
+    int   newpos = (int)loc;
+
+    return buf[newpos] * (1.0f - frac) + buf[newpos + 1] * frac;
+}
+
+void Histogram::paintEvent(QPaintEvent* /*event*/)
 {
     QPainter painter(this);
     int      ww       = width();     // widget width
@@ -88,24 +100,22 @@ void Histogram::paintEvent(QPaintEvent* event)
     if (mMaxAll == 0)
         return;
 
-    for (int x = 0; x < 256; x++)
+    for (int x = 0; x < ww; x++)
     {
         painter.setPen(penRed);
-        painter.drawLine(x,
-            wh - 1,
-            x,
-            wh -
-            (int)((double)mChannelRed[x] / (double)mMaxAll * (double)wh));
+        painter.drawLine(x, wh - 1, x, wh - 1 -
+            (int)((float)getHistValue(mChannelRed,
+            x, ww) / (float)mMaxAll * (float)wh));
 
         painter.setPen(penGreen);
-        painter.drawLine(x, wh - 1, x,
-            wh -
-            (int)((double)mChannelGreen[x] / (double)mMaxAll * (double)wh));
+        painter.drawLine(x, wh - 1, x, wh - 1 -
+            (int)((float)getHistValue(mChannelGreen,
+            x, ww) / (float)mMaxAll * (float)wh));
 
         painter.setPen(penBlue);
-        painter.drawLine(x, wh - 1, x,
-            wh -
-            (int)((double)mChannelBlue[x] / (double)mMaxAll * (double)wh));
+        painter.drawLine(x, wh - 1, x, wh - 1 -
+            (int)((float)getHistValue(mChannelBlue,
+            x, ww) / (float)mMaxAll * (float)wh));
     }
 }
 }
