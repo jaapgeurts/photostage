@@ -41,7 +41,7 @@ class TileView : public QWidget
 
         void setMinimumCellWidth(int minWidth);
         void setMaximumCellWidth(int maxWidth);
-        void setCellHeightRatio(float ratio);
+        void setCellSizeRatio(float ratio);
 
         void setCellMargins(int left, int top, int right, int bottom);
         void setCellMargins(const QMargins& margins);
@@ -62,10 +62,8 @@ class TileView : public QWidget
         void setOrientation(Qt::Orientation orientation);
         Qt::Orientation orientation() const;
 
-        void setMaxRows(int maxRows);
-        int maxRows() const;
-        void setMaxColumns(int maxColumns);
-        int maxColumns() const;
+        // set the max # of rows or cols
+        void setTilesPerColRow(int value);
 
         void setMinimumCellHeight(int minHeight);
 
@@ -73,7 +71,7 @@ class TileView : public QWidget
         void selectAll();
         void clearSelection();
 
-        int tilesPerRowOrCol();
+        int tilesPerColRow();
 
     signals:
 
@@ -105,7 +103,7 @@ class TileView : public QWidget
         void resizeEvent(QResizeEvent* event) Q_DECL_OVERRIDE;
         void mouseReleaseEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
         void mouseDoubleClickEvent(QMouseEvent*) Q_DECL_OVERRIDE;
-        void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
+        //void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
         void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
 
     private:
@@ -113,23 +111,23 @@ class TileView : public QWidget
         // Animation duration in ms
         const int ANIMATION_DURATION = 150;
 
+        int       mSbSize;
         // Tile Sizes
-        int   mMinimumCellWidth;
-        int   mMinimumCellHeight;
-        int   mMaximumCellWidth;
-        int   mComputedCellWidth;
-        int   mComputedCellHeight;
-        float mCellHeightRatio;
+        int       mMinimumCellWidth;
+        int       mMinimumCellHeight;
+        int       mMaximumCellWidth;
+        int       mComputedCellWidth;
+        int       mComputedCellHeight;
+        float     mCellSizeRatio;
+        bool      mFixedColRowCount;
 
         // other properties
         Qt::Orientation mOrientation;
-        int             mMaxColumns;
-        int             mMaxRows;
 
         // number of columns in a row or rows in a column depending on orientation
-        int                 mTilesPerColRow;
+        int mTilesPerColRow;
 
-        int                 mHighlightedTile;
+        //int                 mHighlightedTile;
 
         QMargins            mCellMargins;
         AbstractTile*       mTile;
@@ -148,8 +146,8 @@ class TileView : public QWidget
         // for scrolling
         int mViewportPosition;     // contains the top x position of the scroll area
 
-        void computeScrollBarValues(int count);
-        void computeCellSize();
+        void computeScrollBarValues();
+        void computeSizes(int w, int h);
         TileInfo createTileInfo(int index);
 
         void ensureTileVisible(int index);

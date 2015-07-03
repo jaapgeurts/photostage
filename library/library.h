@@ -40,7 +40,6 @@ class Library : public Module
 
     signals:
 
-       // void photoSelectionChanged(const QList<Photo>& list);
         void photoSourceChanged(PhotoModel::SourceType type, long long id);
 
     public slots:

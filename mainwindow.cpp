@@ -25,8 +25,8 @@
 #include "import/importbackgroundtask.h"
 #include "filmstriptile.h"
 
-#define SETTINGS_WINDOW_LOCATION          "mainwindow/location"
-#define SETTINGS_SPLITTER_FILMSTRIP_SIZES "mainwindow/splitter_filmstrip"
+const QString SETTINGS_WINDOW_LOCATION          = "location";
+const QString SETTINGS_SPLITTER_FILMSTRIP_SIZES = "splitter_filmstrip";
 
 namespace PhotoStage
 {
@@ -41,9 +41,11 @@ MainWindow::MainWindow(QWidget* parent) :
     mDatabaseAccess = new DatabaseAccess();
 
     QSettings settings;
+    qDebug() << "Settings at:" << settings.fileName();
     move(settings.value(SETTINGS_WINDOW_LOCATION).toPoint());
 
     QList<int> l;
+    settings.beginGroup("mainwindow");
 
     if (settings.contains(SETTINGS_SPLITTER_FILMSTRIP_SIZES))
     {
@@ -52,9 +54,11 @@ MainWindow::MainWindow(QWidget* parent) :
         {
             l << v.toInt();
         }
+        qDebug() << "Key exists";
     }
     else
     {
+        qDebug() << "Key not exists";
         l << 600 << 200;
     }
     ui->splitter->setSizes(l);
@@ -84,10 +88,11 @@ MainWindow::MainWindow(QWidget* parent) :
     FilmstripTile* fsTile = new FilmstripTile(ui->filmStrip);
     ui->filmStrip->setTileFlyweight(fsTile);
     ui->filmStrip->setMinimumCellHeight(80);
-    ui->filmStrip->setMaxRows(1);
+    ui->filmStrip->setTilesPerColRow(1);
     ui->filmStrip->setCheckBoxMode(false);
     ui->filmStrip->setOrientation(Qt::Horizontal);
     ui->filmStrip->setSelectionModel(mPhotoSelection);
+    ui->filmStrip->setObjectName("Filmstrip");
 
     connect(ui->filmStrip, &TileView::doubleClickTile,
         this, &MainWindow::onTileDoubleClicked);
@@ -153,6 +158,10 @@ MainWindow::~MainWindow()
 {
     //QDesktopWidget * desktop = QApplication::desktop();
     QSettings settings;
+
+    qDebug() << "Saving settings to" << settings.fileName();
+
+    settings.beginGroup("mainwindow");
 
     settings.setValue(SETTINGS_WINDOW_LOCATION, pos());
     QVariantList list;

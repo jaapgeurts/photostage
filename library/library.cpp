@@ -46,6 +46,8 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     ui->mClvPhotos->setMinimumCellWidth(150);
     ui->mClvPhotos->setMaximumCellWidth(200);
     ui->mClvPhotos->setCheckBoxMode(false);
+    //ui->mClvPhotos->setTilesPerColRow(ui->hsThumbSize->value());
+   // ui->mClvPhotos->setObjectName("LibaryPhotos");
 
     ui->mClvPhotos->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->mClvPhotos, &TileView::customContextMenuRequested,
@@ -168,7 +170,7 @@ bool Library::canSelectUpDown()
 
 int Library::tilesPerRowOrCol()
 {
-    return ui->mClvPhotos->tilesPerRowOrCol();
+    return ui->mClvPhotos->tilesPerColRow();
 }
 
 void Library::setSelectionModel(QItemSelectionModel* selectionModel)
@@ -201,9 +203,9 @@ void Library::customContextMenu(const QPoint& /*pos*/)
     //    m->exec();
 }
 
-void Library::thumbSizeChanged(int /*newValue*/)
+void Library::thumbSizeChanged(int newValue)
 {
-    // todo: change the number of columns here.
+    ui->mClvPhotos->setMinimumCellWidth(350-newValue);
 }
 
 /*void Library::rotateLeftClicked(const QModelIndex &index)
@@ -245,7 +247,6 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected,
     mKeywording->setPhotos(photos);
     mMetaDataModule->setPhotos(photos);
 
-  //  emit photoSelectionChanged(photos);
 }
 
 void Library::onCurrentPhotoChanged(const QModelIndex& current,
