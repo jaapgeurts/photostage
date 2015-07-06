@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>702</width>
+    <width>925</width>
     <height>467</height>
    </rect>
   </property>
@@ -69,7 +69,7 @@
           </sizepolicy>
          </property>
          <property name="currentIndex">
-          <number>1</number>
+          <number>0</number>
          </property>
          <widget class="PhotoStage::TileView" name="mClvPhotos"/>
          <widget class="QScrollArea" name="mLoupeScrollView">
@@ -87,8 +87,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>364</width>
-             <height>389</height>
+             <width>100</width>
+             <height>30</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -216,6 +216,66 @@
            </widget>
           </item>
           <item>
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>5</width>
+              <height>32</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cbZoom">
+            <item>
+             <property name="text">
+              <string>Fit</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>¼</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>½</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>1½</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>2</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>3</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>4</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -231,16 +291,16 @@
           <item>
            <widget class="QSlider" name="hsThumbSize">
             <property name="minimum">
-             <number>50</number>
+             <number>1</number>
             </property>
             <property name="maximum">
-             <number>300</number>
+             <number>8</number>
             </property>
             <property name="pageStep">
              <number>0</number>
             </property>
             <property name="value">
-             <number>150</number>
+             <number>4</number>
             </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -339,11 +399,11 @@
    <sender>hsThumbSize</sender>
    <signal>valueChanged(int)</signal>
    <receiver>Library</receiver>
-   <slot>thumbSizeChanged(int)</slot>
+   <slot>onThumbSizeChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>439</x>
-     <y>432</y>
+     <x>755</x>
+     <y>441</y>
     </hint>
     <hint type="destinationlabel">
      <x>699</x>
@@ -351,10 +411,27 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>cbZoom</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>Library</receiver>
+   <slot>onZoomLevelChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>308</x>
+     <y>432</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>418</x>
+     <y>460</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showGrid()</slot>
   <slot>showLoupe()</slot>
-  <slot>thumbSizeChanged(int)</slot>
+  <slot>onThumbSizeChanged(int)</slot>
+  <slot>onZoomLevelChanged(int)</slot>
  </slots>
 </ui>

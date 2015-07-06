@@ -103,11 +103,11 @@ long long ImportWorkUnit::importPhoto(const QFileInfo& file,
         "insert into photo (path_id,filename, iso, exposure_time, \
         focal_length, datetime_original, datetime_digitized, rotation, \
         longitude, lattitude, copyright, artist, aperture, flash, lens_name,  \
-        make, model ) \
+        make, model, width, height ) \
         values (:path, :filename,:iso,:exposure_time,:focal_length,\
             :datetime_original,:datetime_digitized,:rotation,:longitude, \
             :lattitude,:copyright,:artist,:aperture,:flash,:lens_name, \
-            :make, :model)");
+            :make, :model, :width, :height)");
     q.bindValue(":path", mLastkey);
     q.bindValue(":filename", fileName);
     q.bindValue(":iso", ei.isoSpeed);
@@ -125,6 +125,8 @@ long long ImportWorkUnit::importPhoto(const QFileInfo& file,
     q.bindValue(":lens_name", ei.lensName);
     q.bindValue(":make", ei.make);
     q.bindValue(":model", ei.model);
+    q.bindValue(":width", ei.width);
+    q.bindValue(":height", ei.height);
 
     if (!q.exec())
     {
@@ -155,6 +157,9 @@ int ImportWorkUnit::createPaths(QStringList& paths)
     q.prepare(
         "select id,directory,parent_id from path where directory = :dir");
     int key = insertPathRec(q, paths, 0, -1);
+
+    // rebuild the tree
+    rebuildTree(1,1);
 
     return key;
 }
@@ -200,5 +205,39 @@ int ImportWorkUnit::insertPathRec(QSqlQuery& q,
         return insertPathRec(q, path, pos + 1, newparent);
     }
     return -1;
+}
+
+long long ImportWorkUnit::rebuildTree(long long parent_id, long long left)
+{
+    // the right value of this node is the left value + 1
+
+    long long right = left + 1;
+
+    // get all children of this node
+
+    QSqlQuery q;
+
+    q.prepare("select id from path where parent_id = :parent_id;");
+    q.bindValue(":parent_id", parent_id);
+
+    q.exec();
+
+    while (q.next())
+    {
+        long long id = q.value(0).toLongLong();
+        right = rebuildTree(id, right);
+    }
+
+    q.prepare("update path set lft=:left, rgt=:right where id=:parent_id;");
+
+    q.bindValue(":left", left);
+    q.bindValue(":right", right);
+    q.bindValue(":parent_id", parent_id);
+
+    q.exec();
+
+    // return the right value of this node + 1
+
+    return right + 1;
 }
 }

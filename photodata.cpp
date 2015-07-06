@@ -60,6 +60,8 @@ PhotoData::PhotoData(QSqlQuery& q) :
     mExifInfo.lensName  = q.value(18).toString();
     mExifInfo.make      = q.value(19).toString();
     mExifInfo.model     = q.value(20).toString();
+    mExifInfo.width     = q.value(21).toInt();
+    mExifInfo.height    = q.value(22).toInt();
 }
 
 PhotoData::~PhotoData()
@@ -120,6 +122,12 @@ void PhotoData::setExifInfo(const ExifInfo& exifInfo)
 {
     mExifInfo = exifInfo;
 }
+
+ExifInfo& PhotoData::exifInfo()
+{
+    return mExifInfo;
+}
+
 
 const ExifInfo& PhotoData::exifInfo() const
 {

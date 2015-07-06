@@ -7,37 +7,39 @@
 
 namespace PhotoStage
 {
-    class ImportWorkUnit
-    {
-        public:
+class ImportWorkUnit
+{
+    public:
 
-            static ImportWorkUnit* instance();
-            long long importPhoto(const QFileInfo& file,
-                const ImportOptions& options);
+        static ImportWorkUnit* instance();
+        long long importPhoto(const QFileInfo& file,
+            const ImportOptions& options);
 
-            void beginImport();
+        void beginImport();
 
-        protected:
+        long long rebuildTree(long long parent_id, long long left);
 
-            explicit ImportWorkUnit();
+    protected:
 
-        signals:
+        explicit ImportWorkUnit();
 
-        public slots:
+    signals:
 
-        private:
+    public slots:
 
-            static ImportWorkUnit* mInstance;
+    private:
 
-            // state variables for the import process
-            QString   mLastpath;
-            long long mLastkey;
+        static ImportWorkUnit* mInstance;
 
-            int createPaths(QStringList& paths);
-            int insertPathRec(QSqlQuery& q,
-                const QStringList& path,
-                int pos,
-                int parentid);
-    };
+        // state variables for the import process
+        QString   mLastpath;
+        long long mLastkey;
+
+        int createPaths(QStringList& paths);
+        int insertPathRec(QSqlQuery& q,
+            const QStringList& path,
+            int pos,
+            int parentid);
+};
 }
 #endif // IMPORTWORKUNIT_H

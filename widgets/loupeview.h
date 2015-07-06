@@ -8,54 +8,73 @@
 
 namespace PhotoStage
 {
-    class LoupeView : public QWidget
-    {
-        Q_OBJECT
+class LoupeView : public QWidget
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            enum ZoomMode
-            {
-                ZoomFit = 1,
-                Zoom25,
-                Zoom50,
-                Zoom100,
-                Zoom150,
-                Zoom200,
-                Zoom300
-            };
+        enum ZoomMode
+        {
+            ZoomFit = 0,
+            Zoom25,
+            Zoom50,
+            Zoom100,
+            Zoom150,
+            Zoom200,
+            Zoom300,
+            Zoom400,
+            ZoomLast
+        };
 
-            explicit LoupeView(QWidget* parent = 0);
+        enum InfoMode
+        {
+            InfoOff = 1,
+            InfoSpaceTime,
+            InfoExposure,
+            InfoLast
+        };
 
-            void setZoomMode(ZoomMode zoomMode);
+        explicit LoupeView(QWidget* parent = 0);
 
-        signals:
+        void setZoomMode(ZoomMode zoomMode);
 
-        public slots:
+    signals:
 
-            void setPhoto(Photo photo);
+    public slots:
 
-        protected:
+        void setPhoto(Photo photo);
 
-            void paintEvent(QPaintEvent* event);
+        void setInfoMode(InfoMode mode);
+        void cycleInfoMode();
 
-            //    void enterEvent(QEvent *event);
-            //    void leaveEvent(QEvent* event);
-            void mousePressEvent(QMouseEvent* event);
-            void mouseReleaseEvent(QMouseEvent* event);
-            void mouseMoveEvent(QMouseEvent* event);
+    protected:
 
-        private:
+        void paintEvent(QPaintEvent*);
 
-            Photo   mPhoto;
-            bool     mPanning;
-            QPoint   mMousePressLocation;
-            QPoint   mPhotoTopLeft;
-            ZoomMode mZoomMode;
-//            QBrush   mCheckeredBrush;
+        //    void enterEvent(QEvent *event);
+        //    void leaveEvent(QEvent* event);
+        void mousePressEvent(QMouseEvent* event);
+        void mouseReleaseEvent(QMouseEvent* event);
+        void mouseMoveEvent(QMouseEvent* event);
 
-            void ensureBestPosition();
-    };
+        void resizeEvent(QResizeEvent *);
+
+private:
+
+        Photo    mPhoto;
+        bool     mPanning;
+        QPoint   mMousePressLocation;
+        QPoint   mPhotoTopLeft;
+        ZoomMode mZoomMode;
+        InfoMode mInfoMode;
+        //            QBrush   mCheckeredBrush;
+
+        float mZoomFactors[ZoomLast] =
+        { 0.9f, 0.25f, 0.5f, 1, 1.5f, 2.0f, 3.0f, 4.0f };
+
+        void ensureBestPosition();
+};
 }
 
 #endif // LOUPEVIEW_H

@@ -21,7 +21,7 @@ void MetaDataModule::setPhotos(const QList<Photo>& list)
 
 void MetaDataModule::setMetaData(const Photo& p)
 {
-    ExifInfo ei = p.exifInfo();
+    const ExifInfo& ei = ((Photo&)p).exifInfo();
 
     ui->leAperture->setText("ƒ / "+QString::number(ei.aperture));
     ui->leArtist->setText(ei.artist);
@@ -35,5 +35,6 @@ void MetaDataModule::setMetaData(const Photo& p)
     ui->leFocalLength->setText(QString::number(ei.focalLength)+"mm");
     ui->leISO->setText(QString::number(ei.isoSpeed));
     ui->leLens->setText(ei.lensName);
+    ui->leDimensions->setText(ei.formatDimension());
 }
 }

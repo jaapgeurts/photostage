@@ -45,10 +45,8 @@ QVariant ImageFileSystemModel::data(const QModelIndex& index,
             info.filePath = path;
             // load image in background thread
             PreviewFileLoader* loader = new PreviewFileLoader(path, index);
-            connect(loader,
-                &PreviewFileLoader::dataReady,
-                this,
-                &ImageFileSystemModel::imageLoaded);
+            connect(loader, &PreviewFileLoader::dataReady,
+                this, &ImageFileSystemModel::imageLoaded);
             mThreadPool->start(loader);
 
             // Insert the dummy image here so that the we know the loader thread has been started

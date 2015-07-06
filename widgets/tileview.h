@@ -62,16 +62,16 @@ class TileView : public QWidget
         void setOrientation(Qt::Orientation orientation);
         Qt::Orientation orientation() const;
 
+
         // set the max # of rows or cols
         void setTilesPerColRow(int value);
+        int tilesPerColRow();
 
         void setMinimumCellHeight(int minHeight);
 
         // TODO: move these to a different place
         void selectAll();
         void clearSelection();
-
-        int tilesPerColRow();
 
     signals:
 
@@ -103,6 +103,7 @@ class TileView : public QWidget
         void resizeEvent(QResizeEvent* event) Q_DECL_OVERRIDE;
         void mouseReleaseEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
         void mouseDoubleClickEvent(QMouseEvent*) Q_DECL_OVERRIDE;
+
         //void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
         void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
 

@@ -47,7 +47,7 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     ui->mClvPhotos->setMaximumCellWidth(200);
     ui->mClvPhotos->setCheckBoxMode(false);
     //ui->mClvPhotos->setTilesPerColRow(ui->hsThumbSize->value());
-   // ui->mClvPhotos->setObjectName("LibaryPhotos");
+    // ui->mClvPhotos->setObjectName("LibaryPhotos");
 
     ui->mClvPhotos->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->mClvPhotos, &TileView::customContextMenuRequested,
@@ -203,9 +203,29 @@ void Library::customContextMenu(const QPoint& /*pos*/)
     //    m->exec();
 }
 
-void Library::thumbSizeChanged(int newValue)
+void Library::onZoomLevelChanged(int zoomLevel)
 {
-    ui->mClvPhotos->setMinimumCellWidth(350-newValue);
+    LoupeView::ZoomMode zoom[LoupeView::ZoomLast] = {
+        LoupeView::ZoomFit, LoupeView::Zoom25, LoupeView::Zoom50,
+        LoupeView::Zoom100, LoupeView::Zoom150, LoupeView::Zoom200,
+        LoupeView::Zoom300, LoupeView::Zoom400
+    };
+
+    ui->mLoupeView->setZoomMode(zoom[zoomLevel]);
+}
+
+void Library::onThumbSizeChanged(int newValue)
+{
+    int w = ui->mClvPhotos->width();
+
+    qDebug() << "Newvalue=" << newValue;
+
+    int newMin = w / (newValue + 1);
+
+    if (newMin < 50)
+        newMin = 50;
+
+    ui->mClvPhotos->setMinimumCellWidth(newMin);
 }
 
 /*void Library::rotateLeftClicked(const QModelIndex &index)
@@ -246,7 +266,6 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected,
 
     mKeywording->setPhotos(photos);
     mMetaDataModule->setPhotos(photos);
-
 }
 
 void Library::onCurrentPhotoChanged(const QModelIndex& current,
@@ -279,6 +298,11 @@ void Library::onPathModelRowsRemoved(const QModelIndex& /*parent*/,
 void Library::onTileDoubleClicked(const QModelIndex& /*index*/)
 {
     showLoupe();
+}
+
+void Library::onCycleLoupeInfo()
+{
+    ui->mLoupeView->cycleInfoMode();
 }
 
 void Library::showLoupe()

@@ -54,6 +54,8 @@ class Library : public Module
         void onPathModelRowsRemoved(const QModelIndex&, int, int);
         void onTileDoubleClicked(const QModelIndex&);
 
+        void onCycleLoupeInfo();
+
         // For clicks on the tile
         //    void rotateLeftClicked(const QModelIndex& index);
         //    void rotateRightClicked(const QModelIndex& index);
@@ -66,7 +68,8 @@ class Library : public Module
         void onNewCollectionClicked();
         void onFilesClicked(const QModelIndex&);
         void customContextMenu(const QPoint&);
-        void thumbSizeChanged(int);
+        void onThumbSizeChanged(int);
+        void onZoomLevelChanged(int zoomLevel);
 
     private:
 

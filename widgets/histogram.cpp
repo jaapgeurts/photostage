@@ -69,10 +69,10 @@ void Histogram::recalculate()
         }
     }
     mMaxAll = (float)mMaxAll * 1.05f;
-    qDebug() << "Counts of red[0]" << mChannelRed[0];
-    qDebug() << "Counts of green[0]" << mChannelGreen[0];
-    qDebug() << "Counts of blue[0]" << mChannelBlue[0];
-    qDebug() << "Maxall" << mMaxAll << "pos" << pos;
+//    qDebug() << "Counts of red[0]" << mChannelRed[0];
+//    qDebug() << "Counts of green[0]" << mChannelGreen[0];
+//    qDebug() << "Counts of blue[0]" << mChannelBlue[0];
+//    qDebug() << "Maxall" << mMaxAll << "pos" << pos;
     update();
 }
 

@@ -221,22 +221,18 @@ QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
 {
     QSqlQuery q;
     QString   query = QString(
-        "with recursive cte as ( \
-                            select id,directory \
-                            from path \
-                            where parent_id is NULL \
-                            union all \
-                            select t.id as id , cte.directory || :separator || t.directory as directory \
-                            from cte, path t \
-                            where cte.id = t.parent_id \
-            ) select p.id, p.filename, c.directory,p.rating,p.color,p.flag, \
-              p.iso, p.aperture, p.exposure_time, p.focal_length, p.datetime_original, \
-              p.datetime_digitized, p.rotation, p.lattitude, p.longitude, \
-              p.copyright, p.artist, p.flash, p.lens_name, p.make, p.model \
-            from cte c, photo p \
-            where c.id = p.path_id \
-            and p.id in (:photoids) \
-            order by p.id");
+        "select p.id, p.filename, d.path,p.rating,p.color,p.flag, \
+                p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
+                p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
+                p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
+                p.width, p.height  \
+              from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
+              child.* from path child join path ancestor \
+              on child.lft >= ancestor.lft \
+              and child.lft <= ancestor.rgt \
+              group by child.lft \
+              order by child.lft) as d on p.path_id = d.id \
+              and p.id in (:photoids);");
 
     QString photoids;
 
@@ -249,96 +245,101 @@ QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
     q.prepare(query);
     q.bindValue(":separator", QDir::separator());
 
-    QList<Photo> photoInfoList;
+    QList<Photo> list;
 
-    if (!q.exec())
+    if (!q.exec() && !q.isValid())
     {
-        qDebug() << "PhotoWorkUnit::getPhotosById() error" << q.lastError();
-        return photoInfoList;
+        qDebug() << "Query failed" << q.executedQuery();
+        qDebug() << q.lastError();
+        return list;
     }
 
     while (q.next())
     {
-        photoInfoList.append(Photo(q));
+        list.append(Photo(q));
     }
-    return photoInfoList;
+    return list;
+}
+
+void PhotoWorkUnit::updateExifInfo(const Photo& photo) const
+{
+    QSqlQuery       q;
+
+    const ExifInfo& ei = photo.exifInfo();
+
+    q.prepare(
+        "update photo set width=:width, height=:height where id = :photoid");
+    q.bindValue(":width", ei.width);
+    q.bindValue(":height", ei.height);
+    q.bindValue(":photoid", photo.id());
+
+    if (!q.exec())
+    {
+        qDebug() << "Query failed" << q.executedQuery();
+        qDebug() << q.lastError();
+    }
+
+    return;
 }
 
 // TODO: make path_id work and option to include
 QList<Photo> PhotoWorkUnit::getPhotosByPath(long long path_id,
     bool includeSubDirs)
 {
-    QSqlQuery q;
+    QList<Photo> list;
 
-    QString   query;
+    QSqlQuery    q;
 
-    query =
-        "WITH RECURSIVE cte AS ( \
-            SELECT id,directory \
-            FROM path \
-            WHERE parent_id IS NULL \
-            UNION ALL \
-            SELECT t.id AS id , cte.directory || '/' || t.directory AS directory \
-            FROM cte, path t \
-            WHERE cte.id = t.parent_id ) \
-            SELECT c.directory \
-            FROM cte c \
-            where c.id = :pathid";
+    q.prepare("select lft,rgt from path where id = :id;");
+    q.bindValue(":id", path_id);
 
-    q.prepare(query);
-    q.bindValue(":pathid", path_id);
+    if (!q.exec() && !q.isValid())
+    {
+        qDebug() << "Query failed" << q.executedQuery();
+        qDebug() << q.lastError();
+        return list;
+    }
+    q.next();
 
-    if (!q.exec())
-        qDebug() << "Error getting path for selected id\n"  <<
-            q.lastError();
+    long long lft = q.value(0).toLongLong();
+    long long rgt = q.value(1).toLongLong();
 
-    if (!q.first())
-        qDebug() << "Query to get path didn't return results\n" <<
-            q.lastError();
-    QString path                 = q.value(0).toString();
-    QString includeSubDirsClause = "c.directory like ':path%'";
-    includeSubDirsClause.replace(":path", path);
-
-    query = QString(
-        "with recursive cte as ( \
-                    select id,directory \
-                    from path \
-                    where parent_id is null \
-                    union all \
-                    select t.id as id , cte.directory || :separator || t.directory as directory \
-                    from cte, path t \
-                    where cte.id = t.parent_id \
-            ) select p.id, p.filename, c.directory,p.rating,p.color,p.flag, \
-              p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
-              p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
-              p.copyright, p.artist, p.flash, p.lens_name, p.make,\
-              p.model, c.id \
-            from cte c, photo p \
-            where c.id = p.path_id and :top_or_include \
-            order by p.id");
-
-    if (includeSubDirs)
-        query.replace(":top_or_include", includeSubDirsClause);
-    else
-        query.replace(":top_or_include", "c.id = " + QString::number(
-                path_id));
+    //    if (includeSubDirs)
+    //        query.replace(":top_or_include", includeSubDirsClause);
+    //    else
+    //        query.replace(":top_or_include", "c.id = " + QString::number(
+    //                path_id));
 
     q.clear();
-    q.prepare(query);
+
+    q.prepare(
+        "select p.id, p.filename, d.path,p.rating,p.color,p.flag, \
+              p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
+              p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
+              p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
+                p.width, p.height  \
+            from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
+            child.* from path child join path ancestor \
+            on child.lft >= ancestor.lft \
+            and child.lft <= ancestor.rgt \
+            group by child.lft \
+            order by child.lft) as d on p.path_id = d.id \
+            and d.lft between :lft and :rgt;" );
     q.bindValue(":separator", QDir::separator());
-    q.bindValue(":topid", path_id);
+    q.bindValue(":lft", lft);
+    q.bindValue(":rgt", rgt);
 
-    if (!q.exec())
-        qDebug() << "SqlPhotoModel error" << q.lastError();
-
-    //qDebug() << q.lastQuery();
-
-    QList<Photo> photoInfoList;
+    if (!q.exec() && !q.isValid())
+    {
+        qDebug() << "Query failed" << q.executedQuery();
+        qDebug() << q.lastError();
+        return list;
+    }
 
     while (q.next())
     {
-        photoInfoList.append(Photo(q));
+        list.append(Photo(q));
     }
-    return photoInfoList;
+    return list;
 }
 }

@@ -74,7 +74,7 @@ QSize TileView::minimumSizeHint() const
 {
     QSize s;
 
-    qDebug() << objectName() << "::minimumSizeHint()";
+    //qDebug() << objectName() << "::minimumSizeHint()";
 
     int colRowCount;
 
@@ -89,7 +89,7 @@ QSize TileView::minimumSizeHint() const
     else if (mOrientation == Qt::Vertical)
         s = QSize(mMinimumCellWidth * mFixedColRowCount + mSbSize,
                 mMinimumCellHeight);
-    qDebug() << s;
+    // qDebug() << s;
     return s;
 }
 
@@ -455,10 +455,10 @@ void TileView::resizeEvent(QResizeEvent* /*event*/)
     else
         mScrollBar->setGeometry(0, height() - mSbSize, width(), mSbSize);
 
-    qDebug() << "resizeEvent() of" << objectName() << ":" << width() << "," <<
-        height();
+    //  qDebug() << "resizeEvent() of" << objectName() << ":" << width() << "," <<
+    // height();
     computeSizes(width(), height());
-    qDebug() << "Result width" << mComputedCellWidth * mTilesPerColRow;
+    //  qDebug() << "Result width" << mComputedCellWidth * mTilesPerColRow;
 
     // recalc scrollbar values
     if (mListModel != NULL)

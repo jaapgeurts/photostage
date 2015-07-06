@@ -42,15 +42,15 @@ void DatabaseAccess::initDb()
     QStringList list;
 
     list <<
-        "create table if not exists path (id integer primary key AUTOINCREMENT, directory varchar, parent_id integer)";
+        "CREATE TABLE if not exists path (id integer PRIMARY KEY AUTOINCREMENT, directory varchar, parent_id integer REFERENCES path (id), lft INTEGER NOT NULL DEFAULT (0), rgt INTEGER NOT NULL DEFAULT (0));";
     list <<
-        "CREATE TABLE if not exists photo(id integer PRIMARY KEY AUTOINCREMENT, path_id integer, filename TEXT, iso integer, exposure_time float, focal_length float, datetime_original TEXT, photo_hash TEXT, rating integer, color integer, flag integer, rotation INTEGER, longitude float, lattitude float, datetime_digitized TEXT, copyright TEXT, artist TEXT, aperture float, flash BOOLEAN, lens_name TEXT, make TEXT, model TEXT);";
+        "CREATE TABLE if not exists photo (id integer PRIMARY KEY AUTOINCREMENT, path_id integer REFERENCES path (id), filename TEXT NOT NULL, iso integer, exposure_time float, focal_length float, datetime_original TEXT, photo_hash TEXT, rating integer, color integer, flag integer, rotation INTEGER, longitude float, lattitude float, datetime_digitized TEXT, copyright TEXT, artist TEXT, aperture float, flash BOOLEAN, lens_name TEXT, make TEXT, model TEXT, width integer, height integer);";
     list <<
-        "create table if not exists keyword (id integer primary key AUTOINCREMENT, keyword varchar, parent_id integer)";
+        "CREATE TABLE if not exists keyword (id integer PRIMARY KEY AUTOINCREMENT, keyword varchar NOT NULL, parent_id integer REFERENCES keyword (id), lft INTEGER NOT NULL DEFAULT (0), rgt INTEGER NOT NULL DEFAULT (0));";
     list <<
         "create unique index if not exists idx_keyword on keyword (keyword, parent_id)";
     list <<
-        "create table if not exists photo_keyword (photo_id integer, keyword_id integer)";
+        "CREATE TABLE if not exists photo_keyword (photo_id integer REFERENCES photo (path_id), keyword_id integer REFERENCES keyword (id));";
     list <<
         "create unique index if not exists idx_photo_keyword on photo_keyword (photo_id, keyword_id)";
     list <<

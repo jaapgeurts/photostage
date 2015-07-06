@@ -96,6 +96,7 @@ struct __attribute__((packed)) Canon_ColorData
 
 Exiv2Lib::Exiv2Lib()
 {
+    mExifInfo = {0};
 }
 
 template<typename T>
@@ -111,13 +112,19 @@ QString Exiv2Lib::getExifValue(ExifData& data,
     const QString& key,
     QString defValue)
 {
-    ExifData::const_iterator pos;
+    try
+    {
+        ExifData::const_iterator pos;
 
+        pos = data.findKey(ExifKey(key.toStdString()));
 
-    pos = data.findKey(ExifKey(key.toStdString()));
-
-    if (pos != data.end())
-        return QString::fromStdString(pos->toString());
+        if (pos != data.end())
+            return QString::fromStdString(pos->toString());
+    }
+    catch (BasicError<char> e)
+    {
+        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+    }
     return defValue;
 }
 
@@ -126,11 +133,17 @@ float Exiv2Lib::getExifValue(ExifData& data, const QString& key, float defValue)
 {
     ExifData::const_iterator pos;
 
+    try
+    {
+        pos = data.findKey(ExifKey(key.toStdString()));
 
-    pos = data.findKey(ExifKey(key.toStdString()));
-
-    if (pos != data.end())
-        return pos->toFloat();
+        if (pos != data.end())
+            return pos->toFloat();
+    }
+    catch (BasicError<char> e)
+    {
+        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+    }
     return defValue;
 }
 
@@ -139,11 +152,17 @@ long Exiv2Lib::getExifValue(ExifData& data, const QString& key, long defValue)
 {
     ExifData::const_iterator pos;
 
+    try
+    {
+        pos = data.findKey(ExifKey(key.toStdString()));
 
-    pos = data.findKey(ExifKey(key.toStdString()));
-
-    if (pos != data.end())
-        return pos->toLong();
+        if (pos != data.end())
+            return pos->toLong();
+    }
+    catch (BasicError<char> e)
+    {
+        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+    }
     return defValue;
 }
 
@@ -154,11 +173,17 @@ uint16_t Exiv2Lib::getExifValue(ExifData& data,
 {
     ExifData::const_iterator pos;
 
+    try
+    {
+        pos = data.findKey(ExifKey(key.toStdString()));
 
-    pos = data.findKey(ExifKey(key.toStdString()));
-
-    if (pos != data.end())
-        return (uint16_t)pos->toLong();
+        if (pos != data.end())
+            return (uint16_t)pos->toLong();
+    }
+    catch (BasicError<char> e)
+    {
+        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+    }
     return defValue;
 }
 
@@ -169,11 +194,17 @@ int16_t Exiv2Lib::getExifValue(ExifData& data,
 {
     ExifData::const_iterator pos;
 
+    try
+    {
+        pos = data.findKey(ExifKey(key.toStdString()));
 
-    pos = data.findKey(ExifKey(key.toStdString()));
-
-    if (pos != data.end())
-        return (int16_t)pos->toLong();
+        if (pos != data.end())
+            return (int16_t)pos->toLong();
+    }
+    catch (BasicError<char> e)
+    {
+        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+    }
     return defValue;
 }
 
@@ -182,11 +213,17 @@ bool Exiv2Lib::getExifValue(ExifData& data, const QString& key, bool defValue)
 {
     ExifData::const_iterator pos;
 
+    try
+    {
+        pos = data.findKey(ExifKey(key.toStdString()));
 
-    pos = data.findKey(ExifKey(key.toStdString()));
-
-    if (pos != data.end())
-        return pos->toLong() == 1;
+        if (pos != data.end())
+            return pos->toLong() == 1;
+    }
+    catch (BasicError<char> e)
+    {
+        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+    }
     return defValue;
 }
 
@@ -197,11 +234,17 @@ ExifInfo::Rotation Exiv2Lib::getExifValue(ExifData& data,
 {
     ExifData::const_iterator pos;
 
+    try
+    {
+        pos = data.findKey(ExifKey(key.toStdString()));
 
-    pos = data.findKey(ExifKey(key.toStdString()));
-
-    if (pos != data.end())
-        return (ExifInfo::Rotation)pos->toLong();
+        if (pos != data.end())
+            return (ExifInfo::Rotation)pos->toLong();
+    }
+    catch (BasicError<char> e)
+    {
+        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+    }
     return defValue;
 }
 
@@ -211,22 +254,28 @@ QDateTime Exiv2Lib::getExifValue(ExifData& data, const QString& key,
 {
     ExifData::const_iterator pos;
 
-
-    pos = data.findKey(ExifKey(key.toStdString()));
-
-    if (pos != data.end())
+    try
     {
-        QString   datetime = QString::fromStdString(pos->toString());
-        QDateTime result   = QDateTime::fromString(datetime, Qt::ISODate);
+        pos = data.findKey(ExifKey(key.toStdString()));
 
-        if (result.isValid())
+        if (pos != data.end())
         {
-            return result;
+            QString   datetime = QString::fromStdString(pos->toString());
+            QDateTime result   = QDateTime::fromString(datetime, Qt::ISODate);
+
+            if (result.isValid())
+            {
+                return result;
+            }
+            else
+            {
+                qDebug() << "Can't parse date:" << datetime;
+            }
         }
-        else
-        {
-            qDebug() << "Can't parse date:" << datetime;
-        }
+    }
+    catch (BasicError<char> e)
+    {
+        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
     }
     return defValue;
 }
@@ -238,15 +287,21 @@ bool Exiv2Lib::getExifBytes(ExifData& data,
 {
     ExifData::const_iterator pos;
 
-
-    pos = data.findKey(ExifKey(key.toStdString()));
-
-    if (pos != data.end())
+    try
     {
-        if (size != pos->size())
-            return false;
-        pos->copy(buf, Exiv2::littleEndian);
-        return true;
+        pos = data.findKey(ExifKey(key.toStdString()));
+
+        if (pos != data.end())
+        {
+            if (size != pos->size())
+                return false;
+            pos->copy(buf, Exiv2::littleEndian);
+            return true;
+        }
+    }
+    catch (BasicError<char> e)
+    {
+        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
     }
     return false;
 }
@@ -254,7 +309,6 @@ bool Exiv2Lib::getExifBytes(ExifData& data,
 bool Exiv2Lib::openFile(const QString& path)
 {
     QFileInfo fi(path);
-
 
     if (!fi.isFile())
     {
@@ -305,6 +359,10 @@ bool Exiv2Lib::openFile(const QString& path)
             "Exif.Image.Copyright", "");
     mExifInfo.artist = getExifValue<QString>(data,
             "Exif.Image.Artist", "");
+    mExifInfo.width = getExifValue<uint16_t>(data,
+            "Exif.Photo.ExifImageWidth", 0);
+    mExifInfo.height = getExifValue<uint16_t>(data,
+            "Exif.Photo.ExifImageHeight", 0);
 
     if (mExifInfo.make.startsWith("Canon"))
         readCanonNotes(data);
@@ -322,7 +380,6 @@ ExifInfo Exiv2Lib::data()
 void Exiv2Lib::readCanonNotes(ExifData& data)
 {
     uint16_t lens[3];
-
 
     if (getExifBytes(data, "Exif.CanonCs.Lens", (uint8_t*)lens,
         3 * sizeof(uint16_t)))
@@ -379,9 +436,9 @@ void Exiv2Lib::readNikonNotes(ExifData& data)
         4 * sizeof(double)))
     {
         mExifInfo.lensName =
-            QString("%1-%2 ƒ/%3-%4").arg(lens[0], 0, 'f',0).
-            arg(lens[1], 0, 'f',0).arg(lens[2], 0, 'f',0).
-            arg(lens[3], 0, 'f',0);
+            QString("%1-%2 ƒ/%3-%4").arg(lens[0], 0, 'f', 0).
+            arg(lens[1], 0, 'f', 0).arg(lens[2], 0, 'f', 0).
+            arg(lens[3], 0, 'f', 0);
     }
     setWhiteBalanceCoeffsNikon(data, mExifInfo.rgbCoeffients);
 }
@@ -389,7 +446,6 @@ void Exiv2Lib::readNikonNotes(ExifData& data)
 void Exiv2Lib::setWhiteBalanceCoeffsNikon(ExifData& data, float wb[3])
 {
     ExifData::const_iterator pos;
-
 
     /*
      * This seems to be unnecessary as the multipliers are also
@@ -461,7 +517,6 @@ void Exiv2Lib::setWhiteBalanceCoeffsNikon(ExifData& data, float wb[3])
 void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
 {
     ExifData::const_iterator pos;
-
 
     if (mExifInfo.model == "Canon EOS 300D DIGITAL" ||
         mExifInfo.model == "Canon EOS DIGITAL REBEL")
@@ -572,7 +627,6 @@ QImage Exiv2Lib::getPreview()
 {
     PreviewManager        loader(*mImageFile);
     PreviewPropertiesList list = loader.getPreviewProperties();
-
 
     if (list.empty())
     {

@@ -28,6 +28,7 @@ class PhotoData
         const QString& srcImagePath() const;
 
         void setExifInfo(const ExifInfo& exifInfo);
+        ExifInfo&       exifInfo();
         const ExifInfo& exifInfo() const;
 
         void setRating(int rating);

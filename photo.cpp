@@ -70,7 +70,12 @@ void Photo::setExifInfo(const ExifInfo &exifInfo)
     d->setExifInfo(exifInfo);
 }
 
-const ExifInfo &Photo::exifInfo() const
+ExifInfo &Photo::exifInfo()
+{
+    return d->exifInfo();
+}
+
+const ExifInfo& Photo::exifInfo() const
 {
     return d->exifInfo();
 }

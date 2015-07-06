@@ -41,7 +41,6 @@ MainWindow::MainWindow(QWidget* parent) :
     mDatabaseAccess = new DatabaseAccess();
 
     QSettings settings;
-    qDebug() << "Settings at:" << settings.fileName();
     move(settings.value(SETTINGS_WINDOW_LOCATION).toPoint());
 
     QList<int> l;
@@ -54,16 +53,15 @@ MainWindow::MainWindow(QWidget* parent) :
         {
             l << v.toInt();
         }
-        qDebug() << "Key exists";
     }
     else
     {
-        qDebug() << "Key not exists";
         l << 600 << 200;
     }
     ui->splitter->setSizes(l);
 
     mPhotoModel = new PhotoModel(this);
+    // setup connections
     connect(mPhotoModel, &PhotoModel::modelReset,
         this, &MainWindow::onModelReset);
     connect(mPhotoModel, &PhotoModel::rowsInserted,
@@ -72,6 +70,7 @@ MainWindow::MainWindow(QWidget* parent) :
         this, &MainWindow::onPhotoModelRowsRemoved);
 
     mPhotoSelection = new QItemSelectionModel(mPhotoModel, this);
+    // set up connections
     connect(mPhotoSelection, &QItemSelectionModel::selectionChanged,
         this, &MainWindow::onSelectionChanged);
     connect(mPhotoSelection, &QItemSelectionModel::currentChanged,
@@ -80,9 +79,13 @@ MainWindow::MainWindow(QWidget* parent) :
     // Create the Library Module
     mLibrary = new Library(mPhotoModel, this);
     mLibrary->setSelectionModel(mPhotoSelection);
+    ui->stackedWidget->addWidget(mLibrary);
+
+    // setup connections
     connect(mLibrary, &Library::photoSourceChanged,
         mPhotoModel, &PhotoModel::onReloadPhotos);
-    ui->stackedWidget->addWidget(mLibrary);
+    connect(ui->actionLoupeInfoCycle, &QAction::triggered,
+        mLibrary, &Library::onCycleLoupeInfo);
 
     ui->filmStrip->setModel(mPhotoModel);
     FilmstripTile* fsTile = new FilmstripTile(ui->filmStrip);
@@ -158,8 +161,6 @@ MainWindow::~MainWindow()
 {
     //QDesktopWidget * desktop = QApplication::desktop();
     QSettings settings;
-
-    qDebug() << "Saving settings to" << settings.fileName();
 
     settings.beginGroup("mainwindow");
 

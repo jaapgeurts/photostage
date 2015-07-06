@@ -11,20 +11,6 @@ namespace PhotoStage
 PhotoModel::PhotoModel(QObject* parent) :
     QAbstractListModel(parent)
 {
-    //
-    // create table photo (
-    //    id integer primary key AUTOINCREMENT,
-    //    path integer,
-    //    filename varchar,
-    //            iso integer,
-    //            shutter_speed float,
-    //            float focal_length,
-    //            datetime_taken text,
-    //            hash varchar,
-    //            rating integer,
-    //            color integer,
-    //            flag integer)")))
-
     mWorkUnit = PhotoWorkUnit::instance();
 
     mPreviewCache = PreviewCache::globalCache();
@@ -89,15 +75,18 @@ void PhotoModel::imageLoaded(const QVariant& ref, const QImage& image)
     if (image.isNull())
         return;
 
-
     QModelIndex index = ref.value<QModelIndex>();
+    Photo       info  = mPhotoInfoMap.value(index);
 
-    QImage      preview =
+    info.exifInfo().width = image.width();
+    info.exifInfo().height = image.height();
+    // get actual widthXheight & store in db.
+    PhotoWorkUnit::instance()->updateExifInfo(info);
+
+    QImage preview =
         image.scaled(QSize(PREVIEW_IMG_WIDTH,
             PREVIEW_IMG_HEIGHT), Qt::KeepAspectRatio,
             Qt::SmoothTransformation);
-
-    Photo  info = mPhotoInfoMap.value(index);
 
     QString key = QString::number(info.id());
 
@@ -129,7 +118,7 @@ void PhotoModel::onReloadPhotos(PhotoModel::SourceType source,
     endResetModel();
 }
 
-bool PComp(const Photo & a, const Photo & b)
+bool PComp(const Photo& a, const Photo& b)
 {
     return a.id() < b.id();
 }
@@ -143,7 +132,7 @@ void PhotoModel::refreshData(const QList<Photo>& list )
 void PhotoModel::addData(const QList<long long>& idList)
 {
     // figure out what was changed, what is new and what has been added
-    int           start = rowCount(QModelIndex());
+    int          start = rowCount(QModelIndex());
 
     QList<Photo> list = mWorkUnit->getPhotosById(idList);
     beginInsertRows(QModelIndex(), start, list.size() - 1);

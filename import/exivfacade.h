@@ -33,6 +33,9 @@ struct ExifInfo
     QString copyright;
     QString artist;
 
+    int width;
+    int height;
+
     // photo tech details
     float exposureTime;
     float aperture;
@@ -43,6 +46,9 @@ struct ExifInfo
     // Lens details
     QString lensName;
     float focalLength;
+
+    QString formatExposure() const;
+    QString formatDimension() const;
 };
 
 class ExivFacade
