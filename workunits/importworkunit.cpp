@@ -155,11 +155,12 @@ int ImportWorkUnit::createPaths(QStringList& paths)
     QSqlQuery q;
 
     q.prepare(
-        "select id,directory,parent_id from path where directory = :dir");
+        "select id, directory ,parent_id from path where directory = :dir and ifnull(parent_id,-1) = :p_id");
+
     int key = insertPathRec(q, paths, 0, -1);
 
     // rebuild the tree
-    rebuildTree(1,1);
+    rebuildTree(1, 1);
 
     return key;
 }
@@ -196,7 +197,7 @@ int ImportWorkUnit::insertPathRec(QSqlQuery& q,
             iq.bindValue(":directory", p);
 
             if (parentid == -1)
-                iq.bindValue(":parent", QVariant(QVariant::Int));
+                iq.bindValue(":parent", QVariant(QVariant::LongLong));
             else
                 iq.bindValue(":parent", parentid);
             iq.exec();

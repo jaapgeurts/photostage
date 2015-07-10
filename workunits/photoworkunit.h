@@ -44,6 +44,7 @@ class PhotoWorkUnit
     private:
 
         static PhotoWorkUnit* mInstance;
+        long long rebuildTree(long long parent_id, long long left);
 };
 }
 #endif // PHOTOWORKUNIT_H

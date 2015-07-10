@@ -88,6 +88,7 @@ void PhotoWorkUnit::insertKeywords(const QStringList& words)
     if (words.size() == 0)
         return;
 
+    // find keywords already in the database
     QSqlQuery   q;
     QStringList newWords = words;
     q.prepare("select id, keyword from keyword where keyword in (:list)");
@@ -95,24 +96,29 @@ void PhotoWorkUnit::insertKeywords(const QStringList& words)
     q.bindValue(":list", list);
     q.exec();
 
+    // remove those from the insert list
     while (q.next())
     {
         newWords.removeAll(q.value(1).toString());
     }
 
+    // get the root id ( a single root is needed )
     q.clear();
     q.prepare("select id from keyword where parent_id is NULL");
     q.exec();
-    int parent;
+    long long parent;
 
     if (q.first())
         parent = q.value(0).toLongLong();
     else
     {
-        qDebug() << "no root item for keyword";
-        return;
+        // insert root because there is none.
+        q.clear();
+        q.exec("insert into keyword (keyword,parent_id) values('',NULL) ");
+        parent = q.lastInsertId().toLongLong();
     }
 
+    // insert all the keywords.
     QSqlDatabase::database().transaction();
     q.clear();
     q.prepare(
@@ -126,7 +132,9 @@ void PhotoWorkUnit::insertKeywords(const QStringList& words)
         if (!q.exec())
             qDebug() << q.lastError();
     }
+    // TODO: improve performance and don't rebuild tree on each insert.
     QSqlDatabase::database().commit();
+    rebuildTree(parent, 1);
 }
 
 void PhotoWorkUnit::assignKeywords(const QStringList& words,
@@ -261,27 +269,6 @@ QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
     return list;
 }
 
-void PhotoWorkUnit::updateExifInfo(const Photo& photo) const
-{
-    QSqlQuery       q;
-
-    const ExifInfo& ei = photo.exifInfo();
-
-    q.prepare(
-        "update photo set width=:width, height=:height where id = :photoid");
-    q.bindValue(":width", ei.width);
-    q.bindValue(":height", ei.height);
-    q.bindValue(":photoid", photo.id());
-
-    if (!q.exec())
-    {
-        qDebug() << "Query failed" << q.executedQuery();
-        qDebug() << q.lastError();
-    }
-
-    return;
-}
-
 // TODO: make path_id work and option to include
 QList<Photo> PhotoWorkUnit::getPhotosByPath(long long path_id,
     bool includeSubDirs)
@@ -341,5 +328,60 @@ QList<Photo> PhotoWorkUnit::getPhotosByPath(long long path_id,
         list.append(Photo(q));
     }
     return list;
+}
+
+long long PhotoWorkUnit::rebuildTree(long long parent_id, long long left)
+{
+    // the right value of this node is the left value + 1
+
+    long long right = left + 1;
+
+    // get all children of this node
+
+    QSqlQuery q;
+
+    q.prepare("select id from keyword where parent_id = :parent_id;");
+    q.bindValue(":parent_id", parent_id);
+
+    q.exec();
+
+    while (q.next())
+    {
+        long long id = q.value(0).toLongLong();
+        right = rebuildTree(id, right);
+    }
+
+    q.prepare("update keyword set lft=:left, rgt=:right where id=:parent_id;");
+
+    q.bindValue(":left", left);
+    q.bindValue(":right", right);
+    q.bindValue(":parent_id", parent_id);
+
+    q.exec();
+
+    // return the right value of this node + 1
+
+    return right + 1;
+}
+
+void PhotoWorkUnit::updateExifInfo(const Photo& photo) const
+{
+    QSqlQuery       q;
+
+    const ExifInfo& ei = photo.exifInfo();
+
+    q.prepare(
+        "update photo set width=:width, height=:height where id = :photoid");
+    q.bindValue(":width", ei.width);
+    q.bindValue(":height", ei.height);
+    q.bindValue(":photoid", photo.id());
+
+    if (!q.exec())
+    {
+        qDebug() << "Query failed" << q.executedQuery();
+        qDebug() << q.lastError();
+    }
+
+    return;
 }
 }

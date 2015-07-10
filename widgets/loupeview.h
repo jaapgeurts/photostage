@@ -24,6 +24,7 @@ class LoupeView : public QWidget
             Zoom200,
             Zoom300,
             Zoom400,
+            Zomm800,
             ZoomLast
         };
 
@@ -58,9 +59,9 @@ class LoupeView : public QWidget
         void mouseReleaseEvent(QMouseEvent* event);
         void mouseMoveEvent(QMouseEvent* event);
 
-        void resizeEvent(QResizeEvent *);
+        void resizeEvent(QResizeEvent*);
 
-private:
+    private:
 
         Photo    mPhoto;
         bool     mPanning;
@@ -71,9 +72,10 @@ private:
         //            QBrush   mCheckeredBrush;
 
         float mZoomFactors[ZoomLast] =
-        { 0.9f, 0.25f, 0.5f, 1, 1.5f, 2.0f, 3.0f, 4.0f };
+        { 0.9f, 0.25f, 0.5f, 1, 1.5f, 2.0f, 3.0f, 4.0f, 8.0f };
 
-        void ensureBestPosition();
+        void ensureCorrectPosition();
+        void computeZoomToFitScaleFactor();
 };
 }
 

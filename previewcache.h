@@ -15,7 +15,7 @@ class PreviewCache : public QObject
 
         static PreviewCache *globalCache();
 
-        explicit PreviewCache(const QString& baseDir, QObject* parent = 0);
+        explicit PreviewCache(const QString& location, QObject* parent = 0);
 
         QImage get(const QString& key);
         void put(const QString& key, const QImage& image);    

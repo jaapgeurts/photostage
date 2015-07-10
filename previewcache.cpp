@@ -12,13 +12,14 @@ PreviewCache* PreviewCache::globalCache()
 {
     if (mGlobalCache == NULL)
         mGlobalCache = new PreviewCache(QStandardPaths::writableLocation(
-                    QStandardPaths::CacheLocation), NULL);
+                    QStandardPaths::CacheLocation) + QDir::separator() + "previews",
+                NULL);
     return mGlobalCache;
 }
 
-PreviewCache::PreviewCache(const QString& baseDir, QObject* parent) :
+PreviewCache::PreviewCache(const QString& location, QObject* parent) :
     QObject(parent),
-    mBaseDir(baseDir + QDir::separator() + "previews"),
+    mBaseDir(location),
     mHash(QCryptographicHash::Md5)
 {
 }
@@ -30,6 +31,7 @@ void PreviewCache::remove(const QString& key)
     QString                     hash = pair.second;
 
     QString                     fileName = dir + QDir::separator() + hash;
+
 
     if (!QFile::remove(fileName))
         qDebug() << "Can't remove preview cache file";
@@ -44,7 +46,11 @@ QImage PreviewCache::get(const QString& key)
 
     QString                     fileName = dir + QDir::separator() + hash;
 
-    return QImage(fileName);
+
+    if (QFileInfo::exists(fileName))
+        return QImage(fileName);
+    else
+        return QImage();
 }
 
 void PreviewCache::put(const QString& key, const QImage& image)
@@ -55,6 +61,7 @@ void PreviewCache::put(const QString& key, const QImage& image)
 
     QString                     filePath = dir + QDir::separator() + hash;
     QDir                        d(dir);
+
 
     d.mkpath(dir);
     qDebug() << "Storing image at" << filePath;

@@ -36,5 +36,6 @@ void MetaDataModule::setMetaData(const Photo& p)
     ui->leISO->setText(QString::number(ei.isoSpeed));
     ui->leLens->setText(ei.lensName);
     ui->leDimensions->setText(ei.formatDimension());
+    ui->leGPS->setText(ei.location.toString());
 }
 }

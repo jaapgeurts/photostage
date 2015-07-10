@@ -302,7 +302,7 @@ void TileView::paintEvent(QPaintEvent*/*event*/)
         return;
     }
     QPainter painter(this);
-    //painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     // TODO: implement margins / padding
     // TODO: implement intercell spacing & grid lines etc

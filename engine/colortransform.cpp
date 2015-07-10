@@ -11,21 +11,20 @@ namespace PhotoStage
 QHash<QString, ColorTransform> ColorTransform::mTransformCache;
 QString                        ColorTransform::mMonitorProfilePath;
 
-ColorTransform ColorTransform::getTransform(const QString& from,
+ColorTransform ColorTransform::getTransform(const QString& iden,
+    const QString& from,
     const QString& to,
     Format inFormat,
     Format outFormat)
 {
-    QString key = from + to;
-
-    if (mTransformCache.contains(key))
+    if (mTransformCache.contains(iden))
     {
-        return mTransformCache.value(key);
+        return mTransformCache.value(iden);
     }
     else
     {
         ColorTransform transform(from, to, inFormat, outFormat);
-        mTransformCache.insert(key, transform );
+        mTransformCache.insert(iden, transform );
         return transform;
     }
 }
@@ -48,6 +47,7 @@ static void transform_delete(char* d)
 {
     cmsHTRANSFORM transform = (cmsHTRANSFORM)d;
 
+
     cmsDeleteTransform(transform);
 }
 
@@ -65,9 +65,11 @@ ColorTransform::ColorTransform(const QString& from,
 
     QString toProfile;
 
-    if (to.at(0) == QDir::separator()) {
+
+    if (to.at(0) == QDir::separator())
+    {
         toProfile = to;
-            qDebug() << "Loading monitor profile";
+        qDebug() << "Loading monitor profile";
     }
     else
         toProfile =
@@ -86,6 +88,8 @@ ColorTransform::ColorTransform(const QString& from,
 
     if (inFormat == FORMAT_RGB32)
         inputFormat = TYPE_BGRA_8;
+    else if (inFormat == FORMAT_GRAYSCALE8)
+        inputFormat = (COLORSPACE_SH(PT_RGB) | CHANNELS_SH(1) | BYTES_SH(1));
 
     if (outFormat == FORMAT_RGB32)
         outputFormat = TYPE_BGRA_8;
@@ -122,6 +126,7 @@ Image ColorTransform::transformImage(const Image& inImage) const
     float* inbuf  = inImage.data();
     float* outbuf = outImage.data();
 
+
     cmsDoTransform(
         (cmsHTRANSFORM)mHTransform.data(), inbuf, outbuf,
         inImage.width() * inImage.height());
@@ -134,6 +139,7 @@ QImage ColorTransform::transformToQImage(const Image& inImage) const
     QImage outImage(inImage.size(), QImage::Format_RGB32);
     int    width  = outImage.width();
     int    height = outImage.height();
+
 
     for (int y = 0; y < height; y++)
     {
@@ -156,6 +162,7 @@ QImage ColorTransform::transformQImage(const QImage& inImage) const
     int    width  = outImage.width();
     int    height = outImage.height();
 
+
     for (int y = 0; y < height; y++)
     {
         const uint8_t* inLine  = inImage.constScanLine(y);
@@ -168,7 +175,7 @@ QImage ColorTransform::transformQImage(const QImage& inImage) const
         // when source and dest image format organization are the same
         // set alpha value
         for (int x = 0; x < width; x++)
-            outLine[x * 4 + 3] = inLine[x * 4 + 3];
+            outLine[x * 4 + 3] = 0xff;
     }
     return outImage;
 }
@@ -178,6 +185,7 @@ Image ColorTransform::transformFromQImage(const QImage& inImage) const
     Image outImage(inImage.size());
     int   height = inImage.height();
     int   width  = inImage.width();
+
 
     for (int y = 0; y < height; y++)
     {

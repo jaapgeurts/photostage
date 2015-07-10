@@ -12,11 +12,6 @@ PhotoData::PhotoData() :
 {
 }
 
-PhotoData::PhotoData(const Photo& info)
-{
-    *this = info;
-}
-
 PhotoData::PhotoData(const QImage& image, const QString& filename,
     long long id) :
     mId(id),
@@ -98,7 +93,7 @@ const QImage& PhotoData::libraryPreviewsRGB()
 
         // convert the image to sRGB
         //qDebug() << "Converting image to RGB";
-        ColorTransform transform = ColorTransform::getTransform(
+        ColorTransform transform = ColorTransform::getTransform("Melissa-sRGB-RGB32",
             WORKING_COLOR_SPACE,
             ColorTransform::getMonitorProfilePath(),
             ColorTransform::FORMAT_RGB32,
@@ -127,7 +122,6 @@ ExifInfo& PhotoData::exifInfo()
 {
     return mExifInfo;
 }
-
 
 const ExifInfo& PhotoData::exifInfo() const
 {

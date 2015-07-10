@@ -50,7 +50,7 @@ void DatabaseAccess::initDb()
     list <<
         "create unique index if not exists idx_keyword on keyword (keyword, parent_id)";
     list <<
-        "CREATE TABLE if not exists photo_keyword (photo_id integer REFERENCES photo (path_id), keyword_id integer REFERENCES keyword (id));";
+        "CREATE TABLE if not exists photo_keyword (photo_id integer REFERENCES photo (id), keyword_id integer REFERENCES keyword (id));";
     list <<
         "create unique index if not exists idx_photo_keyword on photo_keyword (photo_id, keyword_id)";
     list <<
@@ -76,5 +76,7 @@ void DatabaseAccess::initDb()
             break;
         }
     }
+
+    // create a
 }
 }

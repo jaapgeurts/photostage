@@ -2,6 +2,7 @@
 #include <QPoint>
 #include <QRect>
 #include <QDebug>
+#include <QGraphicsDropShadowEffect>
 
 #include "loupeview.h"
 #include "utils.h"
@@ -33,13 +34,17 @@ LoupeView::LoupeView(QWidget* parent)
 void LoupeView::setZoomMode(LoupeView::ZoomMode zoomMode)
 {
     mZoomMode = zoomMode;
+
+    ensureCorrectPosition();
+
     update();
 }
 
 void LoupeView::setPhoto(Photo photo)
 {
     mPhoto = photo;
-    ensureBestPosition();
+    computeZoomToFitScaleFactor();
+    ensureCorrectPosition();
     update();
 }
 
@@ -59,7 +64,6 @@ void LoupeView::cycleInfoMode()
         i = InfoOff;
 
     mInfoMode = static_cast<InfoMode>(i);
-    qDebug() << "cycling";
     update();
 }
 
@@ -164,7 +168,7 @@ void LoupeView::mouseMoveEvent(QMouseEvent* event)
     {
         mPhotoTopLeft -=  mMousePressLocation - event->pos();
 
-        ensureBestPosition();
+        ensureCorrectPosition();
 
         mMousePressLocation = event->pos();
         update();
@@ -173,36 +177,87 @@ void LoupeView::mouseMoveEvent(QMouseEvent* event)
 
 void LoupeView::resizeEvent(QResizeEvent*)
 {
+    computeZoomToFitScaleFactor();
+
+    ensureCorrectPosition();
+
+    update();
+}
+
+void LoupeView::computeZoomToFitScaleFactor()
+{
+    if (mPhoto.isNull())
+        return;
+
     int ww = width();
     int wh = height();
 
     int iw = mPhoto.libraryPreviewsRGB().width();
     int ih = mPhoto.libraryPreviewsRGB().height();
 
-    mZoomFactors[ZoomFit] = (float)ww / (float)iw * 0.9f;
-
-    ensureBestPosition();
-
-    update();
+    if (iw > ih)
+        mZoomFactors[ZoomFit] = (float)ww / (float)iw * 0.9f;
+    else
+        mZoomFactors[ZoomFit] = (float)wh / (float)ih * 0.9f;
 }
 
-void LoupeView::ensureBestPosition()
+/*
+   QImage applyEffectToImage(QImage src, QGraphicsEffect effect, int extent)
+   {
+   if(src.isNull()) return QImage(); //No need to do anything else!
+   if(!effect) return src; //No need to do anything else!
+   QGraphicsScene scene;
+   QGraphicsPixmapItem item;
+   item.setPixmap(QPixmap::fromImage(src));
+   item.setGraphicsEffect(effect);
+   scene.addItem(&item);
+   QImage res(src.size()+QSize(extent2, extent2), QImage::Format_ARGB32);
+   res.fill(Qt::transparent);
+   QPainter ptr(&res);
+   scene.render(&ptr, QRectF(), QRectF( -extent, -extent, src.width()+extent2, src.height()+extent*2 ) );
+   return res;
+   }
+ */
+
+void LoupeView::ensureCorrectPosition()
 {
-    if (mPhotoTopLeft.x() > 0)
-        mPhotoTopLeft.setX(0);
 
-    if (mPhotoTopLeft.y() > 0)
-        mPhotoTopLeft.setY(0);
+    if (mPhoto.isNull())
+        return;
 
-    int hiddenx = width() - mPhoto.libraryPreviewsRGB().width()
-        * mZoomFactors[mZoomMode];
-    int hiddeny = height() - mPhoto.libraryPreviewsRGB().height()
-        * mZoomFactors[mZoomMode];
+    int iw = mPhoto.libraryPreviewsRGB().width() * mZoomFactors[mZoomMode];
+    int ih = mPhoto.libraryPreviewsRGB().height() * mZoomFactors[mZoomMode];
+    int ww = width();
+    int wh = height();
 
-    if (mPhotoTopLeft.x() < hiddenx)
-        mPhotoTopLeft.setX(hiddenx);
+    if (iw < ww)
+    {
+        mPhotoTopLeft.setX((ww - iw) / 2);
+    }
+    else
+    {
+        int hiddenx = ww - iw;
 
-    if (mPhotoTopLeft.y() < hiddeny)
-        mPhotoTopLeft.setY(hiddeny);
+        if (mPhotoTopLeft.x() > 0)
+            mPhotoTopLeft.setX(0);
+
+        if (mPhotoTopLeft.x() < hiddenx)
+            mPhotoTopLeft.setX(hiddenx);
+    }
+
+    if (ih < wh)
+    {
+        mPhotoTopLeft.setY((wh - ih) / 2);
+    }
+    else
+    {
+        if (mPhotoTopLeft.y() > 0)
+            mPhotoTopLeft.setY(0);
+
+        int hiddeny = wh - ih;
+
+        if (mPhotoTopLeft.y() < hiddeny)
+            mPhotoTopLeft.setY(hiddeny);
+    }
 }
 }

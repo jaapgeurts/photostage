@@ -7,12 +7,6 @@ namespace PhotoStage
 {
 Photo::Photo()
 {
-
-}
-
-Photo::Photo(const Photo& info)
-{
-    *this = info;
 }
 
 Photo::Photo(const QImage& image, const QString& filename, long long id)
@@ -30,47 +24,47 @@ long long Photo::id() const
     return d->id();
 }
 
-void Photo::setOriginal(const QImage &image)
+void Photo::setOriginal(const QImage& image)
 {
     d->setOriginal(image);
 }
 
-const QImage &Photo::original() const
+const QImage& Photo::original() const
 {
     return d->original();
 }
 
-void Photo::setLibraryPreview(const QImage &image)
+void Photo::setLibraryPreview(const QImage& image)
 {
     d->setLibraryPreview(image);
 }
 
-const QImage &Photo::libraryPreview() const
+const QImage& Photo::libraryPreview() const
 {
     return d->libraryPreview();
 }
 
-const QImage &Photo::libraryPreviewsRGB() const
+const QImage& Photo::libraryPreviewsRGB() const
 {
     return d->libraryPreviewsRGB();
 }
 
-void Photo::setSrcImagePath(const QString &path)
+void Photo::setSrcImagePath(const QString& path)
 {
     d->setSrcImagePath(path);
 }
 
-const QString &Photo::srcImagePath() const
+const QString& Photo::srcImagePath() const
 {
     return d->srcImagePath();
 }
 
-void Photo::setExifInfo(const ExifInfo &exifInfo)
+void Photo::setExifInfo(const ExifInfo& exifInfo)
 {
     d->setExifInfo(exifInfo);
 }
 
-ExifInfo &Photo::exifInfo()
+ExifInfo& Photo::exifInfo()
 {
     return d->exifInfo();
 }
@@ -114,5 +108,4 @@ bool Photo::isNull() const
 {
     return d.isNull();
 }
-
 }

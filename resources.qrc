@@ -9,5 +9,7 @@
         <file alias="foundation-icons-general.ttf">resources/general_foundicons.ttf</file>
         <file alias="foundation-icons-accessibility.ttf">resources/accessibility_foundicons.ttf</file>
     </qresource>
-    <qresource prefix="/icons"/>
+    <qresource prefix="/icons">
+        <file alias="map-pin.png">resources/icons/map-pin.png</file>
+    </qresource>
 </RCC>

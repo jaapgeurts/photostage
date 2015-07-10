@@ -27,16 +27,16 @@ void SqlPathModel::createPathItems()
     QSqlQuery query;
 
     QString   queryText = QString(
-        "select id,directory,parent_id from path where parent_id is NULL");
-
+        "select id, directory, parent_id from path where parent_id is NULL");
 
     if (!query.exec(queryText))
         qDebug() << query.lastError();
 
     if (query.first())
     {
-        mRootItem = new PathItem(query.value(0).toLongLong(), query.value(
-                    1).toString(), query.value(2).toLongLong());
+        mRootItem = new PathItem(query.value(0).toLongLong(),
+                query.value(1).toString(),
+                query.value(2).toLongLong());
         createPathtemsRec(mRootItem);
     }
 }
@@ -45,8 +45,11 @@ void SqlPathModel::createPathtemsRec(PathItem* root)
 {
     QSqlQuery query;
     QString   queryText = QString(
-        "select p.id, p.directory, p.parent_id, count(f.id) from path p left outer join photo f on p.id = f.path_id where  parent_id = :parent_id group by p.id, p.directory, p.parent_id");
-
+        "select p.id, p.directory, p.parent_id, count(f.id) \
+        from path p left outer join photo f \
+                     on p.id = f.path_id \
+        where parent_id = :parent_id \
+        group by p.id, p.directory, p.parent_id");
 
     query.prepare(queryText);
 
@@ -58,10 +61,9 @@ void SqlPathModel::createPathtemsRec(PathItem* root)
     //int total = 0;
     while (query.next())
     {
-        // conside using std::shared_ptr
-        item = new PathItem(query.value(
-                    0).toLongLong(), query.value(1).toString(), query.value(
-                    1).toLongLong());
+        item = new PathItem(query.value(0).toLongLong(),
+                query.value(1).toString(),
+                query.value(1).toLongLong());
         item->count  = query.value(3).toInt();
         item->parent = root;
         root->children.append(item);
@@ -73,7 +75,6 @@ void SqlPathModel::createPathtemsRec(PathItem* root)
 void SqlPathModel::deletePathItems(PathItem* root)
 {
     PathItem* item;
-
 
     foreach(item, root->children)
     {
@@ -121,7 +122,6 @@ QModelIndex SqlPathModel::findItemRec(PathItem* item, int row,
     {
         QModelIndex idx = findItemRec(i, j, pathid);
 
-
         if (idx.isValid())
             return idx;
         j++;
@@ -147,7 +147,6 @@ QModelIndex SqlPathModel::parent(const QModelIndex& index) const
 int SqlPathModel::rowCount(const QModelIndex& parent) const
 {
     PathItem* item;
-
 
     if (!parent.isValid())
         item = mRootItem;

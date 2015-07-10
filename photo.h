@@ -35,7 +35,6 @@ class Photo
         };
 
         Photo();
-        Photo(const Photo& info);
         Photo(const QImage& image, const QString& filename, long long id);
         Photo(QSqlQuery& query);
 
@@ -52,8 +51,8 @@ class Photo
         const QString& srcImagePath() const;
 
         void setExifInfo(const ExifInfo& exifInfo);
-        ExifInfo& exifInfo();
-        const ExifInfo &exifInfo() const;
+        ExifInfo&       exifInfo();
+        const ExifInfo& exifInfo() const;
 
         void setRating(int rating);
         int rating() const;
@@ -66,7 +65,7 @@ class Photo
 
         bool isNull() const;
 
-private:
+    private:
 
         QSharedPointer<PhotoData> d;
 };

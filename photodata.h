@@ -12,7 +12,6 @@ class PhotoData
 
         // Constructors
         PhotoData();
-        PhotoData(const Photo& info);
         PhotoData(const QImage& image, const QString& filename, long long mId);
         PhotoData(QSqlQuery& query);
         virtual ~PhotoData();

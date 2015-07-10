@@ -9,45 +9,45 @@
 
 namespace Ui
 {
-    class Develop;
+class Develop;
 }
 
 namespace PhotoStage
 {
-    class Develop : public Module
-    {
-        Q_OBJECT
+class Develop : public Module
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            explicit Develop(QWidget* parent = 0);
-            ~Develop();
+        explicit Develop(QWidget* parent = 0);
+        ~Develop();
 
-            QRect lightGap();
+        QRect lightGap();
 
-            void setPhoto(Photo photo);
+        void setPhoto(Photo photo);
 
-        public slots:
+    public slots:
 
-            void imageChanged();
+        void imageChanged();
 
-        protected:
+    protected:
 
-            void showEvent(QShowEvent*);
+        void showEvent(QShowEvent*);
 
-        private:
+    private:
 
-            Ui::Develop*            ui;
-            DevelopHistogramModule* mHistogramModule;
-            RawModule*              mRawModule;
-            BasicModule*            mBasicModule;
-            Photo                  mPhoto;
-            bool                    mLoadPhoto;
+        Ui::Develop*            ui;
+        DevelopHistogramModule* mHistogramModule;
+        RawModule*              mRawModule;
+        BasicModule*            mBasicModule;
+        Photo                   mPhoto;
+        bool                    mLoadPhoto;
 
-            // QWidget interface
+        // QWidget interface
 
-            void doSetPhoto(Photo photo);
-    };
+        void doSetPhoto(Photo photo);
+};
 }
 
 #endif // DEVELOP_H

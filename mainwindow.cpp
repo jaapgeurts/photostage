@@ -202,6 +202,10 @@ bool MainWindow::eventFilter(QObject* /*obj*/, QEvent* event)
 
             case Qt::Key_Return:
             case Qt::Key_Enter:
+
+                if (!mLibrary->canSelectionChange() &&
+                    !ui->filmStrip->hasFocus())
+                    return false;
                 mLibrary->showLoupe();
                 return true;
         }
@@ -314,9 +318,16 @@ void MainWindow::onTileDoubleClicked(const QModelIndex&)
     mLibrary->showLoupe();
 }
 
-void MainWindow::onSelectionChanged(const QItemSelection& /*selected*/,
+void MainWindow::onSelectionChanged(const QItemSelection& selected,
     const QItemSelection& /*deselected*/)
 {
+    QList<Photo> photos;
+    foreach (QModelIndex index, selected.indexes())
+    photos.append(mPhotoModel->data(index,
+        TileView::PhotoRole).value<Photo>());
+
+    mMap->setPhotos(photos);
+
     updateInformationBar();
 }
 
@@ -550,15 +561,14 @@ void MainWindow::updateInformationBar()
 
     if (!photo.isNull())
         imagePath = " " + photo.srcImagePath();
-    ui->lblInformation->setText(QString::number(
-            selCount) + "/" + QString::number(count) + imagePath);
+    ui->lblInformation->setText(QString::number(selCount) +
+        "/" + QString::number(count) + imagePath);
 }
 
 Photo MainWindow::currentPhoto()
 {
-    return mPhotoModel->data(
-        mPhotoSelection->currentIndex(),
-        TileView::PhotoRole).value<Photo>();
+    return mPhotoModel->data(mPhotoSelection->currentIndex(),
+               TileView::PhotoRole).value<Photo>();
 }
 
 void MainWindow::setRating(int rating)

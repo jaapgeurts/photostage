@@ -225,16 +225,19 @@ Image Image::fromQImage(const QImage& image)
     }
 
     //do color conversion here
-    ColorTransform toWorking = ColorTransform::getTransform("sRGB",
-            WORKING_COLOR_SPACE,
-            ColorTransform::FORMAT_RGB32,
-            ColorTransform::FORMAT_FLOAT);
+    ColorTransform toWorking = ColorTransform::getTransform(
+        "sRGB-Melissa-RGB32",
+        "sRGB",
+        WORKING_COLOR_SPACE,
+        ColorTransform::FORMAT_RGB32,
+        ColorTransform::FORMAT_FLOAT);
     return toWorking.transformFromQImage(image);
 }
 
 QImage Image::toQImage() const
 {
-    ColorTransform toRgb = ColorTransform::getTransform(WORKING_COLOR_SPACE,
+    ColorTransform toRgb = ColorTransform::getTransform("Melissa-sRGB-RGB32",
+            WORKING_COLOR_SPACE,
             "sRGB",
             ColorTransform::FORMAT_FLOAT,
             ColorTransform::FORMAT_RGB32);

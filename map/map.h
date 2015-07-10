@@ -2,28 +2,36 @@
 #define MAP_H
 
 #include "module.h"
+#include "photo.h"
+
+#include "widgets/mapprovider.h"
 
 namespace Ui
 {
-    class Map;
+class Map;
 }
 
 namespace PhotoStage
 {
-    class Map : public Module
-    {
-        Q_OBJECT
+class Map : public Module
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            explicit Map(QWidget* parent = 0);
-            ~Map();
+        explicit Map(QWidget* parent = 0);
+        ~Map();
 
-            QRect lightGap();
+        QRect lightGap();
 
-        private:
+        void setPhotos(const QList<Photo>& photos);
 
-            Ui::Map* ui;
-    };
+    private:
+
+        Ui::Map*     ui;
+
+        QList<Photo> mPhotos;
+        MapProvider* mMapProvider;
+};
 }
 #endif // MAP_H

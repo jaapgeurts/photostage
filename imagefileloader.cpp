@@ -138,10 +138,31 @@ QImage ImageFileLoader::genThumb(const QString& path)
         {
             // Assume default JPEG images are in sRGB format.
             // Convert the picture to MelissaRGB space
-            ColorTransform toWorking = ColorTransform::getTransform("sRGB",
-                    WORKING_COLOR_SPACE,
-                    ColorTransform::FORMAT_RGB32,
-                    ColorTransform::FORMAT_RGB32);
+            ColorTransform::Format fmt;
+            ColorTransform         toWorking;
+
+            if (pixmap.format() == QImage::Format_RGB32)
+            {
+                fmt       = ColorTransform::FORMAT_RGB32;
+                toWorking = ColorTransform::getTransform("sRGB-Melissa-RGB32",
+                        "sRGB", WORKING_COLOR_SPACE,
+                        fmt, ColorTransform::FORMAT_RGB32);
+            }
+            else if (pixmap.format() == QImage::Format_Grayscale8)
+            {
+                //                qDebug() << "alpha" << pixmap.hasAlphaChannel();
+                //                qDebug() << "bpp" << pixmap.depth();
+                //                qDebug() << "Channels" << pixmap.bitPlaneCount();
+                fmt       = ColorTransform::FORMAT_GRAYSCALE8;
+                toWorking = ColorTransform::getTransform("sRGB-Melissa-Gray8",
+                        "sRGB", WORKING_COLOR_SPACE,
+                        fmt, ColorTransform::FORMAT_RGB32);
+            }
+            else
+            {
+                qDebug() << "**** QImage format not supported";
+                return image;
+            }
 
             image = toWorking.transformQImage(pixmap);
         }

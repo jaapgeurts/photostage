@@ -208,7 +208,7 @@ void Library::onZoomLevelChanged(int zoomLevel)
     LoupeView::ZoomMode zoom[LoupeView::ZoomLast] = {
         LoupeView::ZoomFit, LoupeView::Zoom25, LoupeView::Zoom50,
         LoupeView::Zoom100, LoupeView::Zoom150, LoupeView::Zoom200,
-        LoupeView::Zoom300, LoupeView::Zoom400
+        LoupeView::Zoom300, LoupeView::Zoom400, LoupeView::Zomm800
     };
 
     ui->mLoupeView->setZoomMode(zoom[zoomLevel]);

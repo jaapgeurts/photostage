@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql positioning
+QT       += core gui sql positioning network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -83,7 +83,11 @@ SOURCES += \
     engine/platform.cpp \
     widgets/actionstategroup.cpp \
     library/modules/metadatamodule.cpp \
-    photodata.cpp
+    photodata.cpp \
+    widgets/mapview.cpp \
+    widgets/mapprovider.cpp \
+    widgets/goolemapprovider.cpp \
+    widgets/openstreetmapmapprovider.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -148,7 +152,11 @@ HEADERS  += \
     engine/platform_mac.h \
     engine/platform.h \
     widgets/actionstategroup.h \
-    library/modules/metadatamodule.h
+    library/modules/metadatamodule.h \
+    widgets/mapview.h \
+    widgets/mapprovider.h \
+    widgets/goolemapprovider.h \
+    widgets/openstreetmapmapprovider.h
 
 FORMS    += \
     mainwindow.ui \

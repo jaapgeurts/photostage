@@ -36,9 +36,9 @@ void SqlKeywordModel::createKeywordItems()
 
     if (query.first())
     {
-        mRootItem = new KeywordItem(query.value(
-                    0).toLongLong(), query.value(1).toString(), query.value(
-                    2).toLongLong());
+        mRootItem = new KeywordItem(query.value(0).toLongLong(),
+                query.value(1).toString(),
+                query.value(2).toLongLong());
         createKeywordItemsRec(mRootItem);
     }
 }
@@ -65,9 +65,9 @@ void SqlKeywordModel::createKeywordItemsRec(KeywordItem* root)
 
     while (query.next())
     {
-        item = new KeywordItem(query.value(
-                    0).toLongLong(), query.value(1).toString(), query.value(
-                    1).toLongLong());
+        item = new KeywordItem(query.value(0).toLongLong(),
+                query.value(1).toString(),
+                query.value(1).toLongLong());
         item->parent = root;
         root->children.append(item);
         createKeywordItemsRec(item);
