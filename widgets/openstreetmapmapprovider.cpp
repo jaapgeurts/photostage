@@ -50,22 +50,11 @@ void OpenstreetmapMapProvider::getTiles(const QGeoCoordinate& center,
     double tiley_offset = tiley_exact - (int64_t)tiley_exact;
     qDebug() << "Fract" << tilex_offset << "," << tiley_offset;
 
-    //    tilex_offset = (width/2) % 256 - tilex_offset * 256;
-    //    tiley_offset = (height/2) % 256 - tiley_offset * 256;
+    int x_start = (int)floor(tilex_exact - (width / 2.0) / 256.0);
+    int y_start = (int)floor(tiley_exact - (height / 2.0) / 256.0);
 
-    // these coords are the center tile
-    int tilex = (int)floor(tilex_exact);
-    int tiley = (int)floor(tiley_exact);
-
-    // our tiles are 256 pixels so we need width/256 and height/256 tiles (rounded up)
-    // add one more depending on where the center coord is located
-    int no_x = width / 256 + 1; // get one more than needed
-    int no_y = height / 256 + 1;
-
-    int x_start = tilex - no_x / 2;
-    int x_end   = tilex + no_x / 2 + no_x % 2;
-    int y_start = tiley - no_y / 2;
-    int y_end   = tiley + no_y / 2 + no_y % 2;
+    int x_end = (int)floor(tilex_exact + (width / 2.0) / 256.0);
+    int y_end = (int)floor(tiley_exact + (height / 2.0) / 256.0);
 
     //    mTileResult.bounds.setTopLeft(QGeoCoordinate(tiley2lat(tiley, zoomLevel),
     //        tilex2long(tilex, zoomLevel)));
@@ -74,15 +63,17 @@ void OpenstreetmapMapProvider::getTiles(const QGeoCoordinate& center,
 
     QQueue<MapTileInfo> list;
 
-    for (int y = y_start; y < y_end; y++)
+    for (int y = y_start; y <= y_end; y++)
     {
-        for (int x = x_start; x < x_end; x++)
+        for (int x = x_start; x <= x_end; x++)
         {
             MapTileInfo info;
             info.tilex    = x;
             info.tiley    = y;
-            info.canvas_x = (x - x_start) * 256 - width/2 % 256;// - tilex_offset * 256; //
-            info.canvas_y = (y - y_start) * 256 - height/2 % 256;// - tiley_offset * 256;//
+            info.canvas_x = (x - x_start) * 256 - tilex_offset * 256 +
+                (width / 2) % 256;
+            info.canvas_y = (y - y_start) * 256 - tiley_offset * 256 +
+                (height / 2) % 256;
             info.zoom = zoomLevel;
 
             list.enqueue(info);
