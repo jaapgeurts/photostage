@@ -31,6 +31,7 @@ class MapView : public QWidget
     protected:
 
         void paintEvent(QPaintEvent*);
+        void resizeEvent(QResizeEvent*);
 
     private slots:
 
@@ -42,6 +43,7 @@ class MapView : public QWidget
         QList<MapTileInfo> mTileInfoList;
         QGeoCoordinate     mCurrentCoord;
         QImage             mIconMapPin;
+        int                mZoomLevel;
 };
 }
 

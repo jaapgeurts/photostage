@@ -50,11 +50,11 @@ void OpenstreetmapMapProvider::getTiles(const QGeoCoordinate& center,
     double tiley_offset = tiley_exact - (int64_t)tiley_exact;
     qDebug() << "Fract" << tilex_offset << "," << tiley_offset;
 
-    int x_start = (int)floor(tilex_exact - (width / 2.0) / 256.0);
-    int y_start = (int)floor(tiley_exact - (height / 2.0) / 256.0);
+    int x_start = (int)floor(tilex_exact - (width / 2) / 256);
+    int y_start = (int)floor(tiley_exact - (height / 2) / 256);
 
-    int x_end = (int)floor(tilex_exact + (width / 2.0) / 256.0);
-    int y_end = (int)floor(tiley_exact + (height / 2.0) / 256.0);
+    int x_end = (int)floor(tilex_exact + (width / 2) / 256)+1;
+    int y_end = (int)floor(tiley_exact + (height / 2) / 256)+1;
 
     //    mTileResult.bounds.setTopLeft(QGeoCoordinate(tiley2lat(tiley, zoomLevel),
     //        tilex2long(tilex, zoomLevel)));
@@ -70,10 +70,8 @@ void OpenstreetmapMapProvider::getTiles(const QGeoCoordinate& center,
             MapTileInfo info;
             info.tilex    = x;
             info.tiley    = y;
-            info.canvas_x = (x - x_start) * 256 - tilex_offset * 256 +
-                (width / 2) % 256;
-            info.canvas_y = (y - y_start) * 256 - tiley_offset * 256 +
-                (height / 2) % 256;
+            info.canvas_x = (x - x_start) * 256 - tilex_offset * 256 + (width / 2) % 256;
+            info.canvas_y = (y - y_start) * 256 - tiley_offset * 256 + (height / 2) % 256;
             info.zoom = zoomLevel;
 
             list.enqueue(info);
@@ -135,7 +133,6 @@ void OpenstreetmapMapProvider::fetchTile(MapTileInfo info)
 
     QImage img = mPreviewCache.get(key);
 
-
     if (img.isNull())
     {
         QNetworkRequest request;
@@ -159,7 +156,6 @@ void OpenstreetmapMapProvider::onReplyFinished(QNetworkReply* reply)
 {
     TileInfoWrapper* wrapper =
         (TileInfoWrapper*)reply->property("wrapper").value<void*>();
-
 
     reply->setProperty("wrapper", QVariant());
 
@@ -201,7 +197,6 @@ double OpenstreetmapMapProvider::tilex2long(int x, int z)
 double OpenstreetmapMapProvider::tiley2lat(int y, int z)
 {
     double n = M_PI - 2.0 * M_PI * y / pow(2.0, z);
-
 
     return 180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n)));
 }

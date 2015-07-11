@@ -8,7 +8,8 @@ namespace PhotoStage
 {
 MapView::MapView(QWidget* parent) :
     QWidget(parent),
-    mIconMapPin(":/icons/map-pin.png")
+    mIconMapPin(":/icons/map-pin.png"),
+    mZoomLevel(14)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 }
@@ -38,13 +39,24 @@ void MapView::onTileAvailable(const MapTileInfo& info)
 
 void MapView::setCurrentCoord(const QGeoCoordinate& coord)
 {
-    mCurrentCoord = coord;
-    mTileInfoList.clear();
+    if (coord.isValid())
+    {
+        mCurrentCoord = coord;
+        mTileInfoList.clear();
 
-    if (mCurrentCoord.isValid())
-        mMapProvider->getTiles(coord, 14, width(), height());
+        mMapProvider->getTiles(mCurrentCoord, mZoomLevel, width(), height());
+    }
     else
         qDebug() << "Invalid Geo Coord";
+}
+
+void MapView::resizeEvent(QResizeEvent*)
+{
+    if (mCurrentCoord.isValid())
+    {
+        mTileInfoList.clear();
+        mMapProvider->getTiles(mCurrentCoord, mZoomLevel, width(), height());
+    }
 }
 
 void MapView::paintEvent(QPaintEvent* /*event*/)
