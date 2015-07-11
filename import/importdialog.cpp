@@ -20,7 +20,7 @@ ImportDialog::ImportDialog(QWidget* parent) :
     setWindowIcon(QIcon());
 
     // add our own CellFlowView
-    mCfvPhotos = new TileView(ui->frmMain);
+    mCfvPhotos = new TileView::TileView(ui->frmMain);
     mCfvPhotos->setTileFlyweight(new ImageFileTile());
     mCfvPhotos->setMinimumCellWidth(125);
     mCfvPhotos->setMaximumCellWidth(175);
@@ -117,7 +117,7 @@ ImportDialog::ImportDialog(QWidget* parent) :
         mCfvPhotos->selectionModel(), &QItemSelectionModel::selectionChanged, this,
         &ImportDialog::onFilesSelected);
 
-    connect(mCfvPhotos, &TileView::checkedItemsChanged, this,
+    connect(mCfvPhotos, &TileView::TileView::checkedItemsChanged, this,
         &ImportDialog::onCheckedItemsChanged);
 }
 

@@ -5,16 +5,16 @@
 
 namespace PhotoStage
 {
-    class ImageFileTile : public AbstractTile
+    class ImageFileTile : public TileView::AbstractTile
     {
         Q_OBJECT
 
         public:
 
-            ImageFileTile(TileView* parent = 0);
+            ImageFileTile(TileView::TileView* parent = 0);
 
             void render(QPainter& painter,
-                const TileInfo& tileInfo,
+                const TileView::TileInfo& tileInfo,
                 const QVariant& data);
 
         private:

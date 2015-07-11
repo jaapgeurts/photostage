@@ -4,7 +4,7 @@
 #include "mapview.h"
 #include "openstreetmapmapprovider.h"
 
-namespace PhotoStage
+namespace MapView
 {
 MapView::MapView(QWidget* parent) :
     QWidget(parent),
@@ -30,10 +30,39 @@ void MapView::setMapProvider(MapProvider* provider)
         this, &MapView::onTileAvailable);
 }
 
-void MapView::onTileAvailable(const MapTileInfo& info)
+void MapView::computeTileBounds()
+{
+    int minx, miny, maxx, maxy;
+
+    minx = miny = std::numeric_limits<int>::max();
+    maxx = maxy = std::numeric_limits<int>::min();
+
+    foreach(TileInfo info, mTileInfoList)
+    {
+        if (info.canvas_x < minx)
+            minx = info.canvas_x;
+
+        if (info.canvas_x > maxx)
+            maxx = info.canvas_x;
+
+        if (info.canvas_y < miny)
+            miny = info.canvas_y;
+
+        if (info.canvas_y > maxy)
+            maxy = info.canvas_y;
+
+        mTileBounds.setTop(minx);
+        mTileBounds.setLeft(miny);
+        mTileBounds.setRight(maxx);
+        mTileBounds.setBottom(maxy);
+    }
+}
+
+void MapView::onTileAvailable(const TileInfo& info)
 {
     mTileInfoList.append(info);
-    qDebug() << "Tile (" << info.canvas_x << "," << info.canvas_y << ")";
+    //    qDebug() << "Tile (" << info.canvas_x << "," << info.canvas_y << ")";
+    computeTileBounds();
     update();
 }
 
@@ -54,8 +83,13 @@ void MapView::resizeEvent(QResizeEvent*)
 {
     if (mCurrentCoord.isValid())
     {
-        mTileInfoList.clear();
-        mMapProvider->getTiles(mCurrentCoord, mZoomLevel, width(), height());
+        if (!mTileBounds.contains(rect()))
+        {
+            mTileInfoList.clear();
+
+            mMapProvider->getTiles(mCurrentCoord, mZoomLevel, width(),
+                height());
+        }
     }
 }
 
@@ -65,7 +99,7 @@ void MapView::paintEvent(QPaintEvent* /*event*/)
     int      w = width();
     int      h = height();
 
-    foreach(const MapTileInfo &info, mTileInfoList)
+    foreach(const TileInfo &info, mTileInfoList)
     {
         QImage img = info.image;
 

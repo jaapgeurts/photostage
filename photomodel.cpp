@@ -39,7 +39,7 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
 
     Photo info;
 
-    if (role == TileView::PhotoRole)
+    if (role == TileView::TileView::PhotoRole)
     {
         info = mPhotoInfoList.at(index.row());
 

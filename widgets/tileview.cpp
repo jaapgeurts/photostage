@@ -12,7 +12,7 @@
 
 #include "tileview.h"
 
-namespace PhotoStage
+namespace TileView
 {
 TileView::TileView(QWidget* parent) :
     QWidget(parent),

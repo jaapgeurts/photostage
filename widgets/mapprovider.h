@@ -6,9 +6,9 @@
 #include <QGeoCoordinate>
 #include <QGeoRectangle>
 
-namespace PhotoStage
+namespace MapView
 {
-struct MapTileInfo
+struct TileInfo
 {
     public:
 
@@ -35,7 +35,7 @@ class MapProvider : public QObject
 
     signals:
 
-        void tileAvailable(const MapTileInfo& info);
+        void tileAvailable(const TileInfo& info);
 
     public slots:
 };

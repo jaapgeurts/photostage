@@ -31,7 +31,7 @@ class Map : public Module
         Ui::Map*     ui;
 
         QList<Photo> mPhotos;
-        MapProvider* mMapProvider;
+        MapView::MapProvider* mMapProvider;
 };
 }
 #endif // MAP_H

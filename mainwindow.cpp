@@ -97,7 +97,7 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->filmStrip->setSelectionModel(mPhotoSelection);
     ui->filmStrip->setObjectName("Filmstrip");
 
-    connect(ui->filmStrip, &TileView::doubleClickTile,
+    connect(ui->filmStrip, &TileView::TileView::doubleClickTile,
         this, &MainWindow::onTileDoubleClicked);
 
     // Create the Develop Module
@@ -324,7 +324,7 @@ void MainWindow::onSelectionChanged(const QItemSelection& selected,
     QList<Photo> photos;
     foreach (QModelIndex index, selected.indexes())
     photos.append(mPhotoModel->data(index,
-        TileView::PhotoRole).value<Photo>());
+        TileView::TileView::PhotoRole).value<Photo>());
 
     mMap->setPhotos(photos);
 
@@ -568,7 +568,7 @@ void MainWindow::updateInformationBar()
 Photo MainWindow::currentPhoto()
 {
     return mPhotoModel->data(mPhotoSelection->currentIndex(),
-               TileView::PhotoRole).value<Photo>();
+               TileView::TileView::PhotoRole).value<Photo>();
 }
 
 void MainWindow::setRating(int rating)
@@ -577,10 +577,10 @@ void MainWindow::setRating(int rating)
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
     list.append(mPhotoModel->data(index,
-        TileView::PhotoRole).value<Photo>());
+        TileView::TileView::PhotoRole).value<Photo>());
     mPhotoWorkUnit->setRating(list, rating);
     QVector<int> roles;
-    roles.append(TileView::PhotoRole);
+    roles.append(TileView::TileView::PhotoRole);
     mPhotoModel->refreshData(list);
 }
 
@@ -590,11 +590,11 @@ void MainWindow::setFlag(Photo::Flag flag)
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
     list.append(mPhotoModel->data(index,
-        TileView::PhotoRole).value<Photo>());
+        TileView::TileView::PhotoRole).value<Photo>());
 
     mPhotoWorkUnit->setFlag(list, flag);
     QVector<int> roles;
-    roles.append(TileView::PhotoRole);
+    roles.append(TileView::TileView::PhotoRole);
     mPhotoModel->refreshData(list);
 }
 
@@ -604,11 +604,11 @@ void MainWindow::setColorLabel(Photo::ColorLabel color)
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
     list.append(mPhotoModel->data(index,
-        TileView::PhotoRole).value<Photo>());
+        TileView::TileView::PhotoRole).value<Photo>());
 
     mPhotoWorkUnit->setColorLabel(list, color);
     QVector<int> roles;
-    roles.append(TileView::PhotoRole);
+    roles.append(TileView::TileView::PhotoRole);
     mPhotoModel->refreshData(list);
 }
 

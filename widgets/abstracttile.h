@@ -7,7 +7,7 @@
 #include <QMouseEvent>
 #include <QModelIndex>
 
-namespace PhotoStage
+namespace TileView
 {
     class TileView;
 

@@ -4,13 +4,13 @@
 
 namespace PhotoStage
 {
-FilmstripTile::FilmstripTile(TileView* parent) :
-    AbstractTile(parent)
+FilmstripTile::FilmstripTile(TileView::TileView* parent) :
+    TileView::AbstractTile(parent)
 {
 }
 
 void FilmstripTile::render(QPainter& painter,
-    const TileInfo& tileInfo,
+    const TileView::TileInfo& tileInfo,
     const QVariant& data)
 {
     int w = painter.window().width();
@@ -24,8 +24,8 @@ void FilmstripTile::render(QPainter& painter,
 
     if (!data.isNull())
     {
-        if ((tileInfo.tileState & TileInfo::TileStateSelected) ==
-            TileInfo::TileStateSelected)
+        if ((tileInfo.tileState & TileView::TileInfo::TileStateSelected) ==
+            TileView::TileInfo::TileStateSelected)
             painter.setBrush(QBrush(QColor(Qt::darkGray).lighter(180),
                 Qt::SolidPattern));
         else

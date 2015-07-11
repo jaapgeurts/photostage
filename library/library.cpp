@@ -50,9 +50,9 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     // ui->mClvPhotos->setObjectName("LibaryPhotos");
 
     ui->mClvPhotos->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->mClvPhotos, &TileView::customContextMenuRequested,
+    connect(ui->mClvPhotos, &TileView::TileView::customContextMenuRequested,
         this, &Library::customContextMenu);
-    connect(ui->mClvPhotos, &TileView::doubleClickTile,
+    connect(ui->mClvPhotos, &TileView::TileView::doubleClickTile,
         this, &Library::onTileDoubleClicked);
 
     // These models are auto deleted by the QObject hierarchy
@@ -262,7 +262,7 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected,
     QList<Photo> photos;
     foreach (QModelIndex index, selected.indexes())
     photos.append(mPhotoModel->data(index,
-        TileView::PhotoRole).value<Photo>());
+        TileView::TileView::PhotoRole).value<Photo>());
 
     mKeywording->setPhotos(photos);
     mMetaDataModule->setPhotos(photos);
@@ -272,7 +272,7 @@ void Library::onCurrentPhotoChanged(const QModelIndex& current,
     const QModelIndex& /*previous*/)
 {
     Photo photo =
-        mPhotoModel->data(current, TileView::PhotoRole).value<Photo>();
+        mPhotoModel->data(current, TileView::TileView::PhotoRole).value<Photo>();
 
     mCurrentPhoto = photo;
     mHistogramModule->setPhoto(photo);

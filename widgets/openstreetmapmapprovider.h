@@ -7,7 +7,7 @@
 #include "mapprovider.h"
 #include "previewcache.h"
 
-namespace PhotoStage
+namespace MapView
 {
 class OpenstreetmapMapProvider : public MapProvider
 {
@@ -42,15 +42,15 @@ class OpenstreetmapMapProvider : public MapProvider
             "http://otile4.mqcdn.com/tiles/1.0.0/osm";
 
         QNetworkAccessManager* mNetworkManager;
-        PreviewCache           mPreviewCache;
+        PhotoStage::PreviewCache           mPreviewCache;
         bool                   mIsRunning;
 
         double long2tilex(double lon, int z);
         double lat2tiley(double lat, int z);
         double tilex2long(int x, int z);
         double tiley2lat(int y, int z);
-        void fetchTile(MapTileInfo info);
-        void startDownload(QQueue<MapTileInfo> &list);
+        void fetchTile(TileInfo info);
+        void startDownload(QQueue<TileInfo> &list);
         void cancelDownload();
 };
 }

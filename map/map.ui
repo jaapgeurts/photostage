@@ -31,23 +31,7 @@
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QScrollArea" name="saMapView">
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Plain</enum>
-      </property>
-      <property name="lineWidth">
-       <number>0</number>
-      </property>
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-      </property>
-      <widget class="PhotoStage::MapView" name="mapView">
+      <widget class="MapView::MapView" name="mapView">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -57,7 +41,6 @@
         </rect>
        </property>
       </widget>
-     </widget>
      <widget class="QScrollArea" name="saModules">
       <property name="frameShape">
        <enum>QFrame::NoFrame</enum>
@@ -88,7 +71,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PhotoStage::MapView</class>
+   <class>MapView::MapView</class>
    <extends>QWidget</extends>
    <header>widgets/mapview.h</header>
    <container>1</container>

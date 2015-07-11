@@ -9,14 +9,14 @@
 
 namespace PhotoStage
 {
-ImageDbTile::ImageDbTile(TileView* parent) :
-    AbstractTile(parent),
+ImageDbTile::ImageDbTile(TileView::TileView* parent) :
+    TileView::AbstractTile(parent),
     mFontGeneralFoundIcons(QFont("General Foundicons", 15))
 {
 }
 
 void ImageDbTile::render(QPainter& painter,
-    const TileInfo& tileInfo,
+    const TileView::TileInfo& tileInfo,
     const QVariant& data)
 {
     int w = painter.window().width();
@@ -30,8 +30,8 @@ void ImageDbTile::render(QPainter& painter,
 
     if (!data.isNull())
     {
-        if ((tileInfo.tileState & TileInfo::TileStateSelected) ==
-            TileInfo::TileStateSelected)
+        if ((tileInfo.tileState & TileView::TileInfo::TileStateSelected) ==
+            TileView::TileInfo::TileStateSelected)
             painter.setBrush(QBrush(QColor(Qt::darkGray).lighter(180),
                 Qt::SolidPattern));
         else
@@ -185,7 +185,7 @@ void ImageDbTile::render(QPainter& painter,
            }
          */
         if (info.flag() == Photo::FlagReject &&
-            !(tileInfo.tileState & TileInfo::TileStateSelected))
+            !(tileInfo.tileState & TileView::TileInfo::TileStateSelected))
         {
             painter.fillRect(0, 0, w, h, QBrush(QColor(0, 0, 0, 80)));
         }
@@ -200,7 +200,7 @@ void ImageDbTile::render(QPainter& painter,
 }
 
 void ImageDbTile::mouseMoveEvent(QMouseEvent*/*event*/,
-    const TileInfo& /*info*/)
+    const TileView::TileInfo& /*info*/)
 {
     //int x = event->pos().x();
     // int y = event->pos().y();
@@ -265,7 +265,7 @@ void ImageDbTile::mouseMoveEvent(QMouseEvent*/*event*/,
 }
 
 void ImageDbTile::mouseReleaseEvent(QMouseEvent* event,
-    const TileInfo& /*info*/)
+    const TileView::TileInfo& /*info*/)
 {
     //bool accept = false;
     // int x = event->pos().x();
@@ -299,11 +299,11 @@ void ImageDbTile::mouseReleaseEvent(QMouseEvent* event,
     event->ignore();
 }
 
-void ImageDbTile::mouseEnterEvent(const TileInfo& /*info*/)
+void ImageDbTile::mouseEnterEvent(const TileView::TileInfo& /*info*/)
 {
 }
 
-void ImageDbTile::mouseLeaveEvent(const TileInfo& /*info*/)
+void ImageDbTile::mouseLeaveEvent(const TileView::TileInfo& /*info*/)
 {
     /*    mLeftHover.clear();
        mRightHover.clear();

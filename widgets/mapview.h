@@ -8,7 +8,7 @@
 
 #include "mapprovider.h"
 
-namespace PhotoStage
+namespace MapView
 {
 class MapView : public QWidget
 {
@@ -35,15 +35,18 @@ class MapView : public QWidget
 
     private slots:
 
-        void onTileAvailable(const MapTileInfo& info);
+        void onTileAvailable(const TileInfo& info);
 
     private:
 
         MapProvider*       mMapProvider;
-        QList<MapTileInfo> mTileInfoList;
+        QList<TileInfo> mTileInfoList;
         QGeoCoordinate     mCurrentCoord;
         QImage             mIconMapPin;
         int                mZoomLevel;
+        QRect              mTileBounds;
+
+        void computeTileBounds();
 };
 }
 

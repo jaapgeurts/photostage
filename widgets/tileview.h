@@ -12,7 +12,7 @@
 
 #include "abstracttile.h"
 
-namespace PhotoStage
+namespace TileView
 {
 class TileView : public QWidget
 {
@@ -61,7 +61,6 @@ class TileView : public QWidget
 
         void setOrientation(Qt::Orientation orientation);
         Qt::Orientation orientation() const;
-
 
         // set the max # of rows or cols
         void setTilesPerColRow(int value);

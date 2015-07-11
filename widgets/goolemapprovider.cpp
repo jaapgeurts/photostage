@@ -1,6 +1,6 @@
 #include "goolemapprovider.h"
 
-namespace PhotoStage
+namespace MapView
 {
 GooleMapProvider::GooleMapProvider()
 {

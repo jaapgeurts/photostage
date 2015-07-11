@@ -5,7 +5,7 @@
 
 #include "mapprovider.h"
 
-namespace PhotoStage
+namespace MapView
 {
 class GooleMapProvider : public MapProvider
 {

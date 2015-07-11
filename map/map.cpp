@@ -7,7 +7,7 @@ namespace PhotoStage
 {
 Map::Map(QWidget* parent) :
     Module(parent),
-    mMapProvider(new OpenstreetmapMapProvider(this)),
+    mMapProvider(new MapView::OpenstreetmapMapProvider(this)),
     ui(new Ui::Map)
 {
     ui->setupUi(this);

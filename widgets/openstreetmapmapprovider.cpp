@@ -9,13 +9,13 @@
 
 #include "openstreetmapmapprovider.h"
 
-namespace PhotoStage
+namespace MapView
 {
 class TileInfoWrapper : public QObjectUserData
 {
     public:
 
-        MapTileInfo info;
+        TileInfo info;
         QString     key;
 };
 
@@ -50,28 +50,28 @@ void OpenstreetmapMapProvider::getTiles(const QGeoCoordinate& center,
     double tiley_offset = tiley_exact - (int64_t)tiley_exact;
     qDebug() << "Fract" << tilex_offset << "," << tiley_offset;
 
-    int x_start = (int)floor(tilex_exact - (width / 2) / 256);
-    int y_start = (int)floor(tiley_exact - (height / 2) / 256);
+    int x_start = (int)floor(tilex_exact - (width / 2) / 256) - 1;
+    int y_start = (int)floor(tiley_exact - (height / 2) / 256) - 1;
 
-    int x_end = (int)floor(tilex_exact + (width / 2) / 256)+1;
-    int y_end = (int)floor(tiley_exact + (height / 2) / 256)+1;
+    int x_end = (int)floor(tilex_exact + (width / 2) / 256) + 1;
+    int y_end = (int)floor(tiley_exact + (height / 2) / 256) + 1;
 
     //    mTileResult.bounds.setTopLeft(QGeoCoordinate(tiley2lat(tiley, zoomLevel),
     //        tilex2long(tilex, zoomLevel)));
     //    mTileResult.bounds.setBottomRight(QGeoCoordinate(tiley2lat(tiley + 1,
     //        zoomLevel), tilex2long(tilex + 1, zoomLevel)));
 
-    QQueue<MapTileInfo> list;
+    QQueue<TileInfo> list;
 
     for (int y = y_start; y <= y_end; y++)
     {
         for (int x = x_start; x <= x_end; x++)
         {
-            MapTileInfo info;
+            TileInfo info;
             info.tilex    = x;
             info.tiley    = y;
-            info.canvas_x = (x - x_start) * 256 - tilex_offset * 256 + (width / 2) % 256;
-            info.canvas_y = (y - y_start) * 256 - tiley_offset * 256 + (height / 2) % 256;
+            info.canvas_x = (x - x_start - 1) * 256 - tilex_offset * 256 + (width / 2) % 256;
+            info.canvas_y = (y - y_start - 1) * 256 - tiley_offset * 256 + (height / 2) % 256;
             info.zoom = zoomLevel;
 
             list.enqueue(info);
@@ -94,26 +94,26 @@ void OpenstreetmapMapProvider::getTile(const QGeoCoordinate& coord,
     //        zoomLevel),
     //        tilex2long(tilex + 1, zoomLevel)));
 
-    MapTileInfo info;
+    TileInfo info;
     info.tilex    = tilex;
     info.tiley    = tiley;
     info.canvas_x = 0;
     info.canvas_y = 0;
     info.zoom     = zoomLevel;
 
-    QQueue<MapTileInfo> queue;
+    QQueue<TileInfo> queue;
     queue.enqueue(info);
 
     startDownload(queue);
 }
 
-void OpenstreetmapMapProvider::startDownload(QQueue<MapTileInfo>& queue)
+void OpenstreetmapMapProvider::startDownload(QQueue<TileInfo>& queue)
 {
     mIsRunning = true;
 
     while (queue.size() > 0)
     {
-        MapTileInfo info = queue.dequeue();
+        TileInfo info = queue.dequeue();
         fetchTile(info);
     }
 }
@@ -124,14 +124,17 @@ void OpenstreetmapMapProvider::cancelDownload()
     mIsRunning = false;
 }
 
-void OpenstreetmapMapProvider::fetchTile(MapTileInfo info)
+void OpenstreetmapMapProvider::fetchTile(TileInfo info)
 {
     QString url = QString("%1/%2/%3/%4.png").arg(TILESERVER_ENDPOINT1)
         .arg(info.zoom).arg(info.tilex).arg(info.tiley);
     QString key = QString("%2/%3/%4.png").arg(info.zoom)
         .arg(info.tilex).arg(info.tiley);
 
+    // check local cache first.
+
     QImage img = mPreviewCache.get(key);
+
 
     if (img.isNull())
     {
@@ -156,6 +159,7 @@ void OpenstreetmapMapProvider::onReplyFinished(QNetworkReply* reply)
 {
     TileInfoWrapper* wrapper =
         (TileInfoWrapper*)reply->property("wrapper").value<void*>();
+
 
     reply->setProperty("wrapper", QVariant());
 
@@ -197,6 +201,7 @@ double OpenstreetmapMapProvider::tilex2long(int x, int z)
 double OpenstreetmapMapProvider::tiley2lat(int y, int z)
 {
     double n = M_PI - 2.0 * M_PI * y / pow(2.0, z);
+
 
     return 180.0 / M_PI * atan(0.5 * (exp(n) - exp(-n)));
 }

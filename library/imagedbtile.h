@@ -10,24 +10,24 @@
 
 namespace PhotoStage
 {
-class ImageDbTile : public AbstractTile
+class ImageDbTile : public TileView::AbstractTile
 {
     Q_OBJECT
 
     public:
 
-        ImageDbTile(TileView* parent = 0);
+        ImageDbTile(TileView::TileView* parent = 0);
 
         // AbstractCellRenderer interface
         void render(QPainter& painter,
-            const TileInfo& tileInfo,
+            const TileView::TileInfo& tileInfo,
             const QVariant& data);
 
-        void mouseMoveEvent(QMouseEvent* event, const TileInfo& info);
-        void mouseReleaseEvent(QMouseEvent* event, const TileInfo& info);
+        void mouseMoveEvent(QMouseEvent* event, const TileView::TileInfo& info);
+        void mouseReleaseEvent(QMouseEvent* event, const TileView::TileInfo& info);
 
-        void mouseEnterEvent(const TileInfo& info);
-        void mouseLeaveEvent(const TileInfo& info);
+        void mouseEnterEvent(const TileView::TileInfo& info);
+        void mouseLeaveEvent(const TileView::TileInfo& info);
 
     signals:
 

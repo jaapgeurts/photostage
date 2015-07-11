@@ -2,7 +2,7 @@
 
 #include "tileview.h"
 
-namespace PhotoStage
+namespace TileView
 {
 AbstractTile::AbstractTile(TileView* parent) : QObject(parent)
 {

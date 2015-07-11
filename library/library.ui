@@ -74,7 +74,7 @@
          <property name="currentIndex">
           <number>0</number>
          </property>
-         <widget class="PhotoStage::TileView" name="mClvPhotos"/>
+         <widget class="TileView::TileView" name="mClvPhotos"/>
          <widget class="QScrollArea" name="mLoupeScrollView">
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
@@ -345,7 +345,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>PhotoStage::TileView</class>
+   <class>TileView::TileView</class>
    <extends>QWidget</extends>
    <header>widgets/tileview.h</header>
    <container>1</container>

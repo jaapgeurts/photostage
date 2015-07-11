@@ -1,6 +1,6 @@
 #include "mapprovider.h"
 
-namespace PhotoStage
+namespace MapView
 {
 MapProvider::MapProvider(QObject* parent)
     : QObject(parent)
