@@ -7,8 +7,9 @@
 
 namespace PhotoStage
 {
-BasicModule::BasicModule(QWidget* parent) : DevelopModule(parent), ui(
-        new Ui::BasicModule)
+BasicModule::BasicModule(QWidget* parent) :
+    DevelopModule(parent),
+    ui(new Ui::BasicModule)
 {
     ui->setupUi(this);
 }
@@ -157,7 +158,6 @@ inline float clamp(float l, float h, float v)
 void BasicModule::onExposureChanged(int value)
 {
     qDebug() << "exposure value" << value;
-
 
     //    Image img = mPhoto->original().clone();
 

@@ -1,6 +1,9 @@
 #ifndef DEVELOP_H
 #define DEVELOP_H
 
+#include <QItemSelectionModel>
+#include <QModelIndex>
+
 #include "module.h"
 #include "modules/develophistogrammodule.h"
 #include "modules/rawmodule.h"
@@ -27,13 +30,13 @@ class Develop : public Module
 
         void setPhoto(Photo photo);
 
-    public slots:
-
-        void imageChanged();
-
     protected:
 
         void showEvent(QShowEvent*);
+
+    private slots:
+
+        void onDevelopSettingsChanged();
 
     private:
 
@@ -43,8 +46,7 @@ class Develop : public Module
         BasicModule*            mBasicModule;
         Photo                   mPhoto;
         bool                    mLoadPhoto;
-
-        // QWidget interface
+        QItemSelectionModel*    mPhotoModel;
 
         void doSetPhoto(Photo photo);
 };

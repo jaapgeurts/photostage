@@ -84,10 +84,14 @@ SOURCES += \
     widgets/actionstategroup.cpp \
     library/modules/metadatamodule.cpp \
     photodata.cpp \
-    widgets/mapview.cpp \
-    widgets/mapprovider.cpp \
-    widgets/goolemapprovider.cpp \
-    widgets/openstreetmapmapprovider.cpp
+    widgets/mapview/mapview.cpp \
+    widgets/mapview/mapprovider.cpp \
+    widgets/mapview/goolemapprovider.cpp \
+    widgets/mapview/openstreetmapmapprovider.cpp \
+    widgets/mapview/layer.cpp \
+    widgets/mapview/abstractmarker.cpp \
+    widgets/mapview/imagemarker.cpp \
+    widgets/mapview/groupmarker.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -153,10 +157,14 @@ HEADERS  += \
     engine/platform.h \
     widgets/actionstategroup.h \
     library/modules/metadatamodule.h \
-    widgets/mapview.h \
-    widgets/mapprovider.h \
-    widgets/goolemapprovider.h \
-    widgets/openstreetmapmapprovider.h
+    widgets/mapview/mapview.h \
+    widgets/mapview/mapprovider.h \
+    widgets/mapview/goolemapprovider.h \
+    widgets/mapview/openstreetmapmapprovider.h \
+    widgets/mapview/layer.h \
+    widgets/mapview/abstractmarker.h \
+    widgets/mapview/imagemarker.h \
+    widgets/mapview/groupmarker.h
 
 FORMS    += \
     mainwindow.ui \

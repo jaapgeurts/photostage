@@ -37,7 +37,7 @@ void MapView::computeTileBounds()
     minx = miny = std::numeric_limits<int>::max();
     maxx = maxy = std::numeric_limits<int>::min();
 
-    foreach(TileInfo info, mTileInfoList)
+    foreach(Tile info, mTileInfoList)
     {
         if (info.canvas_x < minx)
             minx = info.canvas_x;
@@ -58,7 +58,7 @@ void MapView::computeTileBounds()
     }
 }
 
-void MapView::onTileAvailable(const TileInfo& info)
+void MapView::onTileAvailable(const Tile& info)
 {
     mTileInfoList.append(info);
     //    qDebug() << "Tile (" << info.canvas_x << "," << info.canvas_y << ")";
@@ -70,13 +70,21 @@ void MapView::setCurrentCoord(const QGeoCoordinate& coord)
 {
     if (coord.isValid())
     {
-        mCurrentCoord = coord;
+        mCurrentCoord = mMapProvider->moveCoord(coord,
+                -width() / 2,
+                -height() / 2,
+                mZoomLevel);
         mTileInfoList.clear();
 
         mMapProvider->getTiles(mCurrentCoord, mZoomLevel, width(), height());
     }
     else
         qDebug() << "Invalid Geo Coord";
+}
+
+void MapView::addLayer(Layer* layer)
+{
+    mLayers.append(layer);
 }
 
 void MapView::resizeEvent(QResizeEvent*)
@@ -99,7 +107,7 @@ void MapView::paintEvent(QPaintEvent* /*event*/)
     int      w = width();
     int      h = height();
 
-    foreach(const TileInfo &info, mTileInfoList)
+    foreach(const Tile &info, mTileInfoList)
     {
         QImage img = info.image;
 

@@ -4,7 +4,5 @@ namespace MapView
 {
 GooleMapProvider::GooleMapProvider()
 {
-
 }
-
 }

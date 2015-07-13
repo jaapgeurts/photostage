@@ -1,5 +1,5 @@
-#ifndef OPENSTREETMAPMAPPROVIDER_H
-#define OPENSTREETMAPMAPPROVIDER_H
+#ifndef MAPVIEW_OPENSTREETMAPMAPPROVIDER_H
+#define MAPVIEW_OPENSTREETMAPMAPPROVIDER_H
 
 #include <QNetworkReply>
 #include <QQueue>
@@ -21,16 +21,28 @@ class OpenstreetmapMapProvider : public MapProvider
         // MapProvider interface
 
         void getTile(const QGeoCoordinate& coord, int zoomLevel);
-        void getTiles(const QGeoCoordinate& center,
-            int zoomLevel,
+        void getTiles(const QGeoCoordinate& topleft, int zoomLevel,
             int width,
             int height);
+
+        QPoint coordToPixel(const QGeoCoordinate& coord, int zoomLevel) const;
+        QGeoCoordinate pixelToCoord(const QPoint& point, int zoomLevel) const;
+
+        QGeoCoordinate moveCoord(const QGeoCoordinate& coord,
+            int dx,
+            int dy,
+            int zoomLevel) const;
+
+        int getMinZoomLevel() const;
+        int getMaxZoomLevel() const;
 
     private slots:
 
         void onReplyFinished(QNetworkReply* reply);
 
     private:
+
+        const int     TILE_DIMENSION = 256;
 
         const QString TILESERVER_ENDPOINT1 =
             "http://otile1.mqcdn.com/tiles/1.0.0/osm";
@@ -41,16 +53,16 @@ class OpenstreetmapMapProvider : public MapProvider
         const QString TILESERVER_ENDPOINT4 =
             "http://otile4.mqcdn.com/tiles/1.0.0/osm";
 
-        QNetworkAccessManager* mNetworkManager;
-        PhotoStage::PreviewCache           mPreviewCache;
-        bool                   mIsRunning;
+        QNetworkAccessManager*   mNetworkManager;
+        PhotoStage::PreviewCache mPreviewCache;
+        bool                     mIsRunning;
 
-        double long2tilex(double lon, int z);
-        double lat2tiley(double lat, int z);
-        double tilex2long(int x, int z);
-        double tiley2lat(int y, int z);
-        void fetchTile(TileInfo info);
-        void startDownload(QQueue<TileInfo> &list);
+        double long2tilex(double lon, int z) const;
+        double lat2tiley(double lat, int z) const;
+        double tilex2long(double x, int z) const;
+        double tiley2lat(double y, int z) const;
+        void fetchTile(Tile info);
+        void startDownload(QQueue<Tile>& list);
         void cancelDownload();
 };
 }

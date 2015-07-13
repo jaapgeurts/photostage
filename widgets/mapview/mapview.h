@@ -1,5 +1,5 @@
-#ifndef MAPVIEW_H
-#define MAPVIEW_H
+#ifndef MAPVIEW_MAPVIEW_H
+#define MAPVIEW_MAPVIEW_H
 
 #include <QObject>
 #include <QWidget>
@@ -7,6 +7,7 @@
 #include <QList>
 
 #include "mapprovider.h"
+#include "layer.h"
 
 namespace MapView
 {
@@ -22,6 +23,8 @@ class MapView : public QWidget
         QSize sizeHint() const;
         void setCurrentCoord(const QGeoCoordinate& coord);
 
+        void addLayer(Layer* layer);
+
     signals:
 
     public slots:
@@ -35,16 +38,17 @@ class MapView : public QWidget
 
     private slots:
 
-        void onTileAvailable(const TileInfo& info);
+        void onTileAvailable(const Tile& info);
 
     private:
 
-        MapProvider*       mMapProvider;
-        QList<TileInfo> mTileInfoList;
-        QGeoCoordinate     mCurrentCoord;
-        QImage             mIconMapPin;
-        int                mZoomLevel;
-        QRect              mTileBounds;
+        MapProvider*   mMapProvider;
+        QList<Tile>    mTileInfoList;
+        QGeoCoordinate mCurrentCoord;
+        QImage         mIconMapPin;
+        int            mZoomLevel;
+        QRect          mTileBounds;
+        QList<Layer*>   mLayers;
 
         void computeTileBounds();
 };

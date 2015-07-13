@@ -40,11 +40,11 @@ MainWindow::MainWindow(QWidget* parent) :
 
     mDatabaseAccess = new DatabaseAccess();
 
-    QSettings settings;
-    move(settings.value(SETTINGS_WINDOW_LOCATION).toPoint());
+    QSettings  settings;
 
     QList<int> l;
     settings.beginGroup("mainwindow");
+    move(settings.value(SETTINGS_WINDOW_LOCATION).toPoint());
 
     if (settings.contains(SETTINGS_SPLITTER_FILMSTRIP_SIZES))
     {
@@ -76,7 +76,8 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(mPhotoSelection, &QItemSelectionModel::currentChanged,
         this, &MainWindow::onCurrentChanged);
 
-    // Create the Library Module
+    //**************
+    // create the LIBRARY MODULE
     mLibrary = new Library(mPhotoModel, this);
     mLibrary->setSelectionModel(mPhotoSelection);
     ui->stackedWidget->addWidget(mLibrary);
@@ -100,12 +101,16 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(ui->filmStrip, &TileView::TileView::doubleClickTile,
         this, &MainWindow::onTileDoubleClicked);
 
-    // Create the Develop Module
+    //***************
+    // Create the DEVELOP MODULE
     mDevelop = new Develop(this);
     ui->stackedWidget->addWidget(mDevelop);
 
-    mMap = new Map(this);
+    // ***************
+    // Create the MAP MODULE
+    mMap = new Map(mPhotoModel, this);
     ui->stackedWidget->addWidget(mMap);
+    mMap->setSelectionModel(mPhotoSelection);
 
     // Set the current module variables
     mCurrentModule = mLibrary;
@@ -114,8 +119,7 @@ MainWindow::MainWindow(QWidget* parent) :
     mPhotoWorkUnit = PhotoWorkUnit::instance();
 
     mBackgroundTaskManager = new BackgroundTaskManager(
-        ui->scrollAreaWidgetContents,
-        this);
+        ui->scrollAreaWidgetContents, this);
 
     // Put all actions in groups.
     mActionStatePhoto.addAction(ui->actionColorBlue);
@@ -325,8 +329,6 @@ void MainWindow::onSelectionChanged(const QItemSelection& selected,
     foreach (QModelIndex index, selected.indexes())
     photos.append(mPhotoModel->data(index,
         TileView::TileView::PhotoRole).value<Photo>());
-
-    mMap->setPhotos(photos);
 
     updateInformationBar();
 }

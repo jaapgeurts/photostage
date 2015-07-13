@@ -11,7 +11,8 @@ namespace PhotoStage
 Develop::Develop(QWidget* parent) :
     Module(parent),
     ui(new Ui::Develop),
-    mLoadPhoto(false)
+    mLoadPhoto(false),
+    mPhotoModel(NULL)
 {
     ui->setupUi(this);
 
@@ -45,10 +46,8 @@ Develop::Develop(QWidget* parent) :
     // Basic
     mBasicModule = new BasicModule(ui->DevelopPanel);
     ui->DevelopPanel->addPanel("Basic", mBasicModule);
-    connect(mBasicModule,
-        &BasicModule::parametersAdjusted,
-        this,
-        &Develop::imageChanged);
+    connect(mBasicModule, &BasicModule::parametersAdjusted,
+        this, &Develop::onDevelopSettingsChanged);
 }
 
 Develop::~Develop()
@@ -73,23 +72,20 @@ QRect Develop::lightGap()
 
 void Develop::setPhoto(Photo photo)
 {
-    // determine visibility
-
     mPhoto = photo;
 
     // if visible, load immediately
     if (isVisible())
-        doSetPhoto(photo);
+        doSetPhoto(mPhoto);
     else
         // TODO: if invisible, defer loading until visible
         mLoadPhoto = true;
 }
 
-void Develop::imageChanged()
+void Develop::onDevelopSettingsChanged()
 {
     ui->developView->update();
     mHistogramModule->setPhoto(mPhoto);
-    //  mHistogramModule->recalculate();
 }
 
 void Develop::showEvent(QShowEvent*)

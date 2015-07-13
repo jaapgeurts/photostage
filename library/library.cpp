@@ -6,8 +6,8 @@
 // models
 #include "sqlkeywordmodel.h"
 
-#define SETTINGS_SPLITTER_LIBRARY_SIZES "librarymodule/splitter_main"
-#define SETTINGS_LIBRARY_FILES_PATHITEM "librarymodule/files/pathitem"
+#define SETTINGS_SPLITTER_LIBRARY_SIZES "splitter_main"
+#define SETTINGS_LIBRARY_FILES_PATHITEM "files/pathitem"
 
 namespace PhotoStage
 {
@@ -21,6 +21,7 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     ui->setupUi(this);
 
     QSettings  settings;
+    settings.beginGroup("libray");
     QList<int> l;
 
     if (settings.contains(SETTINGS_SPLITTER_LIBRARY_SIZES))
@@ -127,7 +128,9 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
 
 Library::~Library()
 {
-    QSettings    settings;
+    QSettings settings;
+
+    settings.beginGroup("library");
     QVariantList list;
 
     foreach(int size, ui->splitterMain->sizes())
@@ -272,7 +275,8 @@ void Library::onCurrentPhotoChanged(const QModelIndex& current,
     const QModelIndex& /*previous*/)
 {
     Photo photo =
-        mPhotoModel->data(current, TileView::TileView::PhotoRole).value<Photo>();
+        mPhotoModel->data(current,
+            TileView::TileView::PhotoRole).value<Photo>();
 
     mCurrentPhoto = photo;
     mHistogramModule->setPhoto(photo);
