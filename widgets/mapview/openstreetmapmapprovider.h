@@ -33,8 +33,8 @@ class OpenstreetmapMapProvider : public MapProvider
             int dy,
             int zoomLevel) const;
 
-        int getMinZoomLevel() const;
-        int getMaxZoomLevel() const;
+        int minZoomLevel() const;
+        int maxZoomLevel() const;
 
     private slots:
 

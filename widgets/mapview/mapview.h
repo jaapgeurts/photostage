@@ -5,12 +5,14 @@
 #include <QWidget>
 #include <QGeoCoordinate>
 #include <QList>
+#include <QSlider>
 
 #include "mapprovider.h"
-#include "layer.h"
 
 namespace MapView
 {
+class Layer;
+
 class MapView : public QWidget
 {
     Q_OBJECT
@@ -25,11 +27,17 @@ class MapView : public QWidget
 
         void addLayer(Layer* layer);
 
-    signals:
+        MapProvider* mapProvider() const;
+        void setMapProvider(MapProvider* provider);
+
+        int zoomLevel() const;
+        QPoint origin() const;
 
     public slots:
 
-        void setMapProvider(MapProvider* provider);
+        void setZoomLevel(int level);
+
+    signals:
 
     protected:
 
@@ -39,17 +47,20 @@ class MapView : public QWidget
     private slots:
 
         void onTileAvailable(const Tile& info);
+        void onZoomLevelChanged(int value);
 
     private:
 
         MapProvider*   mMapProvider;
-        QList<Tile>    mTileInfoList;
+        QList<Tile>    mTileList;
         QGeoCoordinate mCurrentCoord;
-        QImage         mIconMapPin;
+        QPoint         mOrigin;
         int            mZoomLevel;
         QRect          mTileBounds;
-        QList<Layer*>   mLayers;
+        QList<Layer*>  mLayers;
+        QSlider*       mZoomSlider;
 
+        void fetchTiles();
         void computeTileBounds();
 };
 }

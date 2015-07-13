@@ -2,6 +2,7 @@
 #include "ui_map.h"
 
 #include "widgets/mapview/openstreetmapmapprovider.h"
+#include "widgets/mapview/imagemarker.h"
 #include "widgets/tileview.h"
 
 namespace PhotoStage
@@ -10,11 +11,13 @@ Map::Map(QAbstractItemModel* model, QWidget* parent) :
     Module(parent),
     ui(new Ui::Map),
     mPhotoModel(model),
-    mLoadPhoto(false)
+    mLoadPhoto(false),
+    mIconMapPin(":/icons/map-pin.png")
 {
     ui->setupUi(this);
     mMapProvider = new MapView::OpenstreetmapMapProvider(ui->mapView);
-    mLayer       = new MapView::Layer(mMapProvider);
+    mLayer       = new MapView::Layer(ui->mapView);
+    ui->mapView->addLayer(mLayer);
     ui->mapView->setMapProvider(mMapProvider);
 
     connect(mPhotoModel, &QAbstractItemModel::modelReset,
@@ -54,22 +57,28 @@ void Map::onCurrentPhotoChanged(const QModelIndex& current,
         mLoadPhoto = true;
 }
 
-void Map::onSelectionChanged(const QItemSelection& selected,
-    const QItemSelection& deselected)
+void Map::onSelectionChanged(const QItemSelection& /*selected*/,
+    const QItemSelection& /*deselected*/)
 {
 }
 
 void Map::onModelReset()
 {
-    return;
     mLayer->clear();
     int c = mPhotoModel->rowCount();
 
     for (int i = 0; i < c; i++)
     {
-        Photo p = mPhotoModel->data(mPhotoModel->index(c, 0),
-                TileView::TileView::PhotoRole).value<Photo>();
-        //  if (photo.exifInfo().location.isValid()))
+        Photo p = mPhotoModel->data(mPhotoModel->index(i, 0),
+                Photo::DataRole).value<Photo>();
+
+        QGeoCoordinate coord = p.exifInfo().location;
+
+        if (coord.isValid())
+        {
+            mLayer->addMarker(new MapView::ImageMarker(mIconMapPin,
+                coord, this));
+        }
     }
 }
 

@@ -3,6 +3,7 @@
 
 #include <QPainter>
 #include <QObject>
+#include <QGeoCoordinate>
 
 #include "QRect"
 
@@ -28,17 +29,22 @@ class AbstractMarker : public QObject
         };
 
         AbstractMarker(QObject* parent = 0);
+        AbstractMarker(const QGeoCoordinate& coord, QObject* parent = 0);
         virtual ~AbstractMarker();
+
+        void setCoord(const QGeoCoordinate& coord);
+        const QGeoCoordinate& coord() const;
 
         virtual QRect bounds() const = 0;
         Anchor anchor() const;
         void setAnchor(Anchor anchor);
 
-        virtual void paintMarker(QPainter* painter) = 0;
+        virtual void paint(QPainter* painter) = 0;
 
     private:
 
-        Anchor mAnchor;
+        Anchor         mAnchor;
+        QGeoCoordinate mCoord;
 };
 }
 #endif // ABSTRACTMARKER_H

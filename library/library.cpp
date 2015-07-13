@@ -21,7 +21,7 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     ui->setupUi(this);
 
     QSettings  settings;
-    settings.beginGroup("libray");
+    settings.beginGroup("library");
     QList<int> l;
 
     if (settings.contains(SETTINGS_SPLITTER_LIBRARY_SIZES))
@@ -115,9 +115,11 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     long long pathid =
         settings.value(SETTINGS_LIBRARY_FILES_PATHITEM).toLongLong();
 
+    qDebug()<<"Expanding";
     QModelIndex index = mPathModel->index(pathid);
     do
     {
+        qDebug()<<"+"<<((PathItem*)index.internalPointer())->path;
         mTrvwFiles->expand(index);
         index = index.parent();
     }

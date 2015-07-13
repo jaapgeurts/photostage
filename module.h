@@ -1,9 +1,11 @@
-#ifndef MODULE_H
-#define MODULE_H
+#ifndef PHOTOSTAGE_MODULE_H
+#define PHOTOSTAGE_MODULE_H
 
 #include <QWidget>
 #include <QRect>
 
+namespace PhotoStage
+{
 class Module : public QWidget
 {
     Q_OBJECT
@@ -20,5 +22,5 @@ class Module : public QWidget
 
         virtual QRect lightGap() = 0;
 };
-
+}
 #endif // MODULE_H

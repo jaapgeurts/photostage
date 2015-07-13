@@ -118,6 +118,9 @@ QModelIndex SqlPathModel::findItemRec(PathItem* item, int row,
         return createIndex(row, 0, item);
 
     int j = 0;
+
+    if (item->path == "2014")
+        qDebug() <<"found";
     foreach(PathItem * i, item->children)
     {
         QModelIndex idx = findItemRec(i, j, pathid);

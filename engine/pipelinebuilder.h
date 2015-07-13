@@ -1,5 +1,5 @@
-#ifndef PIPELINE_H
-#define PIPELINE_H
+#ifndef PIPELINE_BUILDER_H
+#define PIPELINE_BUILDER_H
 
 #include <QObject>
 #include <QImage>

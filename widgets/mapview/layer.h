@@ -2,20 +2,26 @@
 #define MAPVIEW_LAYER_H
 
 #include <QObject>
+#include <QPainter>
 
+#include "mapview.h"
 #include "abstractmarker.h"
 
 namespace MapView
 {
+
+
 class Layer : public QObject
 {
     Q_OBJECT
 
     public:
 
-        explicit Layer(QObject* parent = 0);
+        explicit Layer(MapView* view);
 
         void addMarker(AbstractMarker* marker);
+
+        void paint(QPainter* painter);
 
     signals:
 
@@ -26,6 +32,7 @@ class Layer : public QObject
     private:
 
         QList<AbstractMarker*> mMarkers;
+        MapView*               mMapView;
 };
 }
 

@@ -6,25 +6,25 @@
 
 namespace PhotoStage
 {
-    class DevelopModule : public QWidget
-    {
-        Q_OBJECT
+class DevelopModule : public QWidget
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            explicit DevelopModule(QWidget* parent = 0);
+        explicit DevelopModule(QWidget* parent = 0);
 
-            virtual void setPhoto(Photo photo);
-            const Photo photo() const;
+        virtual void setPhoto(Photo photo);
+        const Photo photo() const;
 
-        signals:
+    signals:
 
-            // TODO: remove when the engine takes care of rendering
-            void parametersAdjusted();
+        // TODO: remove when the engine takes care of rendering
+        void parametersAdjusted();
 
-        protected:
+    protected:
 
-            Photo mPhoto;
-    };
+        Photo mPhoto;
+};
 }
 #endif // DEVELOPMODULE_H

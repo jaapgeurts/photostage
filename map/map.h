@@ -1,5 +1,5 @@
-#ifndef MAP_H
-#define MAP_H
+#ifndef PHOTOSTAGE_MAP_H
+#define PHOTOSTAGE_MAP_H
 
 #include <QAbstractItemModel>
 #include <QItemSelectionModel>
@@ -38,8 +38,7 @@ class Map : public Module
 
         void onCurrentPhotoChanged(const QModelIndex& current,
             const QModelIndex&);
-        void onSelectionChanged(const QItemSelection& selected,
-            const QItemSelection& deselected);
+        void onSelectionChanged(const QItemSelection&, const QItemSelection&);
 
         void onModelReset();
 
@@ -52,6 +51,7 @@ class Map : public Module
         MapView::Layer*       mLayer;
         bool                  mLoadPhoto;
         Photo                 mPhoto;
+        QImage                mIconMapPin;
 
         void setPhoto(Photo photo);
 };

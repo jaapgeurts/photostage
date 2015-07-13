@@ -66,6 +66,11 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
     {
         return QString(mPhotoInfoList.at(index.row()).srcImagePath());
     }
+    else if (role == Photo::DataRole)
+    {
+        info = mPhotoInfoList.at(index.row());
+        return QVariant::fromValue<Photo>(info);
+    }
     else
         return QVariant();
 }
@@ -78,7 +83,7 @@ void PhotoModel::imageLoaded(const QVariant& ref, const QImage& image)
     QModelIndex index = ref.value<QModelIndex>();
     Photo       info  = mPhotoInfoMap.value(index);
 
-    info.exifInfo().width = image.width();
+    info.exifInfo().width  = image.width();
     info.exifInfo().height = image.height();
     // get actual widthXheight & store in db.
     PhotoWorkUnit::instance()->updateExifInfo(info);

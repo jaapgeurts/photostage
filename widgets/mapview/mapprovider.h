@@ -10,8 +10,7 @@ namespace MapView
 {
 struct Tile
 {
-    int tilex, tiley;
-    int canvas_x, canvas_y;
+    int x, y;
     int zoom;
     QImage image;
 };
@@ -34,12 +33,10 @@ class MapProvider : public QObject
         virtual QGeoCoordinate pixelToCoord(const QPoint& point,
             int zoomLevel) const = 0;
         virtual QGeoCoordinate moveCoord(const QGeoCoordinate& coord,
-            int dx,
-            int dy,
-            int zoomLevel) const = 0;
+            int dx, int dy, int zoomLevel) const = 0;
 
-        virtual int getMinZoomLevel() const = 0;
-        virtual int getMaxZoomLevel() const = 0;
+        virtual int minZoomLevel() const = 0;
+        virtual int maxZoomLevel() const = 0;
 
     signals:
 

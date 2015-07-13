@@ -1,6 +1,7 @@
 #include <QPainter>
 #include <QDebug>
 
+#include "layer.h"
 #include "mapview.h"
 #include "openstreetmapmapprovider.h"
 
@@ -8,10 +9,13 @@ namespace MapView
 {
 MapView::MapView(QWidget* parent) :
     QWidget(parent),
-    mIconMapPin(":/icons/map-pin.png"),
-    mZoomLevel(14)
+    mZoomLevel(8)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
+    mZoomSlider = new QSlider(Qt::Vertical, this);
+    mZoomSlider->resize(30, 150);
+    connect(mZoomSlider, &QSlider::valueChanged,
+        this, &MapView::onZoomLevelChanged);
 }
 
 MapView::~MapView()
@@ -28,6 +32,37 @@ void MapView::setMapProvider(MapProvider* provider)
     mMapProvider = provider;
     connect(mMapProvider, &MapProvider::tileAvailable,
         this, &MapView::onTileAvailable);
+    mZoomSlider->setMinimum(mMapProvider->minZoomLevel());
+    mZoomSlider->setMaximum(mMapProvider->maxZoomLevel());
+    mZoomSlider->setValue(mZoomLevel);
+}
+
+int MapView::zoomLevel() const
+{
+    return mZoomLevel;
+}
+
+QPoint MapView::origin() const
+{
+    return mOrigin;
+}
+
+void MapView::setZoomLevel(int level)
+{
+    mZoomLevel = level;
+}
+
+MapProvider* MapView::mapProvider() const
+{
+    return mMapProvider;
+}
+
+void MapView::onTileAvailable(const Tile& info)
+{
+    qDebug () << "New tiles";
+    mTileList.append(info);
+    computeTileBounds();
+    update();
 }
 
 void MapView::computeTileBounds()
@@ -37,19 +72,19 @@ void MapView::computeTileBounds()
     minx = miny = std::numeric_limits<int>::max();
     maxx = maxy = std::numeric_limits<int>::min();
 
-    foreach(Tile info, mTileInfoList)
+    foreach(Tile info, mTileList)
     {
-        if (info.canvas_x < minx)
-            minx = info.canvas_x;
+        if (info.x < minx)
+            minx = info.x;
 
-        if (info.canvas_x > maxx)
-            maxx = info.canvas_x;
+        if (info.x > maxx)
+            maxx = info.x;
 
-        if (info.canvas_y < miny)
-            miny = info.canvas_y;
+        if (info.y < miny)
+            miny = info.y;
 
-        if (info.canvas_y > maxy)
-            maxy = info.canvas_y;
+        if (info.y > maxy)
+            maxy = info.y;
 
         mTileBounds.setTop(minx);
         mTileBounds.setLeft(miny);
@@ -58,12 +93,15 @@ void MapView::computeTileBounds()
     }
 }
 
-void MapView::onTileAvailable(const Tile& info)
+void MapView::onZoomLevelChanged(int value)
 {
-    mTileInfoList.append(info);
-    //    qDebug() << "Tile (" << info.canvas_x << "," << info.canvas_y << ")";
-    computeTileBounds();
-    update();
+    // currentCoord should be the pixel under the mouse or the center of the screen.
+    mZoomLevel    = value;
+    mCurrentCoord = mMapProvider->moveCoord(mCurrentCoord,
+            -width() / 2, -height() / 2, mZoomLevel);
+    mOrigin = mMapProvider->coordToPixel(mCurrentCoord, mZoomLevel);
+
+    fetchTiles();
 }
 
 void MapView::setCurrentCoord(const QGeoCoordinate& coord)
@@ -71,15 +109,22 @@ void MapView::setCurrentCoord(const QGeoCoordinate& coord)
     if (coord.isValid())
     {
         mCurrentCoord = mMapProvider->moveCoord(coord,
-                -width() / 2,
-                -height() / 2,
-                mZoomLevel);
-        mTileInfoList.clear();
+                -width() / 2, -height() / 2, mZoomLevel);
+        mOrigin = mMapProvider->coordToPixel(mCurrentCoord, mZoomLevel);
 
-        mMapProvider->getTiles(mCurrentCoord, mZoomLevel, width(), height());
+        fetchTiles();
     }
     else
         qDebug() << "Invalid Geo Coord";
+}
+
+void MapView::fetchTiles()
+{
+    if (mCurrentCoord.isValid())
+    {
+        mTileList.clear();
+        mMapProvider->getTiles(mCurrentCoord, mZoomLevel, width(), height());
+    }
 }
 
 void MapView::addLayer(Layer* layer)
@@ -93,12 +138,15 @@ void MapView::resizeEvent(QResizeEvent*)
     {
         if (!mTileBounds.contains(rect()))
         {
-            mTileInfoList.clear();
+            mTileList.clear();
 
             mMapProvider->getTiles(mCurrentCoord, mZoomLevel, width(),
                 height());
         }
     }
+    mZoomSlider->resize(30, height() / 2 - 60);
+    mZoomSlider->move(width() - 40, 30);
+    update();
 }
 
 void MapView::paintEvent(QPaintEvent* /*event*/)
@@ -107,23 +155,21 @@ void MapView::paintEvent(QPaintEvent* /*event*/)
     int      w = width();
     int      h = height();
 
-    foreach(const Tile &info, mTileInfoList)
+    // First draw the bottom fixed layer (map tiles)
+    foreach(const Tile &info, mTileList)
     {
         QImage img = info.image;
 
         if (!img.isNull())
         {
-            painter.drawImage(info.canvas_x, info.canvas_y, img);
+            painter.drawImage(info.x - mOrigin.x(), info.y - mOrigin.y(), img);
+        }
+    }
 
-            painter.drawImage(
-                (w - mIconMapPin.width()) / 2,
-                h / 2  - mIconMapPin.height(),
-                mIconMapPin);
-        }
-        else
-        {
-            qDebug() << "Image is NULL";
-        }
+    // draw other layers
+    foreach(Layer * layer, mLayers)
+    {
+        layer->paint(&painter);
     }
 }
 }

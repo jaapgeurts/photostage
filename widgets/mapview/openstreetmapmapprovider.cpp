@@ -41,8 +41,8 @@ void OpenstreetmapMapProvider::getTile(const QGeoCoordinate& coord,
 {
     cancelDownload();
 
-    int tilex = long2tilex(coord.longitude(), zoomLevel);
-    int tiley = lat2tiley(coord.latitude(), zoomLevel);
+    double tilex_exact = long2tilex(coord.longitude(), zoomLevel);
+    double tiley_exact = lat2tiley(coord.latitude(), zoomLevel);
 
     //    mTileResult.bounds.setTopLeft(QGeoCoordinate(tiley2lat(tiley, zoomLevel),
     //        tilex2long(tilex, zoomLevel)));
@@ -51,11 +51,9 @@ void OpenstreetmapMapProvider::getTile(const QGeoCoordinate& coord,
     //        tilex2long(tilex + 1, zoomLevel)));
 
     Tile info;
-    info.tilex    = tilex;
-    info.tiley    = tiley;
-    info.canvas_x = 0;
-    info.canvas_y = 0;
-    info.zoom     = zoomLevel;
+    info.x    = tilex_exact;
+    info.y    = tiley_exact;
+    info.zoom = zoomLevel;
 
     QQueue<Tile> queue;
     queue.enqueue(info);
@@ -73,14 +71,14 @@ void OpenstreetmapMapProvider::getTiles(const QGeoCoordinate& topleft,
     double tilex_exact = long2tilex(topleft.longitude(), zoomLevel);
     double tiley_exact = lat2tiley(topleft.latitude(), zoomLevel);
 
-    double tilex_offset = tilex_exact - (int64_t)tilex_exact;
-    double tiley_offset = tiley_exact - (int64_t)tiley_exact;
+    //    double tilex_offset = tilex_exact - (int64_t)tilex_exact;
+    //    double tiley_offset = tiley_exact - (int64_t)tiley_exact;
 
-    int    x_start = (int)floor(tilex_exact);
-    int    y_start = (int)floor(tiley_exact);
+    int x_start = (int)floor(tilex_exact);
+    int y_start = (int)floor(tiley_exact);
 
-    int    x_end = (int)floor(tilex_exact) + width / TILE_DIMENSION + 1;
-    int    y_end = (int)floor(tiley_exact) + height / TILE_DIMENSION + 1;
+    int x_end = (int)floor(tilex_exact) + width / TILE_DIMENSION + 1;
+    int y_end = (int)floor(tiley_exact) + height / TILE_DIMENSION + 1;
 
     //    mTileResult.bounds.setTopLeft(QGeoCoordinate(tiley2lat(tiley, zoomLevel),
     //        tilex2long(tilex, zoomLevel)));
@@ -94,12 +92,8 @@ void OpenstreetmapMapProvider::getTiles(const QGeoCoordinate& topleft,
         for (int x = x_start; x <= x_end; x++)
         {
             Tile info;
-            info.tilex    = x;
-            info.tiley    = y;
-            info.canvas_x = (x - x_start) * TILE_DIMENSION - tilex_offset *
-                TILE_DIMENSION;
-            info.canvas_y = (y - y_start) * TILE_DIMENSION - tiley_offset *
-                TILE_DIMENSION;
+            info.x    = x * TILE_DIMENSION;
+            info.y    = y * TILE_DIMENSION;
             info.zoom = zoomLevel;
 
             list.enqueue(info);
@@ -124,9 +118,7 @@ QGeoCoordinate OpenstreetmapMapProvider::pixelToCoord(const QPoint& point,
 }
 
 QGeoCoordinate OpenstreetmapMapProvider::moveCoord(const QGeoCoordinate& coord,
-    int dx,
-    int dy,
-    int zoomLevel) const
+    int dx, int dy, int zoomLevel) const
 {
     QPoint p = coordToPixel(coord, zoomLevel);
 
@@ -135,12 +127,12 @@ QGeoCoordinate OpenstreetmapMapProvider::moveCoord(const QGeoCoordinate& coord,
     return pixelToCoord(p, zoomLevel);
 }
 
-int OpenstreetmapMapProvider::getMinZoomLevel() const
+int OpenstreetmapMapProvider::minZoomLevel() const
 {
     return 0;
 }
 
-int OpenstreetmapMapProvider::getMaxZoomLevel() const
+int OpenstreetmapMapProvider::maxZoomLevel() const
 {
     return 18;
 }
@@ -164,10 +156,12 @@ void OpenstreetmapMapProvider::cancelDownload()
 
 void OpenstreetmapMapProvider::fetchTile(Tile info)
 {
+    int     x = info.x / TILE_DIMENSION;
+    int     y = info.y / TILE_DIMENSION;
+
     QString url = QString("%1/%2/%3/%4.png").arg(TILESERVER_ENDPOINT1)
-        .arg(info.zoom).arg(info.tilex).arg(info.tiley);
-    QString key = QString("%2/%3/%4.png").arg(info.zoom)
-        .arg(info.tilex).arg(info.tiley);
+        .arg(info.zoom).arg(x).arg(y);
+    QString key = QString("%2/%3/%4.png").arg(info.zoom).arg(x).arg(y);
 
     // check local cache first.
 

@@ -1,5 +1,5 @@
-#ifndef PHOTO_H
-#define PHOTO_H
+#ifndef PHOTOSTAGE_PHOTO_H
+#define PHOTOSTAGE_PHOTO_H
 
 #include <QString>
 #include <QMetaType>
@@ -15,6 +15,11 @@ class PhotoData;
 class Photo
 {
     public:
+
+        enum Roles
+        {
+            DataRole = Qt::UserRole + 2
+        };
 
         enum ColorLabel
         {
