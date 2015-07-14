@@ -221,7 +221,7 @@
        <item>
         <widget class="QPushButton" name="btnModeMap">
          <property name="text">
-          <string>Map</string>
+          <string>Cartography</string>
          </property>
          <property name="checkable">
           <bool>true</bool>

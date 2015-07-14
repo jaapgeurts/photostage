@@ -6,18 +6,31 @@ PhotoMarker::PhotoMarker(QObject* parent) :
     AbstractMarker(parent)
 {
     setAnchor(AbstractMarker::BottomLeft);
-    pp.addRoundedRect(0, 0, 24, 24, 8, 8);
-    pp.moveTo(0, 20);
+    pp.moveTo(0, 6);
+    pp.arcTo(0, 0, 12, 12, 180, -90);
+    pp.lineTo(18, 0);
+    pp.arcTo(12, 0, 12, 12, 90, -90);
+    pp.lineTo(24, 18);
+    pp.arcTo(12, 12, 12, 12, 0, -90);
+    pp.lineTo(8, 24);
     pp.lineTo(0, 32);
-    pp.lineTo(8, 20);
-    pp.lineTo(0, 20);
-    pp.setFillRule(Qt::WindingFill);
+    pp.lineTo(0, 6);
 }
 
 PhotoMarker::PhotoMarker(const QGeoCoordinate& coord,
     QObject* parent) :
     AbstractMarker(coord, parent)
 {
+    setAnchor(AbstractMarker::BottomLeft);
+    pp.moveTo(0, 6);
+    pp.arcTo(0, 0, 12, 12, 180, -90);
+    pp.lineTo(18, 0);
+    pp.arcTo(12, 0, 12, 12, 90, -90);
+    pp.lineTo(24, 18);
+    pp.arcTo(12, 12, 12, 12, 0, -90);
+    pp.lineTo(8, 24);
+    pp.lineTo(0, 32);
+    pp.lineTo(0, 6);
 }
 
 QSize PhotoMarker::size() const
@@ -27,8 +40,10 @@ QSize PhotoMarker::size() const
 
 void PhotoMarker::paint(QPainter* painter)
 {
-    //    painter->setBrush(QBrush(Qt::red));
+    painter->setBrush(QBrush(Qt::red));
     painter->setPen(Qt::black);
     painter->fillPath(pp, QBrush(Qt::red));
+    painter->drawPath(pp);
+    painter->drawText(8,16,"1");
 }
 }

@@ -216,6 +216,7 @@ void MapView::mouseMoveEvent(QMouseEvent* event)
 
 void MapView::wheelEvent(QWheelEvent* event)
 {
+    // TODO: mac trackpads have small angles (two finger move)
     int    vdelta = event->angleDelta().y() / 8;
     QPoint pos    = event->pos();
 
@@ -225,7 +226,12 @@ void MapView::wheelEvent(QWheelEvent* event)
     {
         qDebug() << "Slider step" << steps;
         // TODO: allow zooming in on mouse location;
-        //mCurrentCoord = mMapProvider->pixelToCoord(pos,mZoomLevel);
+        QPoint         delta =  mOriginPixels - pos;
+
+        QGeoCoordinate zoomCoord = mMapProvider->pixelToCoord(pos, mZoomLevel);
+        mCurrentCoord = mMapProvider->moveCoord(zoomCoord, delta.x(),
+                delta.y(), mZoomLevel + steps);
+
         mZoomSlider->setValue(mZoomLevel + steps);
         event->accept();
     }
