@@ -1,16 +1,19 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
+
 #include <QMainWindow>
 #include <QActionGroup>
 #include <QPoint>
+
 // modules
 #include "module.h"
 #include "library/library.h"
 #include "develop/develop.h"
 #include "widgets/actionstategroup.h"
-#include "map/map.h"
+#include "cartography/map.h"
 #include "databaseaccess.h"
 #include "backgroundtaskmanager.h"
+
 namespace Ui
 {
 class MainWindow;

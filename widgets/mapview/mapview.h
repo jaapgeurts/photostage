@@ -1,8 +1,8 @@
 #ifndef MAPVIEW_MAPVIEW_H
 #define MAPVIEW_MAPVIEW_H
 
-#include <QObject>
 #include <QWidget>
+#include <QMouseEvent>
 #include <QGeoCoordinate>
 #include <QList>
 #include <QSlider>
@@ -43,6 +43,10 @@ class MapView : public QWidget
 
         void paintEvent(QPaintEvent*);
         void resizeEvent(QResizeEvent*);
+        void mousePressEvent(QMouseEvent* event);
+        void mouseReleaseEvent(QMouseEvent* event);
+        void mouseMoveEvent(QMouseEvent* event);
+        void wheelEvent(QWheelEvent* event);
 
     private slots:
 
@@ -53,15 +57,19 @@ class MapView : public QWidget
 
         MapProvider*   mMapProvider;
         QList<Tile>    mTileList;
-        QGeoCoordinate mCurrentCoord;
-        QPoint         mOrigin;
+        QGeoCoordinate mOriginCoord, mCurrentCoord;
+        QPoint         mOriginPixels;
         int            mZoomLevel;
         QRect          mTileBounds;
         QList<Layer*>  mLayers;
         QSlider*       mZoomSlider;
+        bool           mPanning;
+        QPoint         mMousePressLocation;
+        QPoint         mDragDelta;
 
-        void fetchTiles();
         void computeTileBounds();
+        void fetchTiles();
+        void moveOrigin(const QPoint& delta);
 };
 }
 

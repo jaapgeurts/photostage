@@ -1,5 +1,5 @@
-#ifndef OPERATION_H
-#define OPERATION_H
+#ifndef PHOTOSTAGE_OPERATION_H
+#define PHOTOSTAGE_OPERATION_H
 
 #include <QObject>
 
@@ -21,4 +21,4 @@ namespace PhotoStage
             };
     };
 }
-#endif // OPERATION_H
+#endif // PHOTOSTAGE_OPERATION_H

@@ -64,7 +64,7 @@ void PreviewCache::put(const QString& key, const QImage& image)
 
 
     d.mkpath(dir);
-    qDebug() << "Storing image at" << filePath;
+    //qDebug() << "Storing image at" << filePath;
     image.save(filePath, "jpg", 80);
 }
 

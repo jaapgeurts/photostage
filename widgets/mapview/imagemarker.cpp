@@ -15,9 +15,9 @@ ImageMarker::ImageMarker(const QImage& img,
 {
 }
 
-QRect ImageMarker::bounds() const
+QSize ImageMarker::size() const
 {
-    return QRect(0, 0, mIcon.width(), mIcon.height());
+    return mIcon.size();
 }
 
 void ImageMarker::paint(QPainter* painter)

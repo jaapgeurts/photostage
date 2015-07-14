@@ -17,7 +17,7 @@ class ImageMarker : public AbstractMarker
             const QGeoCoordinate& coord,
             QObject* parent);
 
-        QRect bounds() const;
+        QSize size() const;
         void paint(QPainter* painter);
 
     private:

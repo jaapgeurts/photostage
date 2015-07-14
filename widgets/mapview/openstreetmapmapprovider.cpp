@@ -44,15 +44,11 @@ void OpenstreetmapMapProvider::getTile(const QGeoCoordinate& coord,
     double tilex_exact = long2tilex(coord.longitude(), zoomLevel);
     double tiley_exact = lat2tiley(coord.latitude(), zoomLevel);
 
-    //    mTileResult.bounds.setTopLeft(QGeoCoordinate(tiley2lat(tiley, zoomLevel),
-    //        tilex2long(tilex, zoomLevel)));
-    //    mTileResult.bounds.setBottomRight(QGeoCoordinate(tiley2lat(tiley + 1,
-    //        zoomLevel),
-    //        tilex2long(tilex + 1, zoomLevel)));
-
-    Tile info;
+    Tile   info;
     info.x    = tilex_exact;
     info.y    = tiley_exact;
+    info.w    = TILE_DIMENSION;
+    info.h    = TILE_DIMENSION;
     info.zoom = zoomLevel;
 
     QQueue<Tile> queue;
@@ -68,22 +64,14 @@ void OpenstreetmapMapProvider::getTiles(const QGeoCoordinate& topleft,
 {
     cancelDownload();
 
-    double tilex_exact = long2tilex(topleft.longitude(), zoomLevel);
-    double tiley_exact = lat2tiley(topleft.latitude(), zoomLevel);
+    double       tilex_exact = long2tilex(topleft.longitude(), zoomLevel);
+    double       tiley_exact = lat2tiley(topleft.latitude(), zoomLevel);
 
-    //    double tilex_offset = tilex_exact - (int64_t)tilex_exact;
-    //    double tiley_offset = tiley_exact - (int64_t)tiley_exact;
+    int          x_start = (int)floor(tilex_exact);
+    int          y_start = (int)floor(tiley_exact);
 
-    int x_start = (int)floor(tilex_exact);
-    int y_start = (int)floor(tiley_exact);
-
-    int x_end = (int)floor(tilex_exact) + width / TILE_DIMENSION + 1;
-    int y_end = (int)floor(tiley_exact) + height / TILE_DIMENSION + 1;
-
-    //    mTileResult.bounds.setTopLeft(QGeoCoordinate(tiley2lat(tiley, zoomLevel),
-    //        tilex2long(tilex, zoomLevel)));
-    //    mTileResult.bounds.setBottomRight(QGeoCoordinate(tiley2lat(tiley + 1,
-    //        zoomLevel), tilex2long(tilex + 1, zoomLevel)));
+    int          x_end = (int)floor(tilex_exact) + width / TILE_DIMENSION + 1;
+    int          y_end = (int)floor(tiley_exact) + height / TILE_DIMENSION + 1;
 
     QQueue<Tile> list;
 
@@ -94,6 +82,8 @@ void OpenstreetmapMapProvider::getTiles(const QGeoCoordinate& topleft,
             Tile info;
             info.x    = x * TILE_DIMENSION;
             info.y    = y * TILE_DIMENSION;
+            info.w    = TILE_DIMENSION;
+            info.h    = TILE_DIMENSION;
             info.zoom = zoomLevel;
 
             list.enqueue(info);

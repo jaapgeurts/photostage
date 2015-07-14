@@ -38,6 +38,7 @@ SOURCES += \
     engine/engineutils.cpp \
     engine/operation.cpp \
     engine/pipelinebuilder.cpp \
+    engine/platform.cpp \
     filmstriptile.cpp \
     image.cpp \
     imagefileloader.cpp \
@@ -54,12 +55,15 @@ SOURCES += \
     library/modules/collectionmodule.cpp \
     library/modules/libraryhistogrammodule.cpp \
     library/modules/librarymodule.cpp \
+    library/modules/metadatamodule.cpp \
     library/modules/shortcutmodule.cpp \
     library/modules/taggingmodule.cpp \
     main.cpp\
     mainwindow.cpp \
-    map/map.cpp \
+    cartography/map.cpp \
+    cartography/photomarker.cpp \
     photo.cpp \
+    photodata.cpp \
     photomodel.cpp \
     preferences.cpp \
     preferencesdialog.cpp \
@@ -69,29 +73,26 @@ SOURCES += \
     timeadjustdialog.cpp \
     utils.cpp \
     widgets/abstracttile.cpp \
+    widgets/actionstategroup.cpp \
     widgets/backgroundtaskprogress.cpp \
     widgets/fixedtreeview.cpp \
     widgets/histogram.cpp \
     widgets/loupeview.cpp \
+    widgets/mapview/abstractmarker.cpp \
+    widgets/mapview/goolemapprovider.cpp \
+    widgets/mapview/groupmarker.cpp \
+    widgets/mapview/imagemarker.cpp \
+    widgets/mapview/layer.cpp \
+    widgets/mapview/mapprovider.cpp \
+    widgets/mapview/mapview.cpp \
+    widgets/mapview/openstreetmapmapprovider.cpp \
     widgets/modulepanel.cpp \
     widgets/tileview.cpp \
     widgets/translucentwindow.cpp \
     workunits/importinfo.cpp \
     workunits/importoptions.cpp \
     workunits/importworkunit.cpp \
-    workunits/photoworkunit.cpp \
-    engine/platform.cpp \
-    widgets/actionstategroup.cpp \
-    library/modules/metadatamodule.cpp \
-    photodata.cpp \
-    widgets/mapview/mapview.cpp \
-    widgets/mapview/mapprovider.cpp \
-    widgets/mapview/goolemapprovider.cpp \
-    widgets/mapview/openstreetmapmapprovider.cpp \
-    widgets/mapview/layer.cpp \
-    widgets/mapview/abstractmarker.cpp \
-    widgets/mapview/imagemarker.cpp \
-    widgets/mapview/groupmarker.cpp
+    workunits/photoworkunit.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -110,6 +111,8 @@ HEADERS  += \
     engine/engineutils.h \
     engine/operation.h \
     engine/pipelinebuilder.h \
+    engine/platform.h \
+    engine/platform_mac.h \
     filmstriptile.h \
     image.h \
     imagefileloader.h \
@@ -126,10 +129,12 @@ HEADERS  += \
     library/modules/collectionmodule.h \
     library/modules/libraryhistogrammodule.h \
     library/modules/librarymodule.h \
+    library/modules/metadatamodule.h \
     library/modules/shortcutmodule.h \
     library/modules/taggingmodule.h \
     mainwindow.h \
-    map/map.h \
+    cartography/map.h \
+    cartography/photomarker.h \
     module.h \
     photo.h \
     photodata.h \
@@ -142,29 +147,26 @@ HEADERS  += \
     timeadjustdialog.h \
     utils.h \
     widgets/abstracttile.h \
+    widgets/actionstategroup.h \
     widgets/backgroundtaskprogress.h \
     widgets/fixedtreeview.h \
     widgets/histogram.h \
     widgets/loupeview.h \
+    widgets/mapview/abstractmarker.h \
+    widgets/mapview/goolemapprovider.h \
+    widgets/mapview/groupmarker.h \
+    widgets/mapview/imagemarker.h \
+    widgets/mapview/layer.h \
+    widgets/mapview/mapprovider.h \
+    widgets/mapview/mapview.h \
+    widgets/mapview/openstreetmapmapprovider.h \
     widgets/modulepanel.h \
     widgets/tileview.h \
     widgets/translucentwindow.h \
     workunits/importinfo.h \
     workunits/importoptions.h \
     workunits/importworkunit.h \
-    workunits/photoworkunit.h \
-    engine/platform_mac.h \
-    engine/platform.h \
-    widgets/actionstategroup.h \
-    library/modules/metadatamodule.h \
-    widgets/mapview/mapview.h \
-    widgets/mapview/mapprovider.h \
-    widgets/mapview/goolemapprovider.h \
-    widgets/mapview/openstreetmapmapprovider.h \
-    widgets/mapview/layer.h \
-    widgets/mapview/abstractmarker.h \
-    widgets/mapview/imagemarker.h \
-    widgets/mapview/groupmarker.h
+    workunits/photoworkunit.h
 
 FORMS    += \
     mainwindow.ui \
@@ -174,7 +176,7 @@ FORMS    += \
     develop/modules/rawmodule.ui \
     import/importdialog.ui \
     library/library.ui \
-    map/map.ui \
+    cartography/map.ui \
     preferencesdialog.ui \
     timeadjustdialog.ui \
     widgets/backgroundtaskprogress.ui \

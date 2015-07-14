@@ -11,6 +11,7 @@ namespace MapView
 struct Tile
 {
     int x, y;
+    int w,h;
     int zoom;
     QImage image;
 };

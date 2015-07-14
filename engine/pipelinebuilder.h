@@ -29,7 +29,7 @@ class PipelineBuilder
         void setDomain(int bl, int wp);
         void setColorConversion(float* colorMatrix);
         void setInput(Halide::Image<uint16_t> input);
-        void setCFAStart(int dcraw_filter_id);
+        void setCFAStart(uint32_t dcraw_filter_id);
         void setRotation(int dir);
 
         void prepare();
@@ -60,8 +60,8 @@ class PipelineBuilder
 
         Halide::Func           mPipeline;
 
-        int                    mWidth;
-        int                    mHeight;
+//        int                    mWidth;
+//        int                    mHeight;
 
         // Little CMS variable
         cmsHTRANSFORM mHRawTransform;

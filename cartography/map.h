@@ -51,7 +51,7 @@ class Map : public Module
         MapView::Layer*       mLayer;
         bool                  mLoadPhoto;
         Photo                 mPhoto;
-        QImage                mIconMapPin;
+        //QImage                mIconMapPin;
 
         void setPhoto(Photo photo);
 };

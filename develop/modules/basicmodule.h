@@ -1,8 +1,6 @@
 #ifndef BASIC_H
 #define BASIC_H
 
-#include <QWidget>
-
 #include "developmodule.h"
 
 namespace Ui

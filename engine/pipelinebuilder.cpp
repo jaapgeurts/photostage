@@ -1,6 +1,7 @@
 #include <QDebug>
 
-#include "math.h"
+#include <math.h>
+
 #include "pipelinebuilder.h"
 
 using namespace Halide;
@@ -9,10 +10,10 @@ namespace PhotoStage
 {
 PipelineBuilder::PipelineBuilder() :
     mInput(type_of<uint16_t>(), 2),
-    mColorMatrix(type_of<float>(), 2),
-    mHRawTransform(NULL),
     mIsSRaw(false),
-    mRotation(0)
+    mRotation(0),
+    mColorMatrix(type_of<float>(), 2),
+    mHRawTransform(NULL)
 {
     createRawProfileConversion();
 }
@@ -90,7 +91,7 @@ void PipelineBuilder::setInput(Image<uint16_t> input)
     mInput.set(input);
 }
 
-void PipelineBuilder::setCFAStart(int dcraw_filter_id)
+void PipelineBuilder::setCFAStart(uint32_t dcraw_filter_id)
 {
     // enter the start position or R
     if (dcraw_filter_id == 0x16161616)
@@ -276,7 +277,6 @@ void PipelineBuilder::prepare()
     Func final ("final");
     final (x, y, c) = cast<uint16_t>(contrast(x, y, c) * 65535.0f);
 
-
     mPipeline = final;
 }
 
@@ -319,8 +319,8 @@ QImage PipelineBuilder::execute(int width, int height)
         image = QImage(width, height, QImage::Format_RGB32);
 
         Func mrot;
-        mrot(x,y,c) = mPipeline(x,y,c);
-        Var x_outer, y_outer, x_inner, y_inner, tile_index;
+        mrot(x, y, c) = mPipeline(x, y, c);
+        Var  x_outer, y_outer, x_inner, y_inner, tile_index;
         mrot.tile(x, y, x_outer, y_outer, x_inner, y_inner, 256, 256)
         .fuse(x_outer, y_outer, tile_index)
         .parallel(tile_index);

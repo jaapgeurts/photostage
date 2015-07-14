@@ -1,5 +1,5 @@
-#ifndef IMAGE_H
-#define IMAGE_H
+#ifndef PHOTOSTAGE_IMAGE_H
+#define PHOTOSTAGE_IMAGE_H
 
 #include <QMetaType>
 #include <QImage>
@@ -50,4 +50,4 @@ class Image
 Q_DECLARE_METATYPE(PhotoStage::Image)
 //Q_DECLARE_METATYPE(Image*)
 
-#endif // IMAGE_H
+#endif // PHOTOSTAGE_IMAGE_H

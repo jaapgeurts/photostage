@@ -5,14 +5,16 @@
 #include "widgets/mapview/imagemarker.h"
 #include "widgets/tileview.h"
 
+#include "photomarker.h"
+
 namespace PhotoStage
 {
 Map::Map(QAbstractItemModel* model, QWidget* parent) :
     Module(parent),
     ui(new Ui::Map),
     mPhotoModel(model),
-    mLoadPhoto(false),
-    mIconMapPin(":/icons/map-pin.png")
+    mLoadPhoto(false)
+   // mIconMapPin(":/icons/map-pin.png")
 {
     ui->setupUi(this);
     mMapProvider = new MapView::OpenstreetmapMapProvider(ui->mapView);
@@ -76,8 +78,7 @@ void Map::onModelReset()
 
         if (coord.isValid())
         {
-            mLayer->addMarker(new MapView::ImageMarker(mIconMapPin,
-                coord, this));
+            mLayer->addMarker(new PhotoMarker(coord, this));
         }
     }
 }

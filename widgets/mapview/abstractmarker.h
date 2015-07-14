@@ -35,7 +35,7 @@ class AbstractMarker : public QObject
         void setCoord(const QGeoCoordinate& coord);
         const QGeoCoordinate& coord() const;
 
-        virtual QRect bounds() const = 0;
+        virtual QSize size() const = 0;
         Anchor anchor() const;
         void setAnchor(Anchor anchor);
 
