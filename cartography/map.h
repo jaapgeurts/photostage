@@ -29,6 +29,7 @@ class Map : public Module
         QRect lightGap();
 
         void setSelectionModel(QItemSelectionModel* selectionModel);
+        void setModel(QAbstractItemModel* model);
 
     protected:
 
@@ -38,9 +39,8 @@ class Map : public Module
 
         void onCurrentPhotoChanged(const QModelIndex& current,
             const QModelIndex&);
-        void onSelectionChanged(const QItemSelection&selected, const QItemSelection&);
-
-        void onModelReset();
+        void onSelectionChanged(const QItemSelection& selected,
+            const QItemSelection&);
 
     private:
 

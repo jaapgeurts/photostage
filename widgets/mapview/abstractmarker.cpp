@@ -2,29 +2,14 @@
 
 namespace MapView
 {
-AbstractMarker::AbstractMarker(QObject* parent) : QObject(parent)
-{
-}
-
-AbstractMarker::AbstractMarker(const QGeoCoordinate& coord, QObject* parent) :
+AbstractMarker::AbstractMarker(QObject* parent) :
     QObject(parent),
-    mAnchor(CenterBottom),
-    mCoord(coord)
+    mAnchor(CenterBottom)
 {
 }
 
 AbstractMarker::~AbstractMarker()
 {
-}
-
-void AbstractMarker::setCoord(const QGeoCoordinate& coord)
-{
-    mCoord = coord;
-}
-
-const QGeoCoordinate& AbstractMarker::coord() const
-{
-    return mCoord;
 }
 
 AbstractMarker::Anchor AbstractMarker::anchor() const
@@ -35,5 +20,9 @@ AbstractMarker::Anchor AbstractMarker::anchor() const
 void AbstractMarker::setAnchor(AbstractMarker::Anchor anchor)
 {
     mAnchor = anchor;
+}
+
+MarkerInfo::MarkerInfo() : markerState(MarkerStateNone)
+{
 }
 }

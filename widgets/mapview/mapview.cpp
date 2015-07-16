@@ -275,7 +275,7 @@ void MapView::paintEvent(QPaintEvent* /*event*/)
     // draw other layers
     foreach(Layer * layer, mLayers)
     {
-        layer->paint(&painter);
+        layer->paint(painter);
     }
 }
 }

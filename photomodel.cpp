@@ -5,6 +5,7 @@
 #include "constants.h"
 #include "photomodel.h"
 #include "widgets/tileview.h"
+#include "widgets/mapview/layer.h"
 
 namespace PhotoStage
 {
@@ -39,40 +40,45 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
 
     Photo info;
 
-    if (role == TileView::TileView::PhotoRole)
+    switch (role)
     {
-        info = mPhotoInfoList.at(index.row());
+        case TileView::TileView::PhotoRole:
+            info = mPhotoInfoList.at(index.row());
 
-        if (info.libraryPreview().isNull())
-        {
-            QString key = QString::number(info.id());
-            QImage  img = mPreviewCache->get(key);
-
-            info.setLibraryPreview(img);
-            info.setOriginal(img);
-
-            if (img.isNull() && !mPhotoInfoMap.contains(index))
+            if (info.libraryPreview().isNull())
             {
-                // load image in background thread.
-                // add to thread queue so that only 1 instance of Halide runs
-                mLoader->addJob(index, info.srcImagePath());
-                mPhotoInfoMap.insert(index, info);
-            }
-        }
+                QString key = QString::number(info.id());
+                QImage  img = mPreviewCache->get(key);
 
-        return QVariant::fromValue<Photo>(info);
+                info.setLibraryPreview(img);
+                info.setOriginal(img);
+
+                if (img.isNull() && !mPhotoInfoMap.contains(index))
+                {
+                    // load image in background thread.
+                    // add to thread queue so that only 1 instance of Halide runs
+                    mLoader->addJob(index, info.srcImagePath());
+                    mPhotoInfoMap.insert(index, info);
+                }
+            }
+
+            return QVariant::fromValue<Photo>(info);
+
+        case Qt::DisplayRole:
+            return QString(mPhotoInfoList.at(index.row()).srcImagePath());
+
+        case Photo::DataRole:
+        case MapView::Layer::DataRole:
+            info = mPhotoInfoList.at(index.row());
+            return QVariant::fromValue<Photo>(info);
+
+        case MapView::Layer::GeoCoordinateRole:
+            return QVariant::fromValue<QGeoCoordinate>(mPhotoInfoList.at(index.
+                       row()).exifInfo().location);
+
+        default:
+            return QVariant();
     }
-    else if (role == Qt::DisplayRole)
-    {
-        return QString(mPhotoInfoList.at(index.row()).srcImagePath());
-    }
-    else if (role == Photo::DataRole)
-    {
-        info = mPhotoInfoList.at(index.row());
-        return QVariant::fromValue<Photo>(info);
-    }
-    else
-        return QVariant();
 }
 
 void PhotoModel::imageLoaded(const QVariant& ref, const QImage& image)

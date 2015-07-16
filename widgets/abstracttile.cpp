@@ -12,4 +12,9 @@ void AbstractTile::update()
 {
     (dynamic_cast<TileView*>(parent()))->update();
 }
+
+TileInfo::TileInfo() :
+    tileState(TileStateNone)
+{
+}
 }

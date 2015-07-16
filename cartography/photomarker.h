@@ -12,17 +12,15 @@ class PhotoMarker : public MapView::AbstractMarker
     public:
 
         PhotoMarker(QObject* parent = 0);
-        PhotoMarker(const QGeoCoordinate& coord, QObject* parent = 0);
 
         QSize size() const;
-        void paint(QPainter* painter);
-
-        void setSelected(bool selected);
+        void paint(QPainter& painter,
+            const MapView::MarkerInfo& info,
+            const QVariant& data);
 
     private:
 
         QPainterPath pp;
-        bool         mSelected;
 };
 }
 #endif // PHOTOMARKER_H

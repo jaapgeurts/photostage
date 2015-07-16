@@ -19,11 +19,10 @@ Map::Map(QAbstractItemModel* model, QWidget* parent) :
     ui->setupUi(this);
     mMapProvider = new MapView::OpenstreetmapMapProvider(ui->mapView);
     mLayer       = new MapView::Layer(ui->mapView);
+    mLayer->setDelegate(new PhotoMarker(ui->mapView));
+    mLayer->setModel(model);
     ui->mapView->addLayer(mLayer);
     ui->mapView->setMapProvider(mMapProvider);
-
-    connect(mPhotoModel, &QAbstractItemModel::modelReset,
-        this, &Map::onModelReset);
 }
 
 Map::~Map()
@@ -37,6 +36,12 @@ QRect Map::lightGap()
     return QRect();
 }
 
+void Map::setModel(QAbstractItemModel* model)
+{
+    mPhotoModel = model;
+    mLayer->setModel(model);
+}
+
 void Map::setSelectionModel(QItemSelectionModel* selectionModel)
 {
     mSelectionModel = selectionModel;
@@ -44,6 +49,7 @@ void Map::setSelectionModel(QItemSelectionModel* selectionModel)
         this, &Map::onCurrentPhotoChanged);
     connect(selectionModel, &QItemSelectionModel::selectionChanged,
         this, &Map::onSelectionChanged);
+    mLayer->setSelectionModel(selectionModel);
 }
 
 void Map::onCurrentPhotoChanged(const QModelIndex& current,
@@ -63,29 +69,7 @@ void Map::onCurrentPhotoChanged(const QModelIndex& current,
 void Map::onSelectionChanged(const QItemSelection& selected,
     const QItemSelection& /*deselected*/)
 {
-    mLayer->
-}
-
-void Map::onModelReset()
-{
-    mLayer->clear();
-    int c = mPhotoModel->rowCount();
-
-    for (int i = 0; i < c; i++)
-    {
-        QModelIndex index = mPhotoModel->index(i, 0);
-        Photo       p     = mPhotoModel->data(index,
-                Photo::DataRole).value<Photo>();
-
-        QGeoCoordinate coord = p.exifInfo().location;
-
-        if (coord.isValid())
-        {
-            PhotoMarker* pm = new PhotoMarker(coord, this);
-            mLayer->addMarker(pm);
-            pm->setSelected(mSelectionModel->isSelected(index));
-        }
-    }
+    update();
 }
 
 void Map::showEvent(QShowEvent*)

@@ -13,12 +13,12 @@ class ImageMarker : public AbstractMarker
     public:
 
         ImageMarker(QObject* parent = 0);
-        ImageMarker(const QImage& img,
-            const QGeoCoordinate& coord,
-            QObject* parent);
+        ImageMarker(const QImage& img, QObject* parent);
 
         QSize size() const;
-        void paint(QPainter* painter);
+        void paint(QPainter& painter,
+            const MarkerInfo& info,
+            const QVariant& data);
 
     private:
 

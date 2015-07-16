@@ -17,14 +17,14 @@ namespace TileView
 TileView::TileView(QWidget* parent) :
     QWidget(parent),
     mCellSizeRatio(1.0f),
+    mFixedColRowCount(false),
     mOrientation(Qt::Vertical),
     mTilesPerColRow(0),
     //    mHighlightedTile(-1),
     mTile(NULL),
     mListModel(NULL),
     mSelectionModel(NULL),
-    mViewportPosition(0),
-    mFixedColRowCount(false)
+    mViewportPosition(0)
 {
     mScrollBar = new QScrollBar(mOrientation, this);
     mScrollBar->setMinimum(0);

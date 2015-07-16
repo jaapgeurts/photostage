@@ -2,13 +2,38 @@
 #define MAPVIEW_ABSTRACTMARKER_H
 
 #include <QPainter>
-#include <QObject>
 #include <QGeoCoordinate>
+#include <QModelIndex>
 
 #include "QRect"
 
 namespace MapView
 {
+struct MarkerInfo
+{
+    enum MarkerState
+    {
+        MarkerStateNone     = 0x000,
+        MarkerStateSelected = 0x001,
+        MarkerStateActive   = 0x002
+    };
+
+    MarkerInfo();
+
+    // the ordinal number in the list
+    int index;
+    QGeoCoordinate coord; // the position of the marker;
+    // the pixel position in the view (relative to the viewport)
+    int x;
+    int y;
+    int width;
+    int height;
+
+    QModelIndex modelIndex;
+
+    MarkerState markerState;
+};
+
 class AbstractMarker : public QObject
 {
     Q_OBJECT
@@ -29,22 +54,19 @@ class AbstractMarker : public QObject
         };
 
         AbstractMarker(QObject* parent = 0);
-        AbstractMarker(const QGeoCoordinate& coord, QObject* parent = 0);
         virtual ~AbstractMarker();
-
-        void setCoord(const QGeoCoordinate& coord);
-        const QGeoCoordinate& coord() const;
 
         virtual QSize size() const = 0;
         Anchor anchor() const;
         void setAnchor(Anchor anchor);
 
-        virtual void paint(QPainter* painter) = 0;
+        virtual void paint(QPainter& painter,
+            const MarkerInfo& info,
+            const QVariant& data) = 0;
 
     private:
 
-        Anchor         mAnchor;
-        QGeoCoordinate mCoord;
+        Anchor mAnchor;
 };
 }
 #endif // ABSTRACTMARKER_H
