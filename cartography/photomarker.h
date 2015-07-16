@@ -17,9 +17,12 @@ class PhotoMarker : public MapView::AbstractMarker
         QSize size() const;
         void paint(QPainter* painter);
 
+        void setSelected(bool selected);
+
     private:
 
         QPainterPath pp;
+        bool         mSelected;
 };
 }
 #endif // PHOTOMARKER_H

@@ -33,6 +33,8 @@ class MapView : public QWidget
         int zoomLevel() const;
         QPoint origin() const;
 
+        QGeoRectangle mapBounds() const;
+
     public slots:
 
         void setZoomLevel(int level);

@@ -28,6 +28,8 @@ OpenstreetmapMapProvider::OpenstreetmapMapProvider(QObject* parent) :
 {
     mNetworkManager = new QNetworkAccessManager(this);
 
+    //    mPreviewCache.setImageFormat("png");
+
     connect(mNetworkManager, &QNetworkAccessManager::finished,
         this, &OpenstreetmapMapProvider::onReplyFinished);
 }
@@ -160,7 +162,7 @@ void OpenstreetmapMapProvider::fetchTile(Tile info)
     if (img.isNull())
     {
         QNetworkRequest request;
-
+        qDebug () << "Network load tile:" << key;
         request.setUrl(QUrl(url));
         request.setRawHeader("User-Agent", "PhotoStage Map Service Agent 1.0");
         TileInfoWrapper* wrapper = new TileInfoWrapper();

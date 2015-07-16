@@ -52,6 +52,16 @@ QPoint MapView::origin() const
     return mOriginPixels;
 }
 
+QGeoRectangle MapView::mapBounds() const
+{
+    QGeoRectangle grect;
+
+    grect.setTopLeft(mOriginCoord);
+    grect.setBottomRight(mMapProvider->moveCoord(mOriginCoord,
+        width(), height(), mZoomLevel));
+    return grect;
+}
+
 void MapView::setZoomLevel(int level)
 {
     mZoomLevel = level;
@@ -226,11 +236,13 @@ void MapView::wheelEvent(QWheelEvent* event)
     {
         qDebug() << "Slider step" << steps;
         // TODO: allow zooming in on mouse location;
-        QPoint         delta =  mOriginPixels - pos;
+        QPoint         delta =  -pos;
 
-        QGeoCoordinate zoomCoord = mMapProvider->pixelToCoord(pos, mZoomLevel);
-        mCurrentCoord = mMapProvider->moveCoord(zoomCoord, delta.x(),
-                delta.y(), mZoomLevel + steps);
+        QGeoCoordinate zoomCoord = mMapProvider
+            ->pixelToCoord(pos + mOriginPixels, mZoomLevel);
+        mCurrentCoord = mMapProvider->moveCoord(zoomCoord,
+                delta.x() + width() / 2,
+                delta.y() + height() / 2, mZoomLevel + steps);
 
         mZoomSlider->setValue(mZoomLevel + steps);
         event->accept();

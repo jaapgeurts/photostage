@@ -13,15 +13,16 @@ class PreviewCache : public QObject
 
     public:
 
-        static PreviewCache *globalCache();
+        static PreviewCache* globalCache();
 
         explicit PreviewCache(const QString& location, QObject* parent = 0);
 
         QImage get(const QString& key);
-        void put(const QString& key, const QImage& image);    
-        void remove(const QString &key);
+        void put(const QString& key, const QImage& image);
+        void remove(const QString& key);
+        void setImageFormat(QString format);
 
-public slots:
+    public slots:
 
     private:
 
@@ -29,6 +30,7 @@ public slots:
 
         QString              mBaseDir;
         QCryptographicHash   mHash;
+        QString              mFormat;
         std::pair<QString, QString> dirFromKey(const QString& key);
 };
 }

@@ -13,8 +13,8 @@ Map::Map(QAbstractItemModel* model, QWidget* parent) :
     Module(parent),
     ui(new Ui::Map),
     mPhotoModel(model),
-    mLoadPhoto(false)
-   // mIconMapPin(":/icons/map-pin.png")
+    mLoadPhoto(false),
+    mSelectionModel(NULL)
 {
     ui->setupUi(this);
     mMapProvider = new MapView::OpenstreetmapMapProvider(ui->mapView);
@@ -39,6 +39,7 @@ QRect Map::lightGap()
 
 void Map::setSelectionModel(QItemSelectionModel* selectionModel)
 {
+    mSelectionModel = selectionModel;
     connect(selectionModel, &QItemSelectionModel::currentChanged,
         this, &Map::onCurrentPhotoChanged);
     connect(selectionModel, &QItemSelectionModel::selectionChanged,
@@ -59,9 +60,10 @@ void Map::onCurrentPhotoChanged(const QModelIndex& current,
         mLoadPhoto = true;
 }
 
-void Map::onSelectionChanged(const QItemSelection& /*selected*/,
+void Map::onSelectionChanged(const QItemSelection& selected,
     const QItemSelection& /*deselected*/)
 {
+    mLayer->
 }
 
 void Map::onModelReset()
@@ -71,14 +73,17 @@ void Map::onModelReset()
 
     for (int i = 0; i < c; i++)
     {
-        Photo p = mPhotoModel->data(mPhotoModel->index(i, 0),
+        QModelIndex index = mPhotoModel->index(i, 0);
+        Photo       p     = mPhotoModel->data(index,
                 Photo::DataRole).value<Photo>();
 
         QGeoCoordinate coord = p.exifInfo().location;
 
         if (coord.isValid())
         {
-            mLayer->addMarker(new PhotoMarker(coord, this));
+            PhotoMarker* pm = new PhotoMarker(coord, this);
+            mLayer->addMarker(pm);
+            pm->setSelected(mSelectionModel->isSelected(index));
         }
     }
 }

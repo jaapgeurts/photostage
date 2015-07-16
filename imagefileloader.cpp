@@ -10,10 +10,37 @@
 #include "engine/colortransform.h"
 #include "engine/pipelinebuilder.h"
 
-#define max(x, y)     ((x) > (y) ? (x) : (y))
-#define min(x, y)     ((x) < (y) ? (x) : (y))
-#define clip(v, x, y) (max(x, min(v, y)))
-#define SRC(x, y)     (src[x] * src[y])
+static inline long max(long x, long y)
+{
+    return x > y ? x : y;
+}
+
+static inline long min(long x, long y)
+{
+    return x < y ? x : y;
+}
+
+static inline long clip(long v, long x, long y)
+{
+    return max(x, min(v, y));
+}
+
+static inline double max(double x, double y)
+{
+    return x > y ? x : y;
+}
+
+static inline double min(double x, double y)
+{
+    return x < y ? x : y;
+}
+
+static inline double clip(double v, double x, double y)
+{
+    return max(x, min(v, y));
+}
+
+#define SRC(x, y) (src[x] * src[y])
 
 using namespace RawSpeed;
 
@@ -133,6 +160,35 @@ QImage ImageFileLoader::genThumb(const QString& path)
     {
         qDebug() << "Load jpg" << path;
         QImage pixmap = QImage(path);
+
+        // rotate the image if necessary
+        ExivFacade* ex = ExivFacade::createExivReader();
+
+        if (!ex->openFile(path))
+        {
+            qDebug() << "Error loading exif data from image";
+            return image;
+        }
+        ExifInfo ex_info = ex->data();
+        delete(ex);
+
+        QTransform m;
+        switch (ex_info.rotation)
+        {
+
+            case ExifInfo::Rotate90CCW:
+                m.rotate(-90);
+                pixmap = pixmap.transformed(m);
+                break;
+
+            case ExifInfo::Rotate90CW:
+                m.rotate(90);
+                pixmap = pixmap.transformed(m);
+                break;
+
+            default:
+                qDebug() << "Unimplemented rotation value";
+        }
 
         if (!pixmap.isNull())
         {

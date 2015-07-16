@@ -38,7 +38,7 @@ class Map : public Module
 
         void onCurrentPhotoChanged(const QModelIndex& current,
             const QModelIndex&);
-        void onSelectionChanged(const QItemSelection&, const QItemSelection&);
+        void onSelectionChanged(const QItemSelection&selected, const QItemSelection&);
 
         void onModelReset();
 
@@ -51,7 +51,7 @@ class Map : public Module
         MapView::Layer*       mLayer;
         bool                  mLoadPhoto;
         Photo                 mPhoto;
-        //QImage                mIconMapPin;
+        QItemSelectionModel*  mSelectionModel;
 
         void setPhoto(Photo photo);
 };

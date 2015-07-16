@@ -20,7 +20,8 @@ PreviewCache* PreviewCache::globalCache()
 PreviewCache::PreviewCache(const QString& location, QObject* parent) :
     QObject(parent),
     mBaseDir(location),
-    mHash(QCryptographicHash::Md5)
+    mHash(QCryptographicHash::Md5),
+    mFormat("jpg")
 {
 }
 
@@ -32,9 +33,13 @@ void PreviewCache::remove(const QString& key)
 
     QString                     fileName = dir + QDir::separator() + hash;
 
-
     if (!QFile::remove(fileName))
         qDebug() << "Can't remove preview cache file";
+}
+
+void PreviewCache::setImageFormat(QString format)
+{
+    mFormat = format;
 }
 
 QImage PreviewCache::get(const QString& key)
@@ -45,7 +50,6 @@ QImage PreviewCache::get(const QString& key)
     QString                     hash = pair.second;
 
     QString                     fileName = dir + QDir::separator() + hash;
-
 
     if (QFileInfo::exists(fileName))
         return QImage(fileName);
@@ -62,10 +66,9 @@ void PreviewCache::put(const QString& key, const QImage& image)
     QString                     filePath = dir + QDir::separator() + hash;
     QDir                        d(dir);
 
-
     d.mkpath(dir);
     //qDebug() << "Storing image at" << filePath;
-    image.save(filePath, "jpg", 80);
+    image.save(filePath, mFormat.toLocal8Bit().data(), 80);
 }
 
 std::pair<QString, QString> PreviewCache::dirFromKey(const QString& key)

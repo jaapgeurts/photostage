@@ -3,7 +3,8 @@
 namespace PhotoStage
 {
 PhotoMarker::PhotoMarker(QObject* parent) :
-    AbstractMarker(parent)
+    AbstractMarker(parent),
+    mSelected(false)
 {
     setAnchor(AbstractMarker::BottomLeft);
     pp.moveTo(0, 6);
@@ -19,7 +20,8 @@ PhotoMarker::PhotoMarker(QObject* parent) :
 
 PhotoMarker::PhotoMarker(const QGeoCoordinate& coord,
     QObject* parent) :
-    AbstractMarker(coord, parent)
+    AbstractMarker(coord, parent),
+    mSelected(false)
 {
     setAnchor(AbstractMarker::BottomLeft);
     pp.moveTo(0, 6);
@@ -40,10 +42,22 @@ QSize PhotoMarker::size() const
 
 void PhotoMarker::paint(QPainter* painter)
 {
-    painter->setBrush(QBrush(Qt::red));
+    painter->setRenderHint(QPainter::Antialiasing);
+    QBrush b;
+
+    if (mSelected)
+        b = QBrush(QColor(250, 170, 0));
+    else
+        b = QBrush(Qt::red);
+    painter->setBrush(b);
     painter->setPen(Qt::black);
-    painter->fillPath(pp, QBrush(Qt::red));
+    painter->fillPath(pp, b);
     painter->drawPath(pp);
-    painter->drawText(8,16,"1");
+    painter->drawText(8, 16, "1");
+}
+
+void PhotoMarker::setSelected(bool selected)
+{
+    mSelected = selected;
 }
 }

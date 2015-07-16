@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include "layer.h"
 
 namespace MapView
@@ -15,14 +17,30 @@ void Layer::addMarker(AbstractMarker* marker)
 void Layer::paint(QPainter* painter)
 {
     // cull markers not in view and group markers that are too close
-    //    QList<AbstractMarker *> list;
+    QList<AbstractMarker*> culled;
 
-    //    foreach(AbstractMarker * m, mMarkers)
-    //    {
-
-    //    }
+    QGeoRectangle          rect = mMapView->mapBounds();
 
     foreach(AbstractMarker * m, mMarkers)
+    {
+        if (rect.contains(m->coord()))
+        {
+            qDebug() << "Append a marker";
+            culled.append(m);
+        }
+    }
+    qDebug() << "marker list size" << culled.size();
+    /*
+            //find all markers close to each other
+            QList<AbstractMarker*> grouped;
+            foreach(AbstractMarker* m1, culled)
+            {
+                foreach(AbstractMarker*m2, culled)
+                {
+                    if (m1->coord().distanceTo(m2) /
+            }
+     */
+    foreach(AbstractMarker * m, culled)
     {
         QGeoCoordinate coord = m->coord();
         QPoint         pos   = mMapView->mapProvider()
