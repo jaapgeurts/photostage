@@ -3,26 +3,27 @@
 #include <QDir>
 
 #include "engine/colortransform.h"
+
+#include "photomodel.h"
 #include "photodata.h"
 
 namespace PhotoStage
 {
-PhotoData::PhotoData() :
-    mLibraryPreviewsRGB()
-{
-}
-
-PhotoData::PhotoData(const QImage& image, const QString& filename,
+PhotoData::PhotoData(PhotoModel* owner,
+    const QImage& image,
+    const QString& filename,
     long long id) :
     mId(id),
     mLibraryPreview(image),
-    mLibraryPreviewsRGB(),
-    mSrcImagePath(filename)
+    mSrcImagePath(filename),
+    mOwner(owner),
+    mIsDownloading(false)
 {
 }
 
 PhotoData::PhotoData(QSqlQuery& q) :
-    mLibraryPreviewsRGB()
+    mOwner(NULL),
+    mIsDownloading(false)
 {
     mId = q.value(0).toLongLong();
     QString filename = q.value(1).toString();
@@ -80,7 +81,8 @@ void PhotoData::setLibraryPreview(const QImage& image)
     mLibraryPreviewsRGB = QImage();
 }
 
-const QImage& PhotoData::libraryPreview() const
+// TODO: think about using the proxy pattern
+const QImage& PhotoData::libraryPreview()
 {
     return mLibraryPreview;
 }
@@ -93,7 +95,8 @@ const QImage& PhotoData::libraryPreviewsRGB()
 
         // convert the image to sRGB
         //qDebug() << "Converting image to RGB";
-        ColorTransform transform = ColorTransform::getTransform("Melissa-sRGB-RGB32",
+        ColorTransform transform = ColorTransform::getTransform(
+            "Melissa-sRGB-RGB32",
             WORKING_COLOR_SPACE,
             ColorTransform::getMonitorProfilePath(),
             ColorTransform::FORMAT_RGB32,
@@ -166,5 +169,25 @@ Photo::Flag PhotoData::flag() const
 long long PhotoData::id() const
 {
     return mId;
+}
+
+PhotoModel* PhotoData::owner() const
+{
+    return mOwner;
+}
+
+void PhotoData::setOwner(PhotoModel* owner)
+{
+    mOwner = owner;
+}
+
+void PhotoData::setIsDownloading(bool value)
+{
+    mIsDownloading = value;
+}
+
+bool PhotoData::isDownloading() const
+{
+    return mIsDownloading;
 }
 }

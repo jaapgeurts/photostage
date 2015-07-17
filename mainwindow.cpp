@@ -325,11 +325,12 @@ void MainWindow::onTileDoubleClicked(const QModelIndex&)
 void MainWindow::onSelectionChanged(const QItemSelection& selected,
     const QItemSelection& /*deselected*/)
 {
-    QList<Photo> photos;
-    foreach (QModelIndex index, selected.indexes())
-    photos.append(mPhotoModel->data(index,
-        TileView::TileView::PhotoRole).value<Photo>());
-
+    //    QList<Photo> photos;
+    //    foreach (QModelIndex index, selected.indexes())
+    //    {
+    //        photos.append(mPhotoModel->data(index,
+    //            TileView::TileView::PhotoRole).value<Photo>());
+    //    }
     updateInformationBar();
 }
 
@@ -361,6 +362,21 @@ void MainWindow::onModeMapClicked()
     ui->stackedWidget->setCurrentWidget(mMap);
 }
 
+void MainWindow::onSelectAll()
+{
+    int            c           = mPhotoModel->rowCount(QModelIndex());
+    QModelIndex    topLeft     = mPhotoModel->index(0, 0);
+    QModelIndex    bottomRight = mPhotoModel->index(c - 1, 0);
+    QItemSelection selection (topLeft, bottomRight);
+
+    mPhotoSelection->select(selection, QItemSelectionModel::Select);
+}
+
+void MainWindow::onSelectNone()
+{
+    mPhotoSelection->clear();
+}
+
 void MainWindow::onActionImportTriggered()
 {
     ImportDialog* importDialog = new ImportDialog(this);
@@ -372,10 +388,8 @@ void MainWindow::onActionImportTriggered()
             importDialog->importInfo());
         mBackgroundTaskManager->addRunnable(r);
         r->start();
-        connect(r,
-            &ImportBackgroundTask::taskFinished,
-            this,
-            &MainWindow::importFinished);
+        connect(r, &ImportBackgroundTask::taskFinished,
+            this, &MainWindow::importFinished);
     }
     delete importDialog;
 }

@@ -38,6 +38,8 @@ void Layer::paint(QPainter& painter)
     int           c        = mItemModel->rowCount(QModelIndex());
     QGeoRectangle viewPort = mMapView->mapBounds();
 
+    // TODO: group markers together
+
     for (int i = 0; i < c; i++)
     {
         QModelIndex    index = mItemModel->index(i, 0);

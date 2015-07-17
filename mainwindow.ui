@@ -352,8 +352,8 @@
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
     <addaction name="separator"/>
-    <addaction name="actionSelect_All"/>
-    <addaction name="actionSelect_None"/>
+    <addaction name="actionSelectAll"/>
+    <addaction name="actionSelectNone"/>
     <addaction name="separator"/>
     <addaction name="actionPreferences"/>
    </widget>
@@ -872,7 +872,7 @@
     <string>Remove Unused Keywords</string>
    </property>
   </action>
-  <action name="actionSelect_All">
+  <action name="actionSelectAll">
    <property name="text">
     <string>Select All</string>
    </property>
@@ -880,7 +880,7 @@
     <string>Ctrl+A</string>
    </property>
   </action>
-  <action name="actionSelect_None">
+  <action name="actionSelectNone">
    <property name="text">
     <string>Select None</string>
    </property>
@@ -1408,6 +1408,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionSelectAll</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onSelectAll()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSelectNone</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onSelectNone()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onActionImportTriggered()</slot>
@@ -1436,6 +1468,8 @@
   <slot>onActionColorPurple()</slot>
   <slot>onShowGrid()</slot>
   <slot>onShowLoupe()</slot>
+  <slot>onSelectAll()</slot>
+  <slot>onSelectNone()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="moduleNavGroup"/>

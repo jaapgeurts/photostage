@@ -20,7 +20,7 @@ class LibraryModule : public QWidget
             mPhotoInfoList = list;
         }
 
-        virtual void setPhoto(const Photo& photo)
+        virtual void setPhoto(Photo& photo)
         {
             mPhoto = photo;
         }

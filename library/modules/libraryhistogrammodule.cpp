@@ -14,7 +14,7 @@ LibraryHistogramModule::LibraryHistogramModule(QWidget* parent) :
     layout()->addWidget(mHistogram);
 }
 
-void LibraryHistogramModule::setPhoto(const Photo& photo)
+void LibraryHistogramModule::setPhoto(Photo& photo)
 {
     LibraryModule::setPhoto(photo);
 

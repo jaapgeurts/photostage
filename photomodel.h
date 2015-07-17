@@ -8,13 +8,14 @@
 #include "workunits/photoworkunit.h"
 #include "imagefileloader.h"
 #include "previewcache.h"
-#include "photo.h"
 
 namespace PhotoStage
 {
 class PhotoModel : public QAbstractListModel
 {
     Q_OBJECT
+
+    friend class Photo;
 
     public:
 
@@ -59,9 +60,11 @@ class PhotoModel : public QAbstractListModel
         ImageFileLoader* mLoader;
         // The mPhotoInfoList is the main container for the Photo Objects.
         // Delete is required on it's contents
-        QList<Photo>                      mPhotoInfoList;
-        mutable QHash<QModelIndex, Photo> mPhotoInfoMap;
-        mutable PreviewCache*              mPreviewCache;
+        QList<Photo>                  mPhotoList;
+        QHash<long long, QModelIndex> mPhotoIndexMap;
+        PreviewCache*                 mPreviewCache;
+
+        void loadImage(Photo& photo);
 };
 }
 

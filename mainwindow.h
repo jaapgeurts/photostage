@@ -50,6 +50,10 @@ class MainWindow : public QMainWindow
         void onModeDevelopClicked();
         void onModeMapClicked();
 
+        //Edit menu
+        void onSelectAll();
+        void onSelectNone();
+
         // Dialogs
         void onActionImportTriggered();
         void onActionAboutTriggered();

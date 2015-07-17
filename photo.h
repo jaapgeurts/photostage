@@ -11,7 +11,7 @@
 namespace PhotoStage
 {
 class PhotoData;
-
+class PhotoModel;
 class Photo
 {
     public:
@@ -40,7 +40,8 @@ class Photo
         };
 
         Photo();
-        Photo(const QImage& image, const QString& filename, long long id);
+        Photo(PhotoModel* owner, const QImage& image,
+            const QString& filename, long long id);
         Photo(QSqlQuery& query);
 
         long long id() const;
@@ -49,8 +50,8 @@ class Photo
         void setOriginal(const QImage& image);
         const QImage& original() const;
         void setLibraryPreview(const QImage& image);
-        const QImage& libraryPreview() const;
-        const QImage& libraryPreviewsRGB() const;
+        const QImage& libraryPreview();
+        const QImage& libraryPreviewsRGB();
 
         void setSrcImagePath(const QString& path);
         const QString& srcImagePath() const;
@@ -69,6 +70,11 @@ class Photo
         Flag flag() const;
 
         bool isNull() const;
+
+        void setIsDownloading(bool value);
+        bool isDownloading() const;
+
+        void setOwner(PhotoModel* model);
 
     private:
 

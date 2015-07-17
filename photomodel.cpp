@@ -24,7 +24,7 @@ PhotoModel::PhotoModel(QObject* parent) :
 
 PhotoModel::~PhotoModel()
 {
-    mPhotoInfoList.clear();
+    mPhotoList.clear();
 }
 
 QVariant PhotoModel::data(const QModelIndex& index, int role) const
@@ -32,52 +32,51 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (index.row() > mPhotoInfoList.size())
+    if (index.row() > mPhotoList.size())
     {
         qDebug() << "SqlPhotoModel::data() Invalid row requested";
         return QVariant();
     }
 
-    Photo info;
+    Photo photo;
 
     switch (role)
     {
-        case TileView::TileView::PhotoRole:
-            info = mPhotoInfoList.at(index.row());
-
-            if (info.libraryPreview().isNull())
-            {
-                QString key = QString::number(info.id());
-                QImage  img = mPreviewCache->get(key);
-
-                info.setLibraryPreview(img);
-                info.setOriginal(img);
-
-                if (img.isNull() && !mPhotoInfoMap.contains(index))
-                {
-                    // load image in background thread.
-                    // add to thread queue so that only 1 instance of Halide runs
-                    mLoader->addJob(index, info.srcImagePath());
-                    mPhotoInfoMap.insert(index, info);
-                }
-            }
-
-            return QVariant::fromValue<Photo>(info);
-
         case Qt::DisplayRole:
-            return QString(mPhotoInfoList.at(index.row()).srcImagePath());
+            return QString(mPhotoList.at(index.row()).srcImagePath());
 
+        case TileView::TileView::PhotoRole:
         case Photo::DataRole:
         case MapView::Layer::DataRole:
-            info = mPhotoInfoList.at(index.row());
-            return QVariant::fromValue<Photo>(info);
+            photo = mPhotoList.at(index.row());
+            return QVariant::fromValue<Photo>(photo);
 
         case MapView::Layer::GeoCoordinateRole:
-            return QVariant::fromValue<QGeoCoordinate>(mPhotoInfoList.at(index.
+            return QVariant::fromValue<QGeoCoordinate>(mPhotoList.at(index.
                        row()).exifInfo().location);
 
         default:
             return QVariant();
+    }
+}
+
+void PhotoModel::loadImage(Photo& photo)
+{
+    QString key = QString::number(photo.id());
+    QImage  img = mPreviewCache->get(key);
+
+    if (!img.isNull())
+    {
+        photo.setLibraryPreview(img);
+        photo.setOriginal(img);
+    }
+    else if (!photo.isDownloading())
+    {
+        // load image in background thread.
+        // add to thread queue so that only 1 instance of Halide runs
+        photo.setIsDownloading(true);
+        mLoader->addJob(QVariant::fromValue<Photo>(photo),
+            photo.srcImagePath());
     }
 }
 
@@ -86,29 +85,28 @@ void PhotoModel::imageLoaded(const QVariant& ref, const QImage& image)
     if (image.isNull())
         return;
 
-    QModelIndex index = ref.value<QModelIndex>();
-    Photo       info  = mPhotoInfoMap.value(index);
+    Photo photo = ref.value<Photo>();
 
-    info.exifInfo().width  = image.width();
-    info.exifInfo().height = image.height();
-    // get actual widthXheight & store in db.
-    PhotoWorkUnit::instance()->updateExifInfo(info);
+    // get actual width x height & store in db.
+    photo.exifInfo().width  = image.width();
+    photo.exifInfo().height = image.height();
+    PhotoWorkUnit::instance()->updateExifInfo(photo);
 
-    QImage preview =
-        image.scaled(QSize(PREVIEW_IMG_WIDTH,
-            PREVIEW_IMG_HEIGHT), Qt::KeepAspectRatio,
-            Qt::SmoothTransformation);
+    QImage preview = image.scaled(QSize(PREVIEW_IMG_WIDTH, PREVIEW_IMG_HEIGHT),
+            Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
-    QString key = QString::number(info.id());
+    QString key = QString::number(photo.id());
 
     mPreviewCache->put(key, preview);
 
     // TODO: original = null
-    info.setLibraryPreview(preview);
-    mPhotoInfoMap.remove(index);
+    photo.setLibraryPreview(preview);
+    photo.setIsDownloading(false);
 
+    // find the index for this photo.
     QVector<int> roles;
-    emit         dataChanged(index, index, roles);
+    emit         dataChanged(mPhotoIndexMap.value(photo.id()),
+        mPhotoIndexMap.value(photo.id()), roles);
 }
 
 void PhotoModel::onReloadPhotos(PhotoModel::SourceType source,
@@ -118,7 +116,15 @@ void PhotoModel::onReloadPhotos(PhotoModel::SourceType source,
 
     if (source == SourceFiles)
     {
-        mPhotoInfoList = mWorkUnit->getPhotosByPath(pathId);
+        mPhotoList = mWorkUnit->getPhotosByPath(pathId);
+        mPhotoIndexMap.clear();
+        int i = 0;
+        foreach(Photo p, mPhotoList)
+        {
+            p.setOwner(this);
+            mPhotoIndexMap.insert(p.id(), index(i));
+            i++;
+        }
     }
     else if (source == SourceCollection)
     {
@@ -150,7 +156,7 @@ void PhotoModel::addData(const QList<long long>& idList)
     Photo        info;
     foreach(info, list)
     {
-        mPhotoInfoList.append(info);
+        mPhotoList.append(info);
     }
     //    insertRows(start,list.size());
     endInsertRows();
@@ -165,6 +171,6 @@ QVariant PhotoModel::headerData(int /*section*/,
 
 int PhotoModel::rowCount(const QModelIndex& /*parent*/) const
 {
-    return mPhotoInfoList.size();
+    return mPhotoList.size();
 }
 }

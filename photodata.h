@@ -11,8 +11,8 @@ class PhotoData
     public:
 
         // Constructors
-        PhotoData();
-        PhotoData(const QImage& image, const QString& filename, long long mId);
+        PhotoData(PhotoModel* owner, const QImage& image,
+            const QString& filename, long long mId);
         PhotoData(QSqlQuery& query);
         virtual ~PhotoData();
 
@@ -20,7 +20,7 @@ class PhotoData
         void setOriginal(const QImage& image);
         const QImage& original() const;
         void setLibraryPreview(const QImage& image);
-        const QImage& libraryPreview() const;
+        const QImage& libraryPreview();
         const QImage& libraryPreviewsRGB();
 
         void setSrcImagePath(const QString& path);
@@ -41,6 +41,12 @@ class PhotoData
 
         long long id() const;
 
+        PhotoModel* owner() const;
+        void setOwner(PhotoModel * owner);
+
+        void setIsDownloading(bool value);
+        bool isDownloading() const;
+
     private:
 
         long long         mId;
@@ -53,6 +59,8 @@ class PhotoData
         QImage            mOriginal;
         QString           mSrcImagePath;
         ExifInfo          mExifInfo;
+        PhotoModel*       mOwner;
+        bool              mIsDownloading;
 };
 }
 

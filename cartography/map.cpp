@@ -55,6 +55,12 @@ void Map::setSelectionModel(QItemSelectionModel* selectionModel)
 void Map::onCurrentPhotoChanged(const QModelIndex& current,
     const QModelIndex& /*previous*/)
 {
+    if (!current.isValid())
+    {
+        qDebug() << "No valid current";
+        return;
+    }
+
     mPhoto = mPhotoModel->data(current, TileView::TileView::PhotoRole)
         .value<Photo>();
 

@@ -2,6 +2,7 @@
 
 #include "photo.h"
 #include "photodata.h"
+#include "photomodel.h"
 
 namespace PhotoStage
 {
@@ -9,9 +10,12 @@ Photo::Photo()
 {
 }
 
-Photo::Photo(const QImage& image, const QString& filename, long long id)
+Photo::Photo(PhotoModel* owner,
+    const QImage& image,
+    const QString& filename,
+    long long id)
 {
-    d = QSharedPointer<PhotoData>(new PhotoData(image, filename, id));
+    d = QSharedPointer<PhotoData>(new PhotoData(owner, image, filename, id));
 }
 
 Photo::Photo(QSqlQuery& q)
@@ -39,13 +43,22 @@ void Photo::setLibraryPreview(const QImage& image)
     d->setLibraryPreview(image);
 }
 
-const QImage& Photo::libraryPreview() const
+const QImage& Photo::libraryPreview()
 {
-    return d->libraryPreview();
+    const QImage& img = d->libraryPreview();
+
+    if (img.isNull())
+    {
+        d->owner()->loadImage(*this);
+    }
+    return img;
 }
 
-const QImage& Photo::libraryPreviewsRGB() const
+const QImage& Photo::libraryPreviewsRGB()
 {
+    // make sure the library preview is avaialble, it it is not trigger
+    // a download
+    libraryPreview();
     return d->libraryPreviewsRGB();
 }
 
@@ -107,5 +120,20 @@ Photo::Flag Photo::flag() const
 bool Photo::isNull() const
 {
     return d.isNull();
+}
+
+void Photo::setIsDownloading(bool value)
+{
+    d->setIsDownloading(value);
+}
+
+bool Photo::isDownloading() const
+{
+    return d->isDownloading();
+}
+
+void Photo::setOwner(PhotoModel* model)
+{
+    d->setOwner(model);
 }
 }

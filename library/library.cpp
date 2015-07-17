@@ -115,11 +115,11 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     long long pathid =
         settings.value(SETTINGS_LIBRARY_FILES_PATHITEM).toLongLong();
 
-    qDebug()<<"Expanding";
+    qDebug() << "Expanding";
     QModelIndex index = mPathModel->index(pathid);
     do
     {
-        qDebug()<<"+"<<((PathItem*)index.internalPointer())->path;
+        qDebug() << "+" << ((PathItem*)index.internalPointer())->path;
         mTrvwFiles->expand(index);
         index = index.parent();
     }
@@ -276,6 +276,11 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected,
 void Library::onCurrentPhotoChanged(const QModelIndex& current,
     const QModelIndex& /*previous*/)
 {
+    if (!current.isValid())
+    {
+        qDebug() << "No current photo selected";
+        return;
+    }
     Photo photo =
         mPhotoModel->data(current,
             TileView::TileView::PhotoRole).value<Photo>();
