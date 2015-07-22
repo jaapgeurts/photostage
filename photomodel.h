@@ -50,22 +50,25 @@ class PhotoModel : public QAbstractListModel
     public slots:
 
         void onPhotoSourceChanged(SourceType source, long long pathId);
+        void onVisibleTilesChanged(const QModelIndex& start,
+            const QModelIndex& end);
 
     private slots:
 
-        void imageLoaded(Photo photo, const QImage& image);
+        void previewGenerated(Photo photo, const QImage& image);
         void imageTranslated(Photo photo, const QImage& image);
-        void previewReady(Photo photo, const QImage& image);
+        void previewLoaded(Photo photo, const QImage& image);
 
     private:
 
-        PhotoWorkUnit* mWorkUnit;
-        ThreadQueue*   mThreadQueue;
+        PhotoWorkUnit*                mWorkUnit;
+        ThreadQueue*                  mThreadQueue;
         // The mPhotoInfoList is the main container for the Photo Objects.
         QList<Photo>                  mPhotoList;
         QHash<long long, QModelIndex> mPhotoIndexMap;
 
         void loadImage(Photo& photo);
+        void convertImage(Photo& photo);
 };
 }
 

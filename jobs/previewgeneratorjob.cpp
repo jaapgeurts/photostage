@@ -69,6 +69,7 @@ PreviewGeneratorJob::PreviewGeneratorJob(const Photo& photo) :
     QObject(NULL),
     mPhoto(photo)
 {
+    setName("PreviewGeneratorJob");
 }
 
 PreviewGeneratorJob::~PreviewGeneratorJob()

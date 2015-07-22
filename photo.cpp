@@ -66,7 +66,10 @@ const QImage& Photo::libraryPreviewsRGB()
 
     if (d->libraryPreviewsRGB().isNull())
     {
-        libraryPreview();
+        if (d->libraryPreview().isNull())
+            libraryPreview();
+        else
+            d->owner()->convertImage(*this);
     }
 
     return d->libraryPreviewsRGB();

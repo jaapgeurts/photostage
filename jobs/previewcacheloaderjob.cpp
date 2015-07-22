@@ -1,3 +1,5 @@
+#include <QDebug>
+
 #include "previewcacheloaderjob.h"
 #include "previewcache.h"
 
@@ -6,10 +8,12 @@ namespace PhotoStage
 PreviewCacheLoaderJob::PreviewCacheLoaderJob(const Photo& photo) :
     mPhoto(photo)
 {
+    setName("PreviewCacheLoaderJob");
 }
 
 QVariant PreviewCacheLoaderJob::run()
 {
+
     QString key = QString::number(mPhoto.id());
     QImage  img = PreviewCache::globalCache()->get(key);
 

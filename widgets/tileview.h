@@ -68,12 +68,10 @@ class TileView : public QWidget
 
         void setMinimumCellHeight(int minHeight);
 
-        // TODO: move these to a different place
-        void selectAll();
-        void clearSelection();
-
     signals:
 
+        void visibleTilesChanged(const QModelIndex& start,
+            const QModelIndex& end);
         void doubleClickTile(const QModelIndex& index);
         void checkedItemsChanged();
 
@@ -120,6 +118,8 @@ class TileView : public QWidget
         int       mComputedCellHeight;
         float     mCellSizeRatio;
         bool      mFixedColRowCount;
+        int       mOldStart;
+        int       mOldEnd;
 
         // other properties
         Qt::Orientation mOrientation;

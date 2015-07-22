@@ -17,6 +17,7 @@ class Histogram : public QWidget
         explicit Histogram(QWidget* parent = 0);
 
         void setImageData(const QImage& image);
+        void clear();
 
     protected:
 
@@ -37,6 +38,8 @@ class Histogram : public QWidget
         uint32_t mChannelBlue[BIN_SIZE];
 
         uint32_t mMaxAll;
+
+        void reset();
 };
 }
 

@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget* parent) :
     mPhotoModel = new QSortFilterProxyModel(this);
     mPhotoModel->setSourceModel(mSourceModel);
 
-    // setup connections
+    // setup PhotoModel connections
     connect(mPhotoModel, &PhotoModel::modelReset,
         this, &MainWindow::onModelReset);
     connect(mPhotoModel, &PhotoModel::rowsInserted,
@@ -105,6 +105,8 @@ MainWindow::MainWindow(QWidget* parent) :
 
     connect(ui->filmStrip, &TileView::TileView::doubleClickTile,
         this, &MainWindow::onTileDoubleClicked);
+    connect(ui->filmStrip,&TileView::TileView::visibleTilesChanged,
+            mSourceModel,&PhotoModel::onVisibleTilesChanged);
 
     //***************
     // Create the DEVELOP MODULE

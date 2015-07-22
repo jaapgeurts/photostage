@@ -2,8 +2,9 @@
 
 namespace PhotoStage
 {
-Runnable::Runnable()
-    : mAutoDelete(true)
+Runnable::Runnable() :
+    mAutoDelete(true),
+    mName("Unnamed runnable")
 {
 }
 
@@ -23,5 +24,15 @@ bool Runnable::autoDelete() const
 void Runnable::setAutoDelete(bool enable)
 {
     mAutoDelete = enable;
+}
+
+void Runnable::setName(const QString& name)
+{
+    mName = name;
+}
+
+const QString& Runnable::name() const
+{
+    return mName;
 }
 }

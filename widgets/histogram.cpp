@@ -13,11 +13,7 @@ Histogram::Histogram(QWidget* parent) : QWidget(parent)
     setMaximumHeight(120);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    memset(mChannelRed, 0, sizeof(uint32_t) * BIN_SIZE);
-    memset(mChannelBlue, 0, sizeof(uint32_t) * BIN_SIZE);
-    memset(mChannelGreen, 0, sizeof(uint32_t)  * BIN_SIZE);
-
-    mMaxAll = 0;
+    reset();
 }
 
 //void Histogram::setImageData(const PhotoData &image)
@@ -27,15 +23,27 @@ void Histogram::setImageData(const QImage& image)
     recalculate();
 }
 
-void Histogram::recalculate()
+void Histogram::reset()
 {
-    // the default BIN_SIZE = 256
-    //set all values to 0
     memset(mChannelRed, 0, sizeof(uint32_t) * BIN_SIZE);
     memset(mChannelBlue, 0, sizeof(uint32_t) * BIN_SIZE);
     memset(mChannelGreen, 0, sizeof(uint32_t) * BIN_SIZE);
 
     mMaxAll = 0;
+}
+
+void Histogram::clear()
+{
+    reset();
+    update();
+}
+
+void Histogram::recalculate()
+{
+    // the default BIN_SIZE = 256
+    //set all values to 0
+    reset();
+
     int pos = 0;
 
     // first do uniform distribution (linear transform)
@@ -69,10 +77,10 @@ void Histogram::recalculate()
         }
     }
     mMaxAll = (float)mMaxAll * 1.05f;
-//    qDebug() << "Counts of red[0]" << mChannelRed[0];
-//    qDebug() << "Counts of green[0]" << mChannelGreen[0];
-//    qDebug() << "Counts of blue[0]" << mChannelBlue[0];
-//    qDebug() << "Maxall" << mMaxAll << "pos" << pos;
+    //    qDebug() << "Counts of red[0]" << mChannelRed[0];
+    //    qDebug() << "Counts of green[0]" << mChannelGreen[0];
+    //    qDebug() << "Counts of blue[0]" << mChannelBlue[0];
+    //    qDebug() << "Maxall" << mMaxAll << "pos" << pos;
     update();
 }
 

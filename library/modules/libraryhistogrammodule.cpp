@@ -23,5 +23,9 @@ void LibraryHistogramModule::setPhoto(Photo& photo)
         //PhotoData image = loadImage(photo->libraryPreview());
         mHistogram->setImageData(photo.libraryPreview());
     }
+    else
+    {
+        mHistogram->clear();
+    }
 }
 }

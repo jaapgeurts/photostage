@@ -54,6 +54,8 @@ Library::Library(QSortFilterProxyModel* const model, QWidget* parent) :
         this, &Library::customContextMenu);
     connect(ui->mClvPhotos, &TileView::TileView::doubleClickTile,
         this, &Library::onTileDoubleClicked);
+    connect(ui->mClvPhotos,&TileView::TileView::visibleTilesChanged,
+            (PhotoModel*)mPhotoModel->sourceModel(),&PhotoModel::onVisibleTilesChanged);
 
     // These models are auto deleted by the QObject hierarchy
     ui->mClvPhotos->setModel(mPhotoModel);

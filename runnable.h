@@ -20,9 +20,13 @@ class Runnable
         bool autoDelete() const;
         void setAutoDelete(bool enable);
 
+        void setName(const QString& name);
+        const QString& name() const;
+
     private:
 
-        bool mAutoDelete;
+        bool    mAutoDelete;
+        QString mName;
 };
 }
 #endif // PHOTOSTAGE_RUNNABLE

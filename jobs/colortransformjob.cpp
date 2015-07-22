@@ -9,6 +9,7 @@ ColorTransformJob::ColorTransformJob(const Photo& photo) :
     QObject(NULL),
     mPhoto(photo)
 {
+    setName("ColorTransformJob");
 }
 
 QVariant ColorTransformJob::run()

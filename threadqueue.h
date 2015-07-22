@@ -38,6 +38,7 @@ class ThreadQueue : public QObject
     public slots:
 
         void onStarted();
+        void cancel();
 
     private:
 

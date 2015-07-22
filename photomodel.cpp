@@ -1,6 +1,7 @@
 #include <QImage>
 #include <QDir>
 #include <QDebug>
+#include <QItemSelectionRange>
 
 #include "constants.h"
 #include "photomodel.h"
@@ -70,18 +71,37 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
 
 void PhotoModel::loadImage(Photo& photo)
 {
+    if (photo.isDownloading())
+        return;
+
+    photo.setIsDownloading(true);
+
     PreviewCacheLoaderJob* plj = new PreviewCacheLoaderJob(photo);
 
     plj->connect(plj, &PreviewCacheLoaderJob::imageReady,
-        this, &PhotoModel::previewReady);
+        this, &PhotoModel::previewLoaded);
     mThreadQueue->addJob(plj);
 }
 
-void PhotoModel::previewReady(Photo photo, const QImage& image)
+void PhotoModel::convertImage(Photo& photo)
+{
+    if (photo.isDownloading())
+        return;
+
+    photo.setIsDownloading(true);
+    ColorTransformJob* cfj = new ColorTransformJob(photo);
+
+    // convert the image to sRGB
+    cfj->connect(cfj, &ColorTransformJob::imageReady,
+        this, &PhotoModel::imageTranslated);
+    mThreadQueue->addJob(cfj);
+}
+
+void PhotoModel::previewLoaded(Photo photo, const QImage& image)
 {
     if (!image.isNull())
     {
-        photo.setIsDownloading(true);
+        // The image was succesfully loaded from disk cache
         photo.setLibraryPreview(image);
         photo.setOriginal(image);
 
@@ -92,34 +112,39 @@ void PhotoModel::previewReady(Photo photo, const QImage& image)
             this, &PhotoModel::imageTranslated);
         mThreadQueue->addJob(cfj);
     }
-    else if (!photo.isDownloading())
+    else
     {
-        // load image in background thread.
-        // add to thread queue so that only 1 instance of Halide runs
-        photo.setIsDownloading(true);
+        // no image available in the cache.
+        // generate a preview from the original image
         PreviewGeneratorJob* il = new PreviewGeneratorJob(photo);
         il->connect(il, &PreviewGeneratorJob::imageReady,
-            this, &PhotoModel::imageLoaded);
+            this, &PhotoModel::previewGenerated);
         mThreadQueue->addJob(il);
     }
 }
 
 void PhotoModel::imageTranslated(Photo photo, const QImage& image)
 {
-    photo.setLibraryPreviewsRGB(image);
+    if (!image.isNull())
+    {
+        photo.setLibraryPreviewsRGB(image);
 
-    // find the index for this photo.
-    QVector<int> roles;
-    emit         dataChanged(mPhotoIndexMap.value(photo.id()),
-        mPhotoIndexMap.value(photo.id()), roles);
+        // find the index for this photo.
+        QVector<int> roles;
+        emit         dataChanged(mPhotoIndexMap.value(photo.id()),
+            mPhotoIndexMap.value(photo.id()), roles);
+    }
 
     photo.setIsDownloading(false);
 }
 
-void PhotoModel::imageLoaded(Photo photo, const QImage& image)
+void PhotoModel::previewGenerated(Photo photo, const QImage& image)
 {
     if (image.isNull())
+    {
+        photo.setIsDownloading(false);
         return;
+    }
 
     // get actual width x height & store in db.
     photo.exifInfo().width  = image.width();
@@ -149,6 +174,9 @@ void PhotoModel::onPhotoSourceChanged(PhotoModel::SourceType source,
 {
     beginResetModel();
 
+    // cancel all running jobs
+    mThreadQueue->cancel();
+
     if (source == SourceFiles)
     {
         mPhotoList = mWorkUnit->getPhotosByPath(pathId);
@@ -170,6 +198,15 @@ void PhotoModel::onPhotoSourceChanged(PhotoModel::SourceType source,
     endResetModel();
 }
 
+void PhotoModel::onVisibleTilesChanged(const QModelIndex& start,
+    const QModelIndex& end)
+{
+    qDebug() << "PhotoModel::onVisibleTilesChanged" << start.row() << "-" <<
+            end.row();
+    // only cancel jobs that are not visible
+    mThreadQueue->cancel();
+}
+
 bool PComp(const Photo& a, const Photo& b)
 {
     return a.id() < b.id();
@@ -184,7 +221,8 @@ void PhotoModel::refreshData(const QList<Photo>& list )
 void PhotoModel::addData(const QList<long long>& idList)
 {
     // figure out what was changed, what is new and what has been added
-    int          start = rowCount(QModelIndex());
+    int start = rowCount(QModelIndex());
+
 
     QList<Photo> list = mWorkUnit->getPhotosById(idList);
     beginInsertRows(QModelIndex(), start, list.size() - 1);
