@@ -81,6 +81,11 @@ void PhotoData::setLibraryPreview(const QImage& image)
     mLibraryPreviewsRGB = QImage();
 }
 
+void PhotoData::setLibraryPreviewsRGB(const QImage& image)
+{
+    mLibraryPreviewsRGB = image;
+}
+
 // TODO: think about using the proxy pattern
 const QImage& PhotoData::libraryPreview()
 {
@@ -89,20 +94,6 @@ const QImage& PhotoData::libraryPreview()
 
 const QImage& PhotoData::libraryPreviewsRGB()
 {
-    if (mLibraryPreviewsRGB.isNull())
-    {
-        // run this in a thread so the UI is fast.
-
-        // convert the image to sRGB
-        //qDebug() << "Converting image to RGB";
-        ColorTransform transform = ColorTransform::getTransform(
-            "Melissa-sRGB-RGB32",
-            WORKING_COLOR_SPACE,
-            ColorTransform::getMonitorProfilePath(),
-            ColorTransform::FORMAT_RGB32,
-            ColorTransform::FORMAT_RGB32);
-        mLibraryPreviewsRGB = transform.transformQImage(mLibraryPreview);
-    }
     return mLibraryPreviewsRGB;
 }
 

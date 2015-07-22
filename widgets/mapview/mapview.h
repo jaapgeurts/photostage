@@ -65,7 +65,8 @@ class MapView : public QWidget
         QRect          mTileBounds;
         QList<Layer*>  mLayers;
         QSlider*       mZoomSlider;
-        bool           mPanning;
+        bool           mIsPanning;
+        bool           mIsMouseDown;
         QPoint         mMousePressLocation;
         QPoint         mDragDelta;
 

@@ -5,7 +5,7 @@
 #include <lcms2.h>
 
 #include "constants.h"
-#include "imagefileloader.h"
+#include "previewgeneratorjob.h"
 #include "import/exivfacade.h"
 #include "engine/colortransform.h"
 #include "engine/pipelinebuilder.h"
@@ -65,85 +65,35 @@ CameraMetaData* Metadata::metaData()
     return mMetaData;
 }
 
-ImageFileLoader* ImageFileLoader::mLoader = NULL;
-
-ImageFileLoader* ImageFileLoader::getLoader()
+PreviewGeneratorJob::PreviewGeneratorJob(const Photo& photo) :
+    QObject(NULL),
+    mPhoto(photo)
 {
-    if (mLoader == NULL)
-        mLoader = new ImageFileLoader();
-
-    return mLoader;
 }
 
-ImageFileLoader::ImageFileLoader()
+PreviewGeneratorJob::~PreviewGeneratorJob()
 {
-    //qDebug() << "worker thread " << mModelIndex.row() <<" created";
-
-    setAutoDelete(false);
 }
 
-ImageFileLoader::~ImageFileLoader()
+QVariant PreviewGeneratorJob::run()
 {
-    //qDebug() << "worker thread " << mModelIndex.row() <<" deleted";
-    mJobs.clear();
+    QImage image = genThumb(mPhoto.srcImagePath());
+
+    return image;
 }
 
-void ImageFileLoader::addJob(const QVariant& ref, const QString& path)
+void PreviewGeneratorJob::finished(QVariant result)
 {
-    // TODO: these two lines should be atomic
-
-    mMutexJobs.lock();
-    bool shouldStart = mJobs.isEmpty();
-    mJobs.enqueue(Job(ref, path));
-    mMutexJobs.unlock();
-
-    if (shouldStart)
-    {
-        if (thread() != &mThread)
-        {
-            moveToThread(&mThread);
-            qDebug() << "Launching thread";
-            connect(&mThread, &QThread::started, this,
-                &ImageFileLoader::run);
-        }
-        mThread.start();
-    }
+    QImage image = result.value<QImage>();
+    emit   imageReady(mPhoto, image);
 }
 
-//gradient(x, y) = x + y;
-//gradient(x, y) = e;
-
-Job ImageFileLoader::hasMore(QQueue<Job>& queue)
+void PreviewGeneratorJob::error(const QString& error)
 {
-    Job ret;
-
-    mMutexJobs.lock();
-
-    if (!queue.isEmpty())
-        ret = mJobs.dequeue();
-    mMutexJobs.unlock();
-    return ret;
+    qDebug() << "Error during image load or gen thumb" << error;
 }
 
-void ImageFileLoader::run()
-{
-    Job j;
-
-    qDebug() << "Thread started";
-
-    while ((j = hasMore(mJobs)).ref.isValid())
-    {
-        QVariant ref  = j.ref;
-        QString  path = j.path;
-
-        QImage   image = genThumb(path);
-        emit     dataReady(ref, image);
-    }
-    qDebug() << "Thread stopped";
-    thread()->quit();
-}
-
-QImage ImageFileLoader::genThumb(const QString& path)
+QImage PreviewGeneratorJob::genThumb(const QString& path)
 {
     // TODO: catch errors and emit error(QString)
     QImage  image;
@@ -173,9 +123,9 @@ QImage ImageFileLoader::genThumb(const QString& path)
         delete(ex);
 
         QTransform m;
+
         switch (ex_info.rotation)
         {
-
             case ExifInfo::Rotate90CCW:
                 m.rotate(-90);
                 pixmap = pixmap.transformed(m);
@@ -237,7 +187,7 @@ QImage ImageFileLoader::genThumb(const QString& path)
  * @param dst (out parameter) the result
  * @return true, if successful, false if the inverse doesn't exist
  */
-bool ImageFileLoader::compute_inverse(const float src[9], float dst[9])
+bool PreviewGeneratorJob::compute_inverse(const float src[9], float dst[9])
 {
     bool result = false;
 
@@ -279,7 +229,7 @@ bool ImageFileLoader::compute_inverse(const float src[9], float dst[9])
     return result;
 }
 
-void ImageFileLoader::dump_matrix(const QString& name, float m[9])
+void PreviewGeneratorJob::dump_matrix(const QString& name, float m[9])
 {
     QString space = QString(name.length(), ' ');
 
@@ -290,7 +240,7 @@ void ImageFileLoader::dump_matrix(const QString& name, float m[9])
     qDebug() << space << "└";
 }
 
-int ImageFileLoader::compute_cct(float R, float G, float B)
+int PreviewGeneratorJob::compute_cct(float R, float G, float B)
 {
     // see here for more details
     // http://dsp.stackexchange.com/questions/8949/how-do-i-calculate-the-color-temperature-of-the-light-source-illuminating-an-ima
@@ -309,7 +259,7 @@ int ImageFileLoader::compute_cct(float R, float G, float B)
     return CCT;
 }
 
-void ImageFileLoader::mmultm(float* A, float* B, float* out)
+void PreviewGeneratorJob::mmultm(float* A, float* B, float* out)
 {
     out[0] = A[0] * B[0] + A[1] * B[3] + A[2] * B[6];
     out[1] = A[0] * B[1] + A[1] * B[4] + A[2] * B[7];
@@ -328,7 +278,7 @@ void ImageFileLoader::mmultm(float* A, float* B, float* out)
 //{
 //}
 
-void ImageFileLoader::normalize(float* M)
+void PreviewGeneratorJob::normalize(float* M)
 {
     float sum;
 
@@ -344,7 +294,7 @@ void ImageFileLoader::normalize(float* M)
     }
 }
 
-void ImageFileLoader::getMatrix(float* in, float* out)
+void PreviewGeneratorJob::getMatrix(float* in, float* out)
 {
     for (int i = 0; i < 9; i++)
         in[i] /= 10000;
@@ -353,7 +303,7 @@ void ImageFileLoader::getMatrix(float* in, float* out)
     compute_inverse(in, out);
 }
 
-QImage ImageFileLoader::rawThumb(const QString& path)
+QImage PreviewGeneratorJob::rawThumb(const QString& path)
 {
     QImage      image;
 
@@ -529,11 +479,5 @@ QImage ImageFileLoader::rawThumb(const QString& path)
         image = pb.execute(width, height);
     }
     return image;
-}
-
-Job::Job(const QVariant& ref, const QString& path)
-{
-    this->ref  = ref;
-    this->path = path;
 }
 }

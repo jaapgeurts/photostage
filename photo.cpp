@@ -43,6 +43,11 @@ void Photo::setLibraryPreview(const QImage& image)
     d->setLibraryPreview(image);
 }
 
+void Photo::setLibraryPreviewsRGB(const QImage& image)
+{
+    d->setLibraryPreviewsRGB(image);
+}
+
 const QImage& Photo::libraryPreview()
 {
     const QImage& img = d->libraryPreview();
@@ -56,9 +61,14 @@ const QImage& Photo::libraryPreview()
 
 const QImage& Photo::libraryPreviewsRGB()
 {
-    // make sure the library preview is avaialble, it it is not trigger
-    // a download
-    libraryPreview();
+    // make sure the library preview is avaialble,
+    // if it is not trigger download
+
+    if (d->libraryPreviewsRGB().isNull())
+    {
+        libraryPreview();
+    }
+
     return d->libraryPreviewsRGB();
 }
 

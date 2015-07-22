@@ -37,7 +37,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>150</width>
+         <width>168</width>
          <height>443</height>
         </rect>
        </property>
@@ -161,7 +161,7 @@
              </size>
             </property>
             <property name="text">
-             <string>PushButton</string>
+             <string>G</string>
             </property>
             <property name="checkable">
              <bool>true</bool>
@@ -208,7 +208,7 @@
              </size>
             </property>
             <property name="text">
-             <string>PushButton</string>
+             <string>E</string>
             </property>
             <property name="checkable">
              <bool>true</bool>
@@ -228,7 +228,7 @@
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>5</width>
+              <width>10</width>
               <height>32</height>
              </size>
             </property>
@@ -283,9 +283,70 @@
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>127</width>
+              <width>10</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cbSort">
+            <item>
+             <property name="text">
+              <string>Capture Date</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Filename</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbSortOrder">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>↑</string>
+            </property>
+            <property name="checkable">
+             <bool>false</bool>
+            </property>
+            <property name="flat">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>30</width>
               <height>20</height>
              </size>
             </property>
@@ -333,7 +394,7 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>150</width>
+         <width>168</width>
          <height>443</height>
         </rect>
        </property>
@@ -373,11 +434,11 @@
    <sender>pbShowGrid</sender>
    <signal>clicked()</signal>
    <receiver>Library</receiver>
-   <slot>showGrid()</slot>
+   <slot>onShowGrid()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>184</x>
-     <y>433</y>
+     <x>242</x>
+     <y>448</y>
     </hint>
     <hint type="destinationlabel">
      <x>5</x>
@@ -389,11 +450,11 @@
    <sender>pbShowLoupe</sender>
    <signal>clicked()</signal>
    <receiver>Library</receiver>
-   <slot>showLoupe()</slot>
+   <slot>onShowLoupe()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>432</y>
+     <x>287</x>
+     <y>448</y>
     </hint>
     <hint type="destinationlabel">
      <x>5</x>
@@ -408,7 +469,7 @@
    <slot>onThumbSizeChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>755</x>
+     <x>713</x>
      <y>441</y>
     </hint>
     <hint type="destinationlabel">
@@ -424,8 +485,8 @@
    <slot>onZoomLevelChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>308</x>
-     <y>432</y>
+     <x>381</x>
+     <y>444</y>
     </hint>
     <hint type="destinationlabel">
      <x>418</x>
@@ -433,11 +494,45 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pbSortOrder</sender>
+   <signal>clicked()</signal>
+   <receiver>Library</receiver>
+   <slot>onSortOrderChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>524</x>
+     <y>439</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>809</x>
+     <y>460</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSort</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>Library</receiver>
+   <slot>onSortKeyChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>444</x>
+     <y>434</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>357</x>
+     <y>460</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>showGrid()</slot>
-  <slot>showLoupe()</slot>
+  <slot>onShowGrid()</slot>
+  <slot>onShowLoupe()</slot>
   <slot>onThumbSizeChanged(int)</slot>
   <slot>onZoomLevelChanged(int)</slot>
+  <slot>onSortOrderChanged()</slot>
+  <slot>onSortKeyChanged(int)</slot>
  </slots>
 </ui>

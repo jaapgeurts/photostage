@@ -60,7 +60,10 @@ MainWindow::MainWindow(QWidget* parent) :
     }
     ui->splitter->setSizes(l);
 
-    mPhotoModel = new PhotoModel(this);
+    mSourceModel = new PhotoModel(this);
+    mPhotoModel = new QSortFilterProxyModel(this);
+    mPhotoModel->setSourceModel(mSourceModel);
+
     // setup connections
     connect(mPhotoModel, &PhotoModel::modelReset,
         this, &MainWindow::onModelReset);
@@ -84,9 +87,11 @@ MainWindow::MainWindow(QWidget* parent) :
 
     // setup connections
     connect(mLibrary, &Library::photoSourceChanged,
-        mPhotoModel, &PhotoModel::onReloadPhotos);
+        mSourceModel, &PhotoModel::onPhotoSourceChanged);
     connect(ui->actionLoupeInfoCycle, &QAction::triggered,
         mLibrary, &Library::onCycleLoupeInfo);
+    connect(mLibrary, &Library::modelFilterApplied,
+        this, &MainWindow::onFilterApplied);
 
     ui->filmStrip->setModel(mPhotoModel);
     FilmstripTile* fsTile = new FilmstripTile(ui->filmStrip);
@@ -201,7 +206,7 @@ bool MainWindow::eventFilter(QObject* /*obj*/, QEvent* event)
                 return selectNext();
 
             case Qt::Key_Escape:
-                mLibrary->showGrid();
+                mLibrary->onShowGrid();
                 return true;
 
             case Qt::Key_Return:
@@ -210,7 +215,7 @@ bool MainWindow::eventFilter(QObject* /*obj*/, QEvent* event)
                 if (!mLibrary->canSelectionChange() &&
                     !ui->filmStrip->hasFocus())
                     return false;
-                mLibrary->showLoupe();
+                mLibrary->onShowLoupe();
                 return true;
         }
     }
@@ -233,7 +238,7 @@ bool MainWindow::selectNext()
         if (index.row()  < mPhotoModel->rowCount(QModelIndex()) - 1)
         {
             newIndex = oldIndex + 1;
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex),
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex,0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -256,7 +261,7 @@ bool MainWindow::selectPrevious()
         if (oldIndex > 0)
         {
             newIndex = oldIndex - 1;
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex),
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex,0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -282,7 +287,7 @@ bool MainWindow::selectUp()
         {
             newIndex = oldIndex - tilesPerColRow;
 
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex),
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex,0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -309,7 +314,7 @@ bool MainWindow::selectDown()
         {
             newIndex = oldIndex + tilesPerColRow;
 
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex),
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex,0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -319,7 +324,7 @@ bool MainWindow::selectDown()
 
 void MainWindow::onTileDoubleClicked(const QModelIndex&)
 {
-    mLibrary->showLoupe();
+    mLibrary->onShowLoupe();
 }
 
 void MainWindow::onSelectionChanged(const QItemSelection& selected,
@@ -524,7 +529,7 @@ void MainWindow::importFinished(BackgroundTask* task)
 {
     ImportBackgroundTask* t = static_cast<ImportBackgroundTask*>(task);
 
-    mPhotoModel->addData(t->resultList());
+    mSourceModel->addData(t->resultList());
 
     task->deleteLater();
     // update the files tree as well and the collection tree
@@ -552,18 +557,22 @@ void MainWindow::onPhotoModelRowsRemoved(const QModelIndex& /*parent*/,
     updateInformationBar();
 }
 
+void MainWindow::onFilterApplied(const QString& filter)
+{
+}
+
 void MainWindow::onShowGrid()
 {
     // force library module to the front
     onModeLibraryClicked();
-    mLibrary->showGrid();
+    mLibrary->onShowGrid();
 }
 
 void MainWindow::onShowLoupe()
 {
     // force library module to the front
     onModeLibraryClicked();
-    mLibrary->showLoupe();
+    mLibrary->onShowLoupe();
 }
 
 void MainWindow::updateInformationBar()
@@ -584,7 +593,7 @@ void MainWindow::updateInformationBar()
 Photo MainWindow::currentPhoto()
 {
     return mPhotoModel->data(mPhotoSelection->currentIndex(),
-               TileView::TileView::PhotoRole).value<Photo>();
+               TileView::TileView::ImageRole).value<Photo>();
 }
 
 void MainWindow::setRating(int rating)
@@ -593,11 +602,11 @@ void MainWindow::setRating(int rating)
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
     list.append(mPhotoModel->data(index,
-        TileView::TileView::PhotoRole).value<Photo>());
+        TileView::TileView::ImageRole).value<Photo>());
     mPhotoWorkUnit->setRating(list, rating);
     QVector<int> roles;
-    roles.append(TileView::TileView::PhotoRole);
-    mPhotoModel->refreshData(list);
+    roles.append(TileView::TileView::ImageRole);
+    mSourceModel->refreshData(list);
 }
 
 void MainWindow::setFlag(Photo::Flag flag)
@@ -606,12 +615,12 @@ void MainWindow::setFlag(Photo::Flag flag)
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
     list.append(mPhotoModel->data(index,
-        TileView::TileView::PhotoRole).value<Photo>());
+        TileView::TileView::ImageRole).value<Photo>());
 
     mPhotoWorkUnit->setFlag(list, flag);
     QVector<int> roles;
-    roles.append(TileView::TileView::PhotoRole);
-    mPhotoModel->refreshData(list);
+    roles.append(TileView::TileView::ImageRole);
+    mSourceModel->refreshData(list);
 }
 
 void MainWindow::setColorLabel(Photo::ColorLabel color)
@@ -620,12 +629,12 @@ void MainWindow::setColorLabel(Photo::ColorLabel color)
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
     list.append(mPhotoModel->data(index,
-        TileView::TileView::PhotoRole).value<Photo>());
+        TileView::TileView::ImageRole).value<Photo>());
 
     mPhotoWorkUnit->setColorLabel(list, color);
     QVector<int> roles;
-    roles.append(TileView::TileView::PhotoRole);
-    mPhotoModel->refreshData(list);
+    roles.append(TileView::TileView::ImageRole);
+    mSourceModel->refreshData(list);
 }
 
 void MainWindow::setPhotoActionsAvailability(bool enabled)

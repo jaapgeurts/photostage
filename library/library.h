@@ -1,5 +1,7 @@
-#ifndef LIBRARY_H
-#define LIBRARY_H
+#ifndef PHOTOSTAGE_LIBRARY_H
+#define PHOTOSTAGE_LIBRARY_H
+
+#include <QSortFilterProxyModel>
 
 #include "module.h"
 
@@ -8,6 +10,7 @@
 #include "workunits/photoworkunit.h"
 #include "imagedbtile.h"
 #include "modules/taggingmodule.h"
+#include "modules/filtermodule.h"
 #include "modules/collectionmodule.h"
 #include "modules/shortcutmodule.h"
 #include "modules/libraryhistogrammodule.h"
@@ -27,7 +30,8 @@ class Library : public Module
 
     public:
 
-        explicit Library(PhotoModel* const model, QWidget* parent = 0);
+        explicit Library(QSortFilterProxyModel* const model,
+            QWidget* parent = 0);
         ~Library();
 
         QRect lightGap();
@@ -41,15 +45,21 @@ class Library : public Module
     signals:
 
         void photoSourceChanged(PhotoModel::SourceType type, long long id);
+        void modelFilterApplied(const QString& filter);
 
     public slots:
 
-        void showLoupe();
-        void showGrid();
+        // Library options bar
+        void onShowLoupe();
+        void onShowGrid();
+
+        void onSortKeyChanged(int key);
+        void onSortOrderChanged();
 
         void onPhotoSelectionChanged(const QItemSelection& selected,
             const QItemSelection&);
-        void onCurrentPhotoChanged(const QModelIndex& current, const QModelIndex&);
+        void onCurrentPhotoChanged(const QModelIndex& current,
+            const QModelIndex&);
         void onPathModelRowsAdded(const QModelIndex&, int, int);
         void onPathModelRowsRemoved(const QModelIndex&, int, int);
         void onTileDoubleClicked(const QModelIndex&);
@@ -74,7 +84,7 @@ class Library : public Module
     private:
 
         Ui::Library*            ui;
-        PhotoModel*             mPhotoModel;
+        QSortFilterProxyModel*  mPhotoModel;
         PhotoWorkUnit*          mPhotoWorkUnit;
         SqlPathModel*           mPathModel;
         TaggingModule*          mKeywording;
@@ -86,4 +96,4 @@ class Library : public Module
 };
 }
 
-#endif // LIBRARY_H
+#endif // PHOTOSTAGE_LIBRARY_H

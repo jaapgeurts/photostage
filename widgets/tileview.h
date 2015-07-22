@@ -22,7 +22,7 @@ class TileView : public QWidget
 
         enum ModelRole
         {
-            PhotoRole = Qt::UserRole + 1
+            ImageRole = Qt::UserRole + 300
         };
 
         explicit TileView(QWidget* parent = 0);

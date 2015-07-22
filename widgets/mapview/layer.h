@@ -4,6 +4,7 @@
 #include <QPainter>
 #include <QAbstractItemModel>
 #include <QItemSelectionModel>
+#include <QModelIndex>
 
 #include "mapview.h"
 #include "abstractmarker.h"
@@ -18,9 +19,9 @@ class Layer : public QObject
 
         enum LayerRole
         {
-            GeoCoordinateRole = Qt::UserRole + 3,
-            CountRole         = Qt::UserRole + 4,
-            DataRole          = Qt::UserRole + 5
+            GeoCoordinateRole = Qt::UserRole + 200,
+            CountRole         = Qt::UserRole + 201,
+            DataRole          = Qt::UserRole + 202
         };
 
         explicit Layer(MapView* view);
@@ -29,15 +30,20 @@ class Layer : public QObject
         void setSelectionModel(QItemSelectionModel* selectionModel);
         void setDelegate(AbstractMarker* delegate);
 
-        void paint(QPainter& painter);
+        void render(QPainter& painter);
+        bool mousePressEvent(QMouseEvent *event);
 
-    signals:
+        bool intersectsMarker(const QPoint& pos) const;
+        QModelIndex indexAt(const QPoint& pos) const;
+
+
+signals:
 
         void markerDoubleClicked(const QModelIndex& index);
 
     public slots:
 
-        void clear();
+        void viewChanged();
 
     private:
 
@@ -45,6 +51,9 @@ class Layer : public QObject
         QItemSelectionModel* mSelectionModel;
         AbstractMarker*      mDelegate;
         MapView*             mMapView;
+        QList<QModelIndex>   mCulled;
+
+        QRect markerPosition(const QGeoCoordinate& coord) const;
 };
 }
 

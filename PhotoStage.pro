@@ -41,7 +41,6 @@ SOURCES += \
     engine/platform.cpp \
     filmstriptile.cpp \
     image.cpp \
-    imagefileloader.cpp \
     import/exiv2lib.cpp \
     import/exivfacade.cpp \
     import/imagefilesystemmodel.cpp \
@@ -92,7 +91,13 @@ SOURCES += \
     workunits/importinfo.cpp \
     workunits/importoptions.cpp \
     workunits/importworkunit.cpp \
-    workunits/photoworkunit.cpp
+    workunits/photoworkunit.cpp \
+    library/modules/filtermodule.cpp \
+    threadqueue.cpp \
+    runnable.cpp \
+    jobs/colortransformjob.cpp \
+    jobs/previewgeneratorjob.cpp \
+    jobs/previewcacheloaderjob.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -115,7 +120,6 @@ HEADERS  += \
     engine/platform_mac.h \
     filmstriptile.h \
     image.h \
-    imagefileloader.h \
     import/exiv2lib.h \
     import/exivfacade.h \
     import/imagefilesystemmodel.h \
@@ -166,7 +170,13 @@ HEADERS  += \
     workunits/importinfo.h \
     workunits/importoptions.h \
     workunits/importworkunit.h \
-    workunits/photoworkunit.h
+    workunits/photoworkunit.h \
+    library/modules/filtermodule.h \
+    threadqueue.h \
+    runnable.h \
+    jobs/colortransformjob.h \
+    jobs/previewgeneratorjob.h \
+    jobs/previewcacheloaderjob.h
 
 FORMS    += \
     mainwindow.ui \

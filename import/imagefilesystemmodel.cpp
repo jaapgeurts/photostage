@@ -28,7 +28,7 @@ QVariant ImageFileSystemModel::data(const QModelIndex& index,
     QVariant data = QFileSystemModel::data(index,
             QFileSystemModel::FilePathRole);
 
-    if (role == TileView::TileView::PhotoRole)
+    if (role == TileView::TileView::ImageRole)
     {
         // TODO: allocate on heap or stack?
         const QString path = data.toString();
@@ -77,7 +77,7 @@ void ImageFileSystemModel::imageLoaded(const QModelIndex& index,
     info.image = pixmap;
     mPreviewInfoCache->insert(index, info);
     QVector<int> roles;
-    roles.append(TileView::TileView::PhotoRole);
+    roles.append(TileView::TileView::ImageRole);
     emit         dataChanged(index, index, roles);
 }
 

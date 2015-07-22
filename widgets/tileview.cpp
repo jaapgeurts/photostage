@@ -418,7 +418,7 @@ void TileView::paintEvent(QPaintEvent*/*event*/)
 
         // qDebug() << "cell:" << i << "("<<xpos<<","<<ypos<<","<<mComputedCellWidth<<","<<mComputedCellHeight<<")";
 
-        QVariant item = mListModel->data(itemIndex, TileView::PhotoRole);
+        QVariant item = mListModel->data(itemIndex, TileView::ImageRole);
 
         mTile->render(painter, tileInfo, item);
 
@@ -604,7 +604,6 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
                 else if ((modifiers& Qt::ShiftModifier) ==
                     Qt::ShiftModifier)
                 {
-                    qDebug() << "Shift";
                     int first = mSelectionModel->currentIndex().row();
                     int last  = index.row();
 
@@ -615,25 +614,21 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
                         first = last;
                         last  = t;
                     }
-                    qDebug() << "From" << first << "to last" << last;
-                    mSelectionModel->clear();
+                    QItemSelection selection;
 
-                    for (int i = first; i <= last; i++)
-                    {
-                        mSelectionModel->select(mListModel->index(i, 0,
-                            mRootIndex), QItemSelectionModel::Select);
-                    }
-                    mSelectionModel->setCurrentIndex(index,
-                        QItemSelectionModel::NoUpdate);
+                    selection.select(mListModel->index(first, 0),
+                        mListModel->index(last, 0));
+
+                    if (selection.size() > 0)
+                        mSelectionModel->select(selection,
+                            QItemSelectionModel::ClearAndSelect);
                 }
                 else if ((modifiers& Qt::ControlModifier) ==
                     Qt::ControlModifier)
                 {
-                    //  qDebug() << "Control/Command";
                     mSelectionModel->setCurrentIndex(index,
                         QItemSelectionModel::Select);
                 }
-                //                emit selectionChanged();
             }
         }
 

@@ -5,9 +5,10 @@
 #include <QImage>
 #include <QHash>
 
-#include "workunits/photoworkunit.h"
-#include "imagefileloader.h"
+#include "photo.h"
 #include "previewcache.h"
+#include "threadqueue.h"
+#include "workunits/photoworkunit.h"
 
 namespace PhotoStage
 {
@@ -48,21 +49,21 @@ class PhotoModel : public QAbstractListModel
 
     public slots:
 
-        void onReloadPhotos(SourceType source, long long pathId);
+        void onPhotoSourceChanged(SourceType source, long long pathId);
 
     private slots:
 
-        void imageLoaded(const QVariant& ref, const QImage& image);
+        void imageLoaded(Photo photo, const QImage& image);
+        void imageTranslated(Photo photo, const QImage& image);
+        void previewReady(Photo photo, const QImage& image);
 
     private:
 
-        PhotoWorkUnit*   mWorkUnit;
-        ImageFileLoader* mLoader;
+        PhotoWorkUnit* mWorkUnit;
+        ThreadQueue*   mThreadQueue;
         // The mPhotoInfoList is the main container for the Photo Objects.
-        // Delete is required on it's contents
         QList<Photo>                  mPhotoList;
         QHash<long long, QModelIndex> mPhotoIndexMap;
-        PreviewCache*                 mPreviewCache;
 
         void loadImage(Photo& photo);
 };

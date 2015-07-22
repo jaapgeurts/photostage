@@ -18,7 +18,9 @@ class Photo
 
         enum Roles
         {
-            DataRole = Qt::UserRole + 2
+            DataRole     = Qt::UserRole + 100,
+            DateTimeRole = Qt::UserRole + 101,
+            FilenameRole = Qt::UserRole + 102
         };
 
         enum ColorLabel
@@ -50,6 +52,7 @@ class Photo
         void setOriginal(const QImage& image);
         const QImage& original() const;
         void setLibraryPreview(const QImage& image);
+        void setLibraryPreviewsRGB(const QImage& image);
         const QImage& libraryPreview();
         const QImage& libraryPreviewsRGB();
 

@@ -11,13 +11,12 @@
 
 namespace PhotoStage
 {
-Library::Library(PhotoModel* const model, QWidget* parent) :
+Library::Library(QSortFilterProxyModel* const model, QWidget* parent) :
     Module(parent),
     ui(new Ui::Library),
+    mPhotoModel(model),
     mFontAccessFoundIcons(QFont("Accessibility Foundicons", 15))
 {
-    mPhotoModel = model;
-
     ui->setupUi(this);
 
     QSettings  settings;
@@ -64,6 +63,13 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
 
     // **** MODULES LEFT
 
+    // Filter module
+
+    FilterModule* fm = new FilterModule(ui->ModulePanel_1);
+    ui->ModulePanel_1->addPanel("Filter", fm);
+    connect(fm, &FilterModule::modelFilterApplied,
+        this, &Library::modelFilterApplied);
+
     // shortcuts module
     ShortcutModule* sm = new ShortcutModule(ui->ModulePanel_1);
     ui->ModulePanel_1->addPanel("Shortcuts", sm);
@@ -107,7 +113,7 @@ Library::Library(PhotoModel* const model, QWidget* parent) :
     mMetaDataModule = new MetaDataModule(ui->ModulePanel_2);
     ui->ModulePanel_2->addPanel("Meta Data", mMetaDataModule);
 
-    showGrid();
+    onShowGrid();
 
     mPhotoWorkUnit = PhotoWorkUnit::instance();
 
@@ -192,8 +198,10 @@ void Library::onFilesClicked(const QModelIndex& index)
     // TODO: get the path model and get the file to query and show only those images in the view
     QVariant  v    = mPathModel->data(index, SqlPathModel::Path);
     PathItem* item = v.value<PathItem*>();
+
+    // TODO: clear the filter
     // reset the photo model to the root of this item
-    emit      photoSourceChanged(PhotoModel::SourceFiles, item->id);
+    emit photoSourceChanged(PhotoModel::SourceFiles, item->id);
 }
 
 void Library::customContextMenu(const QPoint& /*pos*/)
@@ -267,7 +275,7 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected,
     QList<Photo> photos;
     foreach (QModelIndex index, selected.indexes())
     photos.append(mPhotoModel->data(index,
-        TileView::TileView::PhotoRole).value<Photo>());
+        TileView::TileView::ImageRole).value<Photo>());
 
     mKeywording->setPhotos(photos);
     mMetaDataModule->setPhotos(photos);
@@ -283,13 +291,13 @@ void Library::onCurrentPhotoChanged(const QModelIndex& current,
     }
     Photo photo =
         mPhotoModel->data(current,
-            TileView::TileView::PhotoRole).value<Photo>();
+            TileView::TileView::ImageRole).value<Photo>();
 
     mCurrentPhoto = photo;
     mHistogramModule->setPhoto(photo);
 
     if (ui->mLoupeScrollView->isVisible())
-        showLoupe();
+        onShowLoupe();
 }
 
 void Library::onPathModelRowsAdded(const QModelIndex& /*parent*/,
@@ -308,7 +316,7 @@ void Library::onPathModelRowsRemoved(const QModelIndex& /*parent*/,
 
 void Library::onTileDoubleClicked(const QModelIndex& /*index*/)
 {
-    showLoupe();
+    onShowLoupe();
 }
 
 void Library::onCycleLoupeInfo()
@@ -316,7 +324,7 @@ void Library::onCycleLoupeInfo()
     ui->mLoupeView->cycleInfoMode();
 }
 
-void Library::showLoupe()
+void Library::onShowLoupe()
 {
     if (!mCurrentPhoto.isNull())
     {
@@ -325,9 +333,37 @@ void Library::showLoupe()
     }
 }
 
-void Library::showGrid()
+void Library::onShowGrid()
 {
     ui->StackedWidget_1->setCurrentWidget(ui->mClvPhotos);
+}
+
+void Library::onSortKeyChanged(int key)
+{
+    switch (key)
+    {
+        case 0:
+            mPhotoModel->setSortRole(Photo::DateTimeRole);
+            break;
+
+        case 1:
+            mPhotoModel->setSortRole(Photo::FilenameRole);
+            break;
+    }
+}
+
+void Library::onSortOrderChanged()
+{
+    Qt::SortOrder order = mPhotoModel->sortOrder();
+
+    if (order == Qt::AscendingOrder) {
+        mPhotoModel->sort(0, Qt::DescendingOrder);
+        ui->pbSortOrder->setText("↓");
+    }
+    else {
+        mPhotoModel->sort(0, Qt::AscendingOrder);
+        ui->pbSortOrder->setText("↑");
+    }
 }
 
 void Library::onNewCollectionClicked()

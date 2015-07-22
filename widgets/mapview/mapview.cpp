@@ -11,7 +11,8 @@ MapView::MapView(QWidget* parent) :
     QWidget(parent),
     mZoomLevel(8),
     mTileBounds(0, 0, 0, 0),
-    mPanning(false),
+    mIsPanning(false),
+    mIsMouseDown(false),
     mDragDelta(0, 0)
 {
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
@@ -21,6 +22,9 @@ MapView::MapView(QWidget* parent) :
         this, &MapView::onZoomLevelChanged);
 
     setCursor(QCursor(Qt::OpenHandCursor));
+
+    // otherwise we don't receive hover events
+    setMouseTracking(true);
 }
 
 MapView::~MapView()
@@ -131,11 +135,16 @@ void MapView::onZoomLevelChanged(int value)
     mOriginPixels =
         mMapProvider->coordToPixel(mOriginCoord, mZoomLevel);
     fetchTiles();
+
+    foreach(Layer * layer, mLayers)
+    layer->viewChanged();
 }
 
 void MapView::setCurrentCoord(const QGeoCoordinate& coord)
 {
-    if (coord.isValid())
+    // only reset view location if the coord
+    // is not visible on screen already
+    if (coord.isValid() && !mapBounds().contains(coord))
     {
         mCurrentCoord = coord;
         mOriginCoord  = mMapProvider->moveCoord(mCurrentCoord,
@@ -143,9 +152,10 @@ void MapView::setCurrentCoord(const QGeoCoordinate& coord)
         mOriginPixels =
             mMapProvider->coordToPixel(mOriginCoord, mZoomLevel);
         fetchTiles();
+
+        foreach(Layer * layer, mLayers)
+        layer->viewChanged();
     }
-    else
-        qDebug() << "Invalid Geo Coord";
 }
 
 void MapView::moveOrigin(const QPoint& delta)
@@ -160,6 +170,9 @@ void MapView::moveOrigin(const QPoint& delta)
     mOriginPixels = mMapProvider->coordToPixel(mOriginCoord, mZoomLevel);
 
     computeTileBounds();
+
+    foreach(Layer * layer, mLayers)
+    layer->viewChanged();
 }
 
 void MapView::fetchTiles()
@@ -187,32 +200,60 @@ void MapView::resizeEvent(QResizeEvent*)
 
     mZoomSlider->resize(30, height() / 2 - 60);
     mZoomSlider->move(width() - 40, 30);
+    foreach(Layer * layer, mLayers)
+    layer->viewChanged();
     update();
 }
 
 void MapView::mousePressEvent(QMouseEvent* event)
 {
-    setCursor(QCursor(Qt::ClosedHandCursor));
-    mPanning            = true;
-    mMousePressLocation = event->pos();
-    mDragDelta.setX(0);
-    mDragDelta.setY(0);
+    bool swallowed = false;
+
+    foreach(Layer * layer, mLayers)
+    {
+        swallowed = layer->mousePressEvent(event);
+
+        if (swallowed)
+            break;
+    }
+
+    if (!swallowed)
+    {
+        setCursor(QCursor(Qt::ClosedHandCursor));
+        mIsMouseDown        = true;
+        mMousePressLocation = event->pos();
+    }
 }
 
 void MapView::mouseReleaseEvent(QMouseEvent* event)
 {
-    setCursor(QCursor(Qt::OpenHandCursor));
-    mPanning   = false;
-    mDragDelta =  mMousePressLocation - event->pos();
+    if (mIsPanning)
+    {
+        mDragDelta =  mMousePressLocation - event->pos();
 
-    moveOrigin(mDragDelta);
-    fetchTiles();
-    update();
+        moveOrigin(mDragDelta);
+        fetchTiles();
+        update();
+    }
+    setCursor(QCursor(Qt::OpenHandCursor));
+    mIsPanning   = false;
+    mIsMouseDown = false;
 }
 
 void MapView::mouseMoveEvent(QMouseEvent* event)
 {
-    if (mPanning)
+    if (mIsMouseDown)
+    {
+        QPoint delta = mMousePressLocation - event->pos();
+
+        if (abs(delta.x()) > 5 || abs(delta.y()) > 5)
+        {
+            mIsPanning   = true;
+            mIsMouseDown = false;
+        }
+    }
+
+    if (mIsPanning)
     {
         mDragDelta =  mMousePressLocation - event->pos();
 
@@ -221,6 +262,23 @@ void MapView::mouseMoveEvent(QMouseEvent* event)
         update();
 
         mMousePressLocation = event->pos();
+    }
+    else
+    {
+        bool found = false;
+        foreach(Layer * layer, mLayers)
+        {
+            if (layer->intersectsMarker(event->pos()))
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if (found)
+            setCursor(QCursor(Qt::ArrowCursor));
+        else
+            setCursor(QCursor(Qt::OpenHandCursor));
     }
 }
 
@@ -275,7 +333,7 @@ void MapView::paintEvent(QPaintEvent* /*event*/)
     // draw other layers
     foreach(Layer * layer, mLayers)
     {
-        layer->paint(painter);
+        layer->render(painter);
     }
 }
 }

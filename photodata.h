@@ -20,6 +20,7 @@ class PhotoData
         void setOriginal(const QImage& image);
         const QImage& original() const;
         void setLibraryPreview(const QImage& image);
+        void setLibraryPreviewsRGB(const QImage& image);
         const QImage& libraryPreview();
         const QImage& libraryPreviewsRGB();
 
@@ -42,7 +43,7 @@ class PhotoData
         long long id() const;
 
         PhotoModel* owner() const;
-        void setOwner(PhotoModel * owner);
+        void setOwner(PhotoModel* owner);
 
         void setIsDownloading(bool value);
         bool isDownloading() const;

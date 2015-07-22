@@ -20,8 +20,6 @@ struct MarkerInfo
 
     MarkerInfo();
 
-    // the ordinal number in the list
-    int index;
     QGeoCoordinate coord; // the position of the marker;
     // the pixel position in the view (relative to the viewport)
     int x;

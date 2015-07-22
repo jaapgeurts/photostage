@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QActionGroup>
 #include <QPoint>
+#include <QSortFilterProxyModel>
 
 // modules
 #include "module.h"
@@ -92,11 +93,10 @@ class MainWindow : public QMainWindow
         // model changes
         void onModelReset();
         void onPhotoModelRowsInserted(const QModelIndex& parent,
-            int start,
-            int end);
+            int start, int end);
         void onPhotoModelRowsRemoved(const QModelIndex& parent,
-            int start,
-            int end);
+            int start, int end);
+        void onFilterApplied(const QString& filter);
 
         void onShowGrid();
         void onShowLoupe();
@@ -113,7 +113,8 @@ class MainWindow : public QMainWindow
         Develop*               mDevelop;
         Map*                   mMap;
         Module*                mCurrentModule;
-        PhotoModel*            mPhotoModel;
+        QSortFilterProxyModel* mPhotoModel;
+        PhotoModel*            mSourceModel;
         PhotoWorkUnit*         mPhotoWorkUnit;
         QItemSelectionModel*   mPhotoSelection;
         ActionStateGroup       mActionStatePhoto;

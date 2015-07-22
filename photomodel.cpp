@@ -4,8 +4,13 @@
 
 #include "constants.h"
 #include "photomodel.h"
+
 #include "widgets/tileview.h"
 #include "widgets/mapview/layer.h"
+
+#include "jobs/previewgeneratorjob.h"
+#include "jobs/colortransformjob.h"
+#include "jobs/previewcacheloaderjob.h"
 
 namespace PhotoStage
 {
@@ -14,17 +19,13 @@ PhotoModel::PhotoModel(QObject* parent) :
 {
     mWorkUnit = PhotoWorkUnit::instance();
 
-    mPreviewCache = PreviewCache::globalCache();
-
-    mLoader = ImageFileLoader::getLoader();
-    connect(mLoader, &ImageFileLoader::dataReady, this,
-        &PhotoModel::imageLoaded);
-    // connect(mLoader, &ImageFileLoader::error, this, &PhotoModel::onImageFailed);
+    mThreadQueue = new ThreadQueue();
 }
 
 PhotoModel::~PhotoModel()
 {
     mPhotoList.clear();
+    delete mThreadQueue;
 }
 
 QVariant PhotoModel::data(const QModelIndex& index, int role) const
@@ -45,7 +46,14 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
         case Qt::DisplayRole:
             return QString(mPhotoList.at(index.row()).srcImagePath());
 
-        case TileView::TileView::PhotoRole:
+        case Photo::DateTimeRole:
+            return QVariant::fromValue<QDateTime>(
+                mPhotoList.at(index.row()).exifInfo().dateTimeOriginal);
+
+        case Photo::FilenameRole:
+            return QString(mPhotoList.at(index.row()).srcImagePath());
+
+        case TileView::TileView::ImageRole:
         case Photo::DataRole:
         case MapView::Layer::DataRole:
             photo = mPhotoList.at(index.row());
@@ -62,30 +70,56 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
 
 void PhotoModel::loadImage(Photo& photo)
 {
-    QString key = QString::number(photo.id());
-    QImage  img = mPreviewCache->get(key);
+    PreviewCacheLoaderJob* plj = new PreviewCacheLoaderJob(photo);
 
-    if (!img.isNull())
+    plj->connect(plj, &PreviewCacheLoaderJob::imageReady,
+        this, &PhotoModel::previewReady);
+    mThreadQueue->addJob(plj);
+}
+
+void PhotoModel::previewReady(Photo photo, const QImage& image)
+{
+    if (!image.isNull())
     {
-        photo.setLibraryPreview(img);
-        photo.setOriginal(img);
+        photo.setIsDownloading(true);
+        photo.setLibraryPreview(image);
+        photo.setOriginal(image);
+
+        ColorTransformJob* cfj = new ColorTransformJob(photo);
+
+        // convert the image to sRGB
+        cfj->connect(cfj, &ColorTransformJob::imageReady,
+            this, &PhotoModel::imageTranslated);
+        mThreadQueue->addJob(cfj);
     }
     else if (!photo.isDownloading())
     {
         // load image in background thread.
         // add to thread queue so that only 1 instance of Halide runs
         photo.setIsDownloading(true);
-        mLoader->addJob(QVariant::fromValue<Photo>(photo),
-            photo.srcImagePath());
+        PreviewGeneratorJob* il = new PreviewGeneratorJob(photo);
+        il->connect(il, &PreviewGeneratorJob::imageReady,
+            this, &PhotoModel::imageLoaded);
+        mThreadQueue->addJob(il);
     }
 }
 
-void PhotoModel::imageLoaded(const QVariant& ref, const QImage& image)
+void PhotoModel::imageTranslated(Photo photo, const QImage& image)
+{
+    photo.setLibraryPreviewsRGB(image);
+
+    // find the index for this photo.
+    QVector<int> roles;
+    emit         dataChanged(mPhotoIndexMap.value(photo.id()),
+        mPhotoIndexMap.value(photo.id()), roles);
+
+    photo.setIsDownloading(false);
+}
+
+void PhotoModel::imageLoaded(Photo photo, const QImage& image)
 {
     if (image.isNull())
         return;
-
-    Photo photo = ref.value<Photo>();
 
     // get actual width x height & store in db.
     photo.exifInfo().width  = image.width();
@@ -97,19 +131,20 @@ void PhotoModel::imageLoaded(const QVariant& ref, const QImage& image)
 
     QString key = QString::number(photo.id());
 
-    mPreviewCache->put(key, preview);
+    PreviewCache::globalCache()->put(key, preview);
 
     // TODO: original = null
     photo.setLibraryPreview(preview);
-    photo.setIsDownloading(false);
 
-    // find the index for this photo.
-    QVector<int> roles;
-    emit         dataChanged(mPhotoIndexMap.value(photo.id()),
-        mPhotoIndexMap.value(photo.id()), roles);
+    ColorTransformJob* cfj = new ColorTransformJob(photo);
+
+    // convert the image to sRGB
+    cfj->connect(cfj, &ColorTransformJob::imageReady,
+        this, &PhotoModel::imageTranslated);
+    mThreadQueue->addJob(cfj);
 }
 
-void PhotoModel::onReloadPhotos(PhotoModel::SourceType source,
+void PhotoModel::onPhotoSourceChanged(PhotoModel::SourceType source,
     long long pathId)
 {
     beginResetModel();
