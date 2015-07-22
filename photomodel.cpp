@@ -80,7 +80,8 @@ void PhotoModel::loadImage(Photo& photo)
 
     plj->connect(plj, &PreviewCacheLoaderJob::imageReady,
         this, &PhotoModel::previewLoaded);
-    mThreadQueue->addJob(plj);
+    uint32_t id = mThreadQueue->addJob(plj);
+    mRunningThreads.insert(photo.id(), id);
 }
 
 void PhotoModel::convertImage(Photo& photo)
@@ -94,7 +95,8 @@ void PhotoModel::convertImage(Photo& photo)
     // convert the image to sRGB
     cfj->connect(cfj, &ColorTransformJob::imageReady,
         this, &PhotoModel::imageTranslated);
-    mThreadQueue->addJob(cfj);
+    uint32_t id = mThreadQueue->addJob(cfj);
+    mRunningThreads.insert(photo.id(), id);
 }
 
 void PhotoModel::previewLoaded(Photo photo, const QImage& image)
@@ -110,7 +112,9 @@ void PhotoModel::previewLoaded(Photo photo, const QImage& image)
         // convert the image to sRGB
         cfj->connect(cfj, &ColorTransformJob::imageReady,
             this, &PhotoModel::imageTranslated);
-        mThreadQueue->addJob(cfj);
+        uint32_t id = mThreadQueue->addJob(cfj);
+
+        mRunningThreads.insert(photo.id(), id);
     }
     else
     {
@@ -119,23 +123,9 @@ void PhotoModel::previewLoaded(Photo photo, const QImage& image)
         PreviewGeneratorJob* il = new PreviewGeneratorJob(photo);
         il->connect(il, &PreviewGeneratorJob::imageReady,
             this, &PhotoModel::previewGenerated);
-        mThreadQueue->addJob(il);
+        uint32_t id = mThreadQueue->addJob(il);
+        mRunningThreads.insert(photo.id(), id);
     }
-}
-
-void PhotoModel::imageTranslated(Photo photo, const QImage& image)
-{
-    if (!image.isNull())
-    {
-        photo.setLibraryPreviewsRGB(image);
-
-        // find the index for this photo.
-        QVector<int> roles;
-        emit         dataChanged(mPhotoIndexMap.value(photo.id()),
-            mPhotoIndexMap.value(photo.id()), roles);
-    }
-
-    photo.setIsDownloading(false);
 }
 
 void PhotoModel::previewGenerated(Photo photo, const QImage& image)
@@ -143,6 +133,7 @@ void PhotoModel::previewGenerated(Photo photo, const QImage& image)
     if (image.isNull())
     {
         photo.setIsDownloading(false);
+        mRunningThreads.remove(photo.id());
         return;
     }
 
@@ -166,7 +157,23 @@ void PhotoModel::previewGenerated(Photo photo, const QImage& image)
     // convert the image to sRGB
     cfj->connect(cfj, &ColorTransformJob::imageReady,
         this, &PhotoModel::imageTranslated);
-    mThreadQueue->addJob(cfj);
+    uint32_t id = mThreadQueue->addJob(cfj);
+    mRunningThreads.insert(photo.id(), id);
+}
+
+void PhotoModel::imageTranslated(Photo photo, const QImage& image)
+{
+    if (!image.isNull())
+    {
+        photo.setLibraryPreviewsRGB(image);
+
+        // find the index for this photo.
+        QVector<int> roles;
+        emit         dataChanged(mPhotoIndexMap.value(photo.id()),
+            mPhotoIndexMap.value(photo.id()), roles);
+    }
+    mRunningThreads.remove(photo.id());
+    photo.setIsDownloading(false);
 }
 
 void PhotoModel::onPhotoSourceChanged(PhotoModel::SourceType source,
@@ -175,7 +182,7 @@ void PhotoModel::onPhotoSourceChanged(PhotoModel::SourceType source,
     beginResetModel();
 
     // cancel all running jobs
-    mThreadQueue->cancel();
+    mThreadQueue->purgeKeep();
 
     if (source == SourceFiles)
     {
@@ -202,9 +209,31 @@ void PhotoModel::onVisibleTilesChanged(const QModelIndex& start,
     const QModelIndex& end)
 {
     qDebug() << "PhotoModel::onVisibleTilesChanged" << start.row() << "-" <<
-            end.row();
+        end.row();
     // only cancel jobs that are not visible
-    mThreadQueue->cancel();
+    QList<uint32_t> idList;
+
+    if (start.row() > 0 && end.row() > 0)
+    {
+        for (int i = start.row(); i <= end.row(); i++)
+        {
+            Photo p = mPhotoList.at(i);
+            // TODO: race condition here. the value could be gone
+            // between the check and reading it.
+            uint32_t id = mRunningThreads.value(p.id());
+
+            if (id > 0) // if it is 0 it has already completed. 0 is not a valid thread id
+                idList.append(id);
+        }
+
+        if (!idList.isEmpty())
+        {
+            qDebug() << "Will keep:" << idList;
+            qDebug() << "Active running:" << mRunningThreads.values();
+
+            mThreadQueue->purgeKeep(idList);
+        }
+    }
 }
 
 bool PComp(const Photo& a, const Photo& b)
@@ -221,8 +250,7 @@ void PhotoModel::refreshData(const QList<Photo>& list )
 void PhotoModel::addData(const QList<long long>& idList)
 {
     // figure out what was changed, what is new and what has been added
-    int start = rowCount(QModelIndex());
-
+    int          start = rowCount(QModelIndex());
 
     QList<Photo> list = mWorkUnit->getPhotosById(idList);
     beginInsertRows(QModelIndex(), start, list.size() - 1);

@@ -23,10 +23,14 @@ class Runnable
         void setName(const QString& name);
         const QString& name() const;
 
+        void setId(uint32_t id);
+        uint32_t id() const;
+
     private:
 
-        bool    mAutoDelete;
-        QString mName;
+        bool     mAutoDelete;
+        QString  mName;
+        uint32_t mId;
 };
 }
 #endif // PHOTOSTAGE_RUNNABLE

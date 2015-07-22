@@ -14,7 +14,8 @@ void ResultForwarder::onFinished(Runnable* runnable, const QVariant& result)
 
 ThreadQueue::ThreadQueue() :
     QObject(NULL),
-    mThread(this)
+    mThread(this),
+    mLastId(1)
 {
     //qDebug() << "worker thread " << mModelIndex.row() <<" created";
 }
@@ -22,25 +23,24 @@ ThreadQueue::ThreadQueue() :
 ThreadQueue::~ThreadQueue()
 {
     //qDebug() << "worker thread " << mModelIndex.row() <<" deleted";
-    cancel();
+    purgeKeep();
 }
 
-void ThreadQueue::addJob(Runnable* runnable)
+uint32_t ThreadQueue::addJob(Runnable* runnable)
 {
-    // TODO: these two lines should be atomic
-
     mMutexJobs.lock();
     mJobs.enqueue(runnable);
+    runnable->setId(++mLastId);
     //qDebug() << "Added queue size:" << mJobs.size();
     mMutexJobs.unlock();
 
-    // Make sure our object(ThreadQueue)
-    // is running in its own thread.
     bool hasMoved = thread() == &mThread;
     //qDebug() << "Queue has moved" << (hasMoved ? "yes" : "no");
 
     if (!hasMoved)
     {
+        // Make sure our object(ThreadQueue)
+        // is running in its own thread.
         moveToThread(&mThread);
 
         connect(&mThread, &QThread::started,
@@ -53,25 +53,13 @@ void ThreadQueue::addJob(Runnable* runnable)
     //qDebug() << "Starting thread";
     // calling run twice is not a problem
     mThread.start();
+    return mLastId;
 }
 
 void ThreadQueue::onStarted()
 {
-    QThread* t = thread();
-
-    if (t->isFinished())
-    {
-        qDebug() << "Not running because finished";
-        return;
-    }
-
-    if (t->isInterruptionRequested())
-    {
-        qDebug() << "Not running because interrupt requested";
-        return;
-    }
-
     Runnable* r;
+
     // qDebug() << "has started";
 
     while ((r = hasMore()) != NULL)
@@ -80,10 +68,10 @@ void ThreadQueue::onStarted()
         QVariant result = r->run();
         emit     finished(r, result);
     }
-    t->quit();
+    thread()->quit();
 }
 
-void ThreadQueue::cancel()
+void ThreadQueue::purgeKeep()
 {
     //qDebug() << "Clearing jobs";
     mMutexJobs.lock();
@@ -91,6 +79,26 @@ void ThreadQueue::cancel()
     r->cancel();
     qDeleteAll(mJobs);
     mJobs.clear();
+    mMutexJobs.unlock();
+}
+
+void ThreadQueue::purgeKeep(const QList<uint32_t>& list)
+{
+    if (list.isEmpty())
+        return;
+
+    mMutexJobs.lock();
+    qDebug() << "Searching for jobs to cancel";
+    foreach(Runnable * r, mJobs)
+    {
+        if (!list.contains(r->id()))
+        {
+            qDebug() << "Cancelling job" << r->id();
+            r->cancel();
+            mJobs.removeAll(r);
+            delete r;
+        }
+    }
     mMutexJobs.unlock();
 }
 

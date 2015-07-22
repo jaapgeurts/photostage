@@ -35,4 +35,14 @@ const QString& Runnable::name() const
 {
     return mName;
 }
+
+void Runnable::setId(uint32_t id)
+{
+    mId = id;
+}
+
+uint32_t Runnable::id() const
+{
+    return mId;
+}
 }

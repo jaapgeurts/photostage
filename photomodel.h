@@ -66,6 +66,7 @@ class PhotoModel : public QAbstractListModel
         // The mPhotoInfoList is the main container for the Photo Objects.
         QList<Photo>                  mPhotoList;
         QHash<long long, QModelIndex> mPhotoIndexMap;
+        QHash<long long, uint32_t>    mRunningThreads;
 
         void loadImage(Photo& photo);
         void convertImage(Photo& photo);

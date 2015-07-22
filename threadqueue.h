@@ -28,17 +28,19 @@ class ThreadQueue : public QObject
         explicit ThreadQueue();
         virtual ~ThreadQueue();
 
-        void addJob(Runnable* runnable);
+        uint32_t addJob(Runnable* runnable);
+        void purgeKeep(const QList<uint32_t> &list);
 
     signals:
 
         void finished(Runnable* runnable, const QVariant& result);
-       // void error(int code, QString error);
+
+        // void error(int code, QString error);
 
     public slots:
 
         void onStarted();
-        void cancel();
+        void purgeKeep();
 
     private:
 
@@ -46,6 +48,7 @@ class ThreadQueue : public QObject
         QQueue<Runnable*> mJobs;
         QThread           mThread;
         ResultForwarder   mResultForwarder;
+        uint32_t          mLastId;
 
         Runnable* hasMore();
 };
