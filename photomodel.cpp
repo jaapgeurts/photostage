@@ -182,7 +182,7 @@ void PhotoModel::onPhotoSourceChanged(PhotoModel::SourceType source,
     beginResetModel();
 
     // cancel all running jobs
-    mThreadQueue->purgeExcept();
+    mThreadQueue->cancel();
 
     if (source == SourceFiles)
     {

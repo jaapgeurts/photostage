@@ -97,13 +97,14 @@ class MainWindow : public QMainWindow
         void onPhotoModelRowsRemoved(const QModelIndex& parent,
             int start, int end);
         void onFilterApplied(const QString& filter);
+        void onPhotoSourceChanged(PhotoModel::SourceType type, long long id);
 
         void onShowGrid();
         void onShowLoupe();
 
-        void onTileDoubleClicked(const QModelIndex&);
+        void onTileDoubleClicked(const QModelIndex&);        
 
-    private:
+private:
 
         Ui::MainWindow*        ui;
         BackgroundTaskManager* mBackgroundTaskManager;

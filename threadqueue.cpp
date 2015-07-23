@@ -23,7 +23,7 @@ ThreadQueue::ThreadQueue() :
 ThreadQueue::~ThreadQueue()
 {
     //qDebug() << "worker thread " << mModelIndex.row() <<" deleted";
-    purgeExcept();
+    cancel();
 }
 
 uint32_t ThreadQueue::addJob(Runnable* runnable)
@@ -64,7 +64,7 @@ void ThreadQueue::onStarted()
 
     while ((r = hasMore()) != NULL)
     {
-        qDebug() << "executing next from list" << r->name();
+        //qDebug() << "executing next from list" << r->name();
         QVariant result = r->run();
         emit     finished(r, result);
     }

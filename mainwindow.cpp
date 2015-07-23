@@ -61,7 +61,7 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->splitter->setSizes(l);
 
     mSourceModel = new PhotoModel(this);
-    mPhotoModel = new QSortFilterProxyModel(this);
+    mPhotoModel  = new QSortFilterProxyModel(this);
     mPhotoModel->setSourceModel(mSourceModel);
 
     // setup PhotoModel connections
@@ -87,7 +87,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
     // setup connections
     connect(mLibrary, &Library::photoSourceChanged,
-        mSourceModel, &PhotoModel::onPhotoSourceChanged);
+        this, &MainWindow::onPhotoSourceChanged);
     connect(ui->actionLoupeInfoCycle, &QAction::triggered,
         mLibrary, &Library::onCycleLoupeInfo);
     connect(mLibrary, &Library::modelFilterApplied,
@@ -105,8 +105,8 @@ MainWindow::MainWindow(QWidget* parent) :
 
     connect(ui->filmStrip, &TileView::TileView::doubleClickTile,
         this, &MainWindow::onTileDoubleClicked);
-    connect(ui->filmStrip,&TileView::TileView::visibleTilesChanged,
-            mSourceModel,&PhotoModel::onVisibleTilesChanged);
+    connect(ui->filmStrip, &TileView::TileView::visibleTilesChanged,
+        mSourceModel, &PhotoModel::onVisibleTilesChanged);
 
     //***************
     // Create the DEVELOP MODULE
@@ -240,7 +240,7 @@ bool MainWindow::selectNext()
         if (index.row()  < mPhotoModel->rowCount(QModelIndex()) - 1)
         {
             newIndex = oldIndex + 1;
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex,0),
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex, 0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -263,7 +263,7 @@ bool MainWindow::selectPrevious()
         if (oldIndex > 0)
         {
             newIndex = oldIndex - 1;
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex,0),
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex, 0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -289,7 +289,7 @@ bool MainWindow::selectUp()
         {
             newIndex = oldIndex - tilesPerColRow;
 
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex,0),
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex, 0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -316,7 +316,7 @@ bool MainWindow::selectDown()
         {
             newIndex = oldIndex + tilesPerColRow;
 
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex,0),
+            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex, 0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -561,6 +561,14 @@ void MainWindow::onPhotoModelRowsRemoved(const QModelIndex& /*parent*/,
 
 void MainWindow::onFilterApplied(const QString& filter)
 {
+}
+
+void MainWindow::onPhotoSourceChanged(PhotoModel::SourceType type, long long id)
+{
+    mSourceModel->onPhotoSourceChanged(type, id);
+
+    mPhotoModel->setSortRole(Photo::DateTimeRole);
+    mPhotoModel->sort(0, Qt::AscendingOrder);
 }
 
 void MainWindow::onShowGrid()
