@@ -96,7 +96,7 @@ class MainWindow : public QMainWindow
             int start, int end);
         void onPhotoModelRowsRemoved(const QModelIndex& parent,
             int start, int end);
-        void onFilterApplied(const QString& filter);
+        void onFilterApplied(const PhotoFilterInfo &info);
         void onPhotoSourceChanged(PhotoModel::SourceType type, long long id);
 
         void onShowGrid();

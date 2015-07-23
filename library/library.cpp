@@ -54,8 +54,9 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
         this, &Library::customContextMenu);
     connect(ui->mClvPhotos, &TileView::TileView::doubleClickTile,
         this, &Library::onTileDoubleClicked);
-    connect(ui->mClvPhotos,&TileView::TileView::visibleTilesChanged,
-            (PhotoModel*)mPhotoModel->sourceModel(),&PhotoModel::onVisibleTilesChanged);
+    connect(ui->mClvPhotos, &TileView::TileView::visibleTilesChanged,
+        (PhotoModel*)mPhotoModel->sourceModel(),
+        &PhotoModel::onVisibleTilesChanged);
 
     // These models are auto deleted by the QObject hierarchy
     ui->mClvPhotos->setModel(mPhotoModel);
@@ -358,11 +359,13 @@ void Library::onSortOrderChanged()
 {
     Qt::SortOrder order = mPhotoModel->sortOrder();
 
-    if (order == Qt::AscendingOrder) {
+    if (order == Qt::AscendingOrder)
+    {
         mPhotoModel->sort(0, Qt::DescendingOrder);
         ui->pbSortOrder->setText("↓");
     }
-    else {
+    else
+    {
         mPhotoModel->sort(0, Qt::AscendingOrder);
         ui->pbSortOrder->setText("↑");
     }

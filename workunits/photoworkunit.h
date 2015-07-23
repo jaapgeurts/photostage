@@ -25,8 +25,8 @@ class PhotoWorkUnit
         void removeKeywordsExcept(const QStringList& words,
             const QList<Photo>& list);
 
-        QMap<QString,
-        int> getPhotoKeywords(const QList<Photo>& list) const;
+        QMap<QString, int>getPhotoKeywordsCount(const QList<Photo>& list) const;
+        QStringList getPhotoKeywords(const Photo& photo) const;
 
         // Photo Items are created here.
         // ownership is transferred to the caller who should call delete on the objects

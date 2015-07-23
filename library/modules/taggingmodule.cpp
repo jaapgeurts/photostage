@@ -106,7 +106,7 @@ void TaggingModule::setPhotos(const QList<Photo>& list)
     PhotoWorkUnit* workUnit = PhotoWorkUnit::instance();
 
     // <keyword,count>
-    QMap<QString, int>         words = workUnit->getPhotoKeywords(list);
+    QMap<QString, int>         words = workUnit->getPhotoKeywordsCount(list);
 
     int                        count = list.size();
 

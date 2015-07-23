@@ -98,7 +98,8 @@ SOURCES += \
     jobs/colortransformjob.cpp \
     jobs/previewgeneratorjob.cpp \
     jobs/previewcacheloaderjob.cpp \
-    photosortfilterproxymodel.cpp
+    photosortfilterproxymodel.cpp \
+    nullable.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -178,7 +179,9 @@ HEADERS  += \
     jobs/colortransformjob.h \
     jobs/previewgeneratorjob.h \
     jobs/previewcacheloaderjob.h \
-    photosortfilterproxymodel.h
+    photosortfilterproxymodel.h \
+    nullable.h \
+    photofilterinfo.h
 
 FORMS    += \
     mainwindow.ui \
@@ -192,7 +195,8 @@ FORMS    += \
     preferencesdialog.ui \
     timeadjustdialog.ui \
     widgets/backgroundtaskprogress.ui \
-    library/modules/metadatamodule.ui
+    library/modules/metadatamodule.ui \
+    library/modules/filtermodule.ui
 
 DISTFILES += \
     Info.plist

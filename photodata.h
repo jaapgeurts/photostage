@@ -48,6 +48,9 @@ class PhotoData
         void setIsDownloading(bool value);
         bool isDownloading() const;
 
+        void setKeywords(const QStringList& list);
+        QStringList keywords() const;
+
     private:
 
         long long         mId;
@@ -62,6 +65,7 @@ class PhotoData
         ExifInfo          mExifInfo;
         PhotoModel*       mOwner;
         bool              mIsDownloading;
+        QStringList       mKeywords;
 };
 }
 

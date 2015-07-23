@@ -145,6 +145,16 @@ bool Photo::isDownloading() const
     return d->isDownloading();
 }
 
+void Photo::setKeywords(const QStringList &list)
+{
+    d->setKeywords(list);
+}
+
+QStringList Photo::keywords() const
+{
+    return d->keywords();
+}
+
 void Photo::setOwner(PhotoModel* model)
 {
     d->setOwner(model);

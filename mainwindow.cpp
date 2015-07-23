@@ -572,9 +572,9 @@ void MainWindow::onPhotoModelRowsRemoved(const QModelIndex& /*parent*/,
     updateInformationBar();
 }
 
-void MainWindow::onFilterApplied(const QString& filter)
+void MainWindow::onFilterApplied(const PhotoFilterInfo& info)
 {
-    mPhotoModelProxy->setFilter(filter);
+    mPhotoModelProxy->setFilter(info);
 }
 
 void MainWindow::onPhotoSourceChanged(PhotoModel::SourceType type, long long id)

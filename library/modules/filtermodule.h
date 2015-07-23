@@ -1,9 +1,13 @@
-#ifndef FILTERMODULE_H
-#define FILTERMODULE_H
-
-#include <QLineEdit>
+#ifndef PHOTOSTAGE_FILTERMODULE_H
+#define PHOTOSTAGE_FILTERMODULE_H
 
 #include "librarymodule.h"
+#include "photofilterinfo.h"
+
+namespace Ui
+{
+class FilterModule;
+}
 
 namespace PhotoStage
 {
@@ -15,17 +19,29 @@ class FilterModule : public LibraryModule
 
         FilterModule(QWidget* parent = 0);
 
+    public slots:
+
+        void onFlagNoneClicked();
+        void onFlagPickedClicked();
+        void onFlagRejectedClicked();
+
+        void onRating0Clicked();
+        void onRating1Clicked();
+        void onRating2Clicked();
+        void onRating3Clicked();
+        void onRating4Clicked();
+        void onRating5Clicked();
+        void onKeywordsEntered();
+
     signals:
 
-        void modelFilterApplied(const QString& filter);
-
-    private slots:
-
-        void onApplyFilter();
+        void modelFilterApplied(const PhotoFilterInfo& filter);
 
     private:
 
-        QLineEdit* mLineEdit;
+        Ui::FilterModule* ui;
+        PhotoFilterInfo   mFilterInfo;
+        QString           mOldText;
 };
 }
-#endif // FILTERMODULE_H
+#endif // PHOTOSTAGE_FILTERMODULE_H

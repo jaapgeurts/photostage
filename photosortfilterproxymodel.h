@@ -4,6 +4,8 @@
 #include <QSortFilterProxyModel>
 #include <QHash>
 
+#include "photofilterinfo.h"
+
 namespace PhotoStage
 {
 class PhotoSortFilterProxyModel : public QSortFilterProxyModel
@@ -12,7 +14,7 @@ class PhotoSortFilterProxyModel : public QSortFilterProxyModel
 
         PhotoSortFilterProxyModel(QObject* parent = 0);
 
-        void setFilter(const QString& filter);
+        void setFilter(const PhotoFilterInfo& info);
 
     protected:
 
@@ -21,7 +23,7 @@ class PhotoSortFilterProxyModel : public QSortFilterProxyModel
 
     private:
 
-        QHash<QString, bool> mFilter;
+        PhotoFilterInfo mFilterInfo;
 };
 }
 #endif // PHOTOSTAGE_PHOTOSORTFILTERPROXYMODEL_H

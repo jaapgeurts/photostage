@@ -44,7 +44,7 @@ class Library : public Module
     signals:
 
         void photoSourceChanged(PhotoModel::SourceType type, long long id);
-        void modelFilterApplied(const QString& filter);
+        void modelFilterApplied(const PhotoFilterInfo& info);
 
     public slots:
 

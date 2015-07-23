@@ -77,6 +77,9 @@ class Photo
         void setIsDownloading(bool value);
         bool isDownloading() const;
 
+        void setKeywords(const QStringList& list);
+        QStringList keywords() const;
+
         void setOwner(PhotoModel* model);
 
     private:

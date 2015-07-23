@@ -193,8 +193,9 @@ void PhotoWorkUnit::removeKeywordsExcept(const QStringList& words,
     }
 }
 
-QMap<QString,
-int> PhotoWorkUnit::getPhotoKeywords(const QList<Photo>& list) const
+// return keywords for the selected photos, and the count each keyword appears
+QMap<QString, int>
+PhotoWorkUnit::getPhotoKeywordsCount(const QList<Photo>& list) const
 {
     QSqlQuery q;
     QString   query =
@@ -206,7 +207,9 @@ int> PhotoWorkUnit::getPhotoKeywords(const QList<Photo>& list) const
     Photo     info;
 
     foreach(info, list)
-    photo_ids += QString::number(info.id()) + ",";
+    {
+        photo_ids += QString::number(info.id()) + ",";
+    }
     photo_ids.chop(1);
     query.replace(":photo_ids", photo_ids);
 
@@ -223,6 +226,30 @@ int> PhotoWorkUnit::getPhotoKeywords(const QList<Photo>& list) const
         dict.insert(q.value(0).toString(), q.value(1).toInt());
     }
     return dict;
+}
+
+QStringList PhotoWorkUnit::getPhotoKeywords(const Photo& photo) const
+{
+    QSqlQuery q;
+
+    q.prepare(
+        "select k.keyword\
+            from keyword k, photo_keyword pk on k.id = pk.keyword_id \
+            where pk.photo_id = :photo_id ");
+    q.bindValue(":photo_id", photo.id());
+
+    if (!q.exec())
+    {
+        qDebug() << q.lastError();
+        qDebug() << q.lastQuery();
+    }
+    QStringList list;
+
+    while (q.next())
+    {
+        list << q.value(0).toString();
+    }
+    return list;
 }
 
 QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
@@ -264,7 +291,9 @@ QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
 
     while (q.next())
     {
-        list.append(Photo(q));
+        Photo p(q);
+        p.setKeywords(getPhotoKeywords(p));
+        list.append(p);
     }
     return list;
 }
@@ -325,7 +354,9 @@ QList<Photo> PhotoWorkUnit::getPhotosByPath(long long path_id,
 
     while (q.next())
     {
-        list.append(Photo(q));
+        Photo p(q);
+        p.setKeywords(getPhotoKeywords(p));
+        list.append(p);
     }
     return list;
 }

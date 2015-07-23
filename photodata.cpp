@@ -181,4 +181,14 @@ bool PhotoData::isDownloading() const
 {
     return mIsDownloading;
 }
+
+void PhotoData::setKeywords(const QStringList &list)
+{
+    mKeywords = list;
+}
+
+QStringList PhotoData::keywords() const
+{
+    return mKeywords;
+}
 }
