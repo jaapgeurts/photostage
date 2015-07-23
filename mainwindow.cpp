@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget* parent) :
 {
     QApplication::setFont(QFont(QString("verdana"), 10));
 
+
     ui->setupUi(this);
 
     mDatabaseAccess = new DatabaseAccess();
@@ -60,19 +61,19 @@ MainWindow::MainWindow(QWidget* parent) :
     }
     ui->splitter->setSizes(l);
 
-    mSourceModel = new PhotoModel(this);
-    mPhotoModel  = new QSortFilterProxyModel(this);
-    mPhotoModel->setSourceModel(mSourceModel);
+    mSourceModel     = new PhotoModel(this);
+    mPhotoModelProxy = new PhotoSortFilterProxyModel(this);
+    mPhotoModelProxy->setSourceModel(mSourceModel);
 
     // setup PhotoModel connections
-    connect(mPhotoModel, &PhotoModel::modelReset,
+    connect(mPhotoModelProxy, &PhotoModel::modelReset,
         this, &MainWindow::onModelReset);
-    connect(mPhotoModel, &PhotoModel::rowsInserted,
+    connect(mPhotoModelProxy, &PhotoModel::rowsInserted,
         this, &MainWindow::onPhotoModelRowsInserted);
-    connect(mPhotoModel, &PhotoModel::rowsRemoved,
+    connect(mPhotoModelProxy, &PhotoModel::rowsRemoved,
         this, &MainWindow::onPhotoModelRowsRemoved);
 
-    mPhotoSelection = new QItemSelectionModel(mPhotoModel, this);
+    mPhotoSelection = new QItemSelectionModel(mPhotoModelProxy, this);
     // set up connections
     connect(mPhotoSelection, &QItemSelectionModel::selectionChanged,
         this, &MainWindow::onSelectionChanged);
@@ -81,7 +82,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
     //**************
     // create the LIBRARY MODULE
-    mLibrary = new Library(mPhotoModel, this);
+    mLibrary = new Library(mPhotoModelProxy, this);
     mLibrary->setSelectionModel(mPhotoSelection);
     ui->stackedWidget->addWidget(mLibrary);
 
@@ -93,7 +94,7 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(mLibrary, &Library::modelFilterApplied,
         this, &MainWindow::onFilterApplied);
 
-    ui->filmStrip->setModel(mPhotoModel);
+    ui->filmStrip->setModel(mPhotoModelProxy);
     FilmstripTile* fsTile = new FilmstripTile(ui->filmStrip);
     ui->filmStrip->setTileFlyweight(fsTile);
     ui->filmStrip->setMinimumCellHeight(80);
@@ -115,7 +116,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
     // ***************
     // Create the MAP MODULE
-    mMap = new Map(mPhotoModel, this);
+    mMap = new Map(mPhotoModelProxy, this);
     ui->stackedWidget->addWidget(mMap);
     mMap->setSelectionModel(mPhotoSelection);
 
@@ -172,6 +173,7 @@ MainWindow::~MainWindow()
 {
     //QDesktopWidget * desktop = QApplication::desktop();
     QSettings settings;
+
 
     settings.beginGroup("mainwindow");
 
@@ -237,10 +239,11 @@ bool MainWindow::selectNext()
         int oldIndex = index.row();
         int newIndex = oldIndex;
 
-        if (index.row()  < mPhotoModel->rowCount(QModelIndex()) - 1)
+        if (index.row()  < mPhotoModelProxy->rowCount(QModelIndex()) - 1)
         {
             newIndex = oldIndex + 1;
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex, 0),
+            mPhotoSelection->setCurrentIndex(mPhotoModelProxy->index(newIndex,
+                0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -263,7 +266,8 @@ bool MainWindow::selectPrevious()
         if (oldIndex > 0)
         {
             newIndex = oldIndex - 1;
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex, 0),
+            mPhotoSelection->setCurrentIndex(mPhotoModelProxy->index(newIndex,
+                0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -289,7 +293,8 @@ bool MainWindow::selectUp()
         {
             newIndex = oldIndex - tilesPerColRow;
 
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex, 0),
+            mPhotoSelection->setCurrentIndex(mPhotoModelProxy->index(newIndex,
+                0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -312,11 +317,12 @@ bool MainWindow::selectDown()
         int tilesPerColRow = mLibrary->tilesPerRowOrCol();
 
         if (oldIndex <
-            mPhotoModel->rowCount(QModelIndex()) - tilesPerColRow)
+            mPhotoModelProxy->rowCount(QModelIndex()) - tilesPerColRow)
         {
             newIndex = oldIndex + tilesPerColRow;
 
-            mPhotoSelection->setCurrentIndex(mPhotoModel->index(newIndex, 0),
+            mPhotoSelection->setCurrentIndex(mPhotoModelProxy->index(newIndex,
+                0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -371,10 +377,11 @@ void MainWindow::onModeMapClicked()
 
 void MainWindow::onSelectAll()
 {
-    int            c           = mPhotoModel->rowCount(QModelIndex());
-    QModelIndex    topLeft     = mPhotoModel->index(0, 0);
-    QModelIndex    bottomRight = mPhotoModel->index(c - 1, 0);
+    int            c           = mPhotoModelProxy->rowCount(QModelIndex());
+    QModelIndex    topLeft     = mPhotoModelProxy->index(0, 0);
+    QModelIndex    bottomRight = mPhotoModelProxy->index(c - 1, 0);
     QItemSelection selection (topLeft, bottomRight);
+
 
     mPhotoSelection->select(selection, QItemSelectionModel::Select);
 }
@@ -388,6 +395,7 @@ void MainWindow::onActionImportTriggered()
 {
     ImportDialog* importDialog = new ImportDialog(this);
     int           resultCode   = importDialog->exec();
+
 
     if (resultCode == QDialog::Accepted)
     {
@@ -405,6 +413,7 @@ void MainWindow::onActionAboutTriggered()
 {
     AboutDialog* aboutDialog = new AboutDialog(this);
 
+
     /*int code = */ aboutDialog->exec();
     delete aboutDialog;
 }
@@ -413,6 +422,7 @@ void MainWindow::onActionEditTimeTriggered()
 {
     TimeAdjustDialog* timeAdjustDialog = new TimeAdjustDialog(this);
 
+
     /*int code = */ timeAdjustDialog->exec();
     delete timeAdjustDialog;
 }
@@ -420,6 +430,7 @@ void MainWindow::onActionEditTimeTriggered()
 void MainWindow::onActionPreferences()
 {
     PreferencesDialog prefs(this);
+
 
     prefs.exec();
 }
@@ -509,6 +520,7 @@ void MainWindow::onActionLightsOff()
     //w->showFullScreen();
     QDesktopWidget* d = QApplication::desktop();
 
+
     for (int i = 0; i < d->screenCount(); i++)
     {
         qDebug() << "Lights off on screen:" << i;
@@ -530,6 +542,7 @@ void MainWindow::onActionLightsOff()
 void MainWindow::importFinished(BackgroundTask* task)
 {
     ImportBackgroundTask* t = static_cast<ImportBackgroundTask*>(task);
+
 
     mSourceModel->addData(t->resultList());
 
@@ -561,14 +574,15 @@ void MainWindow::onPhotoModelRowsRemoved(const QModelIndex& /*parent*/,
 
 void MainWindow::onFilterApplied(const QString& filter)
 {
+    mPhotoModelProxy->setFilter(filter);
 }
 
 void MainWindow::onPhotoSourceChanged(PhotoModel::SourceType type, long long id)
 {
     mSourceModel->onPhotoSourceChanged(type, id);
 
-    mPhotoModel->setSortRole(Photo::DateTimeRole);
-    mPhotoModel->sort(0, Qt::AscendingOrder);
+    mPhotoModelProxy->setSortRole(Photo::DateTimeRole);
+    mPhotoModelProxy->sort(0, Qt::AscendingOrder);
 }
 
 void MainWindow::onShowGrid()
@@ -588,11 +602,12 @@ void MainWindow::onShowLoupe()
 void MainWindow::updateInformationBar()
 {
     QString info;
-    int     count    = mPhotoModel->rowCount(QModelIndex());
+    int     count    = mPhotoModelProxy->rowCount(QModelIndex());
     int     selCount = mPhotoSelection->selectedIndexes().size();
 
     QString imagePath;
     Photo   photo = currentPhoto();
+
 
     if (!photo.isNull())
         imagePath = " " + photo.srcImagePath();
@@ -602,7 +617,7 @@ void MainWindow::updateInformationBar()
 
 Photo MainWindow::currentPhoto()
 {
-    return mPhotoModel->data(mPhotoSelection->currentIndex(),
+    return mPhotoModelProxy->data(mPhotoSelection->currentIndex(),
                TileView::TileView::ImageRole).value<Photo>();
 }
 
@@ -611,7 +626,7 @@ void MainWindow::setRating(int rating)
     QList<Photo>    list;
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
-    list.append(mPhotoModel->data(index,
+    list.append(mPhotoModelProxy->data(index,
         TileView::TileView::ImageRole).value<Photo>());
     mPhotoWorkUnit->setRating(list, rating);
     QVector<int> roles;
@@ -624,7 +639,7 @@ void MainWindow::setFlag(Photo::Flag flag)
     QList<Photo>    list;
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
-    list.append(mPhotoModel->data(index,
+    list.append(mPhotoModelProxy->data(index,
         TileView::TileView::ImageRole).value<Photo>());
 
     mPhotoWorkUnit->setFlag(list, flag);
@@ -638,7 +653,7 @@ void MainWindow::setColorLabel(Photo::ColorLabel color)
     QList<Photo>    list;
     QModelIndexList indexes = mPhotoSelection->selectedIndexes();
     foreach (QModelIndex index, indexes)
-    list.append(mPhotoModel->data(index,
+    list.append(mPhotoModelProxy->data(index,
         TileView::TileView::ImageRole).value<Photo>());
 
     mPhotoWorkUnit->setColorLabel(list, color);

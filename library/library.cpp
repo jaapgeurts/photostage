@@ -11,7 +11,7 @@
 
 namespace PhotoStage
 {
-Library::Library(QSortFilterProxyModel* const model, QWidget* parent) :
+Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     Module(parent),
     ui(new Ui::Library),
     mPhotoModel(model),

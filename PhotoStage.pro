@@ -97,7 +97,8 @@ SOURCES += \
     runnable.cpp \
     jobs/colortransformjob.cpp \
     jobs/previewgeneratorjob.cpp \
-    jobs/previewcacheloaderjob.cpp
+    jobs/previewcacheloaderjob.cpp \
+    photosortfilterproxymodel.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -176,7 +177,8 @@ HEADERS  += \
     runnable.h \
     jobs/colortransformjob.h \
     jobs/previewgeneratorjob.h \
-    jobs/previewcacheloaderjob.h
+    jobs/previewcacheloaderjob.h \
+    photosortfilterproxymodel.h
 
 FORMS    += \
     mainwindow.ui \

@@ -4,7 +4,6 @@
 #include <QMainWindow>
 #include <QActionGroup>
 #include <QPoint>
-#include <QSortFilterProxyModel>
 
 // modules
 #include "module.h"
@@ -14,6 +13,7 @@
 #include "cartography/map.h"
 #include "databaseaccess.h"
 #include "backgroundtaskmanager.h"
+#include "photosortfilterproxymodel.h"
 
 namespace Ui
 {
@@ -102,23 +102,23 @@ class MainWindow : public QMainWindow
         void onShowGrid();
         void onShowLoupe();
 
-        void onTileDoubleClicked(const QModelIndex&);        
+        void onTileDoubleClicked(const QModelIndex&);
 
-private:
+    private:
 
-        Ui::MainWindow*        ui;
-        BackgroundTaskManager* mBackgroundTaskManager;
-        DatabaseAccess*        mDatabaseAccess;
+        Ui::MainWindow*            ui;
+        BackgroundTaskManager*     mBackgroundTaskManager;
+        DatabaseAccess*            mDatabaseAccess;
         // module ui pointers
-        Library*               mLibrary;
-        Develop*               mDevelop;
-        Map*                   mMap;
-        Module*                mCurrentModule;
-        QSortFilterProxyModel* mPhotoModel;
-        PhotoModel*            mSourceModel;
-        PhotoWorkUnit*         mPhotoWorkUnit;
-        QItemSelectionModel*   mPhotoSelection;
-        ActionStateGroup       mActionStatePhoto;
+        Library*                   mLibrary;
+        Develop*                   mDevelop;
+        Map*                       mMap;
+        Module*                    mCurrentModule;
+        PhotoSortFilterProxyModel* mPhotoModelProxy;
+        PhotoModel*                mSourceModel;
+        PhotoWorkUnit*             mPhotoWorkUnit;
+        QItemSelectionModel*       mPhotoSelection;
+        ActionStateGroup           mActionStatePhoto;
 
         //    QList<Photo> mCurrentSelection;
         void setRating(int rating);

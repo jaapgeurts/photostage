@@ -77,7 +77,9 @@ class TileView : public QWidget
 
     public slots:
 
-        void newRowsAvailable(const QModelIndex& parent, int first, int);
+        void onRowsInserted(const QModelIndex& parent, int, int);
+        void onRowsRemoved(const QModelIndex&, int, int);
+
         void updateCellContents(const QModelIndex& topleft,
             const QModelIndex& bottomright,
             const QVector<int>& roles);

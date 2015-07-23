@@ -80,7 +80,6 @@ QSize TileView::minimumSizeHint() const
 
     int colRowCount;
 
-
     if (mFixedColRowCount)
         colRowCount = mTilesPerColRow;
     else
@@ -245,7 +244,9 @@ void TileView::setModel(QAbstractItemModel* model)
     mSelectionModel = new QItemSelectionModel(mListModel, this);
 
     connect(model, &QAbstractItemModel::rowsInserted,
-        this, &TileView::newRowsAvailable);
+        this, &TileView::onRowsInserted);
+    connect(model, &QAbstractItemModel::rowsRemoved,
+        this, &TileView::onRowsRemoved);
     connect(model, &QAbstractItemModel::dataChanged,
         this, &TileView::updateCellContents);
     connect(model, &QAbstractItemModel::modelReset,
@@ -500,7 +501,6 @@ void TileView::wheelEvent(QWheelEvent* event)
     QPoint deltaP = event->pixelDelta();
     int    delta  = -deltaP.y();
 
-
     //    int steps = delta / 8 / 15;
     if (event->orientation() == Qt::Vertical)
     {
@@ -518,7 +518,6 @@ void TileView::wheelEvent(QWheelEvent* event)
 void TileView::mouseDoubleClickEvent(QMouseEvent* event)
 {
     int idx = posToIndex(event->pos());
-
 
     if (idx == -1)
         return;
@@ -542,7 +541,6 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
     QPoint pos = event->pos();
 
     int    idx = posToIndex(pos);
-
 
     if (idx == -1)
         return;
@@ -805,7 +803,6 @@ TileInfo TileView::createTileInfo(int index)
 {
     TileInfo info;
 
-
     info.index = -1;
 
     if (index != -1)
@@ -833,7 +830,6 @@ bool TileView::pointInCheckBox(const QPoint& coords) const
 {
     QPoint rel = mapToTile(coords);
 
-
     // check if the coords fall within the checkbox.
     return (rel.x() - 5 < 20 && rel.y() - 5 < 20);
 }
@@ -842,7 +838,6 @@ QPoint TileView::mapToTile(const QPoint& coords) const
 {
     // part of row out of viewport
     int rely, relx;
-
 
     if (mOrientation == Qt::Vertical)
     {
@@ -957,9 +952,15 @@ void TileView::setCheckBoxMode(bool mode)
     mIsCheckBoxMode = mode;
 }
 
-void TileView::newRowsAvailable(const QModelIndex& /*parent*/,
-    int /*first*/,
-    int /*last*/)
+void TileView::onRowsInserted(const QModelIndex& /*parent*/,
+    int /*first*/, int /*last*/)
+{
+    computeScrollBarValues();
+    update();
+}
+
+void TileView::onRowsRemoved(const QModelIndex& /*parent*/,
+    int /*first*/, int /*last*/)
 {
     computeScrollBarValues();
     update();
@@ -979,7 +980,6 @@ void TileView::onSelectionChanged(const QItemSelection& /*selected*/,
     const QItemSelection& /*deselected*/)
 {
     int newIndex = mSelectionModel->currentIndex().row();
-
 
     ensureTileVisible(newIndex);
 

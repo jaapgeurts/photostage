@@ -1,8 +1,6 @@
 #ifndef PHOTOSTAGE_LIBRARY_H
 #define PHOTOSTAGE_LIBRARY_H
 
-#include <QSortFilterProxyModel>
-
 #include "module.h"
 
 #include "photomodel.h"
@@ -16,6 +14,7 @@
 #include "modules/libraryhistogrammodule.h"
 #include "modules/metadatamodule.h"
 #include "widgets/fixedtreeview.h"
+#include "photosortfilterproxymodel.h"
 
 namespace Ui
 {
@@ -30,7 +29,7 @@ class Library : public Module
 
     public:
 
-        explicit Library(QSortFilterProxyModel* const model,
+        explicit Library(PhotoSortFilterProxyModel* const model,
             QWidget* parent = 0);
         ~Library();
 
@@ -83,16 +82,16 @@ class Library : public Module
 
     private:
 
-        Ui::Library*            ui;
-        QSortFilterProxyModel*  mPhotoModel;
-        PhotoWorkUnit*          mPhotoWorkUnit;
-        SqlPathModel*           mPathModel;
-        TaggingModule*          mKeywording;
-        LibraryHistogramModule* mHistogramModule;
-        MetaDataModule*         mMetaDataModule;
-        QFont                   mFontAccessFoundIcons;
-        Photo                   mCurrentPhoto;
-        FixedTreeView*          mTrvwFiles;
+        Ui::Library*               ui;
+        PhotoSortFilterProxyModel* mPhotoModel;
+        PhotoWorkUnit*             mPhotoWorkUnit;
+        SqlPathModel*              mPathModel;
+        TaggingModule*             mKeywording;
+        LibraryHistogramModule*    mHistogramModule;
+        MetaDataModule*            mMetaDataModule;
+        QFont                      mFontAccessFoundIcons;
+        Photo                      mCurrentPhoto;
+        FixedTreeView*             mTrvwFiles;
 };
 }
 
