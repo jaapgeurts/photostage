@@ -34,4 +34,9 @@ void ColorTransformJob::finished(QVariant result)
 void ColorTransformJob::error(const QString& error)
 {
 }
+
+void ColorTransformJob::cancel()
+{
+    mPhoto.setIsDownloading(false);
+}
 }

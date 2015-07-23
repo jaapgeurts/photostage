@@ -23,7 +23,7 @@ ThreadQueue::ThreadQueue() :
 ThreadQueue::~ThreadQueue()
 {
     //qDebug() << "worker thread " << mModelIndex.row() <<" deleted";
-    purgeKeep();
+    purgeExcept();
 }
 
 uint32_t ThreadQueue::addJob(Runnable* runnable)
@@ -71,9 +71,10 @@ void ThreadQueue::onStarted()
     thread()->quit();
 }
 
-void ThreadQueue::purgeKeep()
+void ThreadQueue::cancel()
 {
     //qDebug() << "Clearing jobs";
+    // cancel all running jobs
     mMutexJobs.lock();
     foreach(Runnable * r, mJobs)
     r->cancel();
@@ -82,18 +83,17 @@ void ThreadQueue::purgeKeep()
     mMutexJobs.unlock();
 }
 
-void ThreadQueue::purgeKeep(const QList<uint32_t>& list)
+void ThreadQueue::purgeExcept(const QList<uint32_t>& list)
 {
     if (list.isEmpty())
         return;
 
+    // cancel all jobs except the ones in the list
     mMutexJobs.lock();
-    qDebug() << "Searching for jobs to cancel";
     foreach(Runnable * r, mJobs)
     {
         if (!list.contains(r->id()))
         {
-            qDebug() << "Cancelling job" << r->id();
             r->cancel();
             mJobs.removeAll(r);
             delete r;

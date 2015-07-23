@@ -17,9 +17,10 @@ class PreviewCacheLoaderJob :   public QObject, public Runnable
 
         QVariant run();
         void finished(QVariant result);
-        void error(const QString& error);
+        void error(const QString& error);    
+        void cancel();
 
-    signals:
+signals:
 
         void imageReady(Photo photo, const QImage& image);
 

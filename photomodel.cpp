@@ -182,7 +182,7 @@ void PhotoModel::onPhotoSourceChanged(PhotoModel::SourceType source,
     beginResetModel();
 
     // cancel all running jobs
-    mThreadQueue->purgeKeep();
+    mThreadQueue->purgeExcept();
 
     if (source == SourceFiles)
     {
@@ -208,31 +208,29 @@ void PhotoModel::onPhotoSourceChanged(PhotoModel::SourceType source,
 void PhotoModel::onVisibleTilesChanged(const QModelIndex& start,
     const QModelIndex& end)
 {
-    qDebug() << "PhotoModel::onVisibleTilesChanged" << start.row() << "-" <<
-        end.row();
-    // only cancel jobs that are not visible
     QList<uint32_t> idList;
 
-    if (start.row() > 0 && end.row() > 0)
+    // bail if range is invalid
+    if (start.row() <= 0 || end.row() <= 0)
+        return;
+
+    // cancel jobs that are not visible
+    // by making a list of jobs that are currently in view.
+    for (int i = start.row(); i <= end.row(); i++)
     {
-        for (int i = start.row(); i <= end.row(); i++)
-        {
-            Photo p = mPhotoList.at(i);
-            // TODO: race condition here. the value could be gone
-            // between the check and reading it.
-            uint32_t id = mRunningThreads.value(p.id());
+        Photo p = mPhotoList.at(i);
+        // TODO: race condition here. the value could be gone
+        // between the check and reading it.
+        uint32_t id = mRunningThreads.value(p.id());
 
-            if (id > 0) // if it is 0 it has already completed. 0 is not a valid thread id
-                idList.append(id);
-        }
+        if (id > 0)     // if it is 0 it has already completed. 0 is not a valid thread id
+            idList.append(id);
+    }
 
-        if (!idList.isEmpty())
-        {
-            qDebug() << "Will keep:" << idList;
-            qDebug() << "Active running:" << mRunningThreads.values();
-
-            mThreadQueue->purgeKeep(idList);
-        }
+    if (!idList.isEmpty())
+    {
+        // then purge all jobs but keep the id's in the list.
+        mThreadQueue->purgeExcept(idList);
     }
 }
 

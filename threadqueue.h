@@ -29,7 +29,7 @@ class ThreadQueue : public QObject
         virtual ~ThreadQueue();
 
         uint32_t addJob(Runnable* runnable);
-        void purgeKeep(const QList<uint32_t> &list);
+        void purgeExcept(const QList<uint32_t>& list);
 
     signals:
 
@@ -40,7 +40,7 @@ class ThreadQueue : public QObject
     public slots:
 
         void onStarted();
-        void purgeKeep();
+        void cancel();
 
     private:
 

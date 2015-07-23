@@ -20,6 +20,7 @@ class ColorTransformJob  : public QObject, public Runnable
         QVariant run();
         void finished(QVariant result);
         void error(const QString& error);
+        void cancel();
 
     signals:
 
@@ -28,6 +29,8 @@ class ColorTransformJob  : public QObject, public Runnable
     private:
 
         Photo mPhoto;
+
+
 };
 }
 #endif // PHOTOSTAGE_COLORTRANSFORMJOB_H

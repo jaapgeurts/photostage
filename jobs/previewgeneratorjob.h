@@ -10,7 +10,6 @@
 #include "engine/colortransform.h"
 #include "external/rawspeed/RawSpeed/RawSpeed-API.h"
 
-
 namespace PhotoStage
 {
 class PreviewGeneratorJob : public QObject, public Runnable
@@ -28,6 +27,7 @@ class PreviewGeneratorJob : public QObject, public Runnable
         QVariant run();
         void finished(QVariant result);
         void error(const QString& error);
+        void cancel();
 
     signals:
 

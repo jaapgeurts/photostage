@@ -28,4 +28,10 @@ void PreviewCacheLoaderJob::finished(QVariant result)
 void PreviewCacheLoaderJob::error(const QString& error)
 {
 }
+
+void PreviewCacheLoaderJob::cancel()
+{
+    mPhoto.setIsDownloading(false);
+}
+
 }

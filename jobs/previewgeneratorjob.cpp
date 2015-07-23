@@ -94,6 +94,11 @@ void PreviewGeneratorJob::error(const QString& error)
     qDebug() << "Error during image load or gen thumb" << error;
 }
 
+void PreviewGeneratorJob::cancel()
+{
+    mPhoto.setIsDownloading(false);
+}
+
 QImage PreviewGeneratorJob::genThumb(const QString& path)
 {
     // TODO: catch errors and emit error(QString)
