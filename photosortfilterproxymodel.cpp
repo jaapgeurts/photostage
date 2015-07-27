@@ -18,29 +18,54 @@ bool PhotoSortFilterProxyModel::filterAcceptsRow(int source_row,
     bool flag    = false;
     bool rating  = false;
     bool keyword = false;
+    bool color   = false;
 
-    if (mFilterInfo.flagNone == mFilterInfo.flagPick == mFilterInfo.flagReject == false)
+    if (!mFilterInfo.flagNone && !mFilterInfo.flagPick && !mFilterInfo.flagReject)
     {
         flag = true; // user didn't select any flag. Take this as any flag
     }
     else
     { // check individual flags
-        if (mFilterInfo.flagPick == p.flag())
-            flag = true;
+        if (mFilterInfo.flagPick)
+            flag = p.flag() == Photo::FlagPick;
 
-        if (mFilterInfo.flagReject == p.flag())
-            flag = true;
+        if (mFilterInfo.flagReject)
+            flag = flag || p.flag() == Photo::FlagReject;
 
-        if (mFilterInfo.flagNone == p.flag()) // the item has no flag
-            flag = true;
+        if (mFilterInfo.flagNone)
+            flag = flag || p.flag() == Photo::FlagNone; // the item has no flag
+    }
+
+    if (!mFilterInfo.colorBlue && !mFilterInfo.colorGreen && !mFilterInfo.colorRed && !mFilterInfo.colorYellow)
+    {
+        color = true; // if no color selected, take this as all colors
+    }
+    else
+    {
+        //check individual colors
+        if (mFilterInfo.colorBlue)
+            color = p.colorLabel() == Photo::LabelBlue;
+
+        if (mFilterInfo.colorGreen)
+            color = color || p.colorLabel() == Photo::LabelGreen;
+
+        if (mFilterInfo.colorRed)
+            color = color || p.colorLabel() == Photo::LabelRed;
+
+        if (mFilterInfo.colorYellow)
+            color =  color || p.colorLabel() == Photo::LabelYellow;
+
+        if (mFilterInfo.colorPurple)
+            color = color || p.colorLabel() == Photo::LabelPurple;
+
+        if (mFilterInfo.colorOrange)
+            color = color || p.colorLabel() == Photo::LabelOrange;
     }
 
     if (mFilterInfo.rating == 0) // any rating
         rating = true;
     else if (mFilterInfo.rating == p.rating())
         rating = true;
-
-    return flag && rating;
 
     if (mFilterInfo.keywordsNone)
     {
@@ -62,7 +87,7 @@ bool PhotoSortFilterProxyModel::filterAcceptsRow(int source_row,
         }
         keyword = !illegalkw;
     }
-    return flag && rating && keyword;
+    return flag && color && rating && keyword;
 }
 
 void PhotoSortFilterProxyModel::setFilter(const PhotoFilterInfo& info)

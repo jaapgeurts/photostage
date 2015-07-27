@@ -23,6 +23,8 @@ class FilterModule : public LibraryModule
 
         void checkFlags();
 
+        void checkColors();
+
         void onRating0Clicked();
         void onRating1Clicked();
         void onRating2Clicked();

@@ -14,6 +14,8 @@ struct PhotoFilterInfo
     bool        colorGreen;
     bool        colorBlue;
     bool        colorYellow;
+    bool        colorPurple;
+    bool        colorOrange;
     int         rating;
     bool        keywordsNone;
     QStringList keywords;

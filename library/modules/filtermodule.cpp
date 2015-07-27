@@ -23,6 +23,18 @@ void FilterModule::checkFlags()
     emit modelFilterApplied(mFilterInfo);
 }
 
+void FilterModule::checkColors()
+{
+    mFilterInfo.colorRed    = ui->cbColorRed->isChecked();
+    mFilterInfo.colorGreen  = ui->cbColorGreen->isChecked();
+    mFilterInfo.colorBlue   = ui->cbColorBlue->isChecked();
+    mFilterInfo.colorYellow = ui->cbColorYellow->isChecked();
+    mFilterInfo.colorPurple = ui->cbColorPurple->isChecked();
+    mFilterInfo.colorOrange = ui->cbColorOrange->isChecked();
+
+    emit modelFilterApplied(mFilterInfo);
+}
+
 void FilterModule::onRating0Clicked()
 {
     mFilterInfo.rating = 0;

@@ -44,7 +44,7 @@
          <string>No flag</string>
         </property>
         <property name="checked">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -84,52 +84,66 @@
       <string>Color label</string>
      </property>
      <property name="checkable">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <property name="checked">
       <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="1">
-       <widget class="QRadioButton" name="radioButton_5">
-        <property name="text">
-         <string>Green</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QRadioButton" name="radioButton_7">
-        <property name="text">
-         <string>Yellow</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QRadioButton" name="radioButton_6">
-        <property name="text">
-         <string>Blue</string>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="0">
-       <widget class="QRadioButton" name="radioButton_4">
+       <widget class="QCheckBox" name="cbColorRed">
         <property name="text">
          <string>Red</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="cbColorGreen">
+        <property name="text">
+         <string>Green</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QCheckBox" name="cbColorBlue">
+        <property name="text">
+         <string>Blue</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3" rowspan="2">
        <spacer name="horizontalSpacer_2">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
         <property name="sizeHint" stdset="0">
          <size>
-          <width>40</width>
+          <width>102</width>
           <height>20</height>
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="1" column="0">
+       <widget class="QCheckBox" name="cbColorYellow">
+        <property name="text">
+         <string>Yellow</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="cbColorPurple">
+        <property name="text">
+         <string>Purple</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QCheckBox" name="cbColorOrange">
+        <property name="text">
+         <string>Orange</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -348,7 +362,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>69</x>
-     <y>218</y>
+     <y>208</y>
     </hint>
     <hint type="destinationlabel">
      <x>317</x>
@@ -364,7 +378,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>91</x>
-     <y>218</y>
+     <y>208</y>
     </hint>
     <hint type="destinationlabel">
      <x>304</x>
@@ -380,7 +394,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>113</x>
-     <y>218</y>
+     <y>208</y>
     </hint>
     <hint type="destinationlabel">
      <x>311</x>
@@ -396,7 +410,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>135</x>
-     <y>218</y>
+     <y>208</y>
     </hint>
     <hint type="destinationlabel">
      <x>299</x>
@@ -412,7 +426,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>157</x>
-     <y>218</y>
+     <y>208</y>
     </hint>
     <hint type="destinationlabel">
      <x>297</x>
@@ -427,8 +441,8 @@
    <slot>onRating0Clicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>28</x>
-     <y>210</y>
+     <x>34</x>
+     <y>208</y>
     </hint>
     <hint type="destinationlabel">
      <x>297</x>
@@ -443,8 +457,8 @@
    <slot>onKeywordsEntered()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>143</x>
-     <y>296</y>
+     <x>147</x>
+     <y>279</y>
     </hint>
     <hint type="destinationlabel">
      <x>328</x>
@@ -508,11 +522,107 @@
    <hints>
     <hint type="sourcelabel">
      <x>54</x>
-     <y>263</y>
+     <y>252</y>
     </hint>
     <hint type="destinationlabel">
      <x>349</x>
      <y>282</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbColorRed</sender>
+   <signal>clicked()</signal>
+   <receiver>FilterModule</receiver>
+   <slot>checkColors()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>38</x>
+     <y>109</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>355</x>
+     <y>78</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbColorGreen</sender>
+   <signal>clicked()</signal>
+   <receiver>FilterModule</receiver>
+   <slot>checkColors()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>104</x>
+     <y>115</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>352</x>
+     <y>108</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbColorBlue</sender>
+   <signal>clicked()</signal>
+   <receiver>FilterModule</receiver>
+   <slot>checkColors()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>201</x>
+     <y>118</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>344</x>
+     <y>100</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbColorYellow</sender>
+   <signal>clicked()</signal>
+   <receiver>FilterModule</receiver>
+   <slot>checkColors()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>79</x>
+     <y>139</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>345</x>
+     <y>133</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbColorPurple</sender>
+   <signal>clicked()</signal>
+   <receiver>FilterModule</receiver>
+   <slot>checkColors()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>131</x>
+     <y>128</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>343</x>
+     <y>84</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbColorOrange</sender>
+   <signal>clicked()</signal>
+   <receiver>FilterModule</receiver>
+   <slot>checkColors()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>192</x>
+     <y>131</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>346</x>
+     <y>68</y>
     </hint>
    </hints>
   </connection>
@@ -527,5 +637,6 @@
   <slot>onKeywordsEntered()</slot>
   <slot>checkFlags()</slot>
   <slot>onKeywordsToggled(bool)</slot>
+  <slot>checkColors()</slot>
  </slots>
 </ui>
