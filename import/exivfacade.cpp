@@ -15,8 +15,15 @@ ExivFacade::ExivFacade()
 
 QString ExifInfo::formatExposure() const
 {
-    return "⅟ " + QString::number((int)(1.0f / exposureTime)) + "s at ƒ / " +
-           QString::number(aperture);
+    QString s;
+
+    if (exposureTime != nullptr)
+        s += "⅟ " + QString::number((int)(1.0f / exposureTime.value)) + "s";
+
+    if (aperture != nullptr)
+        s += " at ƒ / " + QString::number(aperture.value);
+
+    return s;
 }
 
 QString ExifInfo::formatDimension() const

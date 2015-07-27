@@ -21,9 +21,7 @@ class FilterModule : public LibraryModule
 
     public slots:
 
-        void onFlagNoneClicked();
-        void onFlagPickedClicked();
-        void onFlagRejectedClicked();
+        void checkFlags();
 
         void onRating0Clicked();
         void onRating1Clicked();
@@ -31,7 +29,9 @@ class FilterModule : public LibraryModule
         void onRating3Clicked();
         void onRating4Clicked();
         void onRating5Clicked();
+
         void onKeywordsEntered();
+        void onKeywordsToggled(bool state);
 
     signals:
 
@@ -42,6 +42,8 @@ class FilterModule : public LibraryModule
         Ui::FilterModule* ui;
         PhotoFilterInfo   mFilterInfo;
         QString           mOldText;
+
+        void parseKeywords();
 };
 }
 #endif // PHOTOSTAGE_FILTERMODULE_H

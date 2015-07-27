@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "external/xxHash/xxhash.h"
 
 namespace PhotoStage
 {
@@ -31,6 +32,14 @@ QRect fitFrame(const QSize& src, const QSize& dst)
     }
     return QRect(x, y, wn, hn);
 }
+
+long long xxHash(const QByteArray& array)
+{
+    long long hash = XXH64(array.constData(), array.length(), 0);
+
+    return hash;
+}
+
 }
 
 // this code is needed for RawSpeed

@@ -2,6 +2,8 @@
 #include <QFileInfo>
 #include <math.h>
 
+#include "exivutils.h"
+
 #include "exiv2lib.h"
 #include "constants.h"
 
@@ -41,8 +43,8 @@ struct __attribute__((packed)) Canon_ColorData
         // This version for the 20D & 350D
         struct V1
         {
-            uint16_t bytecount;
-            uint16_t _unknown[24];
+            uint16_t                 bytecount;
+            uint16_t                 _unknown[24];
             struct WhiteBalanceEntry WhiteBalanceTable[10];
         }
         V1;
@@ -52,24 +54,24 @@ struct __attribute__((packed)) Canon_ColorData
         {
             //    uint16_t bytecount1;
             //    uint16_t values[4]; // Some RGGB values
-            uint16_t bytecount;
-            uint16_t _unknown[31];
+            uint16_t                 bytecount;
+            uint16_t                 _unknown[31];
             struct WhiteBalanceEntry WhiteBalanceTable[10];
         }
         V2;
         // this version is for the G10 and the Powershot S110
         struct V3
         {
-            uint16_t bytecount;
-            uint16_t _unknown[70];
+            uint16_t                 bytecount;
+            uint16_t                 _unknown[70];
             struct WhiteBalanceEntry WhiteBalanceTable[10];
         }
         V3;
         // this is the default for canon
         struct V4
         {
-            uint16_t bytecount;
-            uint16_t _unknown[62];
+            uint16_t                 bytecount;
+            uint16_t                 _unknown[62];
             struct WhiteBalanceEntry WhiteBalanceTable[10];
         }
         V4;
@@ -86,8 +88,8 @@ struct __attribute__((packed)) Canon_ColorData
         V5;
         struct V7
         {
-            uint16_t version;
-            uint16_t _unknown[62];
+            uint16_t                 version;
+            uint16_t                 _unknown[62];
             struct WhiteBalanceEntry WhiteBalanceTable[10];
         }
         V7;
@@ -96,214 +98,6 @@ struct __attribute__((packed)) Canon_ColorData
 
 Exiv2Lib::Exiv2Lib()
 {
-    mExifInfo = {0};
-}
-
-template<typename T>
-T Exiv2Lib::getExifValue(ExifData& data, const QString& key, T defValue)
-{
-    qDebug() << "Template function getExifValue() not defined for type" <<
-        typeid(T).name();
-    return defValue;
-}
-
-template<>
-QString Exiv2Lib::getExifValue(ExifData& data,
-    const QString& key,
-    QString defValue)
-{
-    try
-    {
-        ExifData::const_iterator pos;
-
-        pos = data.findKey(ExifKey(key.toStdString()));
-
-        if (pos != data.end())
-            return QString::fromStdString(pos->toString());
-    }
-    catch (BasicError<char> e)
-    {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
-    }
-    return defValue;
-}
-
-template<>
-float Exiv2Lib::getExifValue(ExifData& data, const QString& key, float defValue)
-{
-    ExifData::const_iterator pos;
-
-    try
-    {
-        pos = data.findKey(ExifKey(key.toStdString()));
-
-        if (pos != data.end())
-            return pos->toFloat();
-    }
-    catch (BasicError<char> e)
-    {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
-    }
-    return defValue;
-}
-
-template<>
-long Exiv2Lib::getExifValue(ExifData& data, const QString& key, long defValue)
-{
-    ExifData::const_iterator pos;
-
-    try
-    {
-        pos = data.findKey(ExifKey(key.toStdString()));
-
-        if (pos != data.end())
-            return pos->toLong();
-    }
-    catch (BasicError<char> e)
-    {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
-    }
-    return defValue;
-}
-
-template<>
-uint16_t Exiv2Lib::getExifValue(ExifData& data,
-    const QString& key,
-    uint16_t defValue)
-{
-    ExifData::const_iterator pos;
-
-    try
-    {
-        pos = data.findKey(ExifKey(key.toStdString()));
-
-        if (pos != data.end())
-            return (uint16_t)pos->toLong();
-    }
-    catch (BasicError<char> e)
-    {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
-    }
-    return defValue;
-}
-
-template<>
-int16_t Exiv2Lib::getExifValue(ExifData& data,
-    const QString& key,
-    int16_t defValue)
-{
-    ExifData::const_iterator pos;
-
-    try
-    {
-        pos = data.findKey(ExifKey(key.toStdString()));
-
-        if (pos != data.end())
-            return (int16_t)pos->toLong();
-    }
-    catch (BasicError<char> e)
-    {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
-    }
-    return defValue;
-}
-
-template<>
-bool Exiv2Lib::getExifValue(ExifData& data, const QString& key, bool defValue)
-{
-    ExifData::const_iterator pos;
-
-    try
-    {
-        pos = data.findKey(ExifKey(key.toStdString()));
-
-        if (pos != data.end())
-            return pos->toLong() == 1;
-    }
-    catch (BasicError<char> e)
-    {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
-    }
-    return defValue;
-}
-
-template<>
-ExifInfo::Rotation Exiv2Lib::getExifValue(ExifData& data,
-    const QString& key,
-    ExifInfo::Rotation defValue)
-{
-    ExifData::const_iterator pos;
-
-    try
-    {
-        pos = data.findKey(ExifKey(key.toStdString()));
-
-        if (pos != data.end())
-            return (ExifInfo::Rotation)pos->toLong();
-    }
-    catch (BasicError<char> e)
-    {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
-    }
-    return defValue;
-}
-
-template<>
-QDateTime Exiv2Lib::getExifValue(ExifData& data, const QString& key,
-    QDateTime defValue)
-{
-    ExifData::const_iterator pos;
-
-    try
-    {
-        pos = data.findKey(ExifKey(key.toStdString()));
-
-        if (pos != data.end())
-        {
-            QString   datetime = QString::fromStdString(pos->toString());
-            QDateTime result   = QDateTime::fromString(datetime, Qt::ISODate);
-
-            if (result.isValid())
-            {
-                return result;
-            }
-            else
-            {
-                qDebug() << "Can't parse date:" << datetime;
-            }
-        }
-    }
-    catch (BasicError<char> e)
-    {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
-    }
-    return defValue;
-}
-
-bool Exiv2Lib::getExifBytes(ExifData& data,
-    const QString& key,
-    uint8_t* buf,
-    size_t size)
-{
-    ExifData::const_iterator pos;
-
-    try
-    {
-        pos = data.findKey(ExifKey(key.toStdString()));
-
-        if (pos != data.end())
-        {
-            if (size != pos->size())
-                return false;
-            pos->copy(buf, Exiv2::littleEndian);
-            return true;
-        }
-    }
-    catch (BasicError<char> e)
-    {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
-    }
-    return false;
 }
 
 bool Exiv2Lib::openFile(const QString& path)
@@ -335,39 +129,31 @@ bool Exiv2Lib::openFile(const QString& path)
 
     ExifData& data = mImageFile->exifData();
 
-    mExifInfo.make = getExifValue<QString>(data,
-            "Exif.Image.Make", "");
-    mExifInfo.model = getExifValue<QString>(data,
-            "Exif.Image.Model", "");
-    mExifInfo.exposureTime = getExifValue<float>(data,
-            "Exif.Photo.ExposureTime", 0.0f);
-    mExifInfo.aperture = getExifValue<float>(data,
-            "Exif.Photo.FNumber", 0.0f);
-    mExifInfo.isoSpeed = getExifValue<uint16_t>(data,
-            "Exif.Photo.ISOSpeedRatings", 0);
-    mExifInfo.dateTimeOriginal = getExifValue<QDateTime>(data,
-            "Exif.Photo.DateTimeOriginal", QDateTime());
-    mExifInfo.dateTimeDigitized = getExifValue<QDateTime>(data,
-            "Exif.Photo.DateTimeDigitized", QDateTime());
-    mExifInfo.flash = getExifValue<bool>(data,
-            "Exif.Photo.Flash", false);
-    mExifInfo.focalLength = getExifValue<float>(data,
-            "Exif.Photo.FocalLength", 0.0f);
-    mExifInfo.rotation = getExifValue<ExifInfo::Rotation>(data,
-            "Exif.Image.Orientation", ExifInfo::NotRotated);
-    mExifInfo.copyright = getExifValue<QString>(data,
-            "Exif.Image.Copyright", "");
-    mExifInfo.artist = getExifValue<QString>(data,
-            "Exif.Image.Artist", "");
-    mExifInfo.width = getExifValue<uint16_t>(data,
-            "Exif.Photo.ExifImageWidth", 0);
-    mExifInfo.height = getExifValue<uint16_t>(data,
-            "Exif.Photo.ExifImageHeight", 0);
+    mExifInfo.make              = getExifValue<QString>(data, "Exif.Image.Make");
+    mExifInfo.model             = getExifValue<QString>(data, "Exif.Image.Model");
+    mExifInfo.exposureTime      = getExifValue<float>(data, "Exif.Photo.ExposureTime");
+    mExifInfo.aperture          = getExifValue<float>(data, "Exif.Photo.FNumber");
+    mExifInfo.isoSpeed          = getExifValue<uint8_t>(data, "Exif.Photo.ISOSpeedRatings");
+    mExifInfo.dateTimeOriginal  = getExifValue<QDateTime>(data, "Exif.Photo.DateTimeOriginal");
+    mExifInfo.dateTimeDigitized = getExifValue<QDateTime>(data, "Exif.Photo.DateTimeDigitized");
+    mExifInfo.flash             = getExifValue<bool>(data, "Exif.Photo.Flash");
+    mExifInfo.focalLength       = getExifValue<float>(data, "Exif.Photo.FocalLength");
+    Nullable<ExifInfo::Rotation> rot = getExifValue<ExifInfo::Rotation>(data, "Exif.Image.Orientation");
+    mExifInfo.rotation  = rot == nullptr ? ExifInfo::NotRotated : rot.value;
+    mExifInfo.copyright = getExifValue<QString>(data, "Exif.Image.Copyright");
+    mExifInfo.artist    = getExifValue<QString>(data, "Exif.Image.Artist");
+    Nullable<uint16_t> w = getExifValue<uint16_t>(data, "Exif.Photo.ExifImageWidth");
+    Nullable<uint16_t> h = getExifValue<uint16_t>(data, "Exif.Photo.ExifImageHeight");
+    mExifInfo.width  = w == nullptr ? 0 : w.value;
+    mExifInfo.height = h == nullptr ? 0 : h.value;
 
-    if (mExifInfo.make.startsWith("Canon"))
-        readCanonNotes(data);
-    else if (mExifInfo.make.startsWith("NIKON"))
-        readNikonNotes(data);
+    if (mExifInfo.make != nullptr)
+    {
+        if (mExifInfo.make.value.startsWith("Canon"))
+            readCanonNotes(data);
+        else if (mExifInfo.make.value.startsWith("NIKON"))
+            readNikonNotes(data);
+    }
 
     return true;
 }
@@ -478,7 +264,7 @@ void Exiv2Lib::setWhiteBalanceCoeffsNikon(ExifData& data, float wb[3])
 
     if (pos != data.end())
     {
-        if (mExifInfo.model == "NIKON D300")
+        if (mExifInfo.model.value == "NIKON D300")
         {
             wb[0] = 1.0f;
             wb[1] = 1.0f;
@@ -518,8 +304,8 @@ void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
 {
     ExifData::const_iterator pos;
 
-    if (mExifInfo.model == "Canon EOS 300D DIGITAL" ||
-        mExifInfo.model == "Canon EOS DIGITAL REBEL")
+    if (mExifInfo.model.value == "Canon EOS 300D DIGITAL" ||
+        mExifInfo.model.value == "Canon EOS DIGITAL REBEL")
     {
         pos = data.findKey(ExifKey("Exif.Canon.WhiteBalanceTable"));
 
@@ -553,7 +339,7 @@ void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
         pos->copy(cdata, littleEndian);
         colorData = (struct Canon_ColorData*)cdata;
 
-        if (mExifInfo.model == "Canon EOS 350D DIGITAL")     // || EOS 20D
+        if (mExifInfo.model.value == "Canon EOS 350D DIGITAL")     // || EOS 20D
         {
             // optimize with bitshifts later
             //                                    wb[0] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[2];
@@ -568,15 +354,15 @@ void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
             qDebug() << "WB EOS 350D DIGITAL RGGB" << wb[0] << "," << wb[1] <<
                 "," << wb[2];
         }
-        else if (mExifInfo.model == "Canon EOS 1D Mark II")     // || 1Ds Mark II
+        else if (mExifInfo.model.value == "Canon EOS 1D Mark II")     // || 1Ds Mark II
         {
             qDebug() << "Whitebalance info unavailable";
         }
-        else if (mExifInfo.model == "Canon G10")
+        else if (mExifInfo.model.value == "Canon G10")
         {
             qDebug() << "Whitebalance info unavailable";
         }
-        else if (mExifInfo.model == "Canon PowerShot S30")
+        else if (mExifInfo.model.value == "Canon PowerShot S30")
         {
             wb[0] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[1];
             wb[1] =
@@ -584,7 +370,7 @@ void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
                 colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[3]) / 2;
             wb[2] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[2];
         }
-        else if (mExifInfo.model == "Canon PowerShot S110")
+        else if (mExifInfo.model.value == "Canon PowerShot S110")
         {
             wb[0] =  colorData->V3.WhiteBalanceTable[WB_AsShot].RGGB[0];
             wb[1] = (colorData->V3.WhiteBalanceTable[WB_AsShot].RGGB[1] +

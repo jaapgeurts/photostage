@@ -99,7 +99,8 @@ SOURCES += \
     jobs/previewgeneratorjob.cpp \
     jobs/previewcacheloaderjob.cpp \
     photosortfilterproxymodel.cpp \
-    nullable.cpp
+    regenhashestask.cpp \
+    dbutils.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -181,7 +182,10 @@ HEADERS  += \
     jobs/previewcacheloaderjob.h \
     photosortfilterproxymodel.h \
     nullable.h \
-    photofilterinfo.h
+    photofilterinfo.h \
+    regenhashestask.h \
+    dbutils.h \
+    import/exivutils.h
 
 FORMS    += \
     mainwindow.ui \
@@ -202,6 +206,7 @@ DISTFILES += \
     Info.plist
 
 include($$PWD/external/rawspeed/rawspeed.pri)
+include($$PWD/external/xxHash/xxhash.pri)
 
 
 unix:!macx {

@@ -89,7 +89,7 @@ void Map::showEvent(QShowEvent*)
 
 void Map::setPhoto(Photo photo)
 {
-    if (photo.exifInfo().location.isValid())
-        ui->mapView->setCurrentCoord(photo.exifInfo().location);
+    if (photo.exifInfo().location != nullptr)
+        ui->mapView->setCurrentCoord(photo.exifInfo().location.value);
 }
 }

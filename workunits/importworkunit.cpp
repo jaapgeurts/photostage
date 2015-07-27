@@ -6,6 +6,9 @@
 #include "importworkunit.h"
 #include "import/exivfacade.h"
 #include "previewcache.h"
+#include "dbutils.h"
+#include "utils.h"
+#include "constants.h"
 
 namespace PhotoStage
 {
@@ -98,33 +101,50 @@ long long ImportWorkUnit::importPhoto(const QFileInfo& file,
     }
     delete(ex);
 
+    QFile f(srcpath);
+
+    f.open(QIODevice::ReadOnly);
+    QByteArray array = f.read(HASH_INPUT_LEN);
+    long long  hash  = xxHash(array);
+    f.close();
+
     QSqlQuery q;
     q.prepare(
-        "insert into photo (path_id,filename, iso, exposure_time, \
+        "insert into photo (path_id,filename,photo_hash, iso, exposure_time, \
         focal_length, datetime_original, datetime_digitized, rotation, \
         longitude, lattitude, copyright, artist, aperture, flash, lens_name,  \
         make, model, width, height ) \
-        values (:path, :filename,:iso,:exposure_time,:focal_length,\
+        values (:path, :filename,:hash,:iso,:exposure_time,:focal_length,\
             :datetime_original,:datetime_digitized,:rotation,:longitude, \
             :lattitude,:copyright,:artist,:aperture,:flash,:lens_name, \
             :make, :model, :width, :height)");
     q.bindValue(":path", mLastkey);
     q.bindValue(":filename", fileName);
-    q.bindValue(":iso", ei.isoSpeed);
-    q.bindValue(":exposure_time", ei.exposureTime);
-    q.bindValue(":focal_length", ei.focalLength);
-    q.bindValue(":datetime_original", ei.dateTimeOriginal);
-    q.bindValue(":datetime_digitized", ei.dateTimeDigitized);
+    q.bindValue(":hash", hash);
+    q.bindValue(":iso", setDbValue(ei.isoSpeed));
+    q.bindValue(":exposure_time", setDbValue(ei.exposureTime));
+    q.bindValue(":focal_length", setDbValue(ei.focalLength));
+    q.bindValue(":datetime_original", setDbValue(ei.dateTimeOriginal));
+    q.bindValue(":datetime_digitized", setDbValue(ei.dateTimeDigitized));
     q.bindValue(":rotation", ei.rotation);
-    q.bindValue(":longitude", ei.location.longitude());
-    q.bindValue(":lattitude", ei.location.latitude());
-    q.bindValue(":copyright", ei.copyright);
-    q.bindValue(":artist", ei.artist);
-    q.bindValue(":aperture", ei.aperture);
-    q.bindValue(":flash", ei.flash);
-    q.bindValue(":lens_name", ei.lensName);
-    q.bindValue(":make", ei.make);
-    q.bindValue(":model", ei.model);
+
+    if (ei.location != nullptr)
+    {
+        q.bindValue(":longitude",ei.location.value.longitude());
+        q.bindValue(":lattitude", ei.location.value.latitude());
+    }
+    else
+    {
+        q.bindValue(":longitude", QVariant(QVariant::Double));
+        q.bindValue(":lattitude", QVariant(QVariant::Double));
+    }
+    q.bindValue(":copyright", setDbValue(ei.copyright));
+    q.bindValue(":artist", setDbValue(ei.artist));
+    q.bindValue(":aperture", setDbValue(ei.aperture));
+    q.bindValue(":flash", setDbValue(ei.flash));
+    q.bindValue(":lens_name", setDbValue(ei.lensName));
+    q.bindValue(":make", setDbValue(ei.make));
+    q.bindValue(":model", setDbValue(ei.model));
     q.bindValue(":width", ei.width);
     q.bindValue(":height", ei.height);
 
@@ -138,12 +158,6 @@ long long ImportWorkUnit::importPhoto(const QFileInfo& file,
         ret = q.lastInsertId().toLongLong();
         PreviewCache::globalCache()->remove(QString::number(ret));
     }
-
-#ifdef QT_DEBUG
-    // simulate that each import takes 1 s
-    // FIXIT: remove me
-    QThread::sleep(1);
-#endif
 
     return ret;
 }

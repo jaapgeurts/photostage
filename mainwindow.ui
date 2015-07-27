@@ -465,6 +465,14 @@
     <property name="title">
      <string>Library</string>
     </property>
+    <widget class="QMenu" name="menuGenerate">
+     <property name="title">
+      <string>Generate</string>
+     </property>
+     <addaction name="actionRegenPreviews"/>
+     <addaction name="actionRegenHashes"/>
+    </widget>
+    <addaction name="menuGenerate"/>
    </widget>
    <widget class="QMenu" name="menuMetadata">
     <property name="title">
@@ -958,6 +966,16 @@
     <string>I</string>
    </property>
   </action>
+  <action name="actionRegenPreviews">
+   <property name="text">
+    <string>Previews</string>
+   </property>
+  </action>
+  <action name="actionRegenHashes">
+   <property name="text">
+    <string>Hashes</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1143,7 +1161,7 @@
    <slot>onModeLibraryClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>864</x>
+     <x>815</x>
      <y>75</y>
     </hint>
     <hint type="destinationlabel">
@@ -1159,7 +1177,7 @@
    <slot>onModeDevelopClicked()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>958</x>
+     <x>909</x>
      <y>75</y>
     </hint>
     <hint type="destinationlabel">
@@ -1440,6 +1458,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionRegenHashes</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onActionRegenHashes()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onActionImportTriggered()</slot>
@@ -1470,6 +1504,7 @@
   <slot>onShowLoupe()</slot>
   <slot>onSelectAll()</slot>
   <slot>onSelectNone()</slot>
+  <slot>onActionRegenHashes()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="moduleNavGroup"/>

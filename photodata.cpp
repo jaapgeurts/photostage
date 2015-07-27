@@ -7,6 +7,9 @@
 #include "photomodel.h"
 #include "photodata.h"
 
+#include "dbutils.h"
+#include "utils.h"
+
 namespace PhotoStage
 {
 PhotoData::PhotoData(PhotoModel* owner,
@@ -30,34 +33,41 @@ PhotoData::PhotoData(QSqlQuery& q) :
     QString path     = q.value(2).toString();
     mSrcImagePath = path + QDir::separator() + filename;
 
-    if (q.value(3).isNull())
-        setRating(0);
-    else
-        setRating(q.value(3).toInt());
-    setColorLabel((Photo::ColorLabel)q.value(4).toInt());
-    setFlag((Photo::Flag)q.value(5).toInt());
+    mRating = q.value(3).isNull() ?  0 : q.value(3).toInt();
+
+    mColorLabel =
+        q.value(4).isNull() ? Photo::LabelNoColor : (Photo::ColorLabel)q.
+        value(4).toInt();
+    mFlag =
+        q.value(5).isNull() ? Photo::FlagNone : (Photo::Flag)q.value(5).
+        toInt();
 
     // p.id, p.filename, c.directory,p.rating,p.color,p.flag, \
     // p.iso, p.aperture, p.exposure_time, p.focal_length, p.datetime_original,\
     // p.datetime_digitized, p.rotatation, p.lattitude, p.longitude, \
     // p.copyright, p.artist, p.flash, p.lens_name, p.make, p.model
-    mExifInfo.isoSpeed          = q.value(6).toInt();
-    mExifInfo.aperture          = q.value(7).toInt();
-    mExifInfo.exposureTime      = q.value(8).toFloat();
-    mExifInfo.focalLength       = q.value(9).toFloat();
-    mExifInfo.dateTimeOriginal  = q.value(10).toDateTime();
-    mExifInfo.dateTimeDigitized = q.value(11).toDateTime();
-    mExifInfo.rotation          = (ExifInfo::Rotation)q.value(12).toInt();
-    mExifInfo.location          = QGeoCoordinate(q.value(13)
-            .toDouble(), q.value(14).toDouble());
-    mExifInfo.copyright = q.value(15).toString();
-    mExifInfo.artist    = q.value(16).toString();
-    mExifInfo.flash     = q.value(17).toBool();
-    mExifInfo.lensName  = q.value(18).toString();
-    mExifInfo.make      = q.value(19).toString();
-    mExifInfo.model     = q.value(20).toString();
-    mExifInfo.width     = q.value(21).toInt();
-    mExifInfo.height    = q.value(22).toInt();
+    getDbValue(q, 6, mExifInfo.isoSpeed);
+    getDbValue(q, 7, mExifInfo.aperture);
+    getDbValue(q, 8, mExifInfo.exposureTime);
+    getDbValue(q, 9, mExifInfo.focalLength);
+    getDbValue(q, 10, mExifInfo.dateTimeOriginal);
+    getDbValue(q, 11, mExifInfo.dateTimeDigitized);
+    mExifInfo.rotation = q.value(12).isNull() ? ExifInfo::NotRotated : (ExifInfo::Rotation)q.value(12).toInt();
+
+    if (!q.value(13).isNull() && !q.value(14).isNull())
+        mExifInfo.location =  QGeoCoordinate(q.value(13)
+                .toDouble(), q.value(14).toDouble());
+    else
+        mExifInfo.location = nullptr;
+    getDbValue(q, 15, mExifInfo.copyright);
+    getDbValue(q, 16, mExifInfo.artist);
+    getDbValue(q, 17, mExifInfo.flash);
+    getDbValue(q, 18, mExifInfo.lensName );
+    getDbValue(q, 19, mExifInfo.make );
+    getDbValue(q, 20, mExifInfo.model);
+    // these two values are NON NULL
+    mExifInfo.width  = q.value(21).toInt();
+    mExifInfo.height = q.value(22).toInt();
 }
 
 PhotoData::~PhotoData()
@@ -157,6 +167,16 @@ Photo::Flag PhotoData::flag() const
     return mFlag;
 }
 
+long long PhotoData::hash() const
+{
+    return mHashCode;
+}
+
+void PhotoData::setHash(long long code)
+{
+    mHashCode = code;
+}
+
 long long PhotoData::id() const
 {
     return mId;
@@ -182,7 +202,7 @@ bool PhotoData::isDownloading() const
     return mIsDownloading;
 }
 
-void PhotoData::setKeywords(const QStringList &list)
+void PhotoData::setKeywords(const QStringList& list)
 {
     mKeywords = list;
 }

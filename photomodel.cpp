@@ -48,8 +48,14 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
             return QString(mPhotoList.at(index.row()).srcImagePath());
 
         case Photo::DateTimeRole:
-            return QVariant::fromValue<QDateTime>(
-                mPhotoList.at(index.row()).exifInfo().dateTimeOriginal);
+        {
+            Nullable<QDateTime> dt = mPhotoList.at(index.row()).exifInfo().dateTimeOriginal;
+
+            if (dt != nullptr)
+                return QVariant::fromValue<QDateTime>(dt.value);
+            else
+                return QVariant::fromValue<QDateTime>(QDateTime());
+        }
 
         case Photo::FilenameRole:
             return QString(mPhotoList.at(index.row()).srcImagePath());
@@ -61,8 +67,14 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
             return QVariant::fromValue<Photo>(photo);
 
         case MapView::Layer::GeoCoordinateRole:
-            return QVariant::fromValue<QGeoCoordinate>(mPhotoList.at(index.
-                       row()).exifInfo().location);
+        {
+            Nullable<QGeoCoordinate> coord = mPhotoList.at(index.row()).exifInfo().location;
+
+            if (coord != nullptr)
+                return QVariant::fromValue<QGeoCoordinate>(coord.value);
+            else
+                return QVariant::fromValue<QGeoCoordinate>(QGeoCoordinate());
+        }
 
         default:
             return QVariant();
@@ -142,15 +154,24 @@ void PhotoModel::previewGenerated(Photo photo, const QImage& image)
     photo.exifInfo().height = image.height();
     PhotoWorkUnit::instance()->updateExifInfo(photo);
 
-    QImage preview = image.scaled(QSize(PREVIEW_IMG_WIDTH, PREVIEW_IMG_HEIGHT),
-            Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    QImage scaled;
 
+    if (image.width() > PREVIEW_IMG_WIDTH &&
+        image.height() > PREVIEW_IMG_HEIGHT)
+    { // only scale images down. never scale up.
+        scaled = image.scaled(PREVIEW_IMG_WIDTH, PREVIEW_IMG_HEIGHT,
+                Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    }
+    else
+    {
+        scaled = image;
+    }
     QString key = QString::number(photo.id());
 
-    PreviewCache::globalCache()->put(key, preview);
+    PreviewCache::globalCache()->put(key, scaled);
 
     // TODO: original = null
-    photo.setLibraryPreview(preview);
+    photo.setLibraryPreview(scaled);
 
     ColorTransformJob* cfj = new ColorTransformJob(photo);
 

@@ -41,7 +41,7 @@ class MainWindow : public QMainWindow
     protected:
 
         bool eventFilter(QObject*, QEvent* event);
-
+        void closeEvent(QCloseEvent* event);
         //bool event(QEvent* event);
 
     private slots:
@@ -55,12 +55,16 @@ class MainWindow : public QMainWindow
         void onSelectAll();
         void onSelectNone();
 
+        //Library menu
+        void onActionRegenHashes();
+
         // Dialogs
         void onActionImportTriggered();
         void onActionAboutTriggered();
         void onActionEditTimeTriggered();
         void onActionPreferences();
 
+        // Photo
         // Rating
         void onActionRating1();
         void onActionRating2();
@@ -96,7 +100,7 @@ class MainWindow : public QMainWindow
             int start, int end);
         void onPhotoModelRowsRemoved(const QModelIndex& parent,
             int start, int end);
-        void onFilterApplied(const PhotoFilterInfo &info);
+        void onFilterApplied(const PhotoFilterInfo& info);
         void onPhotoSourceChanged(PhotoModel::SourceType type, long long id);
 
         void onShowGrid();

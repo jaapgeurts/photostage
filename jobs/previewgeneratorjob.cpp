@@ -435,25 +435,25 @@ QImage PreviewGeneratorJob::rawThumb(const QString& path)
 
         float mat[9];
 
-        if (ex_info.model == "Canon EOS 350D DIGITAL")
+        if (ex_info.model.value == "Canon EOS 350D DIGITAL")
             getMatrix(canon350d, mat);
-        else if (ex_info.model == "Canon EOS 300D DIGITAL" ||
-            ex_info.model == "Canon EOS DIGITAL REBEL")
+        else if (ex_info.model.value == "Canon EOS 300D DIGITAL" ||
+            ex_info.model.value == "Canon EOS DIGITAL REBEL")
             getMatrix(canon300d, mat);
-        else if (ex_info.model == "Canon PowerShot S30")
+        else if (ex_info.model.value == "Canon PowerShot S30")
             getMatrix(powershots30, mat);
-        else if (ex_info.model == "Canon EOS 5D Mark II")
+        else if (ex_info.model.value == "Canon EOS 5D Mark II")
             getMatrix(canon5DMarkII, mat);
-        else if (ex_info.model == "Canon EOS REBEL T3")
+        else if (ex_info.model.value == "Canon EOS REBEL T3")
             getMatrix(eos1100d, mat);
-        else if (ex_info.model == "NIKON D300")
+        else if (ex_info.model.value == "NIKON D300")
             getMatrix(nikonD300, mat);
-        else if (ex_info.model == "Canon PowerShot S110")
+        else if (ex_info.model.value == "Canon PowerShot S110")
             getMatrix(powershots110, mat);
         else
         {
             qDebug() << "Color conversion matrix for camera model" <<
-                ex_info.model << "unavailable.";
+                ex_info.model.value << "unavailable.";
             getMatrix(identity, mat);
         }
 

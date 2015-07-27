@@ -5,6 +5,8 @@
 #include <QDir>
 
 #include "photoworkunit.h"
+#include "utils.h"
+#include "constants.h"
 
 namespace PhotoStage
 {
@@ -16,6 +18,16 @@ PhotoWorkUnit* PhotoWorkUnit::instance()
     if (mInstance == NULL)
         mInstance = new PhotoWorkUnit();
     return mInstance;
+}
+
+void PhotoWorkUnit::beginTransaction()
+{
+    QSqlDatabase::database().transaction();
+}
+
+void PhotoWorkUnit::endTransaction()
+{
+    QSqlDatabase::database().commit();
 }
 
 PhotoWorkUnit::PhotoWorkUnit()
@@ -406,6 +418,30 @@ void PhotoWorkUnit::updateExifInfo(const Photo& photo) const
     q.bindValue(":width", ei.width);
     q.bindValue(":height", ei.height);
     q.bindValue(":photoid", photo.id());
+
+    if (!q.exec())
+    {
+        qDebug() << "Query failed" << q.executedQuery();
+        qDebug() << q.lastError();
+    }
+
+    return;
+}
+
+void PhotoWorkUnit::regenerateHash(Photo& p)
+{
+    QString path = p.srcImagePath();
+    // only scan the first 1MB
+    QFile   f(path);
+
+    f.open(QIODevice::ReadOnly);
+    QByteArray array = f.read(HASH_INPUT_LEN);
+    p.setHash(xxHash(array));
+
+    QSqlQuery q;
+    q.prepare("update photo set photo_hash=:hash where id = :photoid");
+    q.bindValue(":hash", p.hash());
+    q.bindValue(":photoid", p.id());
 
     if (!q.exec())
     {

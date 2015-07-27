@@ -3,6 +3,7 @@
 
 #include <QRect>
 #include <QSize>
+#include <QByteArray>
 
 namespace PhotoStage
 {
@@ -14,6 +15,8 @@ namespace PhotoStage
  * @return
  */
 QRect fitFrame(const QSize& src, const QSize& dst);
+
+long long xxHash(const QByteArray& array);
 }
 
 #endif // PHOTOSTAGE_UTILS_H

@@ -3,16 +3,20 @@
 
 #include <QStringList>
 
-#include "photo.h"
-
 namespace PhotoStage
 {
 struct PhotoFilterInfo
 {
-    Photo::Flag       flag;
-    Photo::ColorLabel colorLabel;
-    uint8_t           rating;
-    QStringList       keywords;
+    bool        flagPick;
+    bool        flagReject;
+    bool        flagNone;
+    bool        colorRed;
+    bool        colorGreen;
+    bool        colorBlue;
+    bool        colorYellow;
+    int         rating;
+    bool        keywordsNone;
+    QStringList keywords;
 };
 }
 #endif // PHOTOSTAGE_PHOTOFILTERINFO_H

@@ -9,35 +9,35 @@
 
 namespace PhotoStage
 {
-    class ImportBackgroundTask : public BackgroundTask, public QRunnable
-    {
-        public:
+class ImportBackgroundTask : public BackgroundTask, public QRunnable
+{
+    public:
 
-            ImportBackgroundTask(const ImportInfo& info);
+        ImportBackgroundTask(const ImportInfo& info);
 
-            int progressMinimum();
-            int progressMaximum();
-            void run();
+        int progressMinimum();
+        int progressMaximum();
+        void run();
 
-            const QList<long long>& resultList()
-            {
-                return mIdList;
-            }
+        const QList<long long>& resultList()
+        {
+            return mIdList;
+        }
 
-        public slots:
+    public slots:
 
-            void start();
-            void cancel();
+        void start();
+        void cancel();
 
-        private:
+    private:
 
-            QString           mName;
-            ImportInfo        mInfo;
+        QString           mName;
+        ImportInfo        mInfo;
 
-            QList<long long>  mIdList;
-            ImportWorkUnit*   mWorkUnit;
-            std::atomic<bool> mRunning;
-    };
+        QList<long long>  mIdList;
+        ImportWorkUnit*   mWorkUnit;
+        std::atomic<bool> mRunning;
+};
 }
 
 #endif // IMPORTBACKGROUNDTASK_H

@@ -130,6 +130,16 @@ Photo::Flag Photo::flag() const
     return d->flag();
 }
 
+long long Photo::hash() const
+{
+    return d->hash();
+}
+
+void Photo::setHash(long long code)
+{
+    d->setHash(code);
+}
+
 bool Photo::isNull() const
 {
     return d.isNull();

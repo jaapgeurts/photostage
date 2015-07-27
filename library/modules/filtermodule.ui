@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>328</width>
+    <width>348</width>
     <height>352</height>
    </rect>
   </property>
@@ -27,15 +27,21 @@
     <number>2</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="gbFlag">
      <property name="title">
       <string>Flag</string>
      </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QRadioButton" name="rbFlagNone">
+       <widget class="QCheckBox" name="cbFlagNone">
         <property name="text">
-         <string>None</string>
+         <string>No flag</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -43,14 +49,14 @@
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="rbFlagPicked">
+       <widget class="QCheckBox" name="cbFlagPicked">
         <property name="text">
          <string>Picked </string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QRadioButton" name="rbFlagRejected">
+       <widget class="QCheckBox" name="cbFlagRejected">
         <property name="text">
          <string>Rejected</string>
         </property>
@@ -73,9 +79,15 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_2">
+    <widget class="QGroupBox" name="gbColor">
      <property name="title">
       <string>Color label</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="1">
@@ -123,9 +135,18 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_3">
+    <widget class="QGroupBox" name="gbRating">
      <property name="title">
       <string>Rating</string>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <property name="checkable">
+      <bool>false</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
@@ -293,9 +314,9 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="label">
+    <widget class="QCheckBox" name="cbKeywords">
      <property name="text">
-      <string>Keywords</string>
+      <string>No keywords assigned</string>
      </property>
     </widget>
    </item>
@@ -319,54 +340,6 @@
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>rbFlagNone</sender>
-   <signal>clicked()</signal>
-   <receiver>FilterModule</receiver>
-   <slot>onFlagNoneClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>31</x>
-     <y>47</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>295</x>
-     <y>76</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>rbFlagPicked</sender>
-   <signal>clicked()</signal>
-   <receiver>FilterModule</receiver>
-   <slot>onFlagPickedClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>137</x>
-     <y>45</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>295</x>
-     <y>12</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>rbFlagRejected</sender>
-   <signal>clicked()</signal>
-   <receiver>FilterModule</receiver>
-   <slot>onFlagRejectedClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>194</x>
-     <y>46</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>295</x>
-     <y>51</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>pbRating1</sender>
    <signal>clicked()</signal>
@@ -470,8 +443,8 @@
    <slot>onKeywordsEntered()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>137</x>
-     <y>281</y>
+     <x>143</x>
+     <y>296</y>
     </hint>
     <hint type="destinationlabel">
      <x>328</x>
@@ -479,11 +452,72 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>cbFlagNone</sender>
+   <signal>clicked()</signal>
+   <receiver>FilterModule</receiver>
+   <slot>checkFlags()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>49</x>
+     <y>42</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>173</x>
+     <y>175</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbFlagPicked</sender>
+   <signal>clicked()</signal>
+   <receiver>FilterModule</receiver>
+   <slot>checkFlags()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>123</x>
+     <y>42</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>173</x>
+     <y>175</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbFlagRejected</sender>
+   <signal>clicked()</signal>
+   <receiver>FilterModule</receiver>
+   <slot>checkFlags()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>203</x>
+     <y>42</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>173</x>
+     <y>175</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbKeywords</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>FilterModule</receiver>
+   <slot>onKeywordsToggled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>54</x>
+     <y>263</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>349</x>
+     <y>282</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
-  <slot>onFlagNoneClicked()</slot>
-  <slot>onFlagPickedClicked()</slot>
-  <slot>onFlagRejectedClicked()</slot>
   <slot>onRating1Clicked()</slot>
   <slot>onRating2Clicked()</slot>
   <slot>onRating3Clicked()</slot>
@@ -491,5 +525,7 @@
   <slot>onRating5Clicked()</slot>
   <slot>onRating0Clicked()</slot>
   <slot>onKeywordsEntered()</slot>
+  <slot>checkFlags()</slot>
+  <slot>onKeywordsToggled(bool)</slot>
  </slots>
 </ui>

@@ -14,6 +14,10 @@ class PhotoWorkUnit
     public:
 
         static PhotoWorkUnit* instance();
+
+        void beginTransaction();
+        void endTransaction();
+
         void setRating(const QList<Photo>& list, int rating);
         void setFlag(const QList<Photo>& list, Photo::Flag flag);
         void setColorLabel(const QList<Photo>& list,
@@ -35,9 +39,10 @@ class PhotoWorkUnit
 
         QList<Photo> getPhotosById(QList<long long> idList);
 
-        void updateExifInfo(const Photo& photo) const;
+        void updateExifInfo(const Photo& photo) const;    
+        void regenerateHash(Photo &p);
 
-    protected:
+protected:
 
         PhotoWorkUnit();
 

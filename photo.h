@@ -72,6 +72,9 @@ class Photo
         void setFlag(Flag flag);
         Flag flag() const;
 
+        long long hash() const;
+        void setHash(long long code);
+
         bool isNull() const;
 
         void setIsDownloading(bool value);

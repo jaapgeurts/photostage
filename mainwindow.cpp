@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QMessageBox>
 #include <QTreeView>
 #include <QTextEdit>
 #include <QLineEdit>
@@ -22,8 +23,11 @@
 #include "widgets/backgroundtaskprogress.h"
 
 #include "backgroundtask.h"
+#include "regenhashestask.h"
 #include "import/importbackgroundtask.h"
 #include "filmstriptile.h"
+
+#include "external/xxHash/xxhash.h"
 
 const QString SETTINGS_WINDOW_LOCATION          = "location";
 const QString SETTINGS_SPLITTER_FILMSTRIP_SIZES = "splitter_filmstrip";
@@ -171,10 +175,9 @@ MainWindow::MainWindow(QWidget* parent) :
 
 MainWindow::~MainWindow()
 {
+    mBackgroundTaskManager->cancelAll();
     //QDesktopWidget * desktop = QApplication::desktop();
     QSettings settings;
-
-
     settings.beginGroup("mainwindow");
 
     settings.setValue(SETTINGS_WINDOW_LOCATION, pos());
@@ -225,6 +228,27 @@ bool MainWindow::eventFilter(QObject* /*obj*/, QEvent* event)
     }
     return false;
     //    return QMainWindow::event(event);
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    if (mBackgroundTaskManager->isWorking())
+    {
+        int dlgResult = QMessageBox::warning(this,
+                "Running active tasks",
+                "There are active tasks running. Do you wish to stop them and quit?",
+                "Stop tasks and quit",
+                "Keep running",
+                QString(),
+                1);
+
+        if (dlgResult == 1)
+            event->ignore();
+        else
+            event->accept(); // close
+    }
+    else
+        event->accept(); // close
 }
 
 bool MainWindow::selectNext()
@@ -391,6 +415,24 @@ void MainWindow::onSelectNone()
     mPhotoSelection->clear();
 }
 
+void MainWindow::onActionRegenHashes()
+{
+    // for all images in the view, recalculate hashes.
+    // start as background job.
+    QList<Photo> list;
+    int          c = mPhotoModelProxy->rowCount();
+
+    for (int i = 0; i < c; i++)
+    {
+        Photo p = mSourceModel->data(mSourceModel
+                ->index(i), Photo::DataRole).value<Photo>();
+        list.append(p);
+    }
+    RegenHashesTask* r = new RegenHashesTask(list);
+    mBackgroundTaskManager->addRunnable(r);
+    r->start();
+}
+
 void MainWindow::onActionImportTriggered()
 {
     ImportDialog* importDialog = new ImportDialog(this);
@@ -399,12 +441,12 @@ void MainWindow::onActionImportTriggered()
 
     if (resultCode == QDialog::Accepted)
     {
-        ImportBackgroundTask* r = new ImportBackgroundTask(
-            importDialog->importInfo());
+        ImportBackgroundTask* r =
+            new ImportBackgroundTask(importDialog->importInfo());
         mBackgroundTaskManager->addRunnable(r);
-        r->start();
         connect(r, &ImportBackgroundTask::taskFinished,
             this, &MainWindow::importFinished);
+        r->start();
     }
     delete importDialog;
 }

@@ -17,11 +17,14 @@ class BackgroundTaskManager : public QObject
         ~BackgroundTaskManager();
         void addRunnable(BackgroundTask* const task);
 
+        bool isWorking();
+
     signals:
 
     public slots:
 
         void taskFinished(BackgroundTask* task);
+        void cancelAll();
 
     private:
 

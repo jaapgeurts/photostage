@@ -3,6 +3,7 @@
 
 #include <QImage>
 #include "photo.h"
+#include "nullable.h"
 
 namespace PhotoStage
 {
@@ -40,6 +41,9 @@ class PhotoData
         void setFlag(Photo::Flag flag);
         Photo::Flag flag() const;
 
+        long long hash() const;
+        void setHash(long long code);
+
         long long id() const;
 
         PhotoModel* owner() const;
@@ -66,6 +70,7 @@ class PhotoData
         PhotoModel*       mOwner;
         bool              mIsDownloading;
         QStringList       mKeywords;
+        long long         mHashCode;
 };
 }
 

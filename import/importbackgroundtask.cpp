@@ -3,13 +3,13 @@
 namespace PhotoStage
 {
 ImportBackgroundTask::ImportBackgroundTask(const ImportInfo& info) :
-    BackgroundTask("Import Task")
+    BackgroundTask("Import Task"),
+    mInfo(info)
+
 {
     setDescription(QString("Importing..."));
-    mInfo = info;
 
     mWorkUnit = ImportWorkUnit::instance();
-
     setAutoDelete(false);
 }
 

@@ -8,28 +8,18 @@ namespace PhotoStage
 {
 FilterModule::FilterModule(QWidget* parent) :
     LibraryModule(parent),
-    ui(new Ui::FilterModule)
+    ui(new Ui::FilterModule),
+    mFilterInfo()
 {
     ui->setupUi(this);
-    mFilterInfo.rating = 0;
-    mFilterInfo.flag   = Photo::FlagNone;
 }
 
-void FilterModule::onFlagNoneClicked()
+void FilterModule::checkFlags()
 {
-    mFilterInfo.flag = Photo::FlagNone;
-    emit modelFilterApplied(mFilterInfo);
-}
+    mFilterInfo.flagNone   = ui->cbFlagNone->isChecked();
+    mFilterInfo.flagPick   = ui->cbFlagPicked->isChecked();
+    mFilterInfo.flagReject = ui->cbFlagRejected->isChecked();
 
-void FilterModule::onFlagPickedClicked()
-{
-    mFilterInfo.flag = Photo::FlagPick;
-    emit modelFilterApplied(mFilterInfo);
-}
-
-void FilterModule::onFlagRejectedClicked()
-{
-    mFilterInfo.flag = Photo::FlagReject;
     emit modelFilterApplied(mFilterInfo);
 }
 
@@ -71,6 +61,21 @@ void FilterModule::onRating5Clicked()
 
 void FilterModule::onKeywordsEntered()
 {
+    parseKeywords();
+
+    emit modelFilterApplied(mFilterInfo);
+}
+
+void FilterModule::onKeywordsToggled(bool state)
+{
+    ui->leKeywords->setEnabled(!state);
+    mFilterInfo.keywordsNone = state;
+    parseKeywords();
+    emit modelFilterApplied(mFilterInfo);
+}
+
+void FilterModule::parseKeywords()
+{
     QString text = ui->leKeywords->text();
 
     if (mOldText != text)
@@ -80,14 +85,14 @@ void FilterModule::onKeywordsEntered()
         // split on whitespace , and ;
         QRegularExpression exp("[,;]");
 
-        mFilterInfo.keywords.clear();
+        QStringList        list;
 
         foreach(QString word, text.split(exp, QString::SkipEmptyParts))
         {
-            mFilterInfo.keywords << word.trimmed();
+            list << word.trimmed();
         }
+        mFilterInfo.keywords = list;
         qDebug() << "Keywords:" << mFilterInfo.keywords;
-        emit modelFilterApplied(mFilterInfo);
     }
 }
 }

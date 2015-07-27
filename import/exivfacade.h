@@ -5,6 +5,8 @@
 #include <QDateTime>
 #include <QGeoCoordinate>
 
+#include "nullable.h"
+
 namespace PhotoStage
 {
 struct ExifInfo
@@ -22,30 +24,30 @@ struct ExifInfo
     };
 
     // Camera tech details
-    QString make;
-    QString model;
+    Nullable<QString> make;
+    Nullable<QString> model;
 
     // Image details
     Rotation rotation;
-    QGeoCoordinate location;
-    QDateTime dateTimeOriginal;
-    QDateTime dateTimeDigitized;
-    QString copyright;
-    QString artist;
+    Nullable<QGeoCoordinate> location;
+    Nullable<QDateTime> dateTimeOriginal;
+    Nullable<QDateTime> dateTimeDigitized;
+    Nullable<QString> copyright;
+    Nullable<QString> artist;
 
     int width;
     int height;
 
     // photo tech details
-    float exposureTime;
-    float aperture;
-    int isoSpeed;
-    bool flash;
+    Nullable<float> exposureTime;
+    Nullable<float> aperture;
+    Nullable<uint8_t> isoSpeed;
+    Nullable<bool> flash;
     float rgbCoeffients[3]; // white balance coefficients
 
     // Lens details
-    QString lensName;
-    float focalLength;
+    Nullable<QString> lensName;
+    Nullable<float> focalLength;
 
     QString formatExposure() const;
     QString formatDimension() const;
