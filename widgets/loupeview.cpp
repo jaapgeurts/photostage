@@ -131,11 +131,11 @@ void LoupeView::paintEvent(QPaintEvent* /*event*/)
         {
             const ExifInfo& ei = mPhoto.exifInfo();
             painter.drawText(40, 50, mPhoto.srcImagePath());
-            QString         exp = ei.isoSpeed == nullptr ? "" : QString(", ISO %1").arg(ei.isoSpeed.value);
+            QString         exp = ei.isoSpeed == nullptr ? "" : QString(", ISO %1").arg(*ei.isoSpeed);
             painter.drawText(40, 80, ei.formatExposure() + exp);
 
-            QString fl = ei.focalLength == nullptr ? "" : QString("%1mm ").arg(ei.focalLength.value);
-            QString ln = ei.lensName == nullptr ? "" : ei.lensName.value;
+            QString fl = ei.focalLength == nullptr ? "" : QString("%1mm ").arg(*ei.focalLength);
+            QString ln = ei.lensName == nullptr ? "" : *ei.lensName;
             painter.drawText(40, 110, fl + ln);
         }
 
@@ -145,7 +145,7 @@ void LoupeView::paintEvent(QPaintEvent* /*event*/)
             painter.drawText(40, 50, mPhoto.srcImagePath());
 
             if (ei.dateTimeOriginal != nullptr)
-                painter.drawText(40, 80, ei.dateTimeOriginal.value.toString());
+                painter.drawText(40, 80, ei.dateTimeOriginal->toString());
             painter.drawText(40, 110, ei.formatDimension());
         }
     }

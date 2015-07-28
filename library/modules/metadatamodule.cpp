@@ -24,43 +24,43 @@ void MetaDataModule::setMetaData(const Photo& p)
     const ExifInfo& ei = ((Photo&)p).exifInfo();
 
     if (ei.aperture != nullptr)
-        ui->leAperture->setText("ƒ / " + QString::number(ei.aperture.value));
+        ui->leAperture->setText("ƒ / " + QString::number(*ei.aperture));
 
     if (ei.artist != nullptr)
-        ui->leArtist->setText(ei.artist.value);
+        ui->leArtist->setText(*ei.artist);
 
     if (ei.make != nullptr)
-        ui->leCameraMake->setText(ei.make.value);
+        ui->leCameraMake->setText(*ei.make);
 
     if (ei.model != nullptr)
-        ui->leCameraModel->setText(ei.model.value);
+        ui->leCameraModel->setText(*ei.model);
 
     if (ei.copyright != nullptr)
-        ui->leCopyright->setText(ei.copyright.value);
+        ui->leCopyright->setText(*ei.copyright);
 
     if (ei.dateTimeDigitized != nullptr)
-        ui->leDateTime->setText(ei.dateTimeDigitized.value.toString());
+        ui->leDateTime->setText(ei.dateTimeDigitized->toString());
 
     if (ei.dateTimeOriginal != nullptr)
-        ui->leDateTimeOriginal->setText(ei.dateTimeOriginal.value.toString());
+        ui->leDateTimeOriginal->setText(ei.dateTimeOriginal->toString());
 
     if (ei.exposureTime != nullptr)
-        ui->leExposure->setText("⅟ " + QString::number((int)(1.0f / ei.exposureTime.value)) + "s");
+        ui->leExposure->setText("⅟ " + QString::number((int)(1.0f / *ei.exposureTime)) + "s");
 
     if (ei.flash != nullptr)
-        ui->leFlash->setText(ei.flash.value ? "Fired" : "Didn't fire");
+        ui->leFlash->setText(*ei.flash ? "Fired" : "Didn't fire");
 
     if (ei.focalLength != nullptr)
-        ui->leFocalLength->setText(QString::number(ei.focalLength.value) + "mm");
+        ui->leFocalLength->setText(QString::number(*ei.focalLength) + "mm");
 
     if (ei.isoSpeed != nullptr)
-        ui->leISO->setText(QString::number(ei.isoSpeed.value));
+        ui->leISO->setText(QString::number(*ei.isoSpeed));
 
     if (ei.lensName != nullptr)
-        ui->leLens->setText(ei.lensName.value);
+        ui->leLens->setText(*ei.lensName);
     ui->leDimensions->setText(ei.formatDimension());
 
     if (ei.location != nullptr)
-        ui->leGPS->setText(ei.location.value.toString(QGeoCoordinate::DegreesMinutesWithHemisphere));
+        ui->leGPS->setText(ei.location->toString(QGeoCoordinate::DegreesMinutesWithHemisphere));
 }
 }

@@ -18,10 +18,10 @@ QString ExifInfo::formatExposure() const
     QString s;
 
     if (exposureTime != nullptr)
-        s += "⅟ " + QString::number((int)(1.0f / exposureTime.value)) + "s";
+        s += "⅟ " + QString::number((int)(1.0f / *exposureTime)) + "s";
 
     if (aperture != nullptr)
-        s += " at ƒ / " + QString::number(aperture.value);
+        s += " at ƒ / " + QString::number(*aperture);
 
     return s;
 }

@@ -139,19 +139,19 @@ bool Exiv2Lib::openFile(const QString& path)
     mExifInfo.flash             = getExifValue<bool>(data, "Exif.Photo.Flash");
     mExifInfo.focalLength       = getExifValue<float>(data, "Exif.Photo.FocalLength");
     Nullable<ExifInfo::Rotation> rot = getExifValue<ExifInfo::Rotation>(data, "Exif.Image.Orientation");
-    mExifInfo.rotation  = rot == nullptr ? ExifInfo::NotRotated : rot.value;
+    mExifInfo.rotation  = rot == nullptr ? ExifInfo::NotRotated : *rot;
     mExifInfo.copyright = getExifValue<QString>(data, "Exif.Image.Copyright");
     mExifInfo.artist    = getExifValue<QString>(data, "Exif.Image.Artist");
     Nullable<uint16_t> w = getExifValue<uint16_t>(data, "Exif.Photo.ExifImageWidth");
     Nullable<uint16_t> h = getExifValue<uint16_t>(data, "Exif.Photo.ExifImageHeight");
-    mExifInfo.width  = w == nullptr ? 0 : w.value;
-    mExifInfo.height = h == nullptr ? 0 : h.value;
+    mExifInfo.width  = w == nullptr ? 0 : *w;
+    mExifInfo.height = h == nullptr ? 0 : *h;
 
     if (mExifInfo.make != nullptr)
     {
-        if (mExifInfo.make.value.startsWith("Canon"))
+        if (mExifInfo.make->startsWith("Canon"))
             readCanonNotes(data);
-        else if (mExifInfo.make.value.startsWith("NIKON"))
+        else if (mExifInfo.make->startsWith("NIKON"))
             readNikonNotes(data);
     }
 
@@ -264,7 +264,7 @@ void Exiv2Lib::setWhiteBalanceCoeffsNikon(ExifData& data, float wb[3])
 
     if (pos != data.end())
     {
-        if (mExifInfo.model.value == "NIKON D300")
+        if (*mExifInfo.model== "NIKON D300")
         {
             wb[0] = 1.0f;
             wb[1] = 1.0f;
@@ -304,8 +304,8 @@ void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
 {
     ExifData::const_iterator pos;
 
-    if (mExifInfo.model.value == "Canon EOS 300D DIGITAL" ||
-        mExifInfo.model.value == "Canon EOS DIGITAL REBEL")
+    if (*mExifInfo.model == "Canon EOS 300D DIGITAL" ||
+        *mExifInfo.model == "Canon EOS DIGITAL REBEL")
     {
         pos = data.findKey(ExifKey("Exif.Canon.WhiteBalanceTable"));
 
@@ -339,7 +339,7 @@ void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
         pos->copy(cdata, littleEndian);
         colorData = (struct Canon_ColorData*)cdata;
 
-        if (mExifInfo.model.value == "Canon EOS 350D DIGITAL")     // || EOS 20D
+        if (*mExifInfo.model == "Canon EOS 350D DIGITAL")     // || EOS 20D
         {
             // optimize with bitshifts later
             //                                    wb[0] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[2];
@@ -354,15 +354,15 @@ void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
             qDebug() << "WB EOS 350D DIGITAL RGGB" << wb[0] << "," << wb[1] <<
                 "," << wb[2];
         }
-        else if (mExifInfo.model.value == "Canon EOS 1D Mark II")     // || 1Ds Mark II
+        else if (*mExifInfo.model == "Canon EOS 1D Mark II")     // || 1Ds Mark II
         {
             qDebug() << "Whitebalance info unavailable";
         }
-        else if (mExifInfo.model.value == "Canon G10")
+        else if (*mExifInfo.model == "Canon G10")
         {
             qDebug() << "Whitebalance info unavailable";
         }
-        else if (mExifInfo.model.value == "Canon PowerShot S30")
+        else if (*mExifInfo.model == "Canon PowerShot S30")
         {
             wb[0] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[1];
             wb[1] =
@@ -370,7 +370,7 @@ void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
                 colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[3]) / 2;
             wb[2] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[2];
         }
-        else if (mExifInfo.model.value == "Canon PowerShot S110")
+        else if (*mExifInfo.model == "Canon PowerShot S110")
         {
             wb[0] =  colorData->V3.WhiteBalanceTable[WB_AsShot].RGGB[0];
             wb[1] = (colorData->V3.WhiteBalanceTable[WB_AsShot].RGGB[1] +

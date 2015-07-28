@@ -130,8 +130,8 @@ long long ImportWorkUnit::importPhoto(const QFileInfo& file,
 
     if (ei.location != nullptr)
     {
-        q.bindValue(":longitude",ei.location.value.longitude());
-        q.bindValue(":lattitude", ei.location.value.latitude());
+        q.bindValue(":longitude",ei.location->longitude());
+        q.bindValue(":lattitude", ei.location->latitude());
     }
     else
     {

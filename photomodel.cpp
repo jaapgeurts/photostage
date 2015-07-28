@@ -52,7 +52,7 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
             Nullable<QDateTime> dt = mPhotoList.at(index.row()).exifInfo().dateTimeOriginal;
 
             if (dt != nullptr)
-                return QVariant::fromValue<QDateTime>(dt.value);
+                return QVariant::fromValue<QDateTime>(*dt);
             else
                 return QVariant::fromValue<QDateTime>(QDateTime());
         }
@@ -71,7 +71,7 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
             Nullable<QGeoCoordinate> coord = mPhotoList.at(index.row()).exifInfo().location;
 
             if (coord != nullptr)
-                return QVariant::fromValue<QGeoCoordinate>(coord.value);
+                return QVariant::fromValue<QGeoCoordinate>(*coord);
             else
                 return QVariant::fromValue<QGeoCoordinate>(QGeoCoordinate());
         }
@@ -90,8 +90,7 @@ void PhotoModel::loadImage(Photo& photo)
 
     PreviewCacheLoaderJob* plj = new PreviewCacheLoaderJob(photo);
 
-    plj->connect(plj, &PreviewCacheLoaderJob::imageReady,
-        this, &PhotoModel::previewLoaded);
+    plj->connect(plj, &PreviewCacheLoaderJob::imageReady, this, &PhotoModel::previewLoaded);
     uint32_t id = mThreadQueue->addJob(plj);
     mRunningThreads.insert(photo.id(), id);
 }
@@ -276,6 +275,7 @@ void PhotoModel::addData(const QList<long long>& idList)
     Photo        info;
     foreach(info, list)
     {
+        info.setOwner(this);
         mPhotoList.append(info);
     }
     //    insertRows(start,list.size());

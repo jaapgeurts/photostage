@@ -47,32 +47,30 @@ class Nullable final
 
         const Nullable<T>& operator=(std::nullptr_t nullpointer);
 
+        const T& operator*() const;
+        const T* operator->() const;
+
     private:
 
         bool m_hasValue;
         T    m_value;
-
-    public:
-
-        const T& value;
 };
-
 
 template <typename T>
 Nullable<T>::Nullable()
-    : m_hasValue(false), m_value(T()), value(m_value)
+    : m_hasValue(false), m_value(T())
 {
 }
 
 template <typename T>
 Nullable<T>::Nullable(const T& value)
-    : m_hasValue(true), m_value(value), value(m_value)
+    : m_hasValue(true), m_value(value)
 {
 }
 
 template <typename T>
 Nullable<T>::Nullable(std::nullptr_t nullpointer)
-    : m_hasValue(false), m_value(T()), value(m_value)
+    : m_hasValue(false), m_value(T())
 {
     (void)nullpointer;
 }
@@ -204,6 +202,18 @@ const Nullable<T>& Nullable<T>::operator=(std::nullptr_t nullpointer)
     m_hasValue = false;
     m_value    = T();
     return *this;
+}
+
+template <typename T>
+const T& Nullable<T>::operator*() const
+{
+    return m_value;
+}
+
+template <typename T>
+const T* Nullable<T>::operator->() const
+{
+    return &m_value;
 }
 
 #endif // PHOTOSTAGE_NULLABLE_H

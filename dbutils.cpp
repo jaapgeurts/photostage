@@ -6,42 +6,42 @@ QVariant setDbValue(const Nullable<uint8_t>& n)
 {
     if (n == nullptr)
         return QVariant(QVariant::Int);
-    return QVariant(n.value);
+    return QVariant(*n);
 }
 
 QVariant setDbValue(const Nullable<float>& n)
 {
     if (n == nullptr)
         return QVariant(QVariant::Double);
-    return QVariant(n.value);
+    return QVariant(*n);
 }
 
 QVariant setDbValue(const Nullable<double>& n)
 {
     if (n == nullptr)
         return QVariant(QVariant::Double);
-    return QVariant(n.value);
+    return QVariant(*n);
 }
 
 QVariant setDbValue(const Nullable<QDateTime>& n)
 {
     if (n == nullptr)
         return QVariant(QVariant::DateTime);
-    return QVariant(n.value);
+    return QVariant(*n);
 }
 
 QVariant setDbValue(const Nullable<QString>& n)
 {
     if (n == nullptr)
         return QVariant(QVariant::String);
-    return QVariant(n.value);
+    return QVariant(*n);
 }
 
 QVariant setDbValue(const Nullable<bool>& n)
 {
     if (n == nullptr)
         return QVariant(QVariant::Bool);
-    return QVariant(n.value);
+    return QVariant(*n);
 }
 
 void getDbValue(QSqlQuery& q, int col, Nullable<uint8_t>& out )
