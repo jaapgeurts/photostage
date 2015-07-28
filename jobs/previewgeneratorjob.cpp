@@ -10,32 +10,20 @@
 #include "engine/colortransform.h"
 #include "engine/pipelinebuilder.h"
 
-static inline long max(long x, long y)
+template<typename T>
+static inline long max(T x, T y)
 {
     return x > y ? x : y;
 }
 
-static inline long min(long x, long y)
+template<typename T>
+static inline long min(T x, T y)
 {
     return x < y ? x : y;
 }
 
-static inline long clip(long v, long x, long y)
-{
-    return max(x, min(v, y));
-}
-
-static inline double max(double x, double y)
-{
-    return x > y ? x : y;
-}
-
-static inline double min(double x, double y)
-{
-    return x < y ? x : y;
-}
-
-static inline double clip(double v, double x, double y)
+template<typename T>
+static inline long clip(T v, T x, T y)
 {
     return max(x, min(v, y));
 }

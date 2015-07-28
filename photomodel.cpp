@@ -266,7 +266,7 @@ void PhotoModel::addData(const QList<long long>& idList)
     int          start = rowCount(QModelIndex());
 
     QList<Photo> list = mWorkUnit->getPhotosById(idList);
-    beginInsertRows(QModelIndex(), start, list.size() - 1);
+    beginInsertRows(QModelIndex(), start, start + list.size() - 1);
     Photo        info;
     foreach(info, list)
     {
@@ -277,9 +277,7 @@ void PhotoModel::addData(const QList<long long>& idList)
     endInsertRows();
 }
 
-QVariant PhotoModel::headerData(int /*section*/,
-    Qt::Orientation /*orientation*/,
-    int /*role*/) const
+QVariant PhotoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int /*role*/) const
 {
     return QVariant();
 }
