@@ -52,8 +52,7 @@ TileView::TileView(QWidget* parent) :
 
     mCheckedList = new QList<QModelIndex>();
 
-    connect(mScrollBar, &QScrollBar::valueChanged,
-        this, &TileView::sliderValueChanged);
+    connect(mScrollBar, &QScrollBar::valueChanged, this, &TileView::sliderValueChanged);
 
     setMouseTracking(true);
 }
@@ -241,14 +240,10 @@ void TileView::setModel(QAbstractItemModel* model)
     mListModel      = model;
     mSelectionModel = new QItemSelectionModel(mListModel, this);
 
-    connect(model, &QAbstractItemModel::rowsInserted,
-        this, &TileView::onRowsInserted);
-    connect(model, &QAbstractItemModel::rowsRemoved,
-        this, &TileView::onRowsRemoved);
-    connect(model, &QAbstractItemModel::dataChanged,
-        this, &TileView::updateCellContents);
-    connect(model, &QAbstractItemModel::modelReset,
-        this, &TileView::resetView);
+    connect(model, &QAbstractItemModel::rowsInserted, this, &TileView::onRowsInserted);
+    connect(model, &QAbstractItemModel::rowsRemoved, this, &TileView::onRowsRemoved);
+    connect(model, &QAbstractItemModel::dataChanged, this, &TileView::updateCellContents);
+    connect(model, &QAbstractItemModel::modelReset, this, &TileView::resetView);
 
     resetView();
 }
@@ -938,15 +933,13 @@ void TileView::setCheckBoxMode(bool mode)
     mIsCheckBoxMode = mode;
 }
 
-void TileView::onRowsInserted(const QModelIndex& /*parent*/,
-    int /*first*/, int /*last*/)
+void TileView::onRowsInserted(const QModelIndex& /*parent*/, int /*first*/, int /*last*/)
 {
     computeScrollBarValues();
     update();
 }
 
-void TileView::onRowsRemoved(const QModelIndex& /*parent*/,
-    int /*first*/, int /*last*/)
+void TileView::onRowsRemoved(const QModelIndex& /*parent*/, int /*first*/, int /*last*/)
 {
     computeScrollBarValues();
     update();

@@ -40,7 +40,6 @@ MainWindow::MainWindow(QWidget* parent) :
 {
     QApplication::setFont(QFont(QString("verdana"), 10));
 
-
     ui->setupUi(this);
 
     mDatabaseAccess = new DatabaseAccess();
@@ -70,19 +69,14 @@ MainWindow::MainWindow(QWidget* parent) :
     mPhotoModelProxy->setSourceModel(mSourceModel);
 
     // setup PhotoModel connections
-    connect(mPhotoModelProxy, &PhotoModel::modelReset,
-        this, &MainWindow::onModelReset);
-    connect(mPhotoModelProxy, &PhotoModel::rowsInserted,
-        this, &MainWindow::onPhotoModelRowsInserted);
-    connect(mPhotoModelProxy, &PhotoModel::rowsRemoved,
-        this, &MainWindow::onPhotoModelRowsRemoved);
+    connect(mSourceModel, &PhotoModel::modelReset, this, &MainWindow::onModelReset);
+    connect(mSourceModel, &PhotoModel::rowsInserted, this, &MainWindow::onPhotoModelRowsInserted);
+    connect(mSourceModel, &PhotoModel::rowsRemoved, this, &MainWindow::onPhotoModelRowsRemoved);
 
     mPhotoSelection = new QItemSelectionModel(mPhotoModelProxy, this);
     // set up connections
-    connect(mPhotoSelection, &QItemSelectionModel::selectionChanged,
-        this, &MainWindow::onSelectionChanged);
-    connect(mPhotoSelection, &QItemSelectionModel::currentChanged,
-        this, &MainWindow::onCurrentChanged);
+    connect(mPhotoSelection, &QItemSelectionModel::selectionChanged, this, &MainWindow::onSelectionChanged);
+    connect(mPhotoSelection, &QItemSelectionModel::currentChanged, this, &MainWindow::onCurrentChanged);
 
     //**************
     // create the LIBRARY MODULE
@@ -91,12 +85,9 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->stackedWidget->addWidget(mLibrary);
 
     // setup connections
-    connect(mLibrary, &Library::photoSourceChanged,
-        this, &MainWindow::onPhotoSourceChanged);
-    connect(ui->actionLoupeInfoCycle, &QAction::triggered,
-        mLibrary, &Library::onCycleLoupeInfo);
-    connect(mLibrary, &Library::modelFilterApplied,
-        this, &MainWindow::onFilterApplied);
+    connect(mLibrary, &Library::photoSourceChanged, this, &MainWindow::onPhotoSourceChanged);
+    connect(ui->actionLoupeInfoCycle, &QAction::triggered, mLibrary, &Library::onCycleLoupeInfo);
+    connect(mLibrary, &Library::modelFilterApplied, this, &MainWindow::onFilterApplied);
 
     ui->filmStrip->setModel(mPhotoModelProxy);
     FilmstripTile* fsTile = new FilmstripTile(ui->filmStrip);
@@ -108,10 +99,8 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->filmStrip->setSelectionModel(mPhotoSelection);
     ui->filmStrip->setObjectName("Filmstrip");
 
-    connect(ui->filmStrip, &TileView::TileView::doubleClickTile,
-        this, &MainWindow::onTileDoubleClicked);
-    connect(ui->filmStrip, &TileView::TileView::visibleTilesChanged,
-        mSourceModel, &PhotoModel::onVisibleTilesChanged);
+    connect(ui->filmStrip, &TileView::TileView::doubleClickTile, this, &MainWindow::onTileDoubleClicked);
+    connect(ui->filmStrip, &TileView::TileView::visibleTilesChanged, mSourceModel, &PhotoModel::onVisibleTilesChanged);
 
     //***************
     // Create the DEVELOP MODULE
@@ -130,8 +119,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
     mPhotoWorkUnit = PhotoWorkUnit::instance();
 
-    mBackgroundTaskManager = new BackgroundTaskManager(
-        ui->scrollAreaWidgetContents, this);
+    mBackgroundTaskManager = new BackgroundTaskManager(ui->scrollAreaWidgetContents, this);
 
     // Put all actions in groups.
     mActionStatePhoto.addAction(ui->actionColorBlue);
@@ -406,7 +394,6 @@ void MainWindow::onSelectAll()
     QModelIndex    bottomRight = mPhotoModelProxy->index(c - 1, 0);
     QItemSelection selection (topLeft, bottomRight);
 
-
     mPhotoSelection->select(selection, QItemSelectionModel::Select);
 }
 
@@ -438,7 +425,6 @@ void MainWindow::onActionImportTriggered()
     ImportDialog* importDialog = new ImportDialog(this);
     int           resultCode   = importDialog->exec();
 
-
     if (resultCode == QDialog::Accepted)
     {
         ImportBackgroundTask* r =
@@ -455,7 +441,6 @@ void MainWindow::onActionAboutTriggered()
 {
     AboutDialog* aboutDialog = new AboutDialog(this);
 
-
     /*int code = */ aboutDialog->exec();
     delete aboutDialog;
 }
@@ -464,7 +449,6 @@ void MainWindow::onActionEditTimeTriggered()
 {
     TimeAdjustDialog* timeAdjustDialog = new TimeAdjustDialog(this);
 
-
     /*int code = */ timeAdjustDialog->exec();
     delete timeAdjustDialog;
 }
@@ -472,7 +456,6 @@ void MainWindow::onActionEditTimeTriggered()
 void MainWindow::onActionPreferences()
 {
     PreferencesDialog prefs(this);
-
 
     prefs.exec();
 }
@@ -562,7 +545,6 @@ void MainWindow::onActionLightsOff()
     //w->showFullScreen();
     QDesktopWidget* d = QApplication::desktop();
 
-
     for (int i = 0; i < d->screenCount(); i++)
     {
         qDebug() << "Lights off on screen:" << i;
@@ -585,7 +567,6 @@ void MainWindow::importFinished(BackgroundTask* task)
 {
     ImportBackgroundTask* t = static_cast<ImportBackgroundTask*>(task);
 
-
     mSourceModel->addData(t->resultList());
 
     task->deleteLater();
@@ -600,16 +581,12 @@ void MainWindow::onModelReset()
     updateInformationBar();
 }
 
-void MainWindow::onPhotoModelRowsInserted(const QModelIndex& /*parent*/,
-    int /*start*/,
-    int /*end*/)
+void MainWindow::onPhotoModelRowsInserted(const QModelIndex& /*parent*/, int /*start*/, int /*end*/)
 {
     updateInformationBar();
 }
 
-void MainWindow::onPhotoModelRowsRemoved(const QModelIndex& /*parent*/,
-    int /*start*/,
-    int /*end*/)
+void MainWindow::onPhotoModelRowsRemoved(const QModelIndex& /*parent*/, int /*start*/, int /*end*/)
 {
     updateInformationBar();
 }
@@ -649,7 +626,6 @@ void MainWindow::updateInformationBar()
 
     QString imagePath;
     Photo   photo = currentPhoto();
-
 
     if (!photo.isNull())
         imagePath = " " + photo.srcImagePath();

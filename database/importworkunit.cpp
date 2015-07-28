@@ -80,8 +80,7 @@ long long ImportWorkUnit::importPhoto(const QFileInfo& file,
     {
         mLastpath = dstdir;
         // TODO: find way to prevent this call
-        QStringList pathlist = dstdir.split(
-            QDir::separator(), QString::KeepEmptyParts);
+        QStringList pathlist = dstdir.split(QDir::separator(), QString::KeepEmptyParts);
         mLastkey = createPaths(pathlist);
     }
 
@@ -158,8 +157,7 @@ int ImportWorkUnit::createPaths(QStringList& paths)
 {
     QSqlQuery q;
 
-    q.prepare(
-        "select id, directory ,parent_id from path where directory = :dir and ifnull(parent_id,-1) = :p_id");
+    q.prepare("select id, directory ,parent_id from path where directory = :dir and ifnull(parent_id,-1) = :p_id");
 
     int key = insertPathRec(q, paths, 0, -1);
 
@@ -171,10 +169,7 @@ int ImportWorkUnit::createPaths(QStringList& paths)
 
 // recursively traverses the path, inserting directories in the table as needed.
 // returns the path id of the last directory
-int ImportWorkUnit::insertPathRec(QSqlQuery& q,
-    const QStringList& path,
-    int pos,
-    int parentid)
+int ImportWorkUnit::insertPathRec(QSqlQuery& q, const QStringList& path, int pos, int parentid)
 {
     if (pos >= path.length())
         return parentid;
@@ -183,6 +178,7 @@ int ImportWorkUnit::insertPathRec(QSqlQuery& q,
 
     qDebug() << "Checking path:" << p;
     q.bindValue(":dir", p);
+    q.bindValue(":p_id",parentid);
 
     if (q.exec())
     {
@@ -196,8 +192,7 @@ int ImportWorkUnit::insertPathRec(QSqlQuery& q,
         {
             qDebug() << "Creating path";
             QSqlQuery iq;     // insert query
-            iq.prepare(
-                "insert into path (directory,parent_id) values (:directory, :parent)");
+            iq.prepare("insert into path (directory,parent_id) values (:directory, :parent)");
             iq.bindValue(":directory", p);
 
             if (parentid == -1)

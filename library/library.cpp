@@ -50,10 +50,8 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     // ui->mClvPhotos->setObjectName("LibaryPhotos");
 
     ui->mClvPhotos->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->mClvPhotos, &TileView::TileView::customContextMenuRequested,
-        this, &Library::customContextMenu);
-    connect(ui->mClvPhotos, &TileView::TileView::doubleClickTile,
-        this, &Library::onTileDoubleClicked);
+    connect(ui->mClvPhotos, &TileView::TileView::customContextMenuRequested, this, &Library::customContextMenu);
+    connect(ui->mClvPhotos, &TileView::TileView::doubleClickTile, this, &Library::onTileDoubleClicked);
     connect(ui->mClvPhotos, &TileView::TileView::visibleTilesChanged,
         (PhotoModel*)mPhotoModel->sourceModel(),
         &PhotoModel::onVisibleTilesChanged);
@@ -83,12 +81,9 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     mTrvwFiles->setModel(mPathModel);
     mTrvwFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->ModulePanel_1->addPanel("Folders", mTrvwFiles);
-    connect(mTrvwFiles, &FixedTreeView::clicked, this,
-        &Library::onFilesClicked);
-    connect(mPathModel, &SqlPathModel::rowsInserted, this,
-        &Library::onPathModelRowsAdded);
-    connect(mPathModel, &SqlPathModel::rowsRemoved, this,
-        &Library::onPathModelRowsRemoved);
+    connect(mTrvwFiles, &FixedTreeView::clicked, this, &Library::onFilesClicked);
+    connect(mPathModel, &SqlPathModel::rowsInserted, this, &Library::onPathModelRowsAdded);
+    connect(mPathModel, &SqlPathModel::rowsRemoved, this, &Library::onPathModelRowsRemoved);
 
     // collections module
     CollectionModule* cm   = new CollectionModule(ui->ModulePanel_1);
@@ -190,10 +185,8 @@ int Library::tilesPerRowOrCol()
 void Library::setSelectionModel(QItemSelectionModel* selectionModel)
 {
     ui->mClvPhotos->setSelectionModel(selectionModel);
-    connect(selectionModel, &QItemSelectionModel::selectionChanged,
-        this, &Library::onPhotoSelectionChanged);
-    connect(selectionModel, &QItemSelectionModel::currentChanged,
-        this, &Library::onCurrentPhotoChanged);
+    connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &Library::onPhotoSelectionChanged);
+    connect(selectionModel, &QItemSelectionModel::currentChanged, this, &Library::onCurrentPhotoChanged);
 }
 
 void Library::onFilesClicked(const QModelIndex& index)

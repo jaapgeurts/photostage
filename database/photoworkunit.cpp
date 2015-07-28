@@ -7,7 +7,6 @@
 #include "photoworkunit.h"
 #include "utils.h"
 
-
 namespace PhotoStage
 {
 // static initializers
@@ -268,7 +267,7 @@ QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
 {
     QSqlQuery q;
     QString   query = QString(
-        "select p.id, p.filename, d.path,p.rating,p.color,p.flag, \
+        "select p.id, p.filename, d.path ,p.rating,p.color,p.flag, \
                 p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
                 p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
                 p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
@@ -311,8 +310,7 @@ QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
 }
 
 // TODO: make path_id work and option to include
-QList<Photo> PhotoWorkUnit::getPhotosByPath(long long path_id,
-    bool includeSubDirs)
+QList<Photo> PhotoWorkUnit::getPhotosByPath(long long path_id, bool includeSubDirs)
 {
     QList<Photo> list;
 
@@ -430,9 +428,10 @@ void PhotoWorkUnit::updateExifInfo(const Photo& photo) const
 
 void PhotoWorkUnit::regenerateHash(Photo& p)
 {
-    QString path = p.srcImagePath();
+    QString   path = p.srcImagePath();
     // only scan the first 1MB
     long long hash = computeImageFileHash(path);
+
     p.setHash(hash);
 
     QSqlQuery q;

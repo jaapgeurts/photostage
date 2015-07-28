@@ -43,10 +43,8 @@ uint32_t ThreadQueue::addJob(Runnable* runnable)
         // is running in its own thread.
         moveToThread(&mThread);
 
-        connect(&mThread, &QThread::started,
-            this, &ThreadQueue::onStarted);
-        connect(this, &ThreadQueue::finished,
-            &mResultForwarder, &ResultForwarder::onFinished);
+        connect(&mThread, &QThread::started, this, &ThreadQueue::onStarted);
+        connect(this, &ThreadQueue::finished, &mResultForwarder, &ResultForwarder::onFinished);
     }
     // TODO: connect errors
 

@@ -104,8 +104,7 @@ void PhotoModel::convertImage(Photo& photo)
     ColorTransformJob* cfj = new ColorTransformJob(photo);
 
     // convert the image to sRGB
-    cfj->connect(cfj, &ColorTransformJob::imageReady,
-        this, &PhotoModel::imageTranslated);
+    cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::imageTranslated);
     uint32_t id = mThreadQueue->addJob(cfj);
     mRunningThreads.insert(photo.id(), id);
 }
@@ -121,8 +120,7 @@ void PhotoModel::previewLoaded(Photo photo, const QImage& image)
         ColorTransformJob* cfj = new ColorTransformJob(photo);
 
         // convert the image to sRGB
-        cfj->connect(cfj, &ColorTransformJob::imageReady,
-            this, &PhotoModel::imageTranslated);
+        cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::imageTranslated);
         uint32_t id = mThreadQueue->addJob(cfj);
 
         mRunningThreads.insert(photo.id(), id);
@@ -132,9 +130,8 @@ void PhotoModel::previewLoaded(Photo photo, const QImage& image)
         // no image available in the cache.
         // generate a preview from the original image
         PreviewGeneratorJob* il = new PreviewGeneratorJob(photo);
-        il->connect(il, &PreviewGeneratorJob::imageReady,
-            this, &PhotoModel::previewGenerated);
-        uint32_t id = mThreadQueue->addJob(il);
+        il->connect(il, &PreviewGeneratorJob::imageReady, this, &PhotoModel::previewGenerated);
+        uint32_t             id = mThreadQueue->addJob(il);
         mRunningThreads.insert(photo.id(), id);
     }
 }
@@ -175,8 +172,7 @@ void PhotoModel::previewGenerated(Photo photo, const QImage& image)
     ColorTransformJob* cfj = new ColorTransformJob(photo);
 
     // convert the image to sRGB
-    cfj->connect(cfj, &ColorTransformJob::imageReady,
-        this, &PhotoModel::imageTranslated);
+    cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::imageTranslated);
     uint32_t id = mThreadQueue->addJob(cfj);
     mRunningThreads.insert(photo.id(), id);
 }
@@ -189,8 +185,7 @@ void PhotoModel::imageTranslated(Photo photo, const QImage& image)
 
         // find the index for this photo.
         QVector<int> roles;
-        emit         dataChanged(mPhotoIndexMap.value(photo.id()),
-            mPhotoIndexMap.value(photo.id()), roles);
+        emit         dataChanged(mPhotoIndexMap.value(photo.id()), mPhotoIndexMap.value(photo.id()), roles);
     }
     mRunningThreads.remove(photo.id());
     photo.setIsDownloading(false);

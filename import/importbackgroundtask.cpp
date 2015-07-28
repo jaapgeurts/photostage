@@ -36,8 +36,7 @@ void ImportBackgroundTask::run()
         long long id   = mWorkUnit->importPhoto(info, mInfo.options());
 
         if (id == -1)
-            qDebug() << "There was an error importing file:" <<
-                info.filePath();
+            qDebug() << "There was an error importing file:" << info.filePath();
         else
             mIdList.append(id);
         i++;
