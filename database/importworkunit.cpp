@@ -8,7 +8,6 @@
 #include "previewcache.h"
 #include "dbutils.h"
 #include "utils.h"
-#include "constants.h"
 
 namespace PhotoStage
 {
@@ -92,21 +91,12 @@ long long ImportWorkUnit::importPhoto(const QFileInfo& file,
     ExifInfo    ei;
 
     if (!ex->openFile(srcpath))
-    {
         qDebug() << "Skipping exif info";
-    }
     else
-    {
         ei = ex->data();
-    }
     delete(ex);
 
-    QFile f(srcpath);
-
-    f.open(QIODevice::ReadOnly);
-    QByteArray array = f.read(HASH_INPUT_LEN);
-    long long  hash  = xxHash(array);
-    f.close();
+    long long hash = computeImageFileHash(srcpath);
 
     QSqlQuery q;
     q.prepare(
@@ -130,7 +120,7 @@ long long ImportWorkUnit::importPhoto(const QFileInfo& file,
 
     if (ei.location != nullptr)
     {
-        q.bindValue(":longitude",ei.location->longitude());
+        q.bindValue(":longitude", ei.location->longitude());
         q.bindValue(":lattitude", ei.location->latitude());
     }
     else

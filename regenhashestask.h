@@ -3,7 +3,7 @@
 
 #include <QList>
 
-#include "workunits/photoworkunit.h"
+#include "database/photoworkunit.h"
 #include "backgroundtask.h"
 
 namespace PhotoStage

@@ -1,5 +1,5 @@
-#ifndef QPHOTOMODEL_H
-#define QPHOTOMODEL_H
+#ifndef PHOTOSTAGE_PHOTOMODEL_H
+#define PHOTOSTAGE_PHOTOMODEL_H
 
 #include <QAbstractListModel>
 #include <QImage>
@@ -8,7 +8,7 @@
 #include "photo.h"
 #include "previewcache.h"
 #include "threadqueue.h"
-#include "workunits/photoworkunit.h"
+#include "database/photoworkunit.h"
 
 namespace PhotoStage
 {
@@ -73,4 +73,4 @@ class PhotoModel : public QAbstractListModel
 };
 }
 
-#endif // QPHOTOMODEL_H
+#endif // PHOTOSTAGE_PHOTOMODEL_H

@@ -7,18 +7,17 @@
 
 namespace PhotoStage
 {
-    class PreviewInfo
-    {
-        public:
+class PreviewInfo
+{
+    public:
 
-            PreviewInfo()
-            {
-            };
-            PreviewInfo(const QImage& img, const QString& path);
+        PreviewInfo();
+        PreviewInfo(const QImage& img, const QString& path);
 
-            QImage  image;
-            QString filePath;
-    };
+        QImage  image;
+        QString filePath;
+        bool    isInLibrary;
+};
 }
 Q_DECLARE_METATYPE(PhotoStage::PreviewInfo)
 

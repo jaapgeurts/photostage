@@ -28,7 +28,14 @@ SOURCES += \
     aboutdialog.cpp \
     backgroundtask.cpp \
     backgroundtaskmanager.cpp \
-    databaseaccess.cpp \
+    cartography/map.cpp \
+    cartography/photomarker.cpp \
+    database/databaseaccess.cpp \
+    database/dbutils.cpp \
+    database/importinfo.cpp \
+    database/importoptions.cpp \
+    database/importworkunit.cpp \
+    database/photoworkunit.cpp \
     develop/develop.cpp \
     develop/modules/basicmodule.cpp \
     develop/modules/develophistogrammodule.cpp \
@@ -49,26 +56,32 @@ SOURCES += \
     import/importdialog.cpp \
     import/previewfileloader.cpp \
     import/previewinfo.cpp \
+    jobs/colortransformjob.cpp \
+    jobs/previewcacheloaderjob.cpp \
+    jobs/previewgeneratorjob.cpp \
     library/imagedbtile.cpp \
     library/library.cpp \
     library/modules/collectionmodule.cpp \
+    library/modules/filtermodule.cpp \
     library/modules/libraryhistogrammodule.cpp \
     library/modules/librarymodule.cpp \
     library/modules/metadatamodule.cpp \
     library/modules/shortcutmodule.cpp \
     library/modules/taggingmodule.cpp \
-    main.cpp\
+    main.cpp \
     mainwindow.cpp \
-    cartography/map.cpp \
-    cartography/photomarker.cpp \
     photo.cpp \
     photodata.cpp \
     photomodel.cpp \
+    photosortfilterproxymodel.cpp \
     preferences.cpp \
     preferencesdialog.cpp \
     previewcache.cpp \
+    regenhashestask.cpp \
+    runnable.cpp \
     sqlkeywordmodel.cpp \
     sqlpathmodel.cpp \
+    threadqueue.cpp \
     timeadjustdialog.cpp \
     utils.cpp \
     widgets/abstracttile.cpp \
@@ -87,20 +100,7 @@ SOURCES += \
     widgets/mapview/openstreetmapmapprovider.cpp \
     widgets/modulepanel.cpp \
     widgets/tileview.cpp \
-    widgets/translucentwindow.cpp \
-    workunits/importinfo.cpp \
-    workunits/importoptions.cpp \
-    workunits/importworkunit.cpp \
-    workunits/photoworkunit.cpp \
-    library/modules/filtermodule.cpp \
-    threadqueue.cpp \
-    runnable.cpp \
-    jobs/colortransformjob.cpp \
-    jobs/previewgeneratorjob.cpp \
-    jobs/previewcacheloaderjob.cpp \
-    photosortfilterproxymodel.cpp \
-    regenhashestask.cpp \
-    dbutils.cpp
+    widgets/translucentwindow.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -108,8 +108,15 @@ HEADERS  += \
     aboutdialog.h \
     backgroundtask.h \
     backgroundtaskmanager.h \
+    cartography/map.h \
+    cartography/photomarker.h \
     constants.h \
-    databaseaccess.h \
+    database/databaseaccess.h \
+    database/dbutils.h \
+    database/importinfo.h \
+    database/importoptions.h \
+    database/importworkunit.h \
+    database/photoworkunit.h \
     develop/develop.h \
     develop/modules/basicmodule.h \
     develop/modules/develophistogrammodule.h \
@@ -125,32 +132,41 @@ HEADERS  += \
     image.h \
     import/exiv2lib.h \
     import/exivfacade.h \
+    import/exivutils.h \
     import/imagefilesystemmodel.h \
     import/imagefiletile.h \
     import/importbackgroundtask.h \
     import/importdialog.h \
     import/previewfileloader.h \
     import/previewinfo.h \
+    jobs/colortransformjob.h \
+    jobs/previewcacheloaderjob.h \
+    jobs/previewgeneratorjob.h \
     library/imagedbtile.h \
     library/library.h \
     library/modules/collectionmodule.h \
+    library/modules/filtermodule.h \
     library/modules/libraryhistogrammodule.h \
     library/modules/librarymodule.h \
     library/modules/metadatamodule.h \
     library/modules/shortcutmodule.h \
     library/modules/taggingmodule.h \
     mainwindow.h \
-    cartography/map.h \
-    cartography/photomarker.h \
     module.h \
+    nullable.h \
     photo.h \
     photodata.h \
+    photofilterinfo.h \
     photomodel.h \
+    photosortfilterproxymodel.h \
     preferences.h \
     preferencesdialog.h \
     previewcache.h \
+    regenhashestask.h \
+    runnable.h \
     sqlkeywordmodel.h \
     sqlpathmodel.h \
+    threadqueue.h \
     timeadjustdialog.h \
     utils.h \
     widgets/abstracttile.h \
@@ -169,23 +185,7 @@ HEADERS  += \
     widgets/mapview/openstreetmapmapprovider.h \
     widgets/modulepanel.h \
     widgets/tileview.h \
-    widgets/translucentwindow.h \
-    workunits/importinfo.h \
-    workunits/importoptions.h \
-    workunits/importworkunit.h \
-    workunits/photoworkunit.h \
-    library/modules/filtermodule.h \
-    threadqueue.h \
-    runnable.h \
-    jobs/colortransformjob.h \
-    jobs/previewgeneratorjob.h \
-    jobs/previewcacheloaderjob.h \
-    photosortfilterproxymodel.h \
-    nullable.h \
-    photofilterinfo.h \
-    regenhashestask.h \
-    dbutils.h \
-    import/exivutils.h
+    widgets/translucentwindow.h
 
 FORMS    += \
     mainwindow.ui \

@@ -75,6 +75,11 @@ void ImageFileTile::render(QPainter& painter,
             QFontMetrics m(fileNameFont);
             int          textWidth = m.width(name);
             painter.drawText((w - textWidth) / 2, h - 5, name);
+
+            if (info.isInLibrary)
+            {
+                painter.fillRect(0, 0, w, h, QBrush(QColor(0, 0, 0, 80)));
+            }
         }
         else
         {

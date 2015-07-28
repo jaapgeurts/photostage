@@ -1,9 +1,11 @@
 #include <QThread>
 #include <QDebug>
 
+#include "database/photoworkunit.h"
 #include "imagefilesystemmodel.h"
 #include "previewfileloader.h"
 #include "widgets/tileview.h"
+#include "utils.h"
 
 namespace PhotoStage
 {
@@ -25,8 +27,8 @@ QVariant ImageFileSystemModel::data(const QModelIndex& index,
 {
     if (!index.isValid())
         return QVariant();
-    QVariant data = QFileSystemModel::data(index,
-            QFileSystemModel::FilePathRole);
+
+    QVariant data = QFileSystemModel::data(index, QFileSystemModel::FilePathRole);
 
     if (role == TileView::TileView::ImageRole)
     {
@@ -45,8 +47,7 @@ QVariant ImageFileSystemModel::data(const QModelIndex& index,
             info.filePath = path;
             // load image in background thread
             PreviewFileLoader* loader = new PreviewFileLoader(path, index);
-            connect(loader, &PreviewFileLoader::dataReady,
-                this, &ImageFileSystemModel::imageLoaded);
+            connect(loader, &PreviewFileLoader::dataReady, this, &ImageFileSystemModel::imageLoaded);
             mThreadPool->start(loader);
 
             // Insert the dummy image here so that the we know the loader thread has been started
@@ -54,9 +55,7 @@ QVariant ImageFileSystemModel::data(const QModelIndex& index,
 
             return QVariant();
         }
-        QVariant v;
-        v.setValue(info);
-        return v;
+        return QVariant::fromValue<PreviewInfo>(info);
     }
     else
     {
@@ -69,11 +68,10 @@ void ImageFileSystemModel::clearCache()
     mPreviewInfoCache->clear();
 }
 
-void ImageFileSystemModel::imageLoaded(const QModelIndex& index,
-    const QImage& pixmap)
+void ImageFileSystemModel::imageLoaded(const QModelIndex& index, const QImage& pixmap)
 {
     PreviewInfo info = mPreviewInfoCache->value(index);
-
+    info.isInLibrary =  PhotoWorkUnit::instance()->IsInLibrary(computeImageFileHash(info.filePath));
     info.image = pixmap;
     mPreviewInfoCache->insert(index, info);
     QVector<int> roles;

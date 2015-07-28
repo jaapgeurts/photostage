@@ -5,7 +5,7 @@
 #include <QList>
 
 #include "backgroundtask.h"
-#include "workunits/importworkunit.h"
+#include "database/importworkunit.h"
 
 namespace PhotoStage
 {

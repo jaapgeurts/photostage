@@ -39,10 +39,12 @@ class PhotoWorkUnit
 
         QList<Photo> getPhotosById(QList<long long> idList);
 
-        void updateExifInfo(const Photo& photo) const;    
-        void regenerateHash(Photo &p);
+        void updateExifInfo(const Photo& photo) const;
+        void regenerateHash(Photo& p);
 
-protected:
+        bool IsInLibrary(long long hash) const;
+
+    protected:
 
         PhotoWorkUnit();
 

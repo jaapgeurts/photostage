@@ -6,7 +6,7 @@
 
 #include "photoworkunit.h"
 #include "utils.h"
-#include "constants.h"
+
 
 namespace PhotoStage
 {
@@ -432,11 +432,8 @@ void PhotoWorkUnit::regenerateHash(Photo& p)
 {
     QString path = p.srcImagePath();
     // only scan the first 1MB
-    QFile   f(path);
-
-    f.open(QIODevice::ReadOnly);
-    QByteArray array = f.read(HASH_INPUT_LEN);
-    p.setHash(xxHash(array));
+    long long hash = computeImageFileHash(path);
+    p.setHash(hash);
 
     QSqlQuery q;
     q.prepare("update photo set photo_hash=:hash where id = :photoid");
@@ -450,5 +447,27 @@ void PhotoWorkUnit::regenerateHash(Photo& p)
     }
 
     return;
+}
+
+bool PhotoWorkUnit::IsInLibrary(long long hash) const
+{
+    QSqlQuery q;
+
+    q.prepare("select count(*) from photo where photo_hash = :hash");
+    q.bindValue(":hash", hash);
+
+    if (!q.exec())
+    {
+        qDebug() << "Query failed" << q.executedQuery();
+        qDebug() << q.lastError();
+    }
+
+    if (!q.next())
+        qDebug() << "select count(*) for hash returned no results!??";
+    int res = q.value(0).toInt();
+
+    if (res > 1)
+        qDebug() << "There are two photos with the same hash";
+    return res == 1;
 }
 }

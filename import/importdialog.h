@@ -3,11 +3,10 @@
 
 #include <QDialog>
 #include <QFileSystemModel>
+
 #include "imagefilesystemmodel.h"
-
 #include "widgets/tileview.h"
-
-#include "workunits/importinfo.h"
+#include "database/importinfo.h"
 
 namespace Ui
 {
@@ -45,7 +44,7 @@ class ImportDialog : public QDialog
         QFileSystemModel*         mDestinationDrivesModel;
         QModelIndex               mDestinationModelIndex;
         ImageFileSystemModel*     mFilesModel;
-        TileView::TileView*                 mCfvPhotos;
+        TileView::TileView*       mCfvPhotos;
         ImportOptions::ImportMode mImportMode;
         QItemSelectionModel*      mFilesSelectionModel;
 

@@ -1,4 +1,5 @@
 #include "utils.h"
+#include "constants.h"
 #include "external/xxHash/xxhash.h"
 
 namespace PhotoStage
@@ -33,15 +34,28 @@ QRect fitFrame(const QSize& src, const QSize& dst)
     return QRect(x, y, wn, hn);
 }
 
-long long xxHash(const QByteArray& array)
+long long computeImageFileHash(QFile& file)
 {
-    long long hash = XXH64(array.constData(), array.length(), 0);
-
-    return hash;
+    if (!file.isOpen())
+        file.open(QIODevice::ReadOnly);
+    QByteArray array = file.read(HASH_INPUT_LEN);
+    return XXH64(array.constData(), array.length(), 0);
 }
 
+long long computeImageFileHash(const QFileInfo& info)
+{
+    QFile file(info.canonicalFilePath());
+
+    return computeImageFileHash(file);
 }
 
+long long computeImageFileHash(const QString& path)
+{
+    QFile file(path);
+
+    return computeImageFileHash(file);
+}
+}
 // this code is needed for RawSpeed
 
 int rawspeed_get_number_of_processor_cores()

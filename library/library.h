@@ -5,7 +5,7 @@
 
 #include "photomodel.h"
 #include "sqlpathmodel.h"
-#include "workunits/photoworkunit.h"
+#include "database/photoworkunit.h"
 #include "imagedbtile.h"
 #include "modules/taggingmodule.h"
 #include "modules/filtermodule.h"

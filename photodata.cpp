@@ -7,7 +7,7 @@
 #include "photomodel.h"
 #include "photodata.h"
 
-#include "dbutils.h"
+#include "database/dbutils.h"
 #include "utils.h"
 
 namespace PhotoStage
@@ -35,12 +35,8 @@ PhotoData::PhotoData(QSqlQuery& q) :
 
     mRating = q.value(3).isNull() ?  0 : q.value(3).toInt();
 
-    mColorLabel =
-        q.value(4).isNull() ? Photo::LabelNoColor : (Photo::ColorLabel)q.
-        value(4).toInt();
-    mFlag =
-        q.value(5).isNull() ? Photo::FlagNone : (Photo::Flag)q.value(5).
-        toInt();
+    mColorLabel = q.value(4).isNull() ? Photo::LabelNoColor : (Photo::ColorLabel)q.value(4).toInt();
+    mFlag       = q.value(5).isNull() ? Photo::FlagNone : (Photo::Flag)q.value(5).toInt();
 
     // p.id, p.filename, c.directory,p.rating,p.color,p.flag, \
     // p.iso, p.aperture, p.exposure_time, p.focal_length, p.datetime_original,\
@@ -55,8 +51,7 @@ PhotoData::PhotoData(QSqlQuery& q) :
     mExifInfo.rotation = q.value(12).isNull() ? ExifInfo::NotRotated : (ExifInfo::Rotation)q.value(12).toInt();
 
     if (!q.value(13).isNull() && !q.value(14).isNull())
-        mExifInfo.location =  QGeoCoordinate(q.value(13)
-                .toDouble(), q.value(14).toDouble());
+        mExifInfo.location =  QGeoCoordinate(q.value(13).toDouble(), q.value(14).toDouble());
     else
         mExifInfo.location = nullptr;
     getDbValue(q, 15, mExifInfo.copyright);
@@ -65,7 +60,7 @@ PhotoData::PhotoData(QSqlQuery& q) :
     getDbValue(q, 18, mExifInfo.lensName );
     getDbValue(q, 19, mExifInfo.make );
     getDbValue(q, 20, mExifInfo.model);
-    // these two values are NON NULL
+    // these two values are declared NOT NULL
     mExifInfo.width  = q.value(21).toInt();
     mExifInfo.height = q.value(22).toInt();
 }

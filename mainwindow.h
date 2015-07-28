@@ -11,7 +11,7 @@
 #include "develop/develop.h"
 #include "widgets/actionstategroup.h"
 #include "cartography/map.h"
-#include "databaseaccess.h"
+#include "database/databaseaccess.h"
 #include "backgroundtaskmanager.h"
 #include "photosortfilterproxymodel.h"
 

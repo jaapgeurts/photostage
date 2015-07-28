@@ -4,6 +4,9 @@
 #include <QRect>
 #include <QSize>
 #include <QByteArray>
+#include <QString>
+#include <QFileInfo>
+#include <QFile>
 
 namespace PhotoStage
 {
@@ -16,7 +19,9 @@ namespace PhotoStage
  */
 QRect fitFrame(const QSize& src, const QSize& dst);
 
-long long xxHash(const QByteArray& array);
+long long computeImageFileHash(QFile& file);
+long long computeImageFileHash(const QFileInfo& info);
+long long computeImageFileHash(const QString& path);
 }
 
 #endif // PHOTOSTAGE_UTILS_H

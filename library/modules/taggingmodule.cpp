@@ -4,7 +4,7 @@
 #include <QKeyEvent>
 
 #include "library/modules/taggingmodule.h"
-#include "workunits/photoworkunit.h"
+#include "database/photoworkunit.h"
 
 namespace PhotoStage
 {

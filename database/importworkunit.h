@@ -3,7 +3,7 @@
 
 #include <QtSql>
 
-#include "workunits/importinfo.h"
+#include "database/importinfo.h"
 
 namespace PhotoStage
 {
