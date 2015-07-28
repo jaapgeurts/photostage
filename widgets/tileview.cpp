@@ -52,10 +52,8 @@ TileView::TileView(QWidget* parent) :
 
     mCheckedList = new QList<QModelIndex>();
 
-    // mLastSelection = QModelIndex();
-
-    connect(mScrollBar, &QScrollBar::valueChanged, this,
-        &TileView::sliderValueChanged);
+    connect(mScrollBar, &QScrollBar::valueChanged,
+        this, &TileView::sliderValueChanged);
 
     setMouseTracking(true);
 }
@@ -628,20 +626,8 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
                 else if ((modifiers& Qt::ShiftModifier) ==
                     Qt::ShiftModifier)
                 {
-                    int first = mSelectionModel->currentIndex().row();
-                    int last  = index.row();
-
-                    // swap if negative direction
-                    if (first > last)
-                    {
-                        int t = first;
-                        first = last;
-                        last  = t;
-                    }
                     QItemSelection selection;
-
-                    selection.select(mListModel->index(first, 0),
-                        mListModel->index(last, 0));
+                    selection.select(mSelectionModel->currentIndex(), index);
 
                     if (selection.size() > 0)
                         mSelectionModel->select(selection,

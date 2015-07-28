@@ -126,13 +126,13 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
 
     qDebug() << "Expanding";
     QModelIndex index = mPathModel->index(pathid);
-    do
+
+    while (index.isValid())
     {
         qDebug() << "+" << ((PathItem*)index.internalPointer())->path;
         mTrvwFiles->expand(index);
         index = index.parent();
     }
-    while (index.isValid());
 
     emit photoSourceChanged(PhotoModel::SourceFiles, pathid);
 }
