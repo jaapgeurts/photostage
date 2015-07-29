@@ -20,7 +20,8 @@
 
 using namespace Exiv2;
 
-static inline float max3(float a, float b, float c)
+template<typename T>
+static inline T max3(T a, T b, T c)
 {
     if (a > b)
         return a > c ? a : c;
@@ -142,8 +143,8 @@ bool Exiv2Lib::openFile(const QString& path)
     mExifInfo.rotation  = rot == nullptr ? ExifInfo::NotRotated : *rot;
     mExifInfo.copyright = getExifValue<QString>(data, "Exif.Image.Copyright");
     mExifInfo.artist    = getExifValue<QString>(data, "Exif.Image.Artist");
-    Nullable<uint16_t> w = getExifValue<uint16_t>(data, "Exif.Photo.ExifImageWidth");
-    Nullable<uint16_t> h = getExifValue<uint16_t>(data, "Exif.Photo.ExifImageHeight");
+    Nullable<uint16_t> w = getExifValue<uint16_t>(data, "Exif.Image.ImageWidth");
+    Nullable<uint16_t> h = getExifValue<uint16_t>(data, "Exif.Image.ImageLength");
     mExifInfo.width  = w == nullptr ? 0 : *w;
     mExifInfo.height = h == nullptr ? 0 : *h;
 

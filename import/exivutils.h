@@ -26,7 +26,7 @@ Nullable<QString> getExifValue(Exiv2::ExifData& data,
     }
     catch (Exiv2::BasicError<char> e)
     {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+        //  qDebug() << "No such Exif field" << key << "Debug:" << e.what();
     }
     return nullptr;
 }
@@ -45,7 +45,7 @@ Nullable<float> getExifValue(Exiv2::ExifData& data, const QString& key)
     }
     catch (Exiv2::BasicError<char> e)
     {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+        // qDebug() << "No such Exif field" << key << "Debug:" << e.what();
     }
     return nullptr;
 }
@@ -64,7 +64,7 @@ Nullable<long> getExifValue(Exiv2::ExifData& data, const QString& key)
     }
     catch (Exiv2::BasicError<char> e)
     {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+        // qDebug() << "No such Exif field" << key << "Debug:" << e.what();
     }
     return nullptr;
 }
@@ -83,7 +83,7 @@ Nullable<uint8_t> getExifValue(Exiv2::ExifData& data, const QString& key)
     }
     catch (Exiv2::BasicError<char> e)
     {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+        //qDebug() << "No such Exif field" << key << "Debug:" << e.what();
     }
     return nullptr;
 }
@@ -102,7 +102,7 @@ Nullable<uint16_t> getExifValue(Exiv2::ExifData& data, const QString& key)
     }
     catch (Exiv2::BasicError<char> e)
     {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+        //  qDebug() << "No such Exif field" << key << "Debug:" << e.what();
     }
     return nullptr;
 }
@@ -121,7 +121,7 @@ Nullable<int16_t> getExifValue(Exiv2::ExifData& data, const QString& key)
     }
     catch (Exiv2::BasicError<char> e)
     {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+        //qDebug() << "No such Exif field" << key << "Debug:" << e.what();
     }
     return nullptr;
 }
@@ -140,14 +140,13 @@ Nullable<bool> getExifValue(Exiv2::ExifData& data, const QString& key)
     }
     catch (Exiv2::BasicError<char> e)
     {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+        // qDebug() << "No such Exif field" << key << "Debug:" << e.what();
     }
     return nullptr;
 }
 
 template<>
-Nullable<PhotoStage::ExifInfo::Rotation> getExifValue(Exiv2::ExifData& data,
-    const QString& key)
+Nullable<PhotoStage::ExifInfo::Rotation> getExifValue(Exiv2::ExifData& data, const QString& key)
 {
     Exiv2::ExifData::const_iterator pos;
 
@@ -160,7 +159,7 @@ Nullable<PhotoStage::ExifInfo::Rotation> getExifValue(Exiv2::ExifData& data,
     }
     catch (Exiv2::BasicError<char> e)
     {
-        qDebug() << "No such Exif field" << key << "Debug:" << e.what();
+        // qDebug() << "No such Exif field" << key << "Debug:" << e.what();
     }
     return nullptr;
 }
