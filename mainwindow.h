@@ -76,6 +76,8 @@ class MainWindow : public QMainWindow
         void onDeletePhotos();
         void onDeleteRejectedPhotos();
 
+        void onShowInFileBrowser();
+
         // flags
         void onActionFlagPick();
         void onActionFlagReject();

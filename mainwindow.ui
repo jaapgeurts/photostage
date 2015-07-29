@@ -398,7 +398,7 @@
     </widget>
     <addaction name="actionAdd_to_Quick_Collection"/>
     <addaction name="separator"/>
-    <addaction name="actionShow_in_Finder"/>
+    <addaction name="actionShowInFileBrowser"/>
     <addaction name="separator"/>
     <addaction name="actionRotate_Left"/>
     <addaction name="actionRotate_Right"/>
@@ -615,9 +615,9 @@
     <string>Add to Quick Collection</string>
    </property>
   </action>
-  <action name="actionShow_in_Finder">
+  <action name="actionShowInFileBrowser">
    <property name="text">
-    <string>Show in Finder</string>
+    <string>Reveal in Finder</string>
    </property>
   </action>
   <action name="actionRotate_Left">
@@ -1512,6 +1512,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionShowInFileBrowser</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>onShowInFileBrowser()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>445</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onActionImportTriggered()</slot>
@@ -1545,6 +1561,7 @@
   <slot>onActionRegenHashes()</slot>
   <slot>onDeletePhotos()</slot>
   <slot>onDeleteRejectedPhotos()</slot>
+  <slot>onShowInFileBrowser()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="moduleNavGroup"/>

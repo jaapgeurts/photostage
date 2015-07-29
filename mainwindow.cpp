@@ -5,7 +5,6 @@
 #include <QLineEdit>
 #include <QDesktopWidget>
 #include <QVariantList>
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
@@ -150,7 +149,7 @@ MainWindow::MainWindow(QWidget* parent) :
     mActionStatePhoto.addAction(ui->actionFlip_Horizontal);
     mActionStatePhoto.addAction(ui->actionFlip_Vertical);
 
-    mActionStatePhoto.addAction(ui->actionShow_in_Finder);
+    mActionStatePhoto.addAction(ui->actionShowInFileBrowser);
     mActionStatePhoto.addAction(ui->actionDeletePhotos);
     mActionStatePhoto.addAction(ui->actionDeleteRejectedPhotos);
 
@@ -525,6 +524,60 @@ void MainWindow::onDeletePhotos()
 void MainWindow::onDeleteRejectedPhotos()
 {
     qDebug() << "void MainWindow::onDeleteRejectedPhotos() Not implemented";
+}
+
+void MainWindow::onShowInFileBrowser()
+{
+    Photo p = currentPhoto();
+
+    if (p.isNull())
+        return;
+    QString pathIn = p.srcImagePath();
+
+#if defined(Q_OS_WIN)
+    const QString explorer = Environment::systemEnvironment().searchInPath(QLatin1String("explorer.exe"));
+
+    if (explorer.isEmpty())
+    {
+        QMessageBox::warning(this,
+            tr("Launching Windows Explorer failed"),
+            tr("Could not find explorer.exe in path to launch Windows Explorer."));
+        return;
+    }
+    QString param;
+
+    if (!QFileInfo(pathIn).isDir())
+        param = QLatin1String("/select,");
+    param += QDir::toNativeSeparators(pathIn);
+    QString command = explorer + " " + param;
+    QProcess::startDetached(command);
+#elif defined(Q_OS_MAC)
+    QStringList scriptArgs;
+    scriptArgs << QLatin1String("-e")
+               << QString::fromLatin1("tell application \"Finder\" to reveal POSIX file \"%1\"")
+        .arg(pathIn);
+    QProcess::execute(QLatin1String("/usr/bin/osascript"), scriptArgs);
+    scriptArgs.clear();
+    scriptArgs << QLatin1String("-e")
+               << QLatin1String("tell application \"Finder\" to activate");
+    QProcess::execute("/usr/bin/osascript", scriptArgs);
+#else
+    // we cannot select a file here, because no file browser really supports it...
+    const QFileInfo fileInfo(pathIn);
+    const QString   folder = fileInfo.absoluteFilePath();
+    const QString   app    = Utils::UnixUtils::fileBrowser(Core::ICore::instance()->settings());
+    QProcess        browserProc;
+    const QString   browserArgs = Utils::UnixUtils::substituteFileBrowserParameters(app, folder);
+
+    if (debug)
+        qDebug() <<  browserArgs;
+    bool          success = browserProc.startDetached(browserArgs);
+    const QString error   = QString::fromLocal8Bit(browserProc.readAllStandardError());
+    success = success && error.isEmpty();
+
+    if (!success)
+        showGraphicalShellError(this, app, error);
+#endif
 }
 
 void MainWindow::onActionFlagPick()
