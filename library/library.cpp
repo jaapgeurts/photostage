@@ -15,7 +15,8 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     Module(parent),
     ui(new Ui::Library),
     mPhotoModel(model),
-    mFontAccessFoundIcons(QFont("Accessibility Foundicons", 15))
+    mFontAccessFoundIcons(QFont("Accessibility Foundicons", 15)),
+    mSelectionModel(NULL)
 {
     ui->setupUi(this);
 
@@ -50,7 +51,7 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     // ui->mClvPhotos->setObjectName("LibaryPhotos");
 
     ui->mClvPhotos->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->mClvPhotos, &TileView::TileView::customContextMenuRequested, this, &Library::customContextMenu);
+    connect(ui->mClvPhotos, &TileView::TileView::customContextMenuRequested, this, &Library::onCustomContextMenu);
     connect(ui->mClvPhotos, &TileView::TileView::doubleClickTile, this, &Library::onTileDoubleClicked);
     connect(ui->mClvPhotos, &TileView::TileView::visibleTilesChanged,
         (PhotoModel*)mPhotoModel->sourceModel(),
@@ -184,6 +185,7 @@ int Library::tilesPerRowOrCol()
 
 void Library::setSelectionModel(QItemSelectionModel* selectionModel)
 {
+    mSelectionModel = selectionModel;
     ui->mClvPhotos->setSelectionModel(selectionModel);
     connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &Library::onPhotoSelectionChanged);
     connect(selectionModel, &QItemSelectionModel::currentChanged, this, &Library::onCurrentPhotoChanged);
@@ -200,16 +202,9 @@ void Library::onFilesClicked(const QModelIndex& index)
     emit photoSourceChanged(PhotoModel::SourceFiles, item->id);
 }
 
-void Library::customContextMenu(const QPoint& /*pos*/)
+void Library::onCustomContextMenu(const QPoint& pos)
 {
-    //QModelIndex index = ui->mClvPhotos->posToModelIndex(pos);
-    // check if there is a single selection or a list.
-    //    Photo info = mPhotoModel->data(index,TileView::PhotoRole).value<Photo>();
-
-    // TODO: FIXME: fix popup
-    //    QMenu *m = ui->menuPhoto;
-    //    m->popup(ui->mClvPhotos->mapToGlobal(pos));
-    //    m->exec();
+    emit customContextMenuRequested(ui->mClvPhotos->mapTo(this,pos));
 }
 
 void Library::onZoomLevelChanged(int zoomLevel)

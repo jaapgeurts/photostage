@@ -95,7 +95,14 @@ long long ImportWorkUnit::importPhoto(const QFileInfo& file,
         ei = ex->data();
     delete(ex);
 
-    long long hash = computeImageFileHash(srcpath);
+    QFileInfo fi(srcpath);
+    long long hash = computeImageFileHash(fi);
+
+    if (ei.dateTimeOriginal == nullptr)
+        ei.dateTimeOriginal = fi.lastModified();
+
+    if (ei.dateTimeDigitized == nullptr)
+        ei.dateTimeDigitized = fi.created();
 
     QSqlQuery q;
     q.prepare(
@@ -178,7 +185,7 @@ int ImportWorkUnit::insertPathRec(QSqlQuery& q, const QStringList& path, int pos
 
     qDebug() << "Checking path:" << p;
     q.bindValue(":dir", p);
-    q.bindValue(":p_id",parentid);
+    q.bindValue(":p_id", parentid);
 
     if (q.exec())
     {

@@ -86,8 +86,10 @@ MainWindow::MainWindow(QWidget* parent) :
 
     // setup connections
     connect(mLibrary, &Library::photoSourceChanged, this, &MainWindow::onPhotoSourceChanged);
-    connect(ui->actionLoupeInfoCycle, &QAction::triggered, mLibrary, &Library::onCycleLoupeInfo);
     connect(mLibrary, &Library::modelFilterApplied, this, &MainWindow::onFilterApplied);
+    connect(mLibrary, &Library::customContextMenuRequested, this, &MainWindow::onLibraryContextMenu);
+
+    connect(ui->actionLoupeInfoCycle, &QAction::triggered, mLibrary, &Library::onCycleLoupeInfo);
 
     ui->filmStrip->setModel(mPhotoModelProxy);
     FilmstripTile* fsTile = new FilmstripTile(ui->filmStrip);
@@ -149,8 +151,8 @@ MainWindow::MainWindow(QWidget* parent) :
     mActionStatePhoto.addAction(ui->actionFlip_Vertical);
 
     mActionStatePhoto.addAction(ui->actionShow_in_Finder);
-    mActionStatePhoto.addAction(ui->actionDelete_Photo);
-    mActionStatePhoto.addAction(ui->actionDelete_Rejected_Photos);
+    mActionStatePhoto.addAction(ui->actionDeletePhotos);
+    mActionStatePhoto.addAction(ui->actionDeleteRejectedPhotos);
 
     mActionStatePhoto.addAction(ui->actionAdd_to_Quick_Collection);
 
@@ -347,27 +349,24 @@ void MainWindow::onTileDoubleClicked(const QModelIndex&)
     mLibrary->onShowLoupe();
 }
 
-void MainWindow::onSelectionChanged(const QItemSelection& selected,
-    const QItemSelection& /*deselected*/)
+void MainWindow::onLibraryContextMenu(const QPoint& pos)
 {
-    //    QList<Photo> photos;
-    //    foreach (QModelIndex index, selected.indexes())
-    //    {
-    //        photos.append(mPhotoModel->data(index,
-    //            TileView::TileView::PhotoRole).value<Photo>());
-    //    }
+    QMenu* mn = ui->menuPhoto;
+
+    mn->exec(mLibrary->mapToGlobal(pos));
+}
+
+void MainWindow::onSelectionChanged(const QItemSelection& selected, const QItemSelection& /*deselected*/)
+{
     updateInformationBar();
 }
 
-void MainWindow::onCurrentChanged(const QModelIndex& current,
-    const QModelIndex& /*previous*/)
+void MainWindow::onCurrentChanged(const QModelIndex& current, const QModelIndex& /*previous*/)
 {
     setPhotoActionsAvailability(current.isValid());
 
     if (current.isValid())
-    {
         mDevelop->setPhoto(currentPhoto());
-    }
 
     updateInformationBar();
 }
@@ -406,16 +405,9 @@ void MainWindow::onActionRegenHashes()
 {
     // for all images in the view, recalculate hashes.
     // start as background job.
-    QList<Photo> list;
-    int          c = mPhotoModelProxy->rowCount();
 
-    for (int i = 0; i < c; i++)
-    {
-        Photo p = mSourceModel->data(mSourceModel
-                ->index(i), Photo::DataRole).value<Photo>();
-        list.append(p);
-    }
-    RegenHashesTask* r = new RegenHashesTask(list);
+    RegenHashesTask* r = new RegenHashesTask(mPhotoModelProxy->toList());
+
     mBackgroundTaskManager->addRunnable(r);
     r->start();
 }
@@ -488,6 +480,51 @@ void MainWindow::onActionRating5()
 void MainWindow::onActionRatingNone()
 {
     setRating(0);
+}
+
+void MainWindow::onDeletePhotos()
+{
+    // TODO: if the view is in File view, offer option to delete from disk.
+    // if view is in Collection view, then only offer to remove from collection
+
+    QMessageBox msgBox;
+
+    msgBox.setWindowTitle("Delete photos");
+    msgBox.setText(QString("Do you wish to delete %1 photos?").arg(mPhotoSelection->selection().indexes().size()));
+    msgBox.setIcon(QMessageBox::Warning);
+    msgBox.setStandardButtons(QMessageBox::Cancel);
+    QPushButton* libOnly    = msgBox.addButton("From Library Only", QMessageBox::AcceptRole);
+    QPushButton* libAndDisk = msgBox.addButton("From Library and Disk", QMessageBox::DestructiveRole);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    msgBox.setEscapeButton(QMessageBox::Cancel);
+
+    msgBox.exec();
+
+    if (msgBox.clickedButton() == libOnly)
+    {
+        QList<Photo> list = mPhotoModelProxy->toList(mPhotoSelection->selection());
+        mPhotoWorkUnit->deletePhotos(list, false);
+        foreach(QItemSelectionRange range, mPhotoSelection->selection())
+        {
+            mPhotoModelProxy->removeRows(range.top(), range.height());
+        }
+        mLibrary->onPathModelRowsAdded(QModelIndex(), 0, 0);
+    }
+    else if (msgBox.clickedButton() == libAndDisk)
+    {
+        QList<Photo> list = mPhotoModelProxy->toList(mPhotoSelection->selection());
+        mPhotoWorkUnit->deletePhotos(list, true);
+        foreach(QItemSelectionRange range, mPhotoSelection->selection())
+        {
+            mPhotoModelProxy->removeRows(range.top(), range.height());
+        }
+        mLibrary->onPathModelRowsAdded(QModelIndex(), 0, 0);
+    } // else do nothing
+}
+
+void MainWindow::onDeleteRejectedPhotos()
+{
+    qDebug() << "void MainWindow::onDeleteRejectedPhotos() Not implemented";
 }
 
 void MainWindow::onActionFlagPick()
@@ -629,23 +666,22 @@ void MainWindow::updateInformationBar()
 
     if (!photo.isNull())
         imagePath = " " + photo.srcImagePath();
-    ui->lblInformation->setText(QString::number(selCount) +
-        "/" + QString::number(count) + imagePath);
+    ui->lblInformation->setText(QString::number(selCount) + "/" + QString::number(count) + imagePath);
 }
 
 Photo MainWindow::currentPhoto()
 {
-    return mPhotoModelProxy->data(mPhotoSelection->currentIndex(),
-               TileView::TileView::ImageRole).value<Photo>();
+    QModelIndex index = mPhotoSelection->currentIndex();
+
+    if (index.isValid())
+        return mPhotoModelProxy->data(index, TileView::TileView::ImageRole).value<Photo>();
+    else
+        return Photo();
 }
 
 void MainWindow::setRating(int rating)
 {
-    QList<Photo>    list;
-    QModelIndexList indexes = mPhotoSelection->selectedIndexes();
-    foreach (QModelIndex index, indexes)
-    list.append(mPhotoModelProxy->data(index,
-        TileView::TileView::ImageRole).value<Photo>());
+    QList<Photo> list = mPhotoModelProxy->toList(mPhotoSelection->selection());
     mPhotoWorkUnit->setRating(list, rating);
     QVector<int> roles;
     roles.append(TileView::TileView::ImageRole);
@@ -654,12 +690,7 @@ void MainWindow::setRating(int rating)
 
 void MainWindow::setFlag(Photo::Flag flag)
 {
-    QList<Photo>    list;
-    QModelIndexList indexes = mPhotoSelection->selectedIndexes();
-    foreach (QModelIndex index, indexes)
-    list.append(mPhotoModelProxy->data(index,
-        TileView::TileView::ImageRole).value<Photo>());
-
+    QList<Photo> list = mPhotoModelProxy->toList(mPhotoSelection->selection());
     mPhotoWorkUnit->setFlag(list, flag);
     QVector<int> roles;
     roles.append(TileView::TileView::ImageRole);
@@ -668,12 +699,7 @@ void MainWindow::setFlag(Photo::Flag flag)
 
 void MainWindow::setColorLabel(Photo::ColorLabel color)
 {
-    QList<Photo>    list;
-    QModelIndexList indexes = mPhotoSelection->selectedIndexes();
-    foreach (QModelIndex index, indexes)
-    list.append(mPhotoModelProxy->data(index,
-        TileView::TileView::ImageRole).value<Photo>());
-
+    QList<Photo> list = mPhotoModelProxy->toList(mPhotoSelection->selection());
     mPhotoWorkUnit->setColorLabel(list, color);
     QVector<int> roles;
     roles.append(TileView::TileView::ImageRole);

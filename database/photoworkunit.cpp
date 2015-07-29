@@ -282,9 +282,9 @@ QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
 
     QString photoids;
 
-    for (int i = 0; i < idList.size(); i++)
+    foreach(long long id, idList)
     {
-        photoids += QString::number(idList.at(i)) + ",";
+        photoids += QString::number(id) + ",";
     }
     photoids.chop(1);
     query.replace(":photoids", photoids);
@@ -307,6 +307,58 @@ QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
         list.append(p);
     }
     return list;
+}
+
+void PhotoWorkUnit::deletePhotos(const QList<Photo>& list, bool deleteFile)
+{
+    QSqlQuery q;
+    QString   photo_ids;
+
+    // create a list of id's
+    QList<QString> paths;
+
+    foreach(Photo info, list)
+    {
+        photo_ids += QString::number(info.id()) + ",";
+        paths << info.srcImagePath();
+    }
+    photo_ids.chop(1);
+
+    // first delete any keyword references
+    QString query = "delete from photo_keyword where photo_id in (:photo_ids)";
+    query.replace(":photo_ids", photo_ids);
+
+    if (!q.exec(query))
+    {
+        qDebug() << q.lastError();
+        qDebug() << q.lastQuery();
+        return;
+    }
+
+    // also remove any references in all collections.
+
+    // now delete the photos from the main library.
+    query = "delete from photo where id in (:photo_ids)";
+    query.replace(":photo_ids", photo_ids);
+
+    if (!q.exec(query))
+    {
+        qDebug() << q.lastError();
+        qDebug() << q.lastQuery();
+        return;
+    }
+
+    // Finally delete the actual file
+    if (deleteFile)
+    {
+        foreach(QString path, paths)
+        {
+            QFile f(path);
+
+            if (!f.remove())
+                qDebug() << "File" << path << "could not be removed";
+        }
+    }
 }
 
 // TODO: make path_id work and option to include

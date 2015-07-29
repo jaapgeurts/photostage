@@ -20,24 +20,22 @@ class PhotoWorkUnit
 
         void setRating(const QList<Photo>& list, int rating);
         void setFlag(const QList<Photo>& list, Photo::Flag flag);
-        void setColorLabel(const QList<Photo>& list,
-            Photo::ColorLabel color);
+        void setColorLabel(const QList<Photo>& list, Photo::ColorLabel color);
 
         void insertKeywords(const QStringList& words);
-        void assignKeywords(const QStringList& words,
-            const QList<Photo>& list);
-        void removeKeywordsExcept(const QStringList& words,
-            const QList<Photo>& list);
+        void assignKeywords(const QStringList& words, const QList<Photo>& list);
+        void removeKeywordsExcept(const QStringList& words, const QList<Photo>& list);
 
-        QMap<QString, int>getPhotoKeywordsCount(const QList<Photo>& list) const;
+        QMap<QString, int> getPhotoKeywordsCount(const QList<Photo>& list) const;
         QStringList getPhotoKeywords(const Photo& photo) const;
 
         // Photo Items are created here.
         // ownership is transferred to the caller who should call delete on the objects
-        QList<Photo> getPhotosByPath(long long path_id,
-            bool includeSubDirs = true);
+        QList<Photo> getPhotosByPath(long long path_id, bool includeSubDirs = true);
 
         QList<Photo> getPhotosById(QList<long long> idList);
+
+        void deletePhotos(const QList<Photo>& list, bool deleteFile);
 
         void updateExifInfo(const Photo& photo) const;
         void regenerateHash(Photo& p);

@@ -95,4 +95,30 @@ void PhotoSortFilterProxyModel::setFilter(const PhotoFilterInfo& info)
     mFilterInfo = info;
     invalidateFilter();
 }
+
+QList<Photo> PhotoSortFilterProxyModel::toList() const
+{
+    QList<Photo> list;
+    int          c = rowCount();
+
+    for (int i = 0; i < c; i++)
+    {
+        Photo p = data(index(i,0), Photo::DataRole).value<Photo>();
+        list.append(p);
+    }
+    return list;
+}
+
+QList<Photo> PhotoSortFilterProxyModel::toList(const QItemSelection& selection) const
+{
+    QList<Photo> list;
+
+    foreach(QModelIndex index, selection.indexes())
+    {
+        Photo p = data(index, Photo::DataRole).value<Photo>();
+
+        list.append(p);
+    }
+    return list;
+}
 }

@@ -73,6 +73,9 @@ class MainWindow : public QMainWindow
         void onActionRating5();
         void onActionRatingNone();
 
+        void onDeletePhotos();
+        void onDeleteRejectedPhotos();
+
         // flags
         void onActionFlagPick();
         void onActionFlagReject();
@@ -107,6 +110,7 @@ class MainWindow : public QMainWindow
         void onShowLoupe();
 
         void onTileDoubleClicked(const QModelIndex&);
+        void onLibraryContextMenu(const QPoint& pos);
 
     private:
 

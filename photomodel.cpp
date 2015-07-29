@@ -254,7 +254,7 @@ bool PComp(const Photo& a, const Photo& b)
     return a.id() < b.id();
 }
 
-void PhotoModel::refreshData(const QList<Photo>& list )
+void PhotoModel::refreshData(const QList<Photo>& list)
 {
     // for now just emit that all data has changed. the tileview doesnt check anyway
     emit dataChanged(index(0, 0), index(rowCount(QModelIndex()) - 1, 0));
@@ -263,18 +263,49 @@ void PhotoModel::refreshData(const QList<Photo>& list )
 void PhotoModel::addData(const QList<long long>& idList)
 {
     // figure out what was changed, what is new and what has been added
-    int          start = rowCount(QModelIndex());
+    int start = rowCount(QModelIndex());
+    int count = idList.size();
+
+    qDebug() << "Imported list dump" << idList;
 
     QList<Photo> list = mWorkUnit->getPhotosById(idList);
-    beginInsertRows(QModelIndex(), start, start + list.size() - 1);
-    Photo        info;
-    foreach(info, list)
+    beginInsertRows(QModelIndex(), start, start + count - 1);
+    foreach(Photo info, list)
     {
         info.setOwner(this);
         mPhotoList.append(info);
     }
-    //    insertRows(start,list.size());
     endInsertRows();
+}
+
+bool PhotoModel::removeRows(int row, int count, const QModelIndex& parent)
+{
+    if (row >= mPhotoList.size() || row + count  > mPhotoList.size() || row < 0 || count < 0)
+        return false;
+
+    emit beginRemoveRows(parent, row, row + count - 1);
+
+    for (int i = row; i < row + count; i++)
+        mPhotoList.removeAt(i);
+    emit endRemoveRows();
+
+    return true;
+}
+
+QList<Photo> PhotoModel::toList() const
+{
+    return mPhotoList;
+}
+
+QList<Photo> PhotoModel::toList(const QItemSelection& selection) const
+{
+    QList<Photo> list;
+
+    foreach(QModelIndex index, selection.indexes())
+    {
+        list.append(mPhotoList.at(index.row()));
+    }
+    return list;
 }
 
 QVariant PhotoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int /*role*/) const

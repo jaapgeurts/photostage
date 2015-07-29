@@ -2,6 +2,7 @@
 #define PHOTOSTAGE_PHOTOMODEL_H
 
 #include <QAbstractListModel>
+#include <QItemSelection>
 #include <QImage>
 #include <QHash>
 
@@ -44,14 +45,19 @@ class PhotoModel : public QAbstractListModel
            bool insertRows(int row, int count, const QModelIndex &parent);
            bool removeRows(int row, int count, const QModelIndex &parent);
          */
-        void refreshData(const QList<Photo>&);
+        void refreshData(const QList<Photo>& list);
         void addData(const QList<long long>& idList);
+
+        QList<Photo> toList() const;
+
+        QList<Photo> toList(const QItemSelection& selection) const;
+
+        bool removeRows(int row, int count, const QModelIndex& parent);
 
     public slots:
 
         void onPhotoSourceChanged(SourceType source, long long pathId);
-        void onVisibleTilesChanged(const QModelIndex& start,
-            const QModelIndex& end);
+        void onVisibleTilesChanged(const QModelIndex& start, const QModelIndex& end);
 
     private slots:
 

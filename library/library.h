@@ -55,10 +55,8 @@ class Library : public Module
         void onSortKeyChanged(int key);
         void onSortOrderChanged();
 
-        void onPhotoSelectionChanged(const QItemSelection& selected,
-            const QItemSelection&);
-        void onCurrentPhotoChanged(const QModelIndex& current,
-            const QModelIndex&);
+        void onPhotoSelectionChanged(const QItemSelection& selected, const QItemSelection&);
+        void onCurrentPhotoChanged(const QModelIndex& current, const QModelIndex&);
         void onPathModelRowsAdded(const QModelIndex&, int, int);
         void onPathModelRowsRemoved(const QModelIndex&, int, int);
         void onTileDoubleClicked(const QModelIndex&);
@@ -76,7 +74,7 @@ class Library : public Module
 
         void onNewCollectionClicked();
         void onFilesClicked(const QModelIndex&);
-        void customContextMenu(const QPoint&);
+        void onCustomContextMenu(const QPoint& pos);
         void onThumbSizeChanged(int);
         void onZoomLevelChanged(int zoomLevel);
 
@@ -92,6 +90,7 @@ class Library : public Module
         QFont                      mFontAccessFoundIcons;
         Photo                      mCurrentPhoto;
         FixedTreeView*             mTrvwFiles;
+        QItemSelectionModel*       mSelectionModel;
 };
 }
 
