@@ -1,6 +1,8 @@
 #ifndef PHOTOSTAGE_EXIVUTILS_H
 #define PHOTOSTAGE_EXIVUTILS_H
 
+#include <QDebug>
+
 #include "exiv2lib.h"
 #include "nullable.h"
 
@@ -21,7 +23,7 @@ Nullable<QString> getExifValue(Exiv2::ExifData& data,
 
         pos = data.findKey(Exiv2::ExifKey(key.toStdString()));
 
-        if (pos != data.end())
+        if (pos != data.end() && pos->size() > 0)
             return Nullable<QString>(QString::fromStdString(pos->toString()));
     }
     catch (Exiv2::BasicError<char> e)
@@ -40,7 +42,7 @@ Nullable<float> getExifValue(Exiv2::ExifData& data, const QString& key)
     {
         pos = data.findKey(Exiv2::ExifKey(key.toStdString()));
 
-        if (pos != data.end())
+        if (pos != data.end() && pos->size() > 0)
             return Nullable<float>(pos->toFloat());
     }
     catch (Exiv2::BasicError<char> e)
@@ -59,7 +61,7 @@ Nullable<long> getExifValue(Exiv2::ExifData& data, const QString& key)
     {
         pos = data.findKey(Exiv2::ExifKey(key.toStdString()));
 
-        if (pos != data.end())
+        if (pos != data.end() && pos->size() > 0)
             return Nullable<long>(pos->toLong());
     }
     catch (Exiv2::BasicError<char> e)
@@ -78,8 +80,8 @@ Nullable<uint8_t> getExifValue(Exiv2::ExifData& data, const QString& key)
     {
         pos = data.findKey(Exiv2::ExifKey(key.toStdString()));
 
-        if (pos != data.end())
-            return Nullable<uint8_t>((uint16_t)pos->toLong());
+        if (pos != data.end() && pos->size() > 0)
+            return Nullable<uint8_t>((uint8_t)pos->toLong());
     }
     catch (Exiv2::BasicError<char> e)
     {
@@ -97,7 +99,7 @@ Nullable<uint16_t> getExifValue(Exiv2::ExifData& data, const QString& key)
     {
         pos = data.findKey(Exiv2::ExifKey(key.toStdString()));
 
-        if (pos != data.end())
+        if (pos != data.end() && pos->size() > 0)
             return Nullable<uint16_t>((uint16_t)pos->toLong());
     }
     catch (Exiv2::BasicError<char> e)
@@ -116,7 +118,7 @@ Nullable<int16_t> getExifValue(Exiv2::ExifData& data, const QString& key)
     {
         pos = data.findKey(Exiv2::ExifKey(key.toStdString()));
 
-        if (pos != data.end())
+        if (pos != data.end() && pos->size() > 0)
             return Nullable<int16_t>((int16_t)pos->toLong());
     }
     catch (Exiv2::BasicError<char> e)
@@ -135,7 +137,7 @@ Nullable<bool> getExifValue(Exiv2::ExifData& data, const QString& key)
     {
         pos = data.findKey(Exiv2::ExifKey(key.toStdString()));
 
-        if (pos != data.end())
+        if (pos != data.end() && pos->size() > 0)
             return Nullable<bool>(pos->toLong() == 1);
     }
     catch (Exiv2::BasicError<char> e)
@@ -154,7 +156,7 @@ Nullable<PhotoStage::ExifInfo::Rotation> getExifValue(Exiv2::ExifData& data, con
     {
         pos = data.findKey(Exiv2::ExifKey(key.toStdString()));
 
-        if (pos != data.end())
+        if (pos != data.end() && pos->size() > 0)
             return Nullable<PhotoStage::ExifInfo::Rotation>((PhotoStage::ExifInfo::Rotation)pos->toLong());
     }
     catch (Exiv2::BasicError<char> e)
@@ -173,7 +175,7 @@ Nullable<QDateTime> getExifValue(Exiv2::ExifData& data, const QString& key)
     {
         pos = data.findKey(Exiv2::ExifKey(key.toStdString()));
 
-        if (pos != data.end())
+        if (pos != data.end() && pos->size() > 0)
         {
             QString   datetime = QString::fromStdString(pos->toString());
             QDateTime result   = QDateTime::fromString(datetime, Qt::ISODate);
@@ -191,10 +193,7 @@ Nullable<QDateTime> getExifValue(Exiv2::ExifData& data, const QString& key)
     return nullptr;
 }
 
-bool getExifBytes(Exiv2::ExifData& data,
-    const QString& key,
-    uint8_t* buf,
-    size_t size)
+bool getExifBytes(Exiv2::ExifData& data, const QString& key, uint8_t* buf, size_t size)
 {
     Exiv2::ExifData::const_iterator pos;
 

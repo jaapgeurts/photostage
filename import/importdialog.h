@@ -36,6 +36,7 @@ class ImportDialog : public QDialog
         void onImportModeAdd();
         void onFilesSelected(const QItemSelection&, const QItemSelection&);
         void onCheckedItemsChanged();
+        void onIncludeSubdirs();
 
     private:
 

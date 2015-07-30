@@ -121,9 +121,9 @@ bool Exiv2Lib::openFile(const QString& path)
         return false;
     }
 
-    if (mImageFile.get() == NULL)
+    if (mImageFile.get() == NULL && mImageFile.get()->good())
     {
-        qDebug() << "Exiv2:: no image";
+        qDebug() << "Exiv2:: no image or not good";
         return false;
     }
     mImageFile->readMetadata();

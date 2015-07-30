@@ -516,7 +516,7 @@
   </connection>
   <connection>
    <sender>cbKeywords</sender>
-   <signal>toggled(bool)</signal>
+   <signal>clicked(bool)</signal>
    <receiver>FilterModule</receiver>
    <slot>onKeywordsToggled(bool)</slot>
    <hints>

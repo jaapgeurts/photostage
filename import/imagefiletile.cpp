@@ -17,19 +17,15 @@ void ImageFileTile::render(QPainter& painter,
     int w = painter.window().width();
     int h = painter.window().height();
 
-    //   painter.drawLine(0,0,w-1,h-1);
-    //   painter.drawLine(0,h,w-1,0);
-
     // draw the selection background
     if ((tileInfo.tileState & TileView::TileInfo::TileStateSelected) ==
         TileView::TileInfo::TileStateSelected)
-        painter.setBrush(QBrush(QColor(Qt::darkGray).lighter(180),
-            Qt::SolidPattern));
+        painter.setBrush(QBrush(QColor(Qt::darkGray).lighter(180), Qt::SolidPattern));
     else
         painter.setBrush(QBrush(QColor(Qt::darkGray), Qt::SolidPattern));
     // draw the tile
     painter.setPen(QColor(Qt::darkGray));
-    painter.drawRect(1, 1, w - 2, h - 2);
+    painter.drawRect(0, 0, w - 2, h - 2);
     painter.setBrush(Qt::NoBrush);
 
     // draw the bevel of the tile
@@ -78,7 +74,7 @@ void ImageFileTile::render(QPainter& painter,
 
             if (info.isInLibrary)
             {
-                painter.fillRect(0, 0, w, h, QBrush(QColor(0, 0, 0, 80)));
+                painter.fillRect(0, 0, w, h, QBrush(QColor(0, 0, 0, 120)));
             }
         }
         else

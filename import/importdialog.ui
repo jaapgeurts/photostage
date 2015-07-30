@@ -104,7 +104,7 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <widget class="QCheckBox" name="checkBox">
+          <widget class="QCheckBox" name="cbIncludeSubdirs">
            <property name="text">
             <string>Include subdirectories</string>
            </property>
@@ -307,6 +307,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>cbIncludeSubdirs</sender>
+   <signal>clicked()</signal>
+   <receiver>ImportDialog</receiver>
+   <slot>onIncludeSubdirs()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>107</x>
+     <y>110</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>110</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onSourceDirClicked(QModelIndex)</slot>
@@ -314,5 +330,6 @@
   <slot>onImportModeCopy()</slot>
   <slot>onImportModeMove()</slot>
   <slot>onImportModeAdd()</slot>
+  <slot>onIncludeSubdirs()</slot>
  </slots>
 </ui>

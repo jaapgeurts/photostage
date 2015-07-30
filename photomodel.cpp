@@ -257,13 +257,13 @@ bool PComp(const Photo& a, const Photo& b)
 void PhotoModel::refreshData(const QList<Photo>& list)
 {
     // for now just emit that all data has changed. the tileview doesnt check anyway
-    emit dataChanged(index(0, 0), index(rowCount(QModelIndex()) - 1, 0));
+    emit dataChanged(index(0, 0), index(rowCount() - 1, 0));
 }
 
 void PhotoModel::addData(const QList<long long>& idList)
 {
     // figure out what was changed, what is new and what has been added
-    int start = rowCount(QModelIndex());
+    int start = rowCount();
     int count = idList.size();
 
     qDebug() << "Imported list dump" << idList;

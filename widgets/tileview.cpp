@@ -26,7 +26,8 @@ TileView::TileView(QWidget* parent) :
     mTile(NULL),
     mListModel(NULL),
     mSelectionModel(NULL),
-    mViewportPosition(0)
+    mViewportPosition(0),
+    mShowChildren(false)
 {
     mScrollBar = new QScrollBar(mOrientation, this);
     mScrollBar->setMinimum(0);
@@ -34,11 +35,9 @@ TileView::TileView(QWidget* parent) :
     mSbSize = qApp->style()->pixelMetric(QStyle::PM_ScrollBarExtent);
 
     if (mOrientation == Qt::Vertical)
-        mScrollBar->setGeometry(width() - mSbSize, 0,
-            mSbSize, height());
+        mScrollBar->setGeometry(width() - mSbSize, 0, mSbSize, height());
     else
-        mScrollBar->setGeometry(0, height() - mSbSize,
-            width(), mSbSize);
+        mScrollBar->setGeometry(0, height() - mSbSize, width(), mSbSize);
 
     // Set sensible defaults;
     setMinimumCellWidth(50);
@@ -113,8 +112,7 @@ void TileView::computeSizes(int w, int h)
 
         mComputedCellWidth = w / mTilesPerColRow;
 
-        mComputedCellHeight =
-            (int)((float)mComputedCellWidth * mCellSizeRatio);
+        mComputedCellHeight = (int)((float)mComputedCellWidth * mCellSizeRatio);
     }
     else if (mOrientation == Qt::Horizontal)
     {
@@ -130,8 +128,7 @@ void TileView::computeSizes(int w, int h)
 
         mComputedCellHeight = h / mTilesPerColRow;
 
-        mComputedCellWidth =
-            (int)((float)mComputedCellHeight * mCellSizeRatio);
+        mComputedCellWidth = (int)((float)mComputedCellHeight * mCellSizeRatio);
     }
     else
         qDebug() << "Illegal orientation value";
@@ -354,8 +351,7 @@ void TileView::paintEvent(QPaintEvent*/*event*/)
 
     if (mOldStart != start || mOldEnd != end)
     {
-        emit visibleTilesChanged(mListModel->index(start, 0),
-            mListModel->index(end, 0));
+        emit visibleTilesChanged(mListModel->index(start, 0), mListModel->index(end, 0));
         mOldStart = start;
         mOldEnd   = end;
     }

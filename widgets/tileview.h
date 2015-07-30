@@ -41,6 +41,7 @@ class TileView : public QWidget
 
         void setMinimumCellWidth(int minWidth);
         void setMaximumCellWidth(int maxWidth);
+        void setMinimumCellHeight(int minHeight);
         void setCellSizeRatio(float ratio);
 
         void setCellMargins(int left, int top, int right, int bottom);
@@ -66,7 +67,8 @@ class TileView : public QWidget
         void setTilesPerColRow(int value);
         int tilesPerColRow();
 
-        void setMinimumCellHeight(int minHeight);
+        void setShowChildren(bool show);
+        bool showChildren() const;
 
     signals:
 
@@ -122,6 +124,7 @@ class TileView : public QWidget
         bool      mFixedColRowCount;
         int       mOldStart;
         int       mOldEnd;
+        bool      mShowChildren;
 
         // other properties
         Qt::Orientation mOrientation;

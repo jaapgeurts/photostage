@@ -32,7 +32,7 @@ class PhotoModel : public QAbstractListModel
         ~PhotoModel();
 
         // getters / setters
-        int rowCount(const QModelIndex& parent) const;
+        int rowCount(const QModelIndex& parent = QModelIndex()) const;
         QVariant headerData(int, Qt::Orientation, int) const;
         QVariant data(const QModelIndex& index, int role) const;
 

@@ -42,6 +42,7 @@ class MainWindow : public QMainWindow
 
         bool eventFilter(QObject*, QEvent* event);
         void closeEvent(QCloseEvent* event);
+
         //bool event(QEvent* event);
 
     private slots:
@@ -95,16 +96,13 @@ class MainWindow : public QMainWindow
 
         // called in response to the import thread
         void importFinished(BackgroundTask* task);
-        void onSelectionChanged(const QItemSelection& selected,
-            const QItemSelection&);
+        void onSelectionChanged(const QItemSelection&, const QItemSelection&);
         void onCurrentChanged(const QModelIndex& current, const QModelIndex&);
 
         // model changes
         void onModelReset();
-        void onPhotoModelRowsInserted(const QModelIndex& parent,
-            int start, int end);
-        void onPhotoModelRowsRemoved(const QModelIndex& parent,
-            int start, int end);
+        void onPhotoModelRowsInserted(const QModelIndex& parent, int start, int end);
+        void onPhotoModelRowsRemoved(const QModelIndex& parent, int start, int end);
         void onFilterApplied(const PhotoFilterInfo& info);
         void onPhotoSourceChanged(PhotoModel::SourceType type, long long id);
 

@@ -355,7 +355,7 @@ void MainWindow::onLibraryContextMenu(const QPoint& pos)
     mn->exec(mLibrary->mapToGlobal(pos));
 }
 
-void MainWindow::onSelectionChanged(const QItemSelection& selected, const QItemSelection& /*deselected*/)
+void MainWindow::onSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 {
     updateInformationBar();
 }
