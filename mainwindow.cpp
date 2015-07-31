@@ -364,8 +364,7 @@ void MainWindow::onCurrentChanged(const QModelIndex& current, const QModelIndex&
 {
     setPhotoActionsAvailability(current.isValid());
 
-    if (current.isValid())
-        mDevelop->setPhoto(currentPhoto());
+    mDevelop->setPhoto(currentPhoto());
 
     updateInformationBar();
 }

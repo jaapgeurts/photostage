@@ -18,7 +18,7 @@ void LibraryHistogramModule::setPhoto(Photo& photo)
 {
     LibraryModule::setPhoto(photo);
 
-    if (!photo.libraryPreview().isNull())
+    if (!photo.isNull() && !photo.libraryPreview().isNull())
     {
         //PhotoData image = loadImage(photo->libraryPreview());
         mHistogram->setImageData(photo.libraryPreview());

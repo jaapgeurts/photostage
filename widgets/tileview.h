@@ -103,6 +103,7 @@ class TileView : public QWidget
         void wheelEvent(QWheelEvent* event) Q_DECL_OVERRIDE;
         void resizeEvent(QResizeEvent* event) Q_DECL_OVERRIDE;
         void mouseReleaseEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
+        void mousePressEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
         void mouseDoubleClickEvent(QMouseEvent*) Q_DECL_OVERRIDE;
 
         //void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
@@ -156,6 +157,9 @@ class TileView : public QWidget
         TileInfo createTileInfo(int index);
 
         void ensureTileVisible(int index);
+
+        void handleSelectionClick(QMouseEvent* event, const QModelIndex& index);
+        void handleCheckboxClick(const QModelIndex& index);
 };
 }
 #endif // CELLFLOWVIEW_H

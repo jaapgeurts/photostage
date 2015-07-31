@@ -20,14 +20,14 @@ TileView::TileView(QWidget* parent) :
     mFixedColRowCount(false),
     mOldStart(-1),
     mOldEnd(-1),
+    mShowChildren(false),
     mOrientation(Qt::Vertical),
     mTilesPerColRow(0),
     //    mHighlightedTile(-1),
     mTile(NULL),
     mListModel(NULL),
     mSelectionModel(NULL),
-    mViewportPosition(0),
-    mShowChildren(false)
+    mViewportPosition(0)
 {
     mScrollBar = new QScrollBar(mOrientation, this);
     mScrollBar->setMinimum(0);
@@ -525,6 +525,96 @@ void TileView::mouseDoubleClickEvent(QMouseEvent* event)
     emit doubleClickTile(index);
 }
 
+void TileView::handleCheckboxClick(const QModelIndex& index)
+{
+    // toggle the checkbox
+    if (mCheckedList->contains(index))
+    {
+        if (mSelectionModel->isSelected(index))
+        {
+            foreach(QModelIndex idx, mSelectionModel->selectedIndexes())
+            {
+                mCheckedList->removeAll(idx);
+            }
+        }
+        else
+        {
+            mCheckedList->removeAll(index);
+        }
+    }
+    else
+    {
+        if (mSelectionModel->isSelected(index))
+        {
+            foreach(QModelIndex idx, mSelectionModel->selectedIndexes())
+            {
+                mCheckedList->append(idx);
+            }
+        }
+        else
+        {
+            mCheckedList->append(index);
+        }
+    }
+    emit checkedItemsChanged();
+}
+
+void TileView::handleSelectionClick(QMouseEvent* event, const QModelIndex& index)
+{
+    // check the keystate (such as shift and control)
+    // 1. shift key adds from last selected to current
+    // 2. control adds the current picture to the selection
+    Qt::KeyboardModifiers modifiers = event->modifiers();
+
+    if (modifiers == Qt::NoModifier)
+    {
+        mSelectionModel->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+        // qDebug() << "No modifiers";
+        //                    mLastSelection = index;
+    }
+    else if ((modifiers & (Qt::ShiftModifier | Qt::ControlModifier)) == (Qt::ShiftModifier | Qt::ControlModifier))
+    {
+        //  qDebug() << "Shift + Control";
+    }
+    else if ((modifiers& Qt::ShiftModifier) == Qt::ShiftModifier)
+    {
+        QItemSelection selection;
+        selection.select(mSelectionModel->currentIndex(), index);
+
+        if (selection.size() > 0)
+            mSelectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
+    }
+    else if ((modifiers& Qt::ControlModifier) == Qt::ControlModifier)
+    {
+        mSelectionModel->setCurrentIndex(index, QItemSelectionModel::Select);
+    }
+}
+
+void TileView::mousePressEvent(QMouseEvent* event)
+{
+    QPoint pos = event->pos();
+
+    int    idx = posToIndex(pos);
+
+    if (idx == -1)
+        return;
+
+    TileInfo    info  = createTileInfo(idx);
+    QModelIndex index = info.modelIndex;
+
+    switch (event->button())
+    {
+        case Qt::RightButton:
+
+            if (index.isValid() &&  !mSelectionModel->selectedIndexes().contains(index))
+                mSelectionModel->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect);
+            break;
+
+        default: // do nothing
+            break;
+    }
+}
+
 void TileView::mouseReleaseEvent(QMouseEvent* event)
 {
     QPoint pos = event->pos();
@@ -551,89 +641,32 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
     // Get the modelindex of the item that was clicked
     QModelIndex index = info.modelIndex;
 
-    if (index.isValid())
+    switch (event->button())
     {
-        if (event->button() == Qt::LeftButton)
-        {
-            if (mIsCheckBoxMode && pointInCheckBox(event->pos()))
+        case  Qt::LeftButton:
+
+            if (index.isValid())
             {
-                // toggle the checkbox
-                if (mCheckedList->contains(index))
-                {
-                    if (mSelectionModel->isSelected(index))
-                    {
-                        qDebug() << "indexes:" <<
-                            mSelectionModel->selectedIndexes().size();
-                        foreach(QModelIndex idx,
-                            mSelectionModel->selectedIndexes())
-                        {
-                            mCheckedList->removeAll(idx);
-                        }
-                    }
-                    else
-                    {
-                        mCheckedList->removeAll(index);
-                    }
-                }
+                if (mIsCheckBoxMode && pointInCheckBox(event->pos()))
+                    handleCheckboxClick(index);
                 else
-                {
-                    if (mSelectionModel->isSelected(index))
-                    {
-                        qDebug() << "indexes:" <<
-                            mSelectionModel->selectedIndexes().size();
-                        foreach(QModelIndex idx,
-                            mSelectionModel->selectedIndexes())
-                        {
-                            mCheckedList->append(idx);
-                        }
-                    }
-                    else
-                    {
-                        mCheckedList->append(index);
-                    }
-                }
-                emit checkedItemsChanged();
+                    handleSelectionClick(event, index);
             }
             else
             {
-                // check the keystate (such as shift and control)
-                // 1. shift key adds from last selected to current
-                // 2. control adds the current picture to the selection
-                Qt::KeyboardModifiers modifiers = event->modifiers();
-
-                if (modifiers == Qt::NoModifier)
+                // clicked outside a valid tile => clear selection
+                if (event->modifiers() == Qt::NoModifier)
                 {
-                    mSelectionModel->setCurrentIndex(index,
-                        QItemSelectionModel::ClearAndSelect);
-                    // qDebug() << "No modifiers";
-                    //                    mLastSelection = index;
-                }
-                else if ((modifiers &
-                    (Qt::ShiftModifier | Qt::ControlModifier)) ==
-                    (Qt::ShiftModifier | Qt::ControlModifier))
-                {
-                    //  qDebug() << "Shift + Control";
-                }
-                else if ((modifiers& Qt::ShiftModifier) ==
-                    Qt::ShiftModifier)
-                {
-                    QItemSelection selection;
-                    selection.select(mSelectionModel->currentIndex(), index);
-
-                    if (selection.size() > 0)
-                        mSelectionModel->select(selection,
-                            QItemSelectionModel::ClearAndSelect);
-                }
-                else if ((modifiers& Qt::ControlModifier) ==
-                    Qt::ControlModifier)
-                {
-                    mSelectionModel->setCurrentIndex(index,
-                        QItemSelectionModel::Select);
+                    mSelectionModel->clearCurrentIndex();
+                    mSelectionModel->clearSelection();
                 }
             }
-        }
 
-        update();
+            update();
+            break;
+
+        default: // do nothing
+            break;
     }
 }
 

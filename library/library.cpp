@@ -263,20 +263,21 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected, const QIte
     photos.append(mPhotoModel->data(index, TileView::TileView::ImageRole).value<Photo>());
 
     mKeywording->setPhotos(photos);
-    mMetaDataModule->setPhotos(photos);
 }
 
 void Library::onCurrentPhotoChanged(const QModelIndex& current, const QModelIndex& /*previous*/)
 {
     if (!current.isValid())
     {
-        qDebug() << "No current photo selected";
-        return;
+        Photo p;
+        mHistogramModule->setPhoto(p);
+        mMetaDataModule->setPhoto(p);
     }
     Photo photo = mPhotoModel->data(current, TileView::TileView::ImageRole).value<Photo>();
 
     mCurrentPhoto = photo;
     mHistogramModule->setPhoto(photo);
+    mMetaDataModule->setPhoto(photo);
 
     if (ui->mLoupeScrollView->isVisible())
         onShowLoupe();

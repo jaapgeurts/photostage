@@ -10,13 +10,29 @@ MetaDataModule::MetaDataModule(QWidget* parent) :
     ui->setupUi(this);
 }
 
-void MetaDataModule::setPhotos(const QList<Photo>& list)
+void MetaDataModule::setPhoto(Photo& photo)
 {
-    if (list.size() > 0)
-    {
-        Photo p = list.at(0);
-        setMetaData(p);
-    }
+    clearAll();
+
+    setMetaData(photo);
+}
+
+void MetaDataModule::clearAll()
+{
+    ui->leAperture->clear();
+    ui->leArtist->clear();
+    ui->leCameraMake->clear();
+    ui->leCameraModel->clear();
+    ui->leCopyright->clear();
+    ui->leDateTime->clear();
+    ui->leDateTimeOriginal->clear();
+    ui->leExposure->clear();
+    ui->leFlash->clear();
+    ui->leFocalLength->clear();
+    ui->leISO->clear();
+    ui->leLens->clear();
+    ui->leGPS->clear();
+    ui->leDimensions->clear();
 }
 
 void MetaDataModule::setMetaData(const Photo& p)
@@ -26,41 +42,42 @@ void MetaDataModule::setMetaData(const Photo& p)
     if (ei.aperture != nullptr)
         ui->leAperture->setText("ƒ / " + QString::number(*ei.aperture));
 
-    ei.artist != nullptr ? ui->leArtist->setText(*ei.artist) : ui->leArtist->clear();
-    ei.make != nullptr ? ui->leCameraMake->setText(*ei.make) : ui->leCameraMake->clear();
-    ei.model != nullptr ? ui->leCameraModel->setText(*ei.model) : ui->leCameraModel->clear();
-    ei.copyright != nullptr ? ui->leCopyright->setText(*ei.copyright) : ui->leCopyright->clear();
+    if (ei.artist != nullptr)
+        ui->leArtist->setText(*ei.artist);
+
+    if (ei.make != nullptr)
+        ui->leCameraMake->setText(*ei.make);
+
+    if (ei.model != nullptr)
+        ui->leCameraModel->setText(*ei.model);
+
+    if (ei.copyright != nullptr)
+        ui->leCopyright->setText(*ei.copyright);
 
     if (ei.dateTimeDigitized != nullptr)
         ui->leDateTime->setText(ei.dateTimeDigitized->toString());
-    else
-        ui->leDateTime->clear();
 
     if (ei.dateTimeOriginal != nullptr)
         ui->leDateTimeOriginal->setText(ei.dateTimeOriginal->toString());
-    else
-        ui->leDateTimeOriginal->clear();
 
     if (ei.exposureTime !=  nullptr)
         ui->leExposure->setText("⅟ " + QString::number((int)(1.0f / *ei.exposureTime)) + "s");
-    else
-        ui->leExposure->clear();
 
-    ei.flash != nullptr ? ui->leFlash->setText(*ei.flash ? "Fired" : "Didn't fire") : ui->leFlash->clear();
+    if (ei.flash != nullptr)
+        ui->leFlash->setText(*ei.flash ? "Fired" : "Didn't fire");
 
     if (ei.focalLength != nullptr)
         ui->leFocalLength->setText(QString::number(*ei.focalLength) + "mm");
-    else
-        ui->leFocalLength->clear();
 
-    ei.isoSpeed != nullptr ? ui->leISO->setText(QString::number(*ei.isoSpeed)) : ui->leISO->clear();
-    ei.lensName != nullptr ? ui->leLens->setText(*ei.lensName) : ui->leLens->clear();
+    if (ei.isoSpeed != nullptr)
+        ui->leISO->setText(QString::number(*ei.isoSpeed));
+
+    if (ei.lensName != nullptr)
+        ui->leLens->setText(*ei.lensName);
 
     ui->leDimensions->setText(ei.formatDimension());
 
     if (ei.location != nullptr)
         ui->leGPS->setText(ei.location->toString(QGeoCoordinate::DegreesMinutesWithHemisphere));
-    else
-        ui->leGPS->clear();
 }
 }
