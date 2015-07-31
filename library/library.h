@@ -5,7 +5,7 @@
 
 #include "photomodel.h"
 #include "sqlpathmodel.h"
-#include "database/photoworkunit.h"
+#include "database/photodao.h"
 #include "imagedbtile.h"
 #include "modules/taggingmodule.h"
 #include "modules/filtermodule.h"
@@ -82,7 +82,7 @@ class Library : public Module
 
         Ui::Library*               ui;
         PhotoSortFilterProxyModel* mPhotoModel;
-        PhotoWorkUnit*             mPhotoWorkUnit;
+        PhotoDAO*             mPhotoWorkUnit;
         SqlPathModel*              mPathModel;
         TaggingModule*             mKeywording;
         LibraryHistogramModule*    mHistogramModule;

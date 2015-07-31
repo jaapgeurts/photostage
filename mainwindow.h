@@ -95,7 +95,7 @@ class MainWindow : public QMainWindow
         void onActionLightsOff();
 
         // called in response to the import thread
-        void importFinished(BackgroundTask* task);
+        void onImportFinished(BackgroundTask* task);
         void onSelectionChanged(const QItemSelection&, const QItemSelection&);
         void onCurrentChanged(const QModelIndex& current, const QModelIndex&);
 
@@ -124,7 +124,7 @@ class MainWindow : public QMainWindow
         Module*                    mCurrentModule;
         PhotoSortFilterProxyModel* mPhotoModelProxy;
         PhotoModel*                mSourceModel;
-        PhotoWorkUnit*             mPhotoWorkUnit;
+        PhotoDAO*             mPhotoWorkUnit;
         QItemSelectionModel*       mPhotoSelection;
         ActionStateGroup           mActionStatePhoto;
 

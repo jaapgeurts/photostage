@@ -11,10 +11,10 @@ RegenHashesTask::RegenHashesTask(const QList<Photo>& list) :
     mRunning(false),
     mPhotoList(list)
 {
-    mPhotoWorkUnit = PhotoWorkUnit::instance();
+    mPhotoWorkUnit = PhotoDAO::instance();
     setDescription(QString("Calculating hashes..."));
     setAutoDelete(true);
-    mPhotoWorkUnit = PhotoWorkUnit::instance();
+    mPhotoWorkUnit = PhotoDAO::instance();
 }
 
 int RegenHashesTask::progressMinimum()

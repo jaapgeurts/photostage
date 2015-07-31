@@ -9,7 +9,7 @@
 #include "photo.h"
 #include "previewcache.h"
 #include "threadqueue.h"
-#include "database/photoworkunit.h"
+#include "database/photodao.h"
 
 namespace PhotoStage
 {
@@ -53,10 +53,11 @@ class PhotoModel : public QAbstractListModel
         QList<Photo> toList(const QItemSelection& selection) const;
 
         bool removeRows(int row, int count, const QModelIndex& parent);
+        long long rootPath();
 
     public slots:
 
-        void onPhotoSourceChanged(SourceType source, long long pathId);
+        void setRootPath(SourceType source, long long pathId);
         void onVisibleTilesChanged(const QModelIndex& start, const QModelIndex& end);
 
     private slots:
@@ -67,12 +68,13 @@ class PhotoModel : public QAbstractListModel
 
     private:
 
-        PhotoWorkUnit*                mWorkUnit;
+        PhotoDAO*                mWorkUnit;
         ThreadQueue*                  mThreadQueue;
         // The mPhotoInfoList is the main container for the Photo Objects.
         QList<Photo>                  mPhotoList;
         QHash<long long, QModelIndex> mPhotoIndexMap;
         QHash<long long, uint32_t>    mRunningThreads;
+        long long                     mRootPathId;
 
         void loadImage(Photo& photo);
         void convertImage(Photo& photo);

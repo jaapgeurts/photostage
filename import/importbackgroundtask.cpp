@@ -9,7 +9,7 @@ ImportBackgroundTask::ImportBackgroundTask(const ImportInfo& info) :
 {
     setDescription(QString("Importing..."));
 
-    mWorkUnit = ImportWorkUnit::instance();
+    mWorkUnit = ImportDAO::instance();
     setAutoDelete(false);
 }
 
@@ -43,6 +43,11 @@ void ImportBackgroundTask::run()
         emit progressUpdated(i);
     }
     emit taskFinished(this);
+}
+
+const QList<long long>& ImportBackgroundTask::resultList()
+{
+    return mIdList;
 }
 
 void ImportBackgroundTask::start()

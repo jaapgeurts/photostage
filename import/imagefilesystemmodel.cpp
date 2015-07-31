@@ -2,7 +2,7 @@
 #include <QThread>
 #include <QDebug>
 
-#include "database/photoworkunit.h"
+#include "database/photodao.h"
 #include "imagefilesystemmodel.h"
 #include "previewfileloader.h"
 #include "widgets/tileview.h"
@@ -81,7 +81,7 @@ void ImageFileSystemModel::imageLoaded(const QModelIndex& index, const QImage& p
 {
     PreviewInfo info = mPreviewInfoCache->value(index);
 
-    info.isInLibrary =  PhotoWorkUnit::instance()->IsInLibrary(computeImageFileHash(info.filePath));
+    info.isInLibrary =  PhotoDAO::instance()->IsInLibrary(computeImageFileHash(info.filePath));
     info.image       = pixmap;
     mPreviewInfoCache->insert(index, info);
     QVector<int> roles;

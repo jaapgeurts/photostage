@@ -12,8 +12,7 @@ class PhotoData
     public:
 
         // Constructors
-        PhotoData(PhotoModel* owner, const QImage& image,
-            const QString& filename, long long mId);
+        PhotoData(PhotoModel* owner, const QImage& image, const QString& filename, long long mId);
         PhotoData(QSqlQuery& query);
         virtual ~PhotoData();
 

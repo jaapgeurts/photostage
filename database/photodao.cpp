@@ -4,36 +4,36 @@
 #include <QDebug>
 #include <QDir>
 
-#include "photoworkunit.h"
+#include "photodao.h"
 #include "utils.h"
 
 namespace PhotoStage
 {
 // static initializers
-PhotoWorkUnit* PhotoWorkUnit::mInstance = NULL;
+PhotoDAO* PhotoDAO::mInstance = NULL;
 
-PhotoWorkUnit* PhotoWorkUnit::instance()
+PhotoDAO* PhotoDAO::instance()
 {
     if (mInstance == NULL)
-        mInstance = new PhotoWorkUnit();
+        mInstance = new PhotoDAO();
     return mInstance;
 }
 
-void PhotoWorkUnit::beginTransaction()
+void PhotoDAO::beginTransaction()
 {
     QSqlDatabase::database().transaction();
 }
 
-void PhotoWorkUnit::endTransaction()
+void PhotoDAO::endTransaction()
 {
     QSqlDatabase::database().commit();
 }
 
-PhotoWorkUnit::PhotoWorkUnit()
+PhotoDAO::PhotoDAO()
 {
 }
 
-void PhotoWorkUnit::setRating(const QList<Photo>& list, int rating)
+void PhotoDAO::setRating(const QList<Photo>& list, int rating)
 {
     QSqlQuery q;
     QString   query = "update photo set rating=:rating where id in (:id)";
@@ -53,7 +53,7 @@ void PhotoWorkUnit::setRating(const QList<Photo>& list, int rating)
     q.exec();
 }
 
-void PhotoWorkUnit::setFlag(const QList<Photo>& list, Photo::Flag flag)
+void PhotoDAO::setFlag(const QList<Photo>& list, Photo::Flag flag)
 {
     QSqlQuery q;
     QString   query = ("update photo set flag=:flag where id in (:id)");
@@ -73,7 +73,7 @@ void PhotoWorkUnit::setFlag(const QList<Photo>& list, Photo::Flag flag)
     q.exec();
 }
 
-void PhotoWorkUnit::setColorLabel(const QList<Photo>& list,
+void PhotoDAO::setColorLabel(const QList<Photo>& list,
     Photo::ColorLabel color)
 {
     QSqlQuery q;
@@ -94,7 +94,7 @@ void PhotoWorkUnit::setColorLabel(const QList<Photo>& list,
     q.exec();
 }
 
-void PhotoWorkUnit::insertKeywords(const QStringList& words)
+void PhotoDAO::insertKeywords(const QStringList& words)
 {
     if (words.size() == 0)
         return;
@@ -132,8 +132,7 @@ void PhotoWorkUnit::insertKeywords(const QStringList& words)
     // insert all the keywords.
     QSqlDatabase::database().transaction();
     q.clear();
-    q.prepare(
-        "insert into keyword (keyword,parent_id) values ( :keyword , :parent )");
+    q.prepare("insert into keyword (keyword,parent_id) values ( :keyword , :parent )");
     q.bindValue(":parent", parent);
     QString word;
     foreach(word, newWords)
@@ -148,8 +147,7 @@ void PhotoWorkUnit::insertKeywords(const QStringList& words)
     rebuildTree(parent, 1);
 }
 
-void PhotoWorkUnit::assignKeywords(const QStringList& words,
-    const QList<Photo>& list)
+void PhotoDAO::assignKeywords(const QStringList& words, const QList<Photo>& list)
 {
     QSqlQuery q;
     QString   word;
@@ -173,8 +171,7 @@ void PhotoWorkUnit::assignKeywords(const QStringList& words,
     QSqlDatabase::database().commit();
 }
 
-void PhotoWorkUnit::removeKeywordsExcept(const QStringList& words,
-    const QList<Photo>& list)
+void PhotoDAO::removeKeywordsExcept(const QStringList& words, const QList<Photo>& list)
 {
     QSqlQuery q;
 
@@ -205,8 +202,7 @@ void PhotoWorkUnit::removeKeywordsExcept(const QStringList& words,
 }
 
 // return keywords for the selected photos, and the count each keyword appears
-QMap<QString, int>
-PhotoWorkUnit::getPhotoKeywordsCount(const QList<Photo>& list) const
+QMap<QString, int> PhotoDAO::getPhotoKeywordsCount(const QList<Photo>& list) const
 {
     QSqlQuery q;
     QString   query =
@@ -239,7 +235,7 @@ PhotoWorkUnit::getPhotoKeywordsCount(const QList<Photo>& list) const
     return dict;
 }
 
-QStringList PhotoWorkUnit::getPhotoKeywords(const Photo& photo) const
+QStringList PhotoDAO::getPhotoKeywords(const Photo& photo) const
 {
     QSqlQuery q;
 
@@ -263,7 +259,19 @@ QStringList PhotoWorkUnit::getPhotoKeywords(const Photo& photo) const
     return list;
 }
 
-QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
+QString PhotoDAO::joinIds(const QList<long long>& idList) const
+{
+    QString photoids;
+
+    foreach(long long id, idList)
+    {
+        photoids += QString::number(id) + ",";
+    }
+    photoids.chop(1);
+    return photoids;
+}
+
+QList<Photo> PhotoDAO::getPhotosById(QList<long long> idList) const
 {
     QSqlQuery q;
     QString   query = QString(
@@ -280,13 +288,8 @@ QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
               order by child.lft) as d on p.path_id = d.id \
               and p.id in (:photoids);");
 
-    QString photoids;
+    QString photoids = joinIds(idList);
 
-    foreach(long long id, idList)
-    {
-        photoids += QString::number(id) + ",";
-    }
-    photoids.chop(1);
     query.replace(":photoids", photoids);
     q.prepare(query);
     q.bindValue(":separator", QDir::separator());
@@ -309,7 +312,59 @@ QList<Photo> PhotoWorkUnit::getPhotosById(QList<long long> idList)
     return list;
 }
 
-void PhotoWorkUnit::deletePhotos(const QList<Photo>& list, bool deleteFile)
+void PhotoDAO::filterList(QList<long long>& list, long long rootPathId, bool includeSubDirs) const
+{
+    QString query;
+
+    // get the list of Id's that fall under the rootPath
+    if (includeSubDirs)
+    {
+        // get left and right of the path root
+        long long lft, rgt;
+
+        getLeftRightForPathId(rootPathId, lft, rgt);
+
+        query =
+            "select p.id from photo p join (select child.* from path child join path ancestor \
+            on child.lft >= ancestor.lft \
+            and child.lft <= ancestor.rgt \
+            group by child.lft order by child.lft) as d on p.path_id = d.id \
+            and d.lft between :lft and :rgt and p.id in (:idList);";
+        query.replace(":lft", QString::number(lft));
+        query.replace(":rgt", QString::number(rgt));
+    }
+    else
+    {
+        query =
+            "select p.id from photo p join (select child.* from path child join path ancestor \
+                on child.lft >= ancestor.lft \
+                and child.lft <= ancestor.rgt \
+                group by child.lft order by child.lft) as d on p.path_id = d.id \
+                and p.path_id = :pathid and p.id in (:idList);";
+        query.replace(":pathid", QString::number(rootPathId));
+    }
+    QString photoids = joinIds(list);
+    query.replace(":idList", photoids);
+
+    QSqlQuery q;
+
+    if (!q.exec(query) && !q.isValid())
+    {
+        qDebug() << "Query failed" << q.executedQuery();
+        qDebug() << q.lastError();
+        return;
+    }
+
+    QList<long long> newList;
+
+    while (q.next())
+    {
+        newList << q.value(0).toLongLong();
+    }
+    list = newList;
+}
+
+void PhotoDAO::deletePhotos(const QList<Photo>& list, bool deleteFile)
 {
     QSqlQuery q;
     QString   photo_ids;
@@ -361,12 +416,9 @@ void PhotoWorkUnit::deletePhotos(const QList<Photo>& list, bool deleteFile)
     }
 }
 
-// TODO: make path_id work and option to include
-QList<Photo> PhotoWorkUnit::getPhotosByPath(long long path_id, bool includeSubDirs)
+void PhotoDAO::getLeftRightForPathId(long long path_id, long long& lft, long long& rgt) const
 {
-    QList<Photo> list;
-
-    QSqlQuery    q;
+    QSqlQuery q;
 
     q.prepare("select lft,rgt from path where id = :id;");
     q.bindValue(":id", path_id);
@@ -375,23 +427,35 @@ QList<Photo> PhotoWorkUnit::getPhotosByPath(long long path_id, bool includeSubDi
     {
         qDebug() << "Query failed" << q.executedQuery();
         qDebug() << q.lastError();
-        return list;
+        return;
     }
     q.next();
 
-    long long lft = q.value(0).toLongLong();
-    long long rgt = q.value(1).toLongLong();
+    lft = q.value(0).toLongLong();
+    rgt = q.value(1).toLongLong();
+}
 
-    //    if (includeSubDirs)
-    //        query.replace(":top_or_include", includeSubDirsClause);
-    //    else
-    //        query.replace(":top_or_include", "c.id = " + QString::number(
-    //                path_id));
+/**
+ * @brief PhotoWorkUnit::getPhotosByPath Return a list of photo's that are in the path identified by path id.
+ *      If includeSubDirs is true, then all photos under this path are returned as well.
+ * @param path_id
+ * @param includeSubDirs
+ * @return
+ */
+QList<Photo> PhotoDAO::getPhotosByPath(long long path_id, bool includeSubDirs) const
+{
+    QSqlQuery    q;
 
+    QList<Photo> list;
     q.clear();
 
-    q.prepare(
-        "select p.id, p.filename, d.path,p.rating,p.color,p.flag, \
+    if (includeSubDirs)
+    {
+        long long lft, rgt;
+        getLeftRightForPathId(path_id, lft, rgt);
+
+        q.prepare(
+            "select p.id, p.filename, d.path,p.rating,p.color,p.flag, \
               p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
               p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
               p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
@@ -403,9 +467,27 @@ QList<Photo> PhotoWorkUnit::getPhotosByPath(long long path_id, bool includeSubDi
             group by child.lft \
             order by child.lft) as d on p.path_id = d.id \
             and d.lft between :lft and :rgt;" );
+        q.bindValue(":lft", lft);
+        q.bindValue(":rgt", rgt);
+    }
+    else
+    {
+        q.prepare(
+            "select p.id, p.filename, d.path,p.rating,p.color,p.flag, \
+              p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
+              p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
+              p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
+                p.width, p.height  \
+            from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
+            child.* from path child join path ancestor \
+            on child.lft >= ancestor.lft \
+            and child.lft <= ancestor.rgt \
+            group by child.lft \
+            order by child.lft) as d on p.path_id = d.id \
+            and p.path_id = :pathid;" );
+        q.bindValue(":pathid", path_id);
+    }
     q.bindValue(":separator", QDir::separator());
-    q.bindValue(":lft", lft);
-    q.bindValue(":rgt", rgt);
 
     if (!q.exec() && !q.isValid())
     {
@@ -423,7 +505,7 @@ QList<Photo> PhotoWorkUnit::getPhotosByPath(long long path_id, bool includeSubDi
     return list;
 }
 
-long long PhotoWorkUnit::rebuildTree(long long parent_id, long long left)
+long long PhotoDAO::rebuildTree(long long parent_id, long long left)
 {
     // the right value of this node is the left value + 1
 
@@ -457,7 +539,7 @@ long long PhotoWorkUnit::rebuildTree(long long parent_id, long long left)
     return right + 1;
 }
 
-void PhotoWorkUnit::updateExifInfo(const Photo& photo) const
+void PhotoDAO::updateExifInfo(const Photo& photo) const
 {
     QSqlQuery       q;
 
@@ -478,7 +560,7 @@ void PhotoWorkUnit::updateExifInfo(const Photo& photo) const
     return;
 }
 
-void PhotoWorkUnit::regenerateHash(Photo& p)
+void PhotoDAO::regenerateHash(Photo& p)
 {
     QString   path = p.srcImagePath();
     // only scan the first 1MB
@@ -500,7 +582,7 @@ void PhotoWorkUnit::regenerateHash(Photo& p)
     return;
 }
 
-bool PhotoWorkUnit::IsInLibrary(long long hash) const
+bool PhotoDAO::IsInLibrary(long long hash) const
 {
     QSqlQuery q;
 

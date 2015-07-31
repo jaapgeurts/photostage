@@ -118,7 +118,7 @@ MainWindow::MainWindow(QWidget* parent) :
     mCurrentModule = mLibrary;
     ui->stackedWidget->setCurrentWidget(mLibrary);
 
-    mPhotoWorkUnit = PhotoWorkUnit::instance();
+    mPhotoWorkUnit = PhotoDAO::instance();
 
     mBackgroundTaskManager = new BackgroundTaskManager(ui->scrollAreaWidgetContents, this);
 
@@ -418,11 +418,9 @@ void MainWindow::onActionImportTriggered()
 
     if (resultCode == QDialog::Accepted)
     {
-        ImportBackgroundTask* r =
-            new ImportBackgroundTask(importDialog->importInfo());
+        ImportBackgroundTask* r = new ImportBackgroundTask(importDialog->importInfo());
         mBackgroundTaskManager->addRunnable(r);
-        connect(r, &ImportBackgroundTask::taskFinished,
-            this, &MainWindow::importFinished);
+        connect(r, &ImportBackgroundTask::taskFinished, this, &MainWindow::onImportFinished);
         r->start();
     }
     delete importDialog;
@@ -653,11 +651,17 @@ void MainWindow::onActionLightsOff()
     }
 }
 
-void MainWindow::importFinished(BackgroundTask* task)
+void MainWindow::onImportFinished(BackgroundTask* task)
 {
     ImportBackgroundTask* t = static_cast<ImportBackgroundTask*>(task);
 
-    mSourceModel->addData(t->resultList());
+    QList<long long>      resultList = t->resultList();
+
+    // remove any values from this list that are not visible (ie. do not belong to the model)
+    // TODO: change subdirectory setting here
+    mPhotoWorkUnit->filterList(resultList, mSourceModel->rootPath(), true);
+
+    mSourceModel->addData(resultList);
 
     task->deleteLater();
     // update the files tree as well and the collection tree
@@ -688,7 +692,7 @@ void MainWindow::onFilterApplied(const PhotoFilterInfo& info)
 
 void MainWindow::onPhotoSourceChanged(PhotoModel::SourceType type, long long id)
 {
-    mSourceModel->onPhotoSourceChanged(type, id);
+    mSourceModel->setRootPath(type, id);
 
     mPhotoModelProxy->setSortRole(Photo::DateTimeRole);
     mPhotoModelProxy->sort(0, Qt::AscendingOrder);

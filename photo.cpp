@@ -10,10 +10,7 @@ Photo::Photo()
 {
 }
 
-Photo::Photo(PhotoModel* owner,
-    const QImage& image,
-    const QString& filename,
-    long long id)
+Photo::Photo(PhotoModel* owner, const QImage& image, const QString& filename, long long id)
 {
     d = QSharedPointer<PhotoData>(new PhotoData(owner, image, filename, id));
 }
@@ -155,7 +152,7 @@ bool Photo::isDownloading() const
     return d->isDownloading();
 }
 
-void Photo::setKeywords(const QStringList &list)
+void Photo::setKeywords(const QStringList& list)
 {
     d->setKeywords(list);
 }

@@ -7,13 +7,13 @@
 
 namespace PhotoStage
 {
-class ImportWorkUnit
+class ImportDAO
 {
     public:
 
-        static ImportWorkUnit* instance();
-        long long importPhoto(const QFileInfo& file,
-            const ImportOptions& options);
+        static ImportDAO* instance();
+
+        long long importPhoto(const QFileInfo& file, const ImportOptions& options);
 
         void beginImport();
 
@@ -21,7 +21,7 @@ class ImportWorkUnit
 
     protected:
 
-        explicit ImportWorkUnit();
+        explicit ImportDAO();
 
     signals:
 
@@ -29,17 +29,14 @@ class ImportWorkUnit
 
     private:
 
-        static ImportWorkUnit* mInstance;
+        static ImportDAO* mInstance;
 
         // state variables for the import process
         QString   mLastpath;
         long long mLastkey;
 
         int createPaths(QStringList& paths);
-        int insertPathRec(QSqlQuery& q,
-            const QStringList& path,
-            int pos,
-            int parentid);
+        int insertPathRec(QSqlQuery& q, const QStringList& path, int pos, int parentid);
 };
 }
 #endif // IMPORTWORKUNIT_H

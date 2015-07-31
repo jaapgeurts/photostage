@@ -5,6 +5,7 @@
 
 #include "constants.h"
 #include "photomodel.h"
+#include "preferences.h"
 
 #include "widgets/tileview.h"
 #include "widgets/mapview/layer.h"
@@ -16,9 +17,10 @@
 namespace PhotoStage
 {
 PhotoModel::PhotoModel(QObject* parent) :
-    QAbstractListModel(parent)
+    QAbstractListModel(parent),
+    mRootPathId(-1)
 {
-    mWorkUnit = PhotoWorkUnit::instance();
+    mWorkUnit = PhotoDAO::instance();
 
     mThreadQueue = new ThreadQueue();
 }
@@ -148,7 +150,7 @@ void PhotoModel::previewGenerated(Photo photo, const QImage& image)
     // get actual width x height & store in db.
     photo.exifInfo().width  = image.width();
     photo.exifInfo().height = image.height();
-    PhotoWorkUnit::instance()->updateExifInfo(photo);
+    PhotoDAO::instance()->updateExifInfo(photo);
 
     QImage scaled;
 
@@ -191,17 +193,17 @@ void PhotoModel::imageTranslated(Photo photo, const QImage& image)
     photo.setIsDownloading(false);
 }
 
-void PhotoModel::onPhotoSourceChanged(PhotoModel::SourceType source,
-    long long pathId)
+void PhotoModel::setRootPath(PhotoModel::SourceType source, long long pathId)
 {
     beginResetModel();
+    mRootPathId = pathId;
 
     // cancel all running jobs
     mThreadQueue->cancel();
 
     if (source == SourceFiles)
     {
-        mPhotoList = mWorkUnit->getPhotosByPath(pathId);
+        mPhotoList = mWorkUnit->getPhotosByPath(pathId, Preferences::instance()->library_include_subfolders);
         mPhotoIndexMap.clear();
         int i = 0;
         foreach(Photo p, mPhotoList)
@@ -220,8 +222,12 @@ void PhotoModel::onPhotoSourceChanged(PhotoModel::SourceType source,
     endResetModel();
 }
 
-void PhotoModel::onVisibleTilesChanged(const QModelIndex& start,
-    const QModelIndex& end)
+long long PhotoModel::rootPath()
+{
+    return mRootPathId;
+}
+
+void PhotoModel::onVisibleTilesChanged(const QModelIndex& start, const QModelIndex& end)
 {
     QList<uint32_t> idList;
 

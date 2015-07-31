@@ -5,7 +5,7 @@
 #include <QList>
 
 #include "backgroundtask.h"
-#include "database/importworkunit.h"
+#include "database/importdao.h"
 
 namespace PhotoStage
 {
@@ -19,10 +19,7 @@ class ImportBackgroundTask : public BackgroundTask, public QRunnable
         int progressMaximum();
         void run();
 
-        const QList<long long>& resultList()
-        {
-            return mIdList;
-        }
+        const QList<long long>& resultList();
 
     public slots:
 
@@ -35,7 +32,7 @@ class ImportBackgroundTask : public BackgroundTask, public QRunnable
         ImportInfo        mInfo;
 
         QList<long long>  mIdList;
-        ImportWorkUnit*   mWorkUnit;
+        ImportDAO*   mWorkUnit;
         std::atomic<bool> mRunning;
 };
 }

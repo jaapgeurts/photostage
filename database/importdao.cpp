@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QSqlQuery>
 
-#include "importworkunit.h"
+#include "importdao.h"
 #include "import/exivfacade.h"
 #include "previewcache.h"
 #include "dbutils.h"
@@ -12,29 +12,30 @@
 namespace PhotoStage
 {
 // static initializers
-ImportWorkUnit* ImportWorkUnit::mInstance = NULL;
+ImportDAO* ImportDAO::mInstance = NULL;
 
-ImportWorkUnit* ImportWorkUnit::instance()
+ImportDAO* ImportDAO::instance()
 {
     if (mInstance == NULL)
-        mInstance = new ImportWorkUnit();
+        mInstance = new ImportDAO();
     return mInstance;
 }
 
-ImportWorkUnit::ImportWorkUnit()
+ImportDAO::ImportDAO()
 {
 }
 
-void ImportWorkUnit::beginImport()
+void ImportDAO::beginImport()
 {
     mLastpath.clear();
     mLastkey = -1;
 }
 
-long long ImportWorkUnit::importPhoto(const QFileInfo& file,
+long long ImportDAO::importPhoto(const QFileInfo& file,
     const ImportOptions& options)
 {
     long long ret = -1;
+
 
     qDebug() << "Importing file" << file.canonicalFilePath();
     QString fileName = file.fileName();
@@ -152,6 +153,8 @@ long long ImportWorkUnit::importPhoto(const QFileInfo& file,
     else
     {
         ret = q.lastInsertId().toLongLong();
+        // make sure the global preview cache does not store an image with the same key
+        // this is probably a left over cache entry from before.
         PreviewCache::globalCache()->remove(QString::number(ret));
     }
 
@@ -160,9 +163,10 @@ long long ImportWorkUnit::importPhoto(const QFileInfo& file,
 
 // This function will check the path hierarchy in the database and insert the necessary paths
 // it returns the path id of the last directory
-int ImportWorkUnit::createPaths(QStringList& paths)
+int ImportDAO::createPaths(QStringList& paths)
 {
     QSqlQuery q;
+
 
     q.prepare("select id, directory ,parent_id from path where directory = :dir and ifnull(parent_id,-1) = :p_id");
 
@@ -176,7 +180,7 @@ int ImportWorkUnit::createPaths(QStringList& paths)
 
 // recursively traverses the path, inserting directories in the table as needed.
 // returns the path id of the last directory
-int ImportWorkUnit::insertPathRec(QSqlQuery& q, const QStringList& path, int pos, int parentid)
+int ImportDAO::insertPathRec(QSqlQuery& q, const QStringList& path, int pos, int parentid)
 {
     if (pos >= path.length())
         return parentid;
@@ -214,7 +218,7 @@ int ImportWorkUnit::insertPathRec(QSqlQuery& q, const QStringList& path, int pos
     return -1;
 }
 
-long long ImportWorkUnit::rebuildTree(long long parent_id, long long left)
+long long ImportDAO::rebuildTree(long long parent_id, long long left)
 {
     // the right value of this node is the left value + 1
 
@@ -223,6 +227,7 @@ long long ImportWorkUnit::rebuildTree(long long parent_id, long long left)
     // get all children of this node
 
     QSqlQuery q;
+
 
     q.prepare("select id from path where parent_id = :parent_id;");
     q.bindValue(":parent_id", parent_id);

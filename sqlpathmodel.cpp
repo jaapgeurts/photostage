@@ -3,90 +3,19 @@
 namespace PhotoStage
 {
 SqlPathModel::SqlPathModel(QObject* parent) :
-    QAbstractItemModel(parent),
-    mRootItem(NULL)
+    QAbstractItemModel(parent)
 {
     // Construct the file tree
-    createPathItems();
+    mRootItem = PathDAO::instance()->createPathItems();
 }
 
 SqlPathModel::~SqlPathModel()
 {
     if (mRootItem != NULL)
-        deletePathItems(mRootItem);
+        PathDAO::instance()->deletePathItems(mRootItem);
 }
 
-void SqlPathModel::createPathItems()
-{
-    // create table path (
-    //    id integer primary key AUTOINCREMENT,
-    //    directory varchar,
-    //    parent integer)")))
-
-    // first create the root item
-    QSqlQuery query;
-
-    QString   queryText = QString(
-        "select id, directory, parent_id from path where parent_id is NULL");
-
-    if (!query.exec(queryText))
-        qDebug() << query.lastError();
-
-    if (query.first())
-    {
-        mRootItem = new PathItem(query.value(0).toLongLong(),
-                query.value(1).toString(),
-                query.value(2).toLongLong());
-        createPathtemsRec(mRootItem);
-    }
-}
-
-void SqlPathModel::createPathtemsRec(PathItem* root)
-{
-    QSqlQuery query;
-    QString   queryText = QString(
-        "select p.id, p.directory, p.parent_id, count(f.id) \
-        from path p left outer join photo f \
-                     on p.id = f.path_id \
-        where parent_id = :parent_id \
-        group by p.id, p.directory, p.parent_id");
-
-    query.prepare(queryText);
-
-    PathItem* item;
-
-    query.bindValue(":parent_id", root->id);
-    query.exec();
-
-    //int total = 0;
-    while (query.next())
-    {
-        item = new PathItem(query.value(0).toLongLong(),
-                query.value(1).toString(),
-                query.value(1).toLongLong());
-        item->count  = query.value(3).toInt();
-        item->parent = root;
-        root->children.append(item);
-        createPathtemsRec(item);
-        root->cumulative += item->count + item->cumulative;
-    }
-}
-
-void SqlPathModel::deletePathItems(PathItem* root)
-{
-    PathItem* item;
-
-    foreach(item, root->children)
-    {
-        deletePathItems(item);
-    }
-    root->children.clear();
-    delete root;
-}
-
-QModelIndex SqlPathModel::index(int row,
-    int column,
-    const QModelIndex& parent) const
+QModelIndex SqlPathModel::index(int row, int column, const QModelIndex& parent) const
 {
     if (!hasIndex(row, column, parent))
         return QModelIndex();
@@ -111,16 +40,13 @@ QModelIndex SqlPathModel::index(long long pathid) const
     return findItemRec(mRootItem, 0, pathid);
 }
 
-QModelIndex SqlPathModel::findItemRec(PathItem* item, int row,
-    long long pathid) const
+QModelIndex SqlPathModel::findItemRec(PathItem* item, int row, long long pathid) const
 {
     if (item->id == pathid)
         return createIndex(row, 0, item);
 
     int j = 0;
 
-    if (item->path == "2014")
-        qDebug() <<"found";
     foreach(PathItem * i, item->children)
     {
         QModelIndex idx = findItemRec(i, j, pathid);
@@ -170,10 +96,7 @@ int SqlPathModel::columnCount(const QModelIndex& /*parent*/) const
 QVariant SqlPathModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
-    {
-        qDebug() << "Requested item invalid";
         return QVariant();
-    }
 
     PathItem* item = static_cast<PathItem*>(index.internalPointer());
 
@@ -197,9 +120,7 @@ QVariant SqlPathModel::data(const QModelIndex& index, int role) const
 //{
 //}
 
-QVariant SqlPathModel::headerData(int /*section*/,
-    Qt::Orientation /*orientation*/,
-    int role) const
+QVariant SqlPathModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const
 {
     if (role == Qt::DisplayRole)
         return QString("Location");
@@ -209,7 +130,10 @@ QVariant SqlPathModel::headerData(int /*section*/,
 void SqlPathModel::reload()
 {
     beginResetModel();
-    createPathItems();
+
+    if (mRootItem != NULL)
+        PathDAO::instance()->deletePathItems(mRootItem);
+    mRootItem = PathDAO::instance()->createPathItems();
     endResetModel();
 }
 }

@@ -34,8 +34,6 @@ SOURCES += \
     database/dbutils.cpp \
     database/importinfo.cpp \
     database/importoptions.cpp \
-    database/importworkunit.cpp \
-    database/photoworkunit.cpp \
     develop/develop.cpp \
     develop/modules/basicmodule.cpp \
     develop/modules/develophistogrammodule.cpp \
@@ -100,7 +98,11 @@ SOURCES += \
     widgets/mapview/openstreetmapmapprovider.cpp \
     widgets/modulepanel.cpp \
     widgets/tileview.cpp \
-    widgets/translucentwindow.cpp
+    widgets/translucentwindow.cpp \
+    database/pathdao.cpp \
+    database/photodao.cpp \
+    database/importdao.cpp \
+    database/pathitem.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -115,8 +117,6 @@ HEADERS  += \
     database/dbutils.h \
     database/importinfo.h \
     database/importoptions.h \
-    database/importworkunit.h \
-    database/photoworkunit.h \
     develop/develop.h \
     develop/modules/basicmodule.h \
     develop/modules/develophistogrammodule.h \
@@ -185,7 +185,11 @@ HEADERS  += \
     widgets/mapview/openstreetmapmapprovider.h \
     widgets/modulepanel.h \
     widgets/tileview.h \
-    widgets/translucentwindow.h
+    widgets/translucentwindow.h \
+    database/pathdao.h \
+    database/photodao.h \
+    database/importdao.h \
+    database/pathitem.h
 
 FORMS    += \
     mainwindow.ui \

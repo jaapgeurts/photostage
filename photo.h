@@ -42,8 +42,7 @@ class Photo
         };
 
         Photo();
-        Photo(PhotoModel* owner, const QImage& image,
-            const QString& filename, long long id);
+        Photo(PhotoModel* owner, const QImage& image, const QString& filename, long long id);
         Photo(QSqlQuery& query);
 
         long long id() const;

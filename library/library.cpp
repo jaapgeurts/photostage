@@ -114,7 +114,7 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
 
     onShowGrid();
 
-    mPhotoWorkUnit = PhotoWorkUnit::instance();
+    mPhotoWorkUnit = PhotoDAO::instance();
 
     // open up the last path location
     long long pathid =
@@ -150,11 +150,8 @@ Library::~Library()
 
     if (index.isValid())
     {
-        QVariant  v    = mPathModel->data(index, SqlPathModel::Path);
-        PathItem* item = v.value<PathItem*>();
-
-        if (item != NULL)
-            settings.setValue(SETTINGS_LIBRARY_FILES_PATHITEM, item->id);
+        PathItem* item = mPathModel->data(index, SqlPathModel::Path).value<PathItem*>();
+        settings.setValue(SETTINGS_LIBRARY_FILES_PATHITEM, item->id);
     }
     delete ui;
 }
@@ -194,8 +191,7 @@ void Library::setSelectionModel(QItemSelectionModel* selectionModel)
 void Library::onFilesClicked(const QModelIndex& index)
 {
     // TODO: get the path model and get the file to query and show only those images in the view
-    QVariant  v    = mPathModel->data(index, SqlPathModel::Path);
-    PathItem* item = v.value<PathItem*>();
+    PathItem* item = mPathModel->data(index, SqlPathModel::Path).value<PathItem*>();
 
     // TODO: clear the filter
     // reset the photo model to the root of this item
@@ -204,7 +200,7 @@ void Library::onFilesClicked(const QModelIndex& index)
 
 void Library::onCustomContextMenu(const QPoint& pos)
 {
-    emit customContextMenuRequested(ui->mClvPhotos->mapTo(this,pos));
+    emit customContextMenuRequested(ui->mClvPhotos->mapTo(this, pos));
 }
 
 void Library::onZoomLevelChanged(int zoomLevel)
@@ -260,29 +256,24 @@ void Library::onThumbSizeChanged(int newValue)
 
 // Called when the selection in the photo tile view changes.
 // get the new selectionlist and pass it to all the modules.
-void Library::onPhotoSelectionChanged(const QItemSelection& selected,
-    const QItemSelection& /*deselected*/)
+void Library::onPhotoSelectionChanged(const QItemSelection& selected, const QItemSelection& /*deselected*/)
 {
     QList<Photo> photos;
     foreach (QModelIndex index, selected.indexes())
-    photos.append(mPhotoModel->data(index,
-        TileView::TileView::ImageRole).value<Photo>());
+    photos.append(mPhotoModel->data(index, TileView::TileView::ImageRole).value<Photo>());
 
     mKeywording->setPhotos(photos);
     mMetaDataModule->setPhotos(photos);
 }
 
-void Library::onCurrentPhotoChanged(const QModelIndex& current,
-    const QModelIndex& /*previous*/)
+void Library::onCurrentPhotoChanged(const QModelIndex& current, const QModelIndex& /*previous*/)
 {
     if (!current.isValid())
     {
         qDebug() << "No current photo selected";
         return;
     }
-    Photo photo =
-        mPhotoModel->data(current,
-            TileView::TileView::ImageRole).value<Photo>();
+    Photo photo = mPhotoModel->data(current, TileView::TileView::ImageRole).value<Photo>();
 
     mCurrentPhoto = photo;
     mHistogramModule->setPhoto(photo);
@@ -291,16 +282,12 @@ void Library::onCurrentPhotoChanged(const QModelIndex& current,
         onShowLoupe();
 }
 
-void Library::onPathModelRowsAdded(const QModelIndex& /*parent*/,
-    int /*start*/,
-    int /*end*/)
+void Library::onPathModelRowsAdded(const QModelIndex& /*parent*/, int /*start*/, int /*end*/)
 {
     mPathModel->reload();
 }
 
-void Library::onPathModelRowsRemoved(const QModelIndex& /*parent*/,
-    int /*start*/,
-    int /*end*/)
+void Library::onPathModelRowsRemoved(const QModelIndex& /*parent*/, int /*start*/, int /*end*/)
 {
     mPathModel->reload();
 }

@@ -3,7 +3,7 @@
 
 #include <QList>
 
-#include "database/photoworkunit.h"
+#include "database/photodao.h"
 #include "backgroundtask.h"
 
 namespace PhotoStage
@@ -32,7 +32,7 @@ class RegenHashesTask : public BackgroundTask, public QRunnable
     private:
 
         std::atomic<bool> mRunning;
-        PhotoWorkUnit*    mPhotoWorkUnit;
+        PhotoDAO*    mPhotoWorkUnit;
         QList<Photo>      mPhotoList;
 };
 }

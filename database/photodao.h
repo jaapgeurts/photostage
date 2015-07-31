@@ -9,11 +9,11 @@
 
 namespace PhotoStage
 {
-class PhotoWorkUnit
+class PhotoDAO
 {
     public:
 
-        static PhotoWorkUnit* instance();
+        static PhotoDAO* instance();
 
         void beginTransaction();
         void endTransaction();
@@ -31,9 +31,10 @@ class PhotoWorkUnit
 
         // Photo Items are created here.
         // ownership is transferred to the caller who should call delete on the objects
-        QList<Photo> getPhotosByPath(long long path_id, bool includeSubDirs = true);
+        QList<Photo> getPhotosByPath(long long path_id, bool includeSubDirs = true) const;
 
-        QList<Photo> getPhotosById(QList<long long> idList);
+        QList<Photo> getPhotosById(QList<long long> idList) const;
+        void filterList(QList<long long>& list, long long rootPathId, bool includeSubDirs) const;
 
         void deletePhotos(const QList<Photo>& list, bool deleteFile);
 
@@ -44,12 +45,15 @@ class PhotoWorkUnit
 
     protected:
 
-        PhotoWorkUnit();
+        PhotoDAO();
 
     private:
 
-        static PhotoWorkUnit* mInstance;
+        static PhotoDAO* mInstance;
+
         long long rebuildTree(long long parent_id, long long left);
+        void getLeftRightForPathId(long long path_id, long long& lft, long long& rgt) const;
+        QString joinIds(const QList<long long>& idList) const;
 };
 }
 #endif // PHOTOWORKUNIT_H
