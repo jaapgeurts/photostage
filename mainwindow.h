@@ -124,7 +124,7 @@ class MainWindow : public QMainWindow
         Module*                    mCurrentModule;
         PhotoSortFilterProxyModel* mPhotoModelProxy;
         PhotoModel*                mSourceModel;
-        PhotoDAO*             mPhotoWorkUnit;
+        PhotoDAO*                  mPhotoWorkUnit;
         QItemSelectionModel*       mPhotoSelection;
         ActionStateGroup           mActionStatePhoto;
 

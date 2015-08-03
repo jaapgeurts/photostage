@@ -31,11 +31,9 @@ void ImportDAO::beginImport()
     mLastkey = -1;
 }
 
-long long ImportDAO::importPhoto(const QFileInfo& file,
-    const ImportOptions& options)
+long long ImportDAO::importPhoto(const QFileInfo& file, const ImportOptions& options)
 {
     long long ret = -1;
-
 
     qDebug() << "Importing file" << file.canonicalFilePath();
     QString fileName = file.fileName();
@@ -167,7 +165,6 @@ int ImportDAO::createPaths(QStringList& paths)
 {
     QSqlQuery q;
 
-
     q.prepare("select id, directory ,parent_id from path where directory = :dir and ifnull(parent_id,-1) = :p_id");
 
     int key = insertPathRec(q, paths, 0, -1);
@@ -227,7 +224,6 @@ long long ImportDAO::rebuildTree(long long parent_id, long long left)
     // get all children of this node
 
     QSqlQuery q;
-
 
     q.prepare("select id from path where parent_id = :parent_id;");
     q.bindValue(":parent_id", parent_id);

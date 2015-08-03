@@ -1,3 +1,5 @@
+#include <QDrag>
+#include <QMimeData>
 #include <QPainter>
 #include <QFileSystemModel>
 
@@ -27,7 +29,9 @@ TileView::TileView(QWidget* parent) :
     mTile(NULL),
     mListModel(NULL),
     mSelectionModel(NULL),
-    mViewportPosition(0)
+    mViewportPosition(0),
+    mDragStartPosition(),
+    mDndHandler(NULL)
 {
     mScrollBar = new QScrollBar(mOrientation, this);
     mScrollBar->setMinimum(0);
@@ -54,6 +58,8 @@ TileView::TileView(QWidget* parent) :
     connect(mScrollBar, &QScrollBar::valueChanged, this, &TileView::sliderValueChanged);
 
     setMouseTracking(true);
+
+    setAcceptDrops(true);
 }
 
 TileView::~TileView()
@@ -256,6 +262,16 @@ void TileView::setSelectionModel(QItemSelectionModel* selectionModel)
 QItemSelectionModel* TileView::selectionModel() const
 {
     return mSelectionModel;
+}
+
+void TileView::setDndHandler(DndHandler* handler)
+{
+    mDndHandler = handler;
+}
+
+DndHandler* TileView::dndHandler()
+{
+    return mDndHandler;
 }
 
 void TileView::resetView()
@@ -572,11 +588,11 @@ void TileView::handleSelectionClick(QMouseEvent* event, const QModelIndex& index
         // qDebug() << "No modifiers";
         //                    mLastSelection = index;
     }
-    else if ((modifiers & (Qt::ShiftModifier | Qt::ControlModifier)) == (Qt::ShiftModifier | Qt::ControlModifier))
+    else if ((modifiers& Qt::ShiftModifier) && (modifiers & Qt::ControlModifier))
     {
-        //  qDebug() << "Shift + Control";
+        qDebug() << "Shift + Control";
     }
-    else if ((modifiers& Qt::ShiftModifier) == Qt::ShiftModifier)
+    else if (modifiers & Qt::ShiftModifier)
     {
         QItemSelection selection;
         selection.select(mSelectionModel->currentIndex(), index);
@@ -584,7 +600,7 @@ void TileView::handleSelectionClick(QMouseEvent* event, const QModelIndex& index
         if (selection.size() > 0)
             mSelectionModel->select(selection, QItemSelectionModel::ClearAndSelect);
     }
-    else if ((modifiers& Qt::ControlModifier) == Qt::ControlModifier)
+    else if (modifiers & Qt::ControlModifier)
     {
         mSelectionModel->setCurrentIndex(index, QItemSelectionModel::Select);
     }
@@ -604,6 +620,10 @@ void TileView::mousePressEvent(QMouseEvent* event)
 
     switch (event->button())
     {
+        case Qt::LeftButton: // record position so we can detect drag event in mouseMoveEvent
+            mDragStartPosition = event->pos();
+            break;
+
         case Qt::RightButton:
 
             if (index.isValid() &&  !mSelectionModel->selectedIndexes().contains(index))
@@ -668,6 +688,64 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
         default: // do nothing
             break;
     }
+}
+
+void TileView::mouseMoveEvent(QMouseEvent* event)
+{
+    if (!(event->buttons() & Qt::LeftButton))
+        return;
+
+    if ((event->pos() - mDragStartPosition).manhattanLength()
+        < QApplication::startDragDistance())
+        return;
+
+    if (mDndHandler == NULL)
+        return; // can't do any thing
+
+    QModelIndex     index = posToModelIndex(event->pos());
+
+    QMimeData*      mimeData = new QMimeData;
+    QPixmap         image;
+    QPoint          hotspot;
+    Qt::DropActions action;
+
+    bool            accept = mDndHandler->dragStart(index, action, mimeData, image, hotspot);
+
+    if (!accept)
+        return;
+
+    QDrag* drag = new QDrag(this);
+    drag->setMimeData(mimeData);
+
+    if (!image.isNull())
+    {
+        drag->setPixmap(image);
+
+        if (!hotspot.isNull())
+            drag->setHotSpot(hotspot);
+    }
+
+    Qt::DropAction dropAction = drag->exec(action);
+}
+
+void TileView::dragEnterEvent(QDragEnterEvent* event)
+{
+    if (mDndHandler != NULL)
+        mDndHandler->dragEnter(event);
+}
+
+void TileView::dragLeaveEvent(QDragLeaveEvent* event)
+{
+}
+
+void TileView::dragMoveEvent(QDragMoveEvent* event)
+{
+}
+
+void TileView::dropEvent(QDropEvent* event)
+{
+    if (mDndHandler != NULL)
+        mDndHandler->dragDrop(event);
 }
 
 /*

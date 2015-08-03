@@ -18,13 +18,17 @@
 #include "import/importdialog.h"
 #include "preferencesdialog.h"
 
+// widget related stuf
 #include "widgets/translucentwindow.h"
 #include "widgets/backgroundtaskprogress.h"
+#include "widgets/dndhandler.h"
+#include "filmstriptile.h"
 
 #include "backgroundtask.h"
 #include "regenhashestask.h"
 #include "import/importbackgroundtask.h"
-#include "filmstriptile.h"
+
+#include "constants.h"
 
 #include "external/xxHash/xxhash.h"
 
@@ -33,6 +37,72 @@ const QString SETTINGS_SPLITTER_FILMSTRIP_SIZES = "splitter_filmstrip";
 
 namespace PhotoStage
 {
+class FilmStripDndHandler : public TileView::DndHandler, public QObject
+{
+    // DndHandler interface
+
+    public:
+
+        FilmStripDndHandler(QAbstractItemModel* model, QObject* parent = 0);
+
+        bool dragStart(const QModelIndex& index,
+            Qt::DropActions& action,
+            QMimeData* mimeData,
+            QPixmap& image,
+            QPoint& hotspot);
+        void dragEnter(QDragEnterEvent* event);
+        void dragLeave(QDragLeaveEvent* event);
+        void dragOver(QDragMoveEvent* event);
+        void dragDrop(QDropEvent* event);
+
+    private:
+
+        QAbstractItemModel* mModel;
+};
+
+FilmStripDndHandler::FilmStripDndHandler(QAbstractItemModel* model, QObject* parent) :
+    mModel(model)
+{
+    setParent(parent);
+}
+
+bool FilmStripDndHandler::dragStart(const QModelIndex& index,
+    Qt::DropActions& action,
+    QMimeData* mimeData,
+    QPixmap& image,
+    QPoint& hotspot)
+{
+    //Photo p = mModel->data(index, TileView::ImageRole).value<Photo>();
+    qDebug() << "Drag start on FilmStrip";
+
+    QByteArray data;
+    data.append("This is the drag data from FilmStrip");
+    mimeData->setData(MIMETYPE_TILEVIEW_SELECTION, data);
+
+    action =   Qt::CopyAction | Qt::MoveAction | Qt::LinkAction;
+    return true;
+}
+
+void FilmStripDndHandler::dragEnter(QDragEnterEvent* event)
+{
+    if (event->mimeData()->hasFormat(MIMETYPE_TILEVIEW_SELECTION))
+        event->acceptProposedAction();
+}
+
+void FilmStripDndHandler::dragLeave(QDragLeaveEvent* event)
+{
+}
+
+void FilmStripDndHandler::dragOver(QDragMoveEvent* event)
+{
+    event->acceptProposedAction();
+}
+
+void FilmStripDndHandler::dragDrop(QDropEvent* event)
+{
+    qDebug() << "Dropped on FilmStrip" << QString(event->mimeData()->data(MIMETYPE_TILEVIEW_SELECTION));
+}
+
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -91,6 +161,7 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(ui->actionLoupeInfoCycle, &QAction::triggered, mLibrary, &Library::onCycleLoupeInfo);
 
     ui->filmStrip->setModel(mPhotoModelProxy);
+    ui->filmStrip->setDndHandler(new FilmStripDndHandler(mPhotoModelProxy, this));
     FilmstripTile* fsTile = new FilmstripTile(ui->filmStrip);
     ui->filmStrip->setTileFlyweight(fsTile);
     ui->filmStrip->setMinimumCellHeight(80);
@@ -504,7 +575,8 @@ void MainWindow::onDeletePhotos()
         {
             mPhotoModelProxy->removeRows(range.top(), range.height());
         }
-        mLibrary->onPathModelRowsAdded(QModelIndex(), 0, 0);
+        // TODO: consider moving this to a central place.(the work manager)
+        mLibrary->reloadPathModel();
     }
     else if (msgBox.clickedButton() == libAndDisk)
     {
@@ -514,7 +586,7 @@ void MainWindow::onDeletePhotos()
         {
             mPhotoModelProxy->removeRows(range.top(), range.height());
         }
-        mLibrary->onPathModelRowsAdded(QModelIndex(), 0, 0);
+        mLibrary->reloadPathModel();
     } // else do nothing
 }
 
@@ -665,7 +737,7 @@ void MainWindow::onImportFinished(BackgroundTask* task)
     task->deleteLater();
     // update the files tree as well and the collection tree
 
-    mLibrary->onPathModelRowsAdded(QModelIndex(), 0, 0);
+    mLibrary->reloadPathModel();
 }
 
 void MainWindow::onModelReset()

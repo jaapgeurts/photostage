@@ -102,7 +102,9 @@ SOURCES += \
     database/pathdao.cpp \
     database/photodao.cpp \
     database/importdao.cpp \
-    database/pathitem.cpp
+    database/pathitem.cpp \
+    library/modules/filesmodule.cpp \
+    dragdropinfo.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -189,7 +191,10 @@ HEADERS  += \
     database/pathdao.h \
     database/photodao.h \
     database/importdao.h \
-    database/pathitem.h
+    database/pathitem.h \
+    widgets/dndhandler.h \
+    library/modules/filesmodule.h \
+    dragdropinfo.h
 
 FORMS    += \
     mainwindow.ui \

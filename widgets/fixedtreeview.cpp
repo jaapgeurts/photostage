@@ -6,12 +6,8 @@ namespace PhotoStage
 {
 FixedTreeView::FixedTreeView(QWidget* parent) : QTreeView(parent)
 {
-    connect(this, &QTreeView::expanded, this,
-        &FixedTreeView::onItemExpanded);
-    connect(this,
-        &QTreeView::collapsed,
-        this,
-        &FixedTreeView::onItemCollapsed);
+    connect(this, &QTreeView::expanded, this, &FixedTreeView::onItemExpanded);
+    connect(this, &QTreeView::collapsed, this, &FixedTreeView::onItemCollapsed);
     setAnimated(true);
     header()->close();
 }

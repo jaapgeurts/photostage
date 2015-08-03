@@ -13,7 +13,9 @@ CollectionModule::CollectionModule(QWidget* parent) : LibraryModule(parent)
     model->setRootPath("/");
     mTrvwCollections->setModel(model);
     mTrvwCollections->setRootIndex(model->index("/Volumes"));
+
     setLayout(new QVBoxLayout(this));
     layout()->addWidget(mTrvwCollections);
+    layout()->setContentsMargins(0, 0, 0, 0);
 }
 }

@@ -74,7 +74,7 @@
          <property name="currentIndex">
           <number>0</number>
          </property>
-         <widget class="TileView::TileView" name="mClvPhotos"/>
+         <widget class="TileView::TileView" name="mPhotoGrid"/>
          <widget class="QScrollArea" name="mLoupeScrollView">
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>

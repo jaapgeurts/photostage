@@ -10,6 +10,7 @@
 #include <QMouseEvent>
 #include <QItemSelectionModel>
 
+#include "dndhandler.h"
 #include "abstracttile.h"
 
 namespace TileView
@@ -31,6 +32,9 @@ class TileView : public QWidget
         void setModel(QAbstractItemModel* model);
         void setSelectionModel(QItemSelectionModel* selectionModel);
         QItemSelectionModel* selectionModel() const;
+
+        void setDndHandler(DndHandler* handler);
+        DndHandler* dndHandler();
 
         void setRootIndex(const QModelIndex& index);
 
@@ -72,8 +76,7 @@ class TileView : public QWidget
 
     signals:
 
-        void visibleTilesChanged(const QModelIndex& start,
-            const QModelIndex& end);
+        void visibleTilesChanged(const QModelIndex& start, const QModelIndex& end);
         void doubleClickTile(const QModelIndex& index);
         void checkedItemsChanged();
 
@@ -82,11 +85,8 @@ class TileView : public QWidget
         void onRowsInserted(const QModelIndex& parent, int, int);
         void onRowsRemoved(const QModelIndex&, int, int);
 
-        void updateCellContents(const QModelIndex& topleft,
-            const QModelIndex& bottomright,
-            const QVector<int>& roles);
-        void onSelectionChanged(const QItemSelection&,
-            const QItemSelection&);
+        void updateCellContents(const QModelIndex& topleft, const QModelIndex& bottomright, const QVector<int>& roles);
+        void onSelectionChanged(const QItemSelection&, const QItemSelection&);
 
     private slots:
 
@@ -100,13 +100,18 @@ class TileView : public QWidget
     protected:
 
         void paintEvent(QPaintEvent* event) Q_DECL_OVERRIDE;
-        void wheelEvent(QWheelEvent* event) Q_DECL_OVERRIDE;
         void resizeEvent(QResizeEvent* event) Q_DECL_OVERRIDE;
+
+        void wheelEvent(QWheelEvent* event) Q_DECL_OVERRIDE;
         void mouseReleaseEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
         void mousePressEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
         void mouseDoubleClickEvent(QMouseEvent*) Q_DECL_OVERRIDE;
+        void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
+        void dragEnterEvent(QDragEnterEvent* event ) Q_DECL_OVERRIDE;
+        void dragLeaveEvent(QDragLeaveEvent* event) Q_DECL_OVERRIDE;
+        void dragMoveEvent(QDragMoveEvent* event) Q_DECL_OVERRIDE;
+        void dropEvent(QDropEvent* event) Q_DECL_OVERRIDE;
 
-        //void mouseMoveEvent(QMouseEvent* event) Q_DECL_OVERRIDE;
         void keyPressEvent(QKeyEvent* event) Q_DECL_OVERRIDE;
 
     private:
@@ -150,7 +155,10 @@ class TileView : public QWidget
         QList<QModelIndex>* mCheckedList;
 
         // for scrolling
-        int mViewportPosition;     // contains the top x position of the scroll area
+        int         mViewportPosition; // contains the top x position of the scroll area
+
+        QPoint      mDragStartPosition;
+        DndHandler* mDndHandler;
 
         void computeScrollBarValues();
         void computeSizes(int w, int h);

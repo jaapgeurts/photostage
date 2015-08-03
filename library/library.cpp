@@ -6,11 +6,92 @@
 // models
 #include "sqlkeywordmodel.h"
 
-#define SETTINGS_SPLITTER_LIBRARY_SIZES "splitter_main"
-#define SETTINGS_LIBRARY_FILES_PATHITEM "files/pathitem"
+#include "dragdropinfo.h"
+#include "constants.h"
 
 namespace PhotoStage
 {
+class PhotoGridDndHandler : public TileView::DndHandler, public QObject
+{
+    // DndHandler interface
+
+    public:
+
+        PhotoGridDndHandler(Library* library, QObject* parent = 0);
+
+        bool dragStart(const QModelIndex& index,
+            Qt::DropActions& action,
+            QMimeData* mimeData,
+            QPixmap& image,
+            QPoint& hotspot);
+        void dragEnter(QDragEnterEvent* event);
+        void dragLeave(QDragLeaveEvent* event);
+        void dragOver(QDragMoveEvent* event);
+        void dragDrop(QDropEvent* event);
+
+    private:
+
+        Library* mLibrary;
+};
+
+PhotoGridDndHandler::PhotoGridDndHandler(Library* library, QObject* parent) :
+    mLibrary(library)
+{
+    setParent(parent);
+}
+
+bool PhotoGridDndHandler::dragStart(const QModelIndex& index,
+    Qt::DropActions& action,
+    QMimeData* mimeData,
+    QPixmap& image,
+    QPoint& hotspot)
+{
+    // tile from which the drag started
+    Photo dragPhoto = mLibrary->mPhotoModel->data(index, TileView::TileView::ImageRole).value<Photo>();
+
+    image = QPixmap::fromImage(dragPhoto.libraryPreview().
+            scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    hotspot = QPoint(image.width() / 2, image.height() / 2);
+
+    // get the id's of all selected items
+    QList<long long> idlist;
+    foreach(QModelIndex index, mLibrary->mSelectionModel->selectedIndexes())
+    {
+        Photo p = mLibrary->mPhotoModel->data(index, TileView::TileView::ImageRole).value<Photo>();
+
+        idlist << p.id();
+    }
+
+    DragDropInfo info(DragDropInfo::PathModel, idlist);
+
+    qDebug() << "Drag start on PhotoGrid";
+
+    mimeData->setData(MIMETYPE_TILEVIEW_SELECTION, info.toByteArray());
+    action =   Qt::CopyAction | Qt::MoveAction | Qt::LinkAction;
+
+    return true;
+}
+
+void PhotoGridDndHandler::dragEnter(QDragEnterEvent* event)
+{
+    if (event->mimeData()->hasFormat(MIMETYPE_TILEVIEW_SELECTION))
+        event->acceptProposedAction();
+}
+
+void PhotoGridDndHandler::dragLeave(QDragLeaveEvent* event)
+{
+}
+
+void PhotoGridDndHandler::dragOver(QDragMoveEvent* event)
+{
+    event->acceptProposedAction();
+}
+
+void PhotoGridDndHandler::dragDrop(QDropEvent* event)
+{
+    qDebug() << "Dropped on PhotoGrid" << QString(event->mimeData()->data(MIMETYPE_TILEVIEW_SELECTION));
+}
+
 Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     Module(parent),
     ui(new Ui::Library),
@@ -38,27 +119,29 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     }
     ui->splitterMain->setSizes(l);
 
-    ImageDbTile* tile = new ImageDbTile(ui->mClvPhotos);
+    ImageDbTile* tile = new ImageDbTile(ui->mPhotoGrid);
     // connect(tile,&ImageDbTile::rotateLeftClicked, this, &Library::rotateLeftClicked);
     // connect(tile,&ImageDbTile::rotateRightClicked, this, &Library::rotateRightClicked);
     // connect(tile,&ImageDbTile::ratingClicked,this,&Library::ratingClicked);
 
-    ui->mClvPhotos->setTileFlyweight(tile);
-    ui->mClvPhotos->setMinimumCellWidth(150);
-    ui->mClvPhotos->setMaximumCellWidth(200);
-    ui->mClvPhotos->setCheckBoxMode(false);
+    ui->mPhotoGrid->setDndHandler(new PhotoGridDndHandler(this, this));
+
+    ui->mPhotoGrid->setTileFlyweight(tile);
+    ui->mPhotoGrid->setMinimumCellWidth(150);
+    ui->mPhotoGrid->setMaximumCellWidth(200);
+    ui->mPhotoGrid->setCheckBoxMode(false);
     //ui->mClvPhotos->setTilesPerColRow(ui->hsThumbSize->value());
     // ui->mClvPhotos->setObjectName("LibaryPhotos");
 
-    ui->mClvPhotos->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->mClvPhotos, &TileView::TileView::customContextMenuRequested, this, &Library::onCustomContextMenu);
-    connect(ui->mClvPhotos, &TileView::TileView::doubleClickTile, this, &Library::onTileDoubleClicked);
-    connect(ui->mClvPhotos, &TileView::TileView::visibleTilesChanged,
-        (PhotoModel*)mPhotoModel->sourceModel(),
-        &PhotoModel::onVisibleTilesChanged);
+    ui->mPhotoGrid->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->mPhotoGrid, &TileView::TileView::customContextMenuRequested,
+        this, &Library::onCustomContextMenu);
+    connect(ui->mPhotoGrid, &TileView::TileView::doubleClickTile, this, &Library::onTileDoubleClicked);
+    connect(ui->mPhotoGrid, &TileView::TileView::visibleTilesChanged,
+        (PhotoModel*)mPhotoModel->sourceModel(), &PhotoModel::onVisibleTilesChanged);
 
     // These models are auto deleted by the QObject hierarchy
-    ui->mClvPhotos->setModel(mPhotoModel);
+    ui->mPhotoGrid->setModel(mPhotoModel);
 
     ui->scrollArea->setWidgetResizable(true);
     ui->scrollArea_2->setWidgetResizable(true);
@@ -69,22 +152,16 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
 
     FilterModule* fm = new FilterModule(ui->ModulePanel_1);
     ui->ModulePanel_1->addPanel("Filter", fm);
-    connect(fm, &FilterModule::modelFilterApplied,
-        this, &Library::modelFilterApplied);
+    connect(fm, &FilterModule::modelFilterApplied, this, &Library::modelFilterApplied);
 
     // shortcuts module
     ShortcutModule* sm = new ShortcutModule(ui->ModulePanel_1);
     ui->ModulePanel_1->addPanel("Shortcuts", sm);
 
     // Files module
-    mTrvwFiles = new FixedTreeView(ui->ModulePanel_1);
-    mPathModel = new SqlPathModel(this);
-    mTrvwFiles->setModel(mPathModel);
-    mTrvwFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    ui->ModulePanel_1->addPanel("Folders", mTrvwFiles);
-    connect(mTrvwFiles, &FixedTreeView::clicked, this, &Library::onFilesClicked);
-    connect(mPathModel, &SqlPathModel::rowsInserted, this, &Library::onPathModelRowsAdded);
-    connect(mPathModel, &SqlPathModel::rowsRemoved, this, &Library::onPathModelRowsRemoved);
+    mFilesModule = new FilesModule(ui->ModulePanel_1);
+    ui->ModulePanel_1->addPanel("Folders", mFilesModule);
+    connect(mFilesModule, &FilesModule::pathSelected, this, &Library::onPathSelected);
 
     // collections module
     CollectionModule* cm   = new CollectionModule(ui->ModulePanel_1);
@@ -115,22 +192,6 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     onShowGrid();
 
     mPhotoWorkUnit = PhotoDAO::instance();
-
-    // open up the last path location
-    long long pathid =
-        settings.value(SETTINGS_LIBRARY_FILES_PATHITEM).toLongLong();
-
-    qDebug() << "Expanding";
-    QModelIndex index = mPathModel->index(pathid);
-
-    while (index.isValid())
-    {
-        qDebug() << "+" << ((PathItem*)index.internalPointer())->path;
-        mTrvwFiles->expand(index);
-        index = index.parent();
-    }
-
-    emit photoSourceChanged(PhotoModel::SourceFiles, pathid);
 }
 
 Library::~Library()
@@ -146,20 +207,13 @@ Library::~Library()
     }
     settings.setValue(SETTINGS_SPLITTER_LIBRARY_SIZES, list);
 
-    QModelIndex index = mTrvwFiles->currentIndex();
-
-    if (index.isValid())
-    {
-        PathItem* item = mPathModel->data(index, SqlPathModel::Path).value<PathItem*>();
-        settings.setValue(SETTINGS_LIBRARY_FILES_PATHITEM, item->id);
-    }
     delete ui;
 }
 
 QRect Library::lightGap()
 {
-    QPoint pos = ui->mClvPhotos->mapToGlobal(QPoint(0, 0));
-    QRect  gap = QRect(pos, ui->mClvPhotos->size());
+    QPoint pos = ui->mPhotoGrid->mapToGlobal(QPoint(0, 0));
+    QRect  gap = QRect(pos, ui->mPhotoGrid->size());
 
     return gap;
 }
@@ -167,40 +221,35 @@ QRect Library::lightGap()
 bool Library::canSelectionChange()
 {
     //    qDebug() << qApp->focusWidget()->objectName();
-    return ui->mClvPhotos->hasFocus() || ui->mLoupeScrollView->hasFocus();
+    return ui->mPhotoGrid->hasFocus() || ui->mLoupeScrollView->hasFocus();
 }
 
 bool Library::canSelectUpDown()
 {
-    return ui->mClvPhotos->isVisible();
+    return ui->mPhotoGrid->isVisible();
 }
 
 int Library::tilesPerRowOrCol()
 {
-    return ui->mClvPhotos->tilesPerColRow();
+    return ui->mPhotoGrid->tilesPerColRow();
+}
+
+void Library::reloadPathModel()
+{
+    mFilesModule->reload();
 }
 
 void Library::setSelectionModel(QItemSelectionModel* selectionModel)
 {
     mSelectionModel = selectionModel;
-    ui->mClvPhotos->setSelectionModel(selectionModel);
+    ui->mPhotoGrid->setSelectionModel(selectionModel);
     connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &Library::onPhotoSelectionChanged);
     connect(selectionModel, &QItemSelectionModel::currentChanged, this, &Library::onCurrentPhotoChanged);
 }
 
-void Library::onFilesClicked(const QModelIndex& index)
-{
-    // TODO: get the path model and get the file to query and show only those images in the view
-    PathItem* item = mPathModel->data(index, SqlPathModel::Path).value<PathItem*>();
-
-    // TODO: clear the filter
-    // reset the photo model to the root of this item
-    emit photoSourceChanged(PhotoModel::SourceFiles, item->id);
-}
-
 void Library::onCustomContextMenu(const QPoint& pos)
 {
-    emit customContextMenuRequested(ui->mClvPhotos->mapTo(this, pos));
+    emit customContextMenuRequested(ui->mPhotoGrid->mapTo(this, pos));
 }
 
 void Library::onZoomLevelChanged(int zoomLevel)
@@ -214,9 +263,14 @@ void Library::onZoomLevelChanged(int zoomLevel)
     ui->mLoupeView->setZoomMode(zoom[zoomLevel]);
 }
 
+void Library::onPathSelected(long long pathid)
+{
+    emit photoSourceChanged(PhotoModel::SourceFiles, pathid);
+}
+
 void Library::onThumbSizeChanged(int newValue)
 {
-    int w = ui->mClvPhotos->width();
+    int w = ui->mPhotoGrid->width();
 
     qDebug() << "Newvalue=" << newValue;
 
@@ -225,7 +279,7 @@ void Library::onThumbSizeChanged(int newValue)
     if (newMin < 50)
         newMin = 50;
 
-    ui->mClvPhotos->setMinimumCellWidth(newMin);
+    ui->mPhotoGrid->setMinimumCellWidth(newMin);
 }
 
 /*void Library::rotateLeftClicked(const QModelIndex &index)
@@ -283,16 +337,6 @@ void Library::onCurrentPhotoChanged(const QModelIndex& current, const QModelInde
         onShowLoupe();
 }
 
-void Library::onPathModelRowsAdded(const QModelIndex& /*parent*/, int /*start*/, int /*end*/)
-{
-    mPathModel->reload();
-}
-
-void Library::onPathModelRowsRemoved(const QModelIndex& /*parent*/, int /*start*/, int /*end*/)
-{
-    mPathModel->reload();
-}
-
 void Library::onTileDoubleClicked(const QModelIndex& /*index*/)
 {
     onShowLoupe();
@@ -314,7 +358,7 @@ void Library::onShowLoupe()
 
 void Library::onShowGrid()
 {
-    ui->StackedWidget_1->setCurrentWidget(ui->mClvPhotos);
+    ui->StackedWidget_1->setCurrentWidget(ui->mPhotoGrid);
 }
 
 void Library::onSortKeyChanged(int key)

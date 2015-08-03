@@ -4,16 +4,15 @@
 #include "module.h"
 
 #include "photomodel.h"
-#include "sqlpathmodel.h"
 #include "database/photodao.h"
 #include "imagedbtile.h"
 #include "modules/taggingmodule.h"
 #include "modules/filtermodule.h"
+#include "modules/filesmodule.h"
 #include "modules/collectionmodule.h"
 #include "modules/shortcutmodule.h"
 #include "modules/libraryhistogrammodule.h"
 #include "modules/metadatamodule.h"
-#include "widgets/fixedtreeview.h"
 #include "photosortfilterproxymodel.h"
 
 namespace Ui
@@ -23,14 +22,17 @@ class Library;
 
 namespace PhotoStage
 {
+class PhotoGridDndHandler;
+
 class Library : public Module
 {
     Q_OBJECT
 
+    friend class PhotoGridDndHandler;
+
     public:
 
-        explicit Library(PhotoSortFilterProxyModel* const model,
-            QWidget* parent = 0);
+        explicit Library(PhotoSortFilterProxyModel* const model, QWidget* parent = 0);
         ~Library();
 
         QRect lightGap();
@@ -40,6 +42,8 @@ class Library : public Module
         bool canSelectionChange();
         bool canSelectUpDown();
         int tilesPerRowOrCol();
+
+        void reloadPathModel();
 
     signals:
 
@@ -57,8 +61,6 @@ class Library : public Module
 
         void onPhotoSelectionChanged(const QItemSelection& selected, const QItemSelection&);
         void onCurrentPhotoChanged(const QModelIndex& current, const QModelIndex&);
-        void onPathModelRowsAdded(const QModelIndex&, int, int);
-        void onPathModelRowsRemoved(const QModelIndex&, int, int);
         void onTileDoubleClicked(const QModelIndex&);
 
         void onCycleLoupeInfo();
@@ -73,24 +75,23 @@ class Library : public Module
     private slots:
 
         void onNewCollectionClicked();
-        void onFilesClicked(const QModelIndex&);
         void onCustomContextMenu(const QPoint& pos);
         void onThumbSizeChanged(int);
         void onZoomLevelChanged(int zoomLevel);
+        void onPathSelected(long long pathid);
 
     private:
 
         Ui::Library*               ui;
         PhotoSortFilterProxyModel* mPhotoModel;
-        PhotoDAO*             mPhotoWorkUnit;
-        SqlPathModel*              mPathModel;
+        PhotoDAO*                  mPhotoWorkUnit;
         TaggingModule*             mKeywording;
         LibraryHistogramModule*    mHistogramModule;
         MetaDataModule*            mMetaDataModule;
         QFont                      mFontAccessFoundIcons;
         Photo                      mCurrentPhoto;
-        FixedTreeView*             mTrvwFiles;
         QItemSelectionModel*       mSelectionModel;
+        FilesModule*               mFilesModule;
 };
 }
 
