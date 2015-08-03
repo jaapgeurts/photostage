@@ -1,18 +1,13 @@
-#include <QDebug>
-#include <QVariant>
 #include <QDir>
 
-#include "engine/colortransform.h"
-
-#include "photomodel.h"
-#include "photodata.h"
+#include <QDebug>
 
 #include "database/dbutils.h"
-#include "utils.h"
+#include "photo.h"
 
 namespace PhotoStage
 {
-PhotoData::PhotoData(PhotoModel* owner,
+Photo::PhotoPrivate::PhotoPrivate(PhotoModel* owner,
     const QImage& image,
     const QString& filename,
     long long id) :
@@ -24,7 +19,7 @@ PhotoData::PhotoData(PhotoModel* owner,
 {
 }
 
-PhotoData::PhotoData(QSqlQuery& q) :
+Photo::PhotoPrivate::PhotoPrivate(QSqlQuery& q) :
     mOwner(NULL),
     mIsDownloading(false)
 {
@@ -65,69 +60,69 @@ PhotoData::PhotoData(QSqlQuery& q) :
     mExifInfo.height = q.value(22).toInt();
 }
 
-PhotoData::~PhotoData()
+Photo::PhotoPrivate::~PhotoPrivate()
 {
 }
 
-void PhotoData::setOriginal(const QImage& image)
+void Photo::PhotoPrivate::setOriginal(const QImage& image)
 {
     mOriginal = image;
 }
 
-const QImage& PhotoData::original() const
+const QImage& Photo::PhotoPrivate::original() const
 {
     return mOriginal;
 }
 
-void PhotoData::setLibraryPreview(const QImage& image)
+void Photo::PhotoPrivate::setLibraryPreview(const QImage& image)
 {
     mLibraryPreview = image;
     // force regeneration of the display image
     mLibraryPreviewsRGB = QImage();
 }
 
-void PhotoData::setLibraryPreviewsRGB(const QImage& image)
+void Photo::PhotoPrivate::setLibraryPreviewsRGB(const QImage& image)
 {
     mLibraryPreviewsRGB = image;
 }
 
 // TODO: think about using the proxy pattern
-const QImage& PhotoData::libraryPreview()
+const QImage& Photo::PhotoPrivate::libraryPreview()
 {
     return mLibraryPreview;
 }
 
-const QImage& PhotoData::libraryPreviewsRGB()
+const QImage& Photo::PhotoPrivate::libraryPreviewsRGB()
 {
     return mLibraryPreviewsRGB;
 }
 
-void PhotoData::setSrcImagePath(const QString& path)
+void Photo::PhotoPrivate::setSrcImagePath(const QString& path)
 {
     mSrcImagePath = path;
 }
 
-const QString& PhotoData::srcImagePath() const
+const QString& Photo::PhotoPrivate::srcImagePath() const
 {
     return mSrcImagePath;
 }
 
-void PhotoData::setExifInfo(const ExifInfo& exifInfo)
+void Photo::PhotoPrivate::setExifInfo(const ExifInfo& exifInfo)
 {
     mExifInfo = exifInfo;
 }
 
-ExifInfo& PhotoData::exifInfo()
+ExifInfo& Photo::PhotoPrivate::exifInfo()
 {
     return mExifInfo;
 }
 
-const ExifInfo& PhotoData::exifInfo() const
+const ExifInfo& Photo::PhotoPrivate::exifInfo() const
 {
     return mExifInfo;
 }
 
-void PhotoData::setRating(int rating)
+void Photo::PhotoPrivate::setRating(int rating)
 {
     if (rating < 0 || rating > 5)
     {
@@ -137,72 +132,72 @@ void PhotoData::setRating(int rating)
     mRating = rating;
 }
 
-int PhotoData::rating() const
+int Photo::PhotoPrivate::rating() const
 {
     return mRating;
 }
 
-void PhotoData::setColorLabel(Photo::ColorLabel label)
+void Photo::PhotoPrivate::setColorLabel(Photo::ColorLabel label)
 {
     mColorLabel = label;
 }
 
-Photo::ColorLabel PhotoData::colorLabel() const
+Photo::ColorLabel Photo::PhotoPrivate::colorLabel() const
 {
     return mColorLabel;
 }
 
-void PhotoData::setFlag(Photo::Flag flag)
+void Photo::PhotoPrivate::setFlag(Photo::Flag flag)
 {
     mFlag = flag;
 }
 
-Photo::Flag PhotoData::flag() const
+Photo::Flag Photo::PhotoPrivate::flag() const
 {
     return mFlag;
 }
 
-long long PhotoData::hash() const
+long long Photo::PhotoPrivate::hash() const
 {
     return mHashCode;
 }
 
-void PhotoData::setHash(long long code)
+void Photo::PhotoPrivate::setHash(long long code)
 {
     mHashCode = code;
 }
 
-long long PhotoData::id() const
+long long Photo::PhotoPrivate::id() const
 {
     return mId;
 }
 
-PhotoModel* PhotoData::owner() const
+PhotoModel* Photo::PhotoPrivate::owner() const
 {
     return mOwner;
 }
 
-void PhotoData::setOwner(PhotoModel* owner)
+void Photo::PhotoPrivate::setOwner(PhotoModel* owner)
 {
     mOwner = owner;
 }
 
-void PhotoData::setIsDownloading(bool value)
+void Photo::PhotoPrivate::setIsDownloading(bool value)
 {
     mIsDownloading = value;
 }
 
-bool PhotoData::isDownloading() const
+bool Photo::PhotoPrivate::isDownloading() const
 {
     return mIsDownloading;
 }
 
-void PhotoData::setKeywords(const QStringList& list)
+void Photo::PhotoPrivate::setKeywords(const QStringList& list)
 {
     mKeywords = list;
 }
 
-QStringList PhotoData::keywords() const
+QStringList Photo::PhotoPrivate::keywords() const
 {
     return mKeywords;
 }

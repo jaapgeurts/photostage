@@ -69,7 +69,6 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     photo.cpp \
-    photodata.cpp \
     photomodel.cpp \
     photosortfilterproxymodel.cpp \
     preferences.cpp \
@@ -105,7 +104,8 @@ SOURCES += \
     library/modules/filesmodule.cpp \
     dragdropinfo.cpp \
     collectionmodel.cpp \
-    pathmodel.cpp
+    pathmodel.cpp \
+    photoprivate.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -158,7 +158,6 @@ HEADERS  += \
     module.h \
     nullable.h \
     photo.h \
-    photodata.h \
     photofilterinfo.h \
     photomodel.h \
     photosortfilterproxymodel.h \

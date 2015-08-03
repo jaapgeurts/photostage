@@ -1,7 +1,6 @@
 #include <QDebug>
 
 #include "photo.h"
-#include "photodata.h"
 #include "photomodel.h"
 
 namespace PhotoStage
@@ -12,12 +11,12 @@ Photo::Photo()
 
 Photo::Photo(PhotoModel* owner, const QImage& image, const QString& filename, long long id)
 {
-    d = QSharedPointer<PhotoData>(new PhotoData(owner, image, filename, id));
+    d = QSharedPointer<PhotoPrivate>(new PhotoPrivate(owner, image, filename, id));
 }
 
 Photo::Photo(QSqlQuery& q)
 {
-    d = QSharedPointer<PhotoData>(new PhotoData(q));
+    d = QSharedPointer<PhotoPrivate>(new PhotoPrivate(q));
 }
 
 long long Photo::id() const
