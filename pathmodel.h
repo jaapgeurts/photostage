@@ -8,16 +8,18 @@
 
 namespace PhotoStage
 {
-class SqlPathModel : public QAbstractItemModel
+class PathModel : public QAbstractItemModel
 {
+    Q_OBJECT
+
     public:
 
         enum DataRole
         {
             Path = Qt::UserRole + 1
         };
-        SqlPathModel(QObject* parent = 0);
-        ~SqlPathModel();
+        PathModel(QObject* parent = 0);
+        ~PathModel();
 
     public:
 

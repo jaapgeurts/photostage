@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "sqlpathmodel.h"
+#include "pathmodel.h"
 #include "librarymodule.h"
 #include "widgets/fixedtreeview.h"
 
@@ -31,7 +31,7 @@ class FilesModule : public LibraryModule
     private:
 
         FixedTreeView* mTrvwFiles;
-        SqlPathModel*  mPathModel;
+        PathModel*  mPathModel;
 
         void onPathModelRowsAdded(const QModelIndex&, int, int);
         void onPathModelRowsRemoved(const QModelIndex&, int, int);

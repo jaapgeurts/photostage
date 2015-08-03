@@ -78,7 +78,6 @@ SOURCES += \
     regenhashestask.cpp \
     runnable.cpp \
     sqlkeywordmodel.cpp \
-    sqlpathmodel.cpp \
     threadqueue.cpp \
     timeadjustdialog.cpp \
     utils.cpp \
@@ -104,7 +103,9 @@ SOURCES += \
     database/importdao.cpp \
     database/pathitem.cpp \
     library/modules/filesmodule.cpp \
-    dragdropinfo.cpp
+    dragdropinfo.cpp \
+    collectionmodel.cpp \
+    pathmodel.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -167,7 +168,6 @@ HEADERS  += \
     regenhashestask.h \
     runnable.h \
     sqlkeywordmodel.h \
-    sqlpathmodel.h \
     threadqueue.h \
     timeadjustdialog.h \
     utils.h \
@@ -194,7 +194,9 @@ HEADERS  += \
     database/pathitem.h \
     widgets/dndhandler.h \
     library/modules/filesmodule.h \
-    dragdropinfo.h
+    dragdropinfo.h \
+    collectionmodel.h \
+    pathmodel.h
 
 FORMS    += \
     mainwindow.ui \

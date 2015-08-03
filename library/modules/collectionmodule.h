@@ -5,20 +5,23 @@
 #include <QTreeView>
 
 #include "librarymodule.h"
+#include "widgets/fixedtreeview.h"
+#include "collectionmodel.h"
 
 namespace PhotoStage
 {
-    class CollectionModule : public LibraryModule
-    {
-        Q_OBJECT
+class CollectionModule : public LibraryModule
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            CollectionModule(QWidget* parent);
+        CollectionModule(QWidget* parent);
 
-        private:
+    private:
 
-            QTreeView* mTrvwCollections;
-    };
+        FixedTreeView*   mTrvwCollections;
+        CollectionModel* mCollectionModel;
+};
 }
 #endif // COLLECTIONMODULE_H

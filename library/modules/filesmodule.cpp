@@ -18,13 +18,14 @@ FilesModule::FilesModule(QWidget* parent) : LibraryModule(parent)
     mTrvwFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     mTrvwFiles->setAcceptDrops(true);
     mTrvwFiles->installEventFilter(this);
+    mTrvwFiles->setDropIndicatorShown(true);
 
-    mPathModel = new SqlPathModel(this);
+    mPathModel = new PathModel(this);
     mTrvwFiles->setModel(mPathModel);
 
     connect(mTrvwFiles, &FixedTreeView::clicked, this, &FilesModule::onFilesClicked);
-    connect(mPathModel, &SqlPathModel::rowsInserted, this, &FilesModule::onPathModelRowsAdded);
-    connect(mPathModel, &SqlPathModel::rowsRemoved, this, &FilesModule::onPathModelRowsRemoved);
+    connect(mPathModel, &PathModel::rowsInserted, this, &FilesModule::onPathModelRowsAdded);
+    connect(mPathModel, &PathModel::rowsRemoved, this, &FilesModule::onPathModelRowsRemoved);
 
     setLayout(new QVBoxLayout(this));
     layout()->addWidget(mTrvwFiles);
@@ -52,7 +53,7 @@ FilesModule::~FilesModule()
 
     if (index.isValid())
     {
-        PathItem* item = mPathModel->data(index, SqlPathModel::Path).value<PathItem*>();
+        PathItem* item = mPathModel->data(index, PathModel::Path).value<PathItem*>();
         settings.setValue(SETTINGS_LIBRARY_FILES_PATHITEM, item->id);
     }
 }
@@ -65,7 +66,7 @@ void FilesModule::reload()
 void FilesModule::onFilesClicked(const QModelIndex& index)
 {
     // TODO: get the path model and get the file to query and show only those images in the view
-    PathItem* item = mPathModel->data(index, SqlPathModel::Path).value<PathItem*>();
+    PathItem* item = mPathModel->data(index, PathModel::Path).value<PathItem*>();
 
     emit      pathSelected(item->id);
 }
@@ -119,9 +120,22 @@ bool FilesModule::handleDrop(QDropEvent* event)
 
     if (info.sourceModel() == DragDropInfo::PathModel)
     {
-        // TODO: do something with the drop. => move the files, if not in the same dir
+        // get the directory the files were dropped on
+        QPoint      pos   = event->pos();
+        QModelIndex index = mTrvwFiles->indexAt(pos);
+
+        if (index.isValid())
+        {
+            PathItem* item = mPathModel->data(index, PathModel::Path).value<PathItem*>();
+            qDebug() << "Dropped on" << item->path;
+            event->accept();
+            event->acceptProposedAction();
+        }
+        else
+        {
+            event->ignore();
+        }
     }
-    event->acceptProposedAction();
     return true;
 }
 }

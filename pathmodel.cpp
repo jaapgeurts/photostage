@@ -1,21 +1,21 @@
- #include "sqlpathmodel.h"
+ #include "pathmodel.h"
 
 namespace PhotoStage
 {
-SqlPathModel::SqlPathModel(QObject* parent) :
+PathModel::PathModel(QObject* parent) :
     QAbstractItemModel(parent)
 {
     // Construct the file tree
     mRootItem = PathDAO::instance()->createPathItems();
 }
 
-SqlPathModel::~SqlPathModel()
+PathModel::~PathModel()
 {
     if (mRootItem != NULL)
         PathDAO::instance()->deletePathItems(mRootItem);
 }
 
-QModelIndex SqlPathModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex PathModel::index(int row, int column, const QModelIndex& parent) const
 {
     if (!hasIndex(row, column, parent))
         return QModelIndex();
@@ -33,14 +33,14 @@ QModelIndex SqlPathModel::index(int row, int column, const QModelIndex& parent) 
 }
 
 // Short cut to return the model index for a particular pathitem id.
-QModelIndex SqlPathModel::index(long long pathid) const
+QModelIndex PathModel::index(long long pathid) const
 {
     if (mRootItem == NULL)
         return QModelIndex(); // root has not been set yet.
     return findItemRec(mRootItem, 0, pathid);
 }
 
-QModelIndex SqlPathModel::findItemRec(PathItem* item, int row, long long pathid) const
+QModelIndex PathModel::findItemRec(PathItem* item, int row, long long pathid) const
 {
     if (item->id == pathid)
         return createIndex(row, 0, item);
@@ -58,7 +58,7 @@ QModelIndex SqlPathModel::findItemRec(PathItem* item, int row, long long pathid)
     return QModelIndex();
 }
 
-QModelIndex SqlPathModel::parent(const QModelIndex& index) const
+QModelIndex PathModel::parent(const QModelIndex& index) const
 {
     if (!index.isValid())
         return QModelIndex();
@@ -73,7 +73,7 @@ QModelIndex SqlPathModel::parent(const QModelIndex& index) const
     return createIndex(0, 0, newItem);
 }
 
-int SqlPathModel::rowCount(const QModelIndex& parent) const
+int PathModel::rowCount(const QModelIndex& parent) const
 {
     PathItem* item;
 
@@ -88,12 +88,12 @@ int SqlPathModel::rowCount(const QModelIndex& parent) const
         return 0;
 }
 
-int SqlPathModel::columnCount(const QModelIndex& /*parent*/) const
+int PathModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return 1;
 }
 
-QVariant SqlPathModel::data(const QModelIndex& index, int role) const
+QVariant PathModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -107,7 +107,7 @@ QVariant SqlPathModel::data(const QModelIndex& index, int role) const
                        QString::number(item->count),
                        QString::number(item->cumulative));
 
-        case SqlPathModel::Path:
+        case PathModel::Path:
             return QVariant::fromValue<PathItem*>(item);
 
         case Qt::DecorationRole:
@@ -120,14 +120,14 @@ QVariant SqlPathModel::data(const QModelIndex& index, int role) const
 //{
 //}
 
-QVariant SqlPathModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const
+QVariant PathModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int role) const
 {
     if (role == Qt::DisplayRole)
         return QString("Location");
     return QVariant();
 }
 
-void SqlPathModel::reload()
+void PathModel::reload()
 {
     beginResetModel();
 
