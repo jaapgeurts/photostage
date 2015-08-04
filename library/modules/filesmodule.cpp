@@ -14,16 +14,17 @@ namespace PhotoStage
 {
 FilesModule::FilesModule(QWidget* parent) : LibraryModule(parent)
 {
-    mTrvwFiles = new FixedTreeView(this);
+    mTrvwFiles = new Widgets::FixedTreeView(this);
     mTrvwFiles->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     mTrvwFiles->setAcceptDrops(true);
     mTrvwFiles->installEventFilter(this);
     mTrvwFiles->setDropIndicatorShown(true);
+    mTrvwFiles->setDragDropMode(QAbstractItemView::DropOnly);
 
     mPathModel = new PathModel(this);
     mTrvwFiles->setModel(mPathModel);
 
-    connect(mTrvwFiles, &FixedTreeView::clicked, this, &FilesModule::onFilesClicked);
+    connect(mTrvwFiles, &Widgets::FixedTreeView::clicked, this, &FilesModule::onFilesClicked);
     connect(mPathModel, &PathModel::rowsInserted, this, &FilesModule::onPathModelRowsAdded);
     connect(mPathModel, &PathModel::rowsRemoved, this, &FilesModule::onPathModelRowsRemoved);
 
@@ -53,7 +54,7 @@ FilesModule::~FilesModule()
 
     if (index.isValid())
     {
-        PathItem* item = mPathModel->data(index, PathModel::Path).value<PathItem*>();
+        PathItem* item = mPathModel->data(index, PathModel::PathRole).value<PathItem*>();
         settings.setValue(SETTINGS_LIBRARY_FILES_PATHITEM, item->id);
     }
 }
@@ -66,7 +67,7 @@ void FilesModule::reload()
 void FilesModule::onFilesClicked(const QModelIndex& index)
 {
     // TODO: get the path model and get the file to query and show only those images in the view
-    PathItem* item = mPathModel->data(index, PathModel::Path).value<PathItem*>();
+    PathItem* item = mPathModel->data(index, PathModel::PathRole).value<PathItem*>();
 
     emit      pathSelected(item->id);
 }
@@ -118,7 +119,7 @@ bool FilesModule::handleDrop(QDropEvent* event)
 {
     DragDropInfo info(event->mimeData()->data(MIMETYPE_TILEVIEW_SELECTION));
 
-    if (info.sourceModel() == DragDropInfo::PathModel)
+    if (info.sourceModel() == DragDropInfo::PhotoModel)
     {
         // get the directory the files were dropped on
         QPoint      pos   = event->pos();
@@ -126,7 +127,7 @@ bool FilesModule::handleDrop(QDropEvent* event)
 
         if (index.isValid())
         {
-            PathItem* item = mPathModel->data(index, PathModel::Path).value<PathItem*>();
+            PathItem* item = mPathModel->data(index, PathModel::PathRole).value<PathItem*>();
             qDebug() << "Dropped on" << item->path;
             event->accept();
             event->acceptProposedAction();

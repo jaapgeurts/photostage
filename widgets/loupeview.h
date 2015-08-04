@@ -6,7 +6,7 @@
 
 #include "photo.h"
 
-namespace PhotoStage
+namespace Widgets
 {
 class LoupeView : public QWidget
 {
@@ -44,7 +44,7 @@ class LoupeView : public QWidget
 
     public slots:
 
-        void setPhoto(Photo photo);
+        void setPhoto(PhotoStage::Photo photo);
 
         void setInfoMode(InfoMode mode);
         void cycleInfoMode();
@@ -63,12 +63,12 @@ class LoupeView : public QWidget
 
     private:
 
-        Photo    mPhoto;
-        bool     mPanning;
-        QPoint   mMousePressLocation;
-        QPoint   mPhotoTopLeft;
-        ZoomMode mZoomMode;
-        InfoMode mInfoMode;
+        PhotoStage::Photo mPhoto;
+        bool              mPanning;
+        QPoint            mMousePressLocation;
+        QPoint            mPhotoTopLeft;
+        ZoomMode          mZoomMode;
+        InfoMode          mInfoMode;
         //            QBrush   mCheckeredBrush;
 
         float mZoomFactors[ZoomLast] =

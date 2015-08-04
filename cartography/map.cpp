@@ -61,8 +61,7 @@ void Map::onCurrentPhotoChanged(const QModelIndex& current,
         return;
     }
 
-    mPhoto = mPhotoModel->data(current, TileView::TileView::ImageRole)
-        .value<Photo>();
+    mPhoto = mPhotoModel->data(current, Widgets::TileView::ImageRole).value<Photo>();
 
     // if visible, load immediately
     if (isVisible())

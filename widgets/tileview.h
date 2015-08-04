@@ -13,7 +13,7 @@
 #include "dndhandler.h"
 #include "abstracttile.h"
 
-namespace TileView
+namespace Widgets
 {
 class TileView : public QWidget
 {
@@ -74,6 +74,9 @@ class TileView : public QWidget
         void setShowChildren(bool show);
         bool showChildren() const;
 
+        void setAllowDrag(bool allow);
+        bool allowDrag() const;
+
     signals:
 
         void visibleTilesChanged(const QModelIndex& start, const QModelIndex& end);
@@ -131,6 +134,7 @@ class TileView : public QWidget
         int       mOldStart;
         int       mOldEnd;
         bool      mShowChildren;
+        bool      mAllowDrag;
 
         // other properties
         Qt::Orientation mOrientation;

@@ -8,19 +8,19 @@
 
 namespace PhotoStage
 {
-    class LibraryHistogramModule : public LibraryModule
-    {
-        public:
+class LibraryHistogramModule : public LibraryModule
+{
+    public:
 
-            LibraryHistogramModule(QWidget* parent);
+        LibraryHistogramModule(QWidget* parent);
 
-            void setPhoto(Photo& photo);
+        void setPhoto(Photo& photo);
 
-        private:
+    private:
 
-            Histogram* mHistogram;
+        Widgets::Histogram* mHistogram;
 
-            //    PhotoData loadImage(const QImage &inImage);
-    };
+        //    PhotoData loadImage(const QImage &inImage);
+};
 }
 #endif // LIBRARYHISTOGRAMMODULE_H

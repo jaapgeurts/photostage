@@ -39,6 +39,7 @@ void MetaDataModule::setMetaData(const Photo& p)
 {
     const ExifInfo& ei = ((Photo&)p).exifInfo();
 
+    // FIXME: this crashes sometimes
     if (ei.aperture != nullptr)
         ui->leAperture->setText("ƒ / " + QString::number(*ei.aperture));
 

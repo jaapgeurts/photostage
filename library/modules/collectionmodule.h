@@ -1,5 +1,5 @@
-#ifndef COLLECTIONMODULE_H
-#define COLLECTIONMODULE_H
+#ifndef PHOTOSTAGE_COLLECTIONMODULE_H
+#define PHOTOSTAGE_COLLECTIONMODULE_H
 
 #include <QObject>
 #include <QTreeView>
@@ -10,8 +10,13 @@
 
 namespace PhotoStage
 {
+class DropHandler;
+
 class CollectionModule : public LibraryModule
 {
+
+    friend class DropHandler;
+
     Q_OBJECT
 
     public:
@@ -20,8 +25,10 @@ class CollectionModule : public LibraryModule
 
     private:
 
-        FixedTreeView*   mTrvwCollections;
-        CollectionModel* mCollectionModel;
+        Widgets::FixedTreeView* mTrvwCollections;
+        CollectionModel*        mCollectionModel;
+
+        void handleDrop(QDropEvent* event);
 };
 }
-#endif // COLLECTIONMODULE_H
+#endif // PHOTOSTAGE_COLLECTIONMODULE_H

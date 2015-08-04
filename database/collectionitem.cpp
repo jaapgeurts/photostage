@@ -1,9 +1,9 @@
-#include "pathitem.h"
+#include "collectionitem.h"
 
 namespace PhotoStage
 {
-PathItem::PathItem() :
-    path(),
+CollectionItem::CollectionItem() :
+    name(),
     id(-1),
     parentId(-1),
     parent(NULL),
@@ -13,8 +13,8 @@ PathItem::PathItem() :
 {
 }
 
-PathItem::PathItem(long long id, const QString& path, long long parent_id) :
-    path(path),
+CollectionItem::CollectionItem(long long id, const QString& name, long long parent_id) :
+    name(name),
     id(id),
     parentId(parent_id),
     parent(NULL),

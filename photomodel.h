@@ -55,6 +55,8 @@ class PhotoModel : public QAbstractListModel
         bool removeRows(int row, int count, const QModelIndex& parent);
         long long rootPath();
 
+        Qt::DropActions supportedDragActions() const;
+
     public slots:
 
         void setRootPath(SourceType source, long long pathId);
@@ -68,7 +70,7 @@ class PhotoModel : public QAbstractListModel
 
     private:
 
-        PhotoDAO*                mWorkUnit;
+        PhotoDAO*                     mWorkUnit;
         ThreadQueue*                  mThreadQueue;
         // The mPhotoInfoList is the main container for the Photo Objects.
         QList<Photo>                  mPhotoList;

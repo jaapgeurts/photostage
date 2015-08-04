@@ -6,7 +6,7 @@
 
 #define BIN_SIZE (256)
 
-namespace PhotoStage
+namespace Widgets
 {
 class Histogram : public QWidget
 {

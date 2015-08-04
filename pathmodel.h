@@ -16,7 +16,7 @@ class PathModel : public QAbstractItemModel
 
         enum DataRole
         {
-            Path = Qt::UserRole + 1
+            PathRole = Qt::UserRole + 1
         };
         PathModel(QObject* parent = 0);
         ~PathModel();

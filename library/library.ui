@@ -74,7 +74,7 @@
          <property name="currentIndex">
           <number>0</number>
          </property>
-         <widget class="TileView::TileView" name="mPhotoGrid"/>
+         <widget class="Widgets::TileView" name="mPhotoGrid"/>
          <widget class="QScrollArea" name="mLoupeScrollView">
           <property name="frameShape">
            <enum>QFrame::NoFrame</enum>
@@ -85,7 +85,7 @@
           <property name="widgetResizable">
            <bool>true</bool>
           </property>
-          <widget class="PhotoStage::LoupeView" name="mLoupeView">
+          <widget class="Widgets::LoupeView" name="mLoupeView">
            <property name="geometry">
             <rect>
              <x>0</x>
@@ -406,7 +406,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>TileView::TileView</class>
+   <class>Widgets::TileView</class>
    <extends>QWidget</extends>
    <header>widgets/tileview.h</header>
    <container>1</container>
@@ -422,7 +422,7 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>PhotoStage::LoupeView</class>
+   <class>Widgets::LoupeView</class>
    <extends>QWidget</extends>
    <header>widgets/loupeview.h</header>
    <container>1</container>

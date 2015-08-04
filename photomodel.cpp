@@ -62,7 +62,7 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
         case Photo::FilenameRole:
             return QString(mPhotoList.at(index.row()).srcImagePath());
 
-        case TileView::TileView::ImageRole:
+        case Widgets::TileView::ImageRole:
         case Photo::DataRole:
         case MapView::Layer::DataRole:
             photo = mPhotoList.at(index.row());
@@ -225,6 +225,11 @@ void PhotoModel::setRootPath(PhotoModel::SourceType source, long long pathId)
 long long PhotoModel::rootPath()
 {
     return mRootPathId;
+}
+
+Qt::DropActions PhotoModel::supportedDragActions() const
+{
+    return Qt::CopyAction | Qt::MoveAction | Qt::LinkAction;
 }
 
 void PhotoModel::onVisibleTilesChanged(const QModelIndex& start, const QModelIndex& end)

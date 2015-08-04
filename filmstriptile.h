@@ -5,15 +5,13 @@
 
 namespace PhotoStage
 {
-class FilmstripTile : public TileView::AbstractTile
+class FilmstripTile : public Widgets::AbstractTile
 {
     public:
 
-        FilmstripTile(TileView::TileView* parent = 0);
+        FilmstripTile(Widgets::TileView* parent = 0);
         // AbstractCellRenderer interface
-        void render(QPainter& painter,
-            const TileView::TileInfo& tileInfo,
-            const QVariant& data);
+        void render(QPainter& painter, const Widgets::TileInfo& tileInfo, const QVariant& data);
 
     private:
 };

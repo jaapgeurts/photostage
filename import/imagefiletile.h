@@ -5,20 +5,18 @@
 
 namespace PhotoStage
 {
-    class ImageFileTile : public TileView::AbstractTile
-    {
-        Q_OBJECT
+class ImageFileTile : public Widgets::AbstractTile
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            ImageFileTile(TileView::TileView* parent = 0);
+        ImageFileTile(Widgets::TileView* parent = 0);
 
-            void render(QPainter& painter,
-                const TileView::TileInfo& tileInfo,
-                const QVariant& data);
+        void render(QPainter& painter, const Widgets::TileInfo& tileInfo, const QVariant& data);
 
-        private:
-    };
+    private:
+};
 }
 
 #endif // IMAGEFILECELLRENDERER_H

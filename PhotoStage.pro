@@ -105,7 +105,9 @@ SOURCES += \
     dragdropinfo.cpp \
     collectionmodel.cpp \
     pathmodel.cpp \
-    photoprivate.cpp
+    photoprivate.cpp \
+    database/collectiondao.cpp \
+    database/collectionitem.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -195,7 +197,9 @@ HEADERS  += \
     library/modules/filesmodule.h \
     dragdropinfo.h \
     collectionmodel.h \
-    pathmodel.h
+    pathmodel.h \
+    database/collectiondao.h \
+    database/collectionitem.h
 
 FORMS    += \
     mainwindow.ui \

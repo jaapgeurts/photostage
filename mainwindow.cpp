@@ -37,7 +37,7 @@ const QString SETTINGS_SPLITTER_FILMSTRIP_SIZES = "splitter_filmstrip";
 
 namespace PhotoStage
 {
-class FilmStripDndHandler : public TileView::DndHandler, public QObject
+class FilmStripDndHandler : public Widgets::DndHandler, public QObject
 {
     // DndHandler interface
 
@@ -45,11 +45,7 @@ class FilmStripDndHandler : public TileView::DndHandler, public QObject
 
         FilmStripDndHandler(QAbstractItemModel* model, QObject* parent = 0);
 
-        bool dragStart(const QModelIndex& index,
-            Qt::DropActions& action,
-            QMimeData* mimeData,
-            QPixmap& image,
-            QPoint& hotspot);
+        bool dragStart(const QModelIndex& index, QMimeData* mimeData, QPixmap& image, QPoint& hotspot);
         void dragEnter(QDragEnterEvent* event);
         void dragLeave(QDragLeaveEvent* event);
         void dragOver(QDragMoveEvent* event);
@@ -66,11 +62,7 @@ FilmStripDndHandler::FilmStripDndHandler(QAbstractItemModel* model, QObject* par
     setParent(parent);
 }
 
-bool FilmStripDndHandler::dragStart(const QModelIndex& index,
-    Qt::DropActions& action,
-    QMimeData* mimeData,
-    QPixmap& image,
-    QPoint& hotspot)
+bool FilmStripDndHandler::dragStart(const QModelIndex& index, QMimeData* mimeData, QPixmap& image, QPoint& hotspot)
 {
     //Photo p = mModel->data(index, TileView::ImageRole).value<Photo>();
     qDebug() << "Drag start on FilmStrip";
@@ -79,7 +71,6 @@ bool FilmStripDndHandler::dragStart(const QModelIndex& index,
     data.append("This is the drag data from FilmStrip");
     mimeData->setData(MIMETYPE_TILEVIEW_SELECTION, data);
 
-    action =   Qt::CopyAction | Qt::MoveAction | Qt::LinkAction;
     return true;
 }
 
@@ -161,6 +152,7 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(ui->actionLoupeInfoCycle, &QAction::triggered, mLibrary, &Library::onCycleLoupeInfo);
 
     ui->filmStrip->setModel(mPhotoModelProxy);
+    ui->filmStrip->setAllowDrag(true);
     ui->filmStrip->setDndHandler(new FilmStripDndHandler(mPhotoModelProxy, this));
     FilmstripTile* fsTile = new FilmstripTile(ui->filmStrip);
     ui->filmStrip->setTileFlyweight(fsTile);
@@ -170,9 +162,10 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->filmStrip->setOrientation(Qt::Horizontal);
     ui->filmStrip->setSelectionModel(mPhotoSelection);
     ui->filmStrip->setObjectName("Filmstrip");
+    ui->filmStrip->setAcceptDrops(true);
 
-    connect(ui->filmStrip, &TileView::TileView::doubleClickTile, this, &MainWindow::onTileDoubleClicked);
-    connect(ui->filmStrip, &TileView::TileView::visibleTilesChanged, mSourceModel, &PhotoModel::onVisibleTilesChanged);
+    connect(ui->filmStrip, &Widgets::TileView::doubleClickTile, this, &MainWindow::onTileDoubleClicked);
+    connect(ui->filmStrip, &Widgets::TileView::visibleTilesChanged, mSourceModel, &PhotoModel::onVisibleTilesChanged);
 
     //***************
     // Create the DEVELOP MODULE
@@ -802,7 +795,7 @@ Photo MainWindow::currentPhoto()
     QModelIndex index = mPhotoSelection->currentIndex();
 
     if (index.isValid())
-        return mPhotoModelProxy->data(index, TileView::TileView::ImageRole).value<Photo>();
+        return mPhotoModelProxy->data(index, Widgets::TileView::ImageRole).value<Photo>();
     else
         return Photo();
 }
@@ -812,7 +805,7 @@ void MainWindow::setRating(int rating)
     QList<Photo> list = mPhotoModelProxy->toList(mPhotoSelection->selection());
     mPhotoWorkUnit->setRating(list, rating);
     QVector<int> roles;
-    roles.append(TileView::TileView::ImageRole);
+    roles.append(Widgets::TileView::ImageRole);
     mSourceModel->refreshData(list);
 }
 
@@ -821,7 +814,7 @@ void MainWindow::setFlag(Photo::Flag flag)
     QList<Photo> list = mPhotoModelProxy->toList(mPhotoSelection->selection());
     mPhotoWorkUnit->setFlag(list, flag);
     QVector<int> roles;
-    roles.append(TileView::TileView::ImageRole);
+    roles.append(Widgets::TileView::ImageRole);
     mSourceModel->refreshData(list);
 }
 
@@ -830,7 +823,7 @@ void MainWindow::setColorLabel(Photo::ColorLabel color)
     QList<Photo> list = mPhotoModelProxy->toList(mPhotoSelection->selection());
     mPhotoWorkUnit->setColorLabel(list, color);
     QVector<int> roles;
-    roles.append(TileView::TileView::ImageRole);
+    roles.append(Widgets::TileView::ImageRole);
     mSourceModel->refreshData(list);
 }
 

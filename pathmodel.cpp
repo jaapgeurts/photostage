@@ -107,7 +107,7 @@ QVariant PathModel::data(const QModelIndex& index, int role) const
                        QString::number(item->count),
                        QString::number(item->cumulative));
 
-        case PathModel::Path:
+        case PathModel::PathRole:
             return QVariant::fromValue<PathItem*>(item);
 
         case Qt::DecorationRole:

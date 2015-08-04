@@ -11,7 +11,7 @@
 
 namespace PhotoStage
 {
-class PhotoGridDndHandler : public TileView::DndHandler, public QObject
+class PhotoGridDndHandler : public Widgets::DndHandler, public QObject
 {
     // DndHandler interface
 
@@ -19,11 +19,7 @@ class PhotoGridDndHandler : public TileView::DndHandler, public QObject
 
         PhotoGridDndHandler(Library* library, QObject* parent = 0);
 
-        bool dragStart(const QModelIndex& index,
-            Qt::DropActions& action,
-            QMimeData* mimeData,
-            QPixmap& image,
-            QPoint& hotspot);
+        bool dragStart(const QModelIndex& index, QMimeData* mimeData, QPixmap& image, QPoint& hotspot);
         void dragEnter(QDragEnterEvent* event);
         void dragLeave(QDragLeaveEvent* event);
         void dragOver(QDragMoveEvent* event);
@@ -40,14 +36,10 @@ PhotoGridDndHandler::PhotoGridDndHandler(Library* library, QObject* parent) :
     setParent(parent);
 }
 
-bool PhotoGridDndHandler::dragStart(const QModelIndex& index,
-    Qt::DropActions& action,
-    QMimeData* mimeData,
-    QPixmap& image,
-    QPoint& hotspot)
+bool PhotoGridDndHandler::dragStart(const QModelIndex& index, QMimeData* mimeData, QPixmap& image, QPoint& hotspot)
 {
     // tile from which the drag started
-    Photo dragPhoto = mLibrary->mPhotoModel->data(index, TileView::TileView::ImageRole).value<Photo>();
+    Photo dragPhoto = mLibrary->mPhotoModel->data(index, Widgets::TileView::ImageRole).value<Photo>();
 
     image = QPixmap::fromImage(dragPhoto.libraryPreview().
             scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
@@ -57,17 +49,16 @@ bool PhotoGridDndHandler::dragStart(const QModelIndex& index,
     QList<long long> idlist;
     foreach(QModelIndex index, mLibrary->mSelectionModel->selectedIndexes())
     {
-        Photo p = mLibrary->mPhotoModel->data(index, TileView::TileView::ImageRole).value<Photo>();
+        Photo p = mLibrary->mPhotoModel->data(index, Widgets::TileView::ImageRole).value<Photo>();
 
         idlist << p.id();
     }
 
-    DragDropInfo info(DragDropInfo::PathModel, idlist);
+    DragDropInfo info(DragDropInfo::PhotoModel, idlist);
 
     qDebug() << "Drag start on PhotoGrid";
 
     mimeData->setData(MIMETYPE_TILEVIEW_SELECTION, info.toByteArray());
-    action =   Qt::CopyAction | Qt::MoveAction | Qt::LinkAction;
 
     return true;
 }
@@ -124,20 +115,23 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     // connect(tile,&ImageDbTile::rotateRightClicked, this, &Library::rotateRightClicked);
     // connect(tile,&ImageDbTile::ratingClicked,this,&Library::ratingClicked);
 
-    ui->mPhotoGrid->setDndHandler(new PhotoGridDndHandler(this, this));
-
     ui->mPhotoGrid->setTileFlyweight(tile);
     ui->mPhotoGrid->setMinimumCellWidth(150);
     ui->mPhotoGrid->setMaximumCellWidth(200);
     ui->mPhotoGrid->setCheckBoxMode(false);
+
+    ui->mPhotoGrid->setAllowDrag(true);
+    ui->mPhotoGrid->setAcceptDrops(true);
+    ui->mPhotoGrid->setDndHandler(new PhotoGridDndHandler(this, this));
+
     //ui->mClvPhotos->setTilesPerColRow(ui->hsThumbSize->value());
     // ui->mClvPhotos->setObjectName("LibaryPhotos");
 
     ui->mPhotoGrid->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->mPhotoGrid, &TileView::TileView::customContextMenuRequested,
+    connect(ui->mPhotoGrid, &Widgets::TileView::customContextMenuRequested,
         this, &Library::onCustomContextMenu);
-    connect(ui->mPhotoGrid, &TileView::TileView::doubleClickTile, this, &Library::onTileDoubleClicked);
-    connect(ui->mPhotoGrid, &TileView::TileView::visibleTilesChanged,
+    connect(ui->mPhotoGrid, &Widgets::TileView::doubleClickTile, this, &Library::onTileDoubleClicked);
+    connect(ui->mPhotoGrid, &Widgets::TileView::visibleTilesChanged,
         (PhotoModel*)mPhotoModel->sourceModel(), &PhotoModel::onVisibleTilesChanged);
 
     // These models are auto deleted by the QObject hierarchy
@@ -180,8 +174,8 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
 
     // **** MODULE
     // Keyword list module
-    FixedTreeView*   trvwKeywords = new FixedTreeView(ui->ModulePanel_2);
-    SqlKeywordModel* keywordModel = new SqlKeywordModel(this);
+    Widgets::FixedTreeView* trvwKeywords = new Widgets::FixedTreeView(ui->ModulePanel_2);
+    SqlKeywordModel*        keywordModel = new SqlKeywordModel(this);
     trvwKeywords->setModel(keywordModel);
     trvwKeywords->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->ModulePanel_2->addPanel("Keyword List", trvwKeywords);
@@ -254,10 +248,10 @@ void Library::onCustomContextMenu(const QPoint& pos)
 
 void Library::onZoomLevelChanged(int zoomLevel)
 {
-    LoupeView::ZoomMode zoom[LoupeView::ZoomLast] = {
-        LoupeView::ZoomFit, LoupeView::Zoom25, LoupeView::Zoom50,
-        LoupeView::Zoom100, LoupeView::Zoom150, LoupeView::Zoom200,
-        LoupeView::Zoom300, LoupeView::Zoom400, LoupeView::Zomm800
+    Widgets::LoupeView::ZoomMode zoom[Widgets::LoupeView::ZoomLast] = {
+        Widgets::LoupeView::ZoomFit, Widgets::LoupeView::Zoom25, Widgets::LoupeView::Zoom50,
+        Widgets::LoupeView::Zoom100, Widgets::LoupeView::Zoom150, Widgets::LoupeView::Zoom200,
+        Widgets::LoupeView::Zoom300, Widgets::LoupeView::Zoom400, Widgets::LoupeView::Zomm800
     };
 
     ui->mLoupeView->setZoomMode(zoom[zoomLevel]);
@@ -314,7 +308,7 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected, const QIte
 {
     QList<Photo> photos;
     foreach (QModelIndex index, selected.indexes())
-    photos.append(mPhotoModel->data(index, TileView::TileView::ImageRole).value<Photo>());
+    photos.append(mPhotoModel->data(index, Widgets::TileView::ImageRole).value<Photo>());
 
     mKeywording->setPhotos(photos);
 }
@@ -327,7 +321,7 @@ void Library::onCurrentPhotoChanged(const QModelIndex& current, const QModelInde
         mHistogramModule->setPhoto(p);
         mMetaDataModule->setPhoto(p);
     }
-    Photo photo = mPhotoModel->data(current, TileView::TileView::ImageRole).value<Photo>();
+    Photo photo = mPhotoModel->data(current, Widgets::TileView::ImageRole).value<Photo>();
 
     mCurrentPhoto = photo;
     mHistogramModule->setPhoto(photo);

@@ -1,5 +1,7 @@
 #include "actionstategroup.h"
 
+namespace PhotoStage
+{
 ActionStateGroup::ActionStateGroup(QObject* parent) :
     QObject(parent)
 {
@@ -34,4 +36,5 @@ void ActionStateGroup::enableAll()
 void ActionStateGroup::disableAll()
 {
     disableAll(true);
+}
 }

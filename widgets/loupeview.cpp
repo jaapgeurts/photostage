@@ -7,7 +7,7 @@
 #include "loupeview.h"
 #include "utils.h"
 
-namespace PhotoStage
+namespace Widgets
 {
 LoupeView::LoupeView(QWidget* parent)
     : QWidget(parent),
@@ -40,7 +40,7 @@ void LoupeView::setZoomMode(LoupeView::ZoomMode zoomMode)
     update();
 }
 
-void LoupeView::setPhoto(Photo photo)
+void LoupeView::setPhoto(PhotoStage::Photo photo)
 {
     mPhoto = photo;
     computeZoomToFitScaleFactor();
@@ -129,7 +129,7 @@ void LoupeView::paintEvent(QPaintEvent* /*event*/)
 
         if (mInfoMode == InfoExposure)
         {
-            const ExifInfo& ei = mPhoto.exifInfo();
+            const PhotoStage::ExifInfo& ei = mPhoto.exifInfo();
             painter.drawText(40, 50, mPhoto.srcImagePath());
             QString         exp = ei.isoSpeed == nullptr ? "" : QString(", ISO %1").arg(*ei.isoSpeed);
             painter.drawText(40, 80, ei.formatExposure() + exp);
@@ -141,7 +141,7 @@ void LoupeView::paintEvent(QPaintEvent* /*event*/)
 
         if (mInfoMode == InfoSpaceTime)
         {
-            const ExifInfo& ei = mPhoto.exifInfo();
+            const PhotoStage::ExifInfo& ei = mPhoto.exifInfo();
             painter.drawText(40, 50, mPhoto.srcImagePath());
 
             if (ei.dateTimeOriginal != nullptr)

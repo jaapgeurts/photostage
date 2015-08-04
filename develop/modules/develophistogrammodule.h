@@ -22,7 +22,7 @@ namespace PhotoStage
 
         private:
 
-            Histogram* mHistogram;
+            Widgets::Histogram* mHistogram;
     };
 }
 #endif // DEVELOPHISTOGRAMMODULE_H

@@ -5,7 +5,7 @@
 
 #include "histogram.h"
 
-namespace PhotoStage
+namespace Widgets
 {
 Histogram::Histogram(QWidget* parent) : QWidget(parent)
 {

@@ -45,7 +45,7 @@ class ImportDialog : public QDialog
         QFileSystemModel*         mDestinationDrivesModel;
         QModelIndex               mDestinationModelIndex;
         ImageFileSystemModel*     mFilesModel;
-        TileView::TileView*       mCfvPhotos;
+        Widgets::TileView*        mCfvPhotos;
         ImportOptions::ImportMode mImportMode;
         QItemSelectionModel*      mFilesSelectionModel;
 

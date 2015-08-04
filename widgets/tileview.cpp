@@ -14,7 +14,7 @@
 
 #include "tileview.h"
 
-namespace TileView
+namespace Widgets
 {
 TileView::TileView(QWidget* parent) :
     QWidget(parent),
@@ -31,7 +31,8 @@ TileView::TileView(QWidget* parent) :
     mSelectionModel(NULL),
     mViewportPosition(0),
     mDragStartPosition(),
-    mDndHandler(NULL)
+    mDndHandler(NULL),
+    mAllowDrag(false)
 {
     mScrollBar = new QScrollBar(mOrientation, this);
     mScrollBar->setMinimum(0);
@@ -56,10 +57,6 @@ TileView::TileView(QWidget* parent) :
     mCheckedList = new QList<QModelIndex>();
 
     connect(mScrollBar, &QScrollBar::valueChanged, this, &TileView::sliderValueChanged);
-
-    setMouseTracking(true);
-
-    setAcceptDrops(true);
 }
 
 TileView::~TileView()
@@ -236,6 +233,16 @@ void TileView::setTilesPerColRow(int value)
 int TileView::tilesPerColRow()
 {
     return mTilesPerColRow;
+}
+
+void TileView::setAllowDrag(bool allow)
+{
+    mAllowDrag = allow;
+}
+
+bool TileView::allowDrag() const
+{
+    return mAllowDrag;
 }
 
 void TileView::setModel(QAbstractItemModel* model)
@@ -621,7 +628,9 @@ void TileView::mousePressEvent(QMouseEvent* event)
     switch (event->button())
     {
         case Qt::LeftButton: // record position so we can detect drag event in mouseMoveEvent
-            mDragStartPosition = event->pos();
+
+            if (mAllowDrag)
+                mDragStartPosition = event->pos();
             break;
 
         case Qt::RightButton:
@@ -692,6 +701,9 @@ void TileView::mouseReleaseEvent(QMouseEvent* event)
 
 void TileView::mouseMoveEvent(QMouseEvent* event)
 {
+    if (!mAllowDrag)
+        return;
+
     if (!(event->buttons() & Qt::LeftButton))
         return;
 
@@ -702,14 +714,13 @@ void TileView::mouseMoveEvent(QMouseEvent* event)
     if (mDndHandler == NULL)
         return; // can't do any thing
 
-    QModelIndex     index = posToModelIndex(event->pos());
+    QModelIndex index = posToModelIndex(event->pos());
 
-    QMimeData*      mimeData = new QMimeData;
-    QPixmap         image;
-    QPoint          hotspot;
-    Qt::DropActions action;
+    QMimeData*  mimeData = new QMimeData;
+    QPixmap     image;
+    QPoint      hotspot;
 
-    bool            accept = mDndHandler->dragStart(index, action, mimeData, image, hotspot);
+    bool        accept = mDndHandler->dragStart(index, mimeData, image, hotspot);
 
     if (!accept)
         return;
@@ -725,7 +736,7 @@ void TileView::mouseMoveEvent(QMouseEvent* event)
             drag->setHotSpot(hotspot);
     }
 
-    Qt::DropAction dropAction = drag->exec(action);
+    Qt::DropAction dropAction = drag->exec(mListModel->supportedDragActions());
 }
 
 void TileView::dragEnterEvent(QDragEnterEvent* event)

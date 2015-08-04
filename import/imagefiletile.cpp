@@ -6,20 +6,19 @@
 
 namespace PhotoStage
 {
-ImageFileTile::ImageFileTile(TileView::TileView* parent) : AbstractTile(parent)
+ImageFileTile::ImageFileTile(Widgets::TileView* parent) :
+    Widgets::AbstractTile(parent)
 {
 }
 
-void ImageFileTile::render(QPainter& painter,
-    const TileView::TileInfo& tileInfo,
-    const QVariant& data)
+void ImageFileTile::render(QPainter& painter, const Widgets::TileInfo& tileInfo, const QVariant& data)
 {
     int w = painter.window().width();
     int h = painter.window().height();
 
     // draw the selection background
-    if ((tileInfo.tileState & TileView::TileInfo::TileStateSelected) ==
-        TileView::TileInfo::TileStateSelected)
+    if ((tileInfo.tileState & Widgets::TileInfo::TileStateSelected) ==
+        Widgets::TileInfo::TileStateSelected)
         painter.setBrush(QBrush(QColor(Qt::darkGray).lighter(180), Qt::SolidPattern));
     else
         painter.setBrush(QBrush(QColor(Qt::darkGray), Qt::SolidPattern));

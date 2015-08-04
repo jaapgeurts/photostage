@@ -7,14 +7,13 @@
 
 #include <QDragEnterEvent>
 
-namespace TileView
+namespace Widgets
 {
 class DndHandler
 {
     public:
 
         virtual bool dragStart(const QModelIndex& index,
-            Qt::DropActions& action,
             QMimeData* mimeData,
             QPixmap& image,
             QPoint& hotspot)                           = 0;

@@ -30,7 +30,7 @@ class FilesModule : public LibraryModule
 
     private:
 
-        FixedTreeView* mTrvwFiles;
+        Widgets::FixedTreeView* mTrvwFiles;
         PathModel*  mPathModel;
 
         void onPathModelRowsAdded(const QModelIndex&, int, int);

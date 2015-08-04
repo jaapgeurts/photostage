@@ -52,7 +52,7 @@
        </property>
       </widget>
      </widget>
-     <widget class="PhotoStage::LoupeView" name="developView" native="true"/>
+     <widget class="Widgets::LoupeView" name="developView" native="true"/>
      <widget class="QScrollArea" name="scrollArea_2">
       <property name="widgetResizable">
        <bool>true</bool>
@@ -80,7 +80,7 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>PhotoStage::LoupeView</class>
+   <class>Widgets::LoupeView</class>
    <extends>QWidget</extends>
    <header>widgets/loupeview.h</header>
    <container>1</container>

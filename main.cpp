@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
     int         id = QFontDatabase::addApplicationFont(
         ":/fonts/foundation-icons-general.ttf");
     QStringList l = QFontDatabase::applicationFontFamilies(id);
+
     qDebug() << "Loaded fonts:" << l;
 
     id = QFontDatabase::addApplicationFont(
@@ -39,13 +40,12 @@ int main(int argc, char* argv[])
 
     // Load the dark style
 #define STYLE_SHEET 1
-#ifdef STYLE_SHEET
+#if defined(STYLE_SHEET)
     QFile f (":qdarkstyle/style.qss");
 
     if (!f.exists())
     {
-        printf(
-            "Unable to set stylesheet. File qdarkstyle/style.qss not found.\n");
+        printf("Unable to set stylesheet. File qdarkstyle/style.qss not found.\n");
     }
     else
     {
@@ -53,27 +53,19 @@ int main(int argc, char* argv[])
         QTextStream ts(&f);
         a.setStyleSheet(ts.readAll());
     }
-#else
+#elif defined(DARK_PALETTE)
     QPalette darkPalette = QApplication::palette();
     darkPalette.setColor(QPalette::Normal, QPalette::Window, QColor(Qt::black));
     darkPalette.setColor(QPalette::Normal, QPalette::Base, QColor(Qt::black));
-    darkPalette.setColor(QPalette::Normal, QPalette::WindowText,
-        QColor(Qt::lightGray));
-    darkPalette.setColor(QPalette::Normal, QPalette::Text,
-        QColor(Qt::lightGray));
+    darkPalette.setColor(QPalette::Normal, QPalette::WindowText, QColor(Qt::lightGray));
+    darkPalette.setColor(QPalette::Normal, QPalette::Text, QColor(Qt::lightGray));
     darkPalette.setColor(QPalette::Normal, QPalette::Button, QColor(Qt::black));
-    darkPalette.setColor(QPalette::Normal, QPalette::ButtonText,
-        QColor(Qt::lightGray));
-    darkPalette.setColor(QPalette::Normal, QPalette::Light, QColor(
-            Qt::lightGray).lighter(180));
-    darkPalette.setColor(QPalette::Normal, QPalette::Midlight,
-        QColor(Qt::lightGray).lighter(150));
-    darkPalette.setColor(QPalette::Normal, QPalette::Dark, QColor(
-            Qt::darkGray).lighter(150));
-    darkPalette.setColor(QPalette::Normal, QPalette::Mid, QColor(
-            Qt::darkGray).lighter(120));
-    darkPalette.setColor(QPalette::Normal, QPalette::Shadow, QColor(
-            Qt::darkGray));
+    darkPalette.setColor(QPalette::Normal, QPalette::ButtonText, QColor(Qt::lightGray));
+    darkPalette.setColor(QPalette::Normal, QPalette::Light, QColor(Qt::lightGray).lighter(180));
+    darkPalette.setColor(QPalette::Normal, QPalette::Midlight, QColor(Qt::lightGray).lighter(150));
+    darkPalette.setColor(QPalette::Normal, QPalette::Dark, QColor(Qt::darkGray).lighter(150));
+    darkPalette.setColor(QPalette::Normal, QPalette::Mid, QColor(Qt::darkGray).lighter(120));
+    darkPalette.setColor(QPalette::Normal, QPalette::Shadow, QColor(Qt::darkGray));
 
     QApplication::setPalette(darkPalette);
 #endif

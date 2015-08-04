@@ -7,7 +7,7 @@
 #include <QMouseEvent>
 #include <QModelIndex>
 
-namespace TileView
+namespace Widgets
 {
 class TileView;
 

@@ -5,13 +5,15 @@
 #include <QAction>
 #include <QObject>
 
+namespace PhotoStage
+{
 class ActionStateGroup : QObject
 {
     Q_OBJECT
 
     public:
 
-        ActionStateGroup(QObject *parent = 0);
+        ActionStateGroup(QObject* parent = 0);
 
         void addAction(QAction* action);
 
@@ -26,5 +28,5 @@ class ActionStateGroup : QObject
 
         QList<QAction*> mListActions;
 };
-
+}
 #endif // ACTIONSTATEGROUP_H

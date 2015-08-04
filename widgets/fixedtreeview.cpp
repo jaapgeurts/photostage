@@ -1,15 +1,23 @@
 #include <QHeaderView>
+#include <QEvent>
+#include <QDragMoveEvent>
+
+#include <QDebug>
 
 #include "fixedtreeview.h"
 
-namespace PhotoStage
+namespace Widgets
 {
-FixedTreeView::FixedTreeView(QWidget* parent) : QTreeView(parent)
+FixedTreeView::FixedTreeView(QWidget* parent) :
+    QTreeView(parent),
+    mDndHandler(NULL)
 {
     connect(this, &QTreeView::expanded, this, &FixedTreeView::onItemExpanded);
     connect(this, &QTreeView::collapsed, this, &FixedTreeView::onItemCollapsed);
     setAnimated(true);
     header()->close();
+    // setViewport(NULL);
+    //    viewport()->setFocusProxy(NULL);
 }
 
 void FixedTreeView::setModel(QAbstractItemModel* model)
@@ -19,9 +27,32 @@ void FixedTreeView::setModel(QAbstractItemModel* model)
     setMinimumHeight(CalculateHeight());
 }
 
+void FixedTreeView::setDndHandler(DndHandler* handler)
+{
+    mDndHandler = handler;
+}
+
 QSize FixedTreeView::sizeHint() const
 {
     return QSize(width(), CalculateHeight());
+}
+
+void FixedTreeView::dragEnterEvent(QDragEnterEvent* event)
+{
+    if (mDndHandler != NULL)
+        mDndHandler->dragEnter(event);
+}
+
+void FixedTreeView::dragMoveEvent(QDragMoveEvent* event)
+{
+    if (mDndHandler != NULL)
+        mDndHandler->dragOver(event);
+}
+
+void FixedTreeView::dropEvent(QDropEvent* event)
+{
+    if (mDndHandler != NULL)
+        mDndHandler->dragDrop(event);
 }
 
 int FixedTreeView::CalculateHeight() const

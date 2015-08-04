@@ -4,24 +4,37 @@
 #include <QWidget>
 #include <QTreeView>
 
-namespace PhotoStage
+#include "dndhandler.h"
+
+namespace Widgets
 {
-    class FixedTreeView : public QTreeView
-    {
-        public:
+class FixedTreeView : public QTreeView
+{
+    public:
 
-            FixedTreeView(QWidget* parent = 0);
-            void setModel(QAbstractItemModel* model);
-            QSize sizeHint() const;
+        FixedTreeView(QWidget* parent = 0);
 
-        private:
+        void setModel(QAbstractItemModel* model);
+        QSize sizeHint() const;
 
-            int CalculateHeight() const;
-            int CalculateHeightRec(const QModelIndex& index) const;
+        void setDndHandler(DndHandler* handler);
 
-            void onItemExpanded(const QModelIndex& index);
-            void onItemCollapsed(const QModelIndex& index);
-    };
+    protected:
+
+        void dragEnterEvent(QDragEnterEvent* event);
+        void dragMoveEvent(QDragMoveEvent* event);
+        void dropEvent(QDropEvent* event);
+
+    private:
+
+        DndHandler* mDndHandler;
+
+        int CalculateHeight() const;
+        int CalculateHeightRec(const QModelIndex& index) const;
+
+        void onItemExpanded(const QModelIndex& index);
+        void onItemCollapsed(const QModelIndex& index);
+};
 }
 
 #endif // FIXEDTREEVIEW_H
