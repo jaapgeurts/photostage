@@ -193,7 +193,6 @@ HEADERS  += \
     database/photodao.h \
     database/importdao.h \
     database/pathitem.h \
-    widgets/dndhandler.h \
     library/modules/filesmodule.h \
     dragdropinfo.h \
     collectionmodel.h \

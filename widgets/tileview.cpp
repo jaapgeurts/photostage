@@ -31,7 +31,6 @@ TileView::TileView(QWidget* parent) :
     mSelectionModel(NULL),
     mViewportPosition(0),
     mDragStartPosition(),
-    mDndHandler(NULL),
     mAllowDrag(false)
 {
     mScrollBar = new QScrollBar(mOrientation, this);
@@ -269,16 +268,6 @@ void TileView::setSelectionModel(QItemSelectionModel* selectionModel)
 QItemSelectionModel* TileView::selectionModel() const
 {
     return mSelectionModel;
-}
-
-void TileView::setDndHandler(DndHandler* handler)
-{
-    mDndHandler = handler;
-}
-
-DndHandler* TileView::dndHandler()
-{
-    return mDndHandler;
 }
 
 void TileView::resetView()
@@ -707,30 +696,26 @@ void TileView::mouseMoveEvent(QMouseEvent* event)
     if (!(event->buttons() & Qt::LeftButton))
         return;
 
-    if ((event->pos() - mDragStartPosition).manhattanLength()
-        < QApplication::startDragDistance())
+    if ((event->pos() - mDragStartPosition).manhattanLength() < QApplication::startDragDistance())
         return;
 
-    if (mDndHandler == NULL)
-        return; // can't do any thing
+    QMimeData* mimeData = mListModel->mimeData(selectionModel()->selectedIndexes());
 
-    QModelIndex index = posToModelIndex(event->pos());
-
-    QMimeData*  mimeData = new QMimeData;
-    QPixmap     image;
-    QPoint      hotspot;
-
-    bool        accept = mDndHandler->dragStart(index, mimeData, image, hotspot);
-
-    if (!accept)
-        return;
-
-    QDrag* drag = new QDrag(this);
+    QDrag*     drag = new QDrag(this);
     drag->setMimeData(mimeData);
 
-    if (!image.isNull())
+    if (mTile != NULL)
     {
+        int      row      = posToIndex(event->pos());
+        TileInfo tileInfo = createTileInfo(row);
+        QPixmap  image(tileInfo.width, tileInfo.height);
+        image.fill(Qt::transparent);
+        QPainter p(&image);
+        QVariant item = mListModel->data(tileInfo.modelIndex, TileView::ImageRole);
+        mTile->render(p, tileInfo, item);
+
         drag->setPixmap(image);
+        QPoint hotspot(event->pos().x() % mComputedCellWidth, event->pos().y() % mComputedCellHeight);
 
         if (!hotspot.isNull())
             drag->setHotSpot(hotspot);
@@ -741,8 +726,12 @@ void TileView::mouseMoveEvent(QMouseEvent* event)
 
 void TileView::dragEnterEvent(QDragEnterEvent* event)
 {
-    if (mDndHandler != NULL)
-        mDndHandler->dragEnter(event);
+    int row = posToIndex(event->pos());
+
+    if (mListModel->canDropMimeData(event->mimeData(), event->dropAction(), row, 0, QModelIndex()))
+        event->acceptProposedAction();
+    else
+        event->ignore();
 }
 
 void TileView::dragLeaveEvent(QDragLeaveEvent* event)
@@ -751,12 +740,19 @@ void TileView::dragLeaveEvent(QDragLeaveEvent* event)
 
 void TileView::dragMoveEvent(QDragMoveEvent* event)
 {
+    int row = posToIndex(event->pos());
+
+    if (mListModel->canDropMimeData(event->mimeData(), event->dropAction(), row, 0, QModelIndex()))
+        event->acceptProposedAction();
+    else
+        event->ignore();
 }
 
 void TileView::dropEvent(QDropEvent* event)
 {
-    if (mDndHandler != NULL)
-        mDndHandler->dragDrop(event);
+    int row = posToIndex(event->pos());
+
+    mListModel->dropMimeData(event->mimeData(), event->dropAction(), row, 0, QModelIndex());
 }
 
 /*

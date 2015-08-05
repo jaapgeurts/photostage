@@ -11,78 +11,6 @@
 
 namespace PhotoStage
 {
-class PhotoGridDndHandler : public Widgets::DndHandler, public QObject
-{
-    // DndHandler interface
-
-    public:
-
-        PhotoGridDndHandler(Library* library, QObject* parent = 0);
-
-        bool dragStart(const QModelIndex& index, QMimeData* mimeData, QPixmap& image, QPoint& hotspot);
-        void dragEnter(QDragEnterEvent* event);
-        void dragLeave(QDragLeaveEvent* event);
-        void dragOver(QDragMoveEvent* event);
-        void dragDrop(QDropEvent* event);
-
-    private:
-
-        Library* mLibrary;
-};
-
-PhotoGridDndHandler::PhotoGridDndHandler(Library* library, QObject* parent) :
-    mLibrary(library)
-{
-    setParent(parent);
-}
-
-bool PhotoGridDndHandler::dragStart(const QModelIndex& index, QMimeData* mimeData, QPixmap& image, QPoint& hotspot)
-{
-    // tile from which the drag started
-    Photo dragPhoto = mLibrary->mPhotoModel->data(index, Widgets::TileView::ImageRole).value<Photo>();
-
-    image = QPixmap::fromImage(dragPhoto.libraryPreview().
-            scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
-    hotspot = QPoint(image.width() / 2, image.height() / 2);
-
-    // get the id's of all selected items
-    QList<long long> idlist;
-    foreach(QModelIndex index, mLibrary->mSelectionModel->selectedIndexes())
-    {
-        Photo p = mLibrary->mPhotoModel->data(index, Widgets::TileView::ImageRole).value<Photo>();
-
-        idlist << p.id();
-    }
-
-    DragDropInfo info(DragDropInfo::PhotoModel, idlist);
-
-    qDebug() << "Drag start on PhotoGrid";
-
-    mimeData->setData(MIMETYPE_TILEVIEW_SELECTION, info.toByteArray());
-
-    return true;
-}
-
-void PhotoGridDndHandler::dragEnter(QDragEnterEvent* event)
-{
-    if (event->mimeData()->hasFormat(MIMETYPE_TILEVIEW_SELECTION))
-        event->acceptProposedAction();
-}
-
-void PhotoGridDndHandler::dragLeave(QDragLeaveEvent* event)
-{
-}
-
-void PhotoGridDndHandler::dragOver(QDragMoveEvent* event)
-{
-    event->acceptProposedAction();
-}
-
-void PhotoGridDndHandler::dragDrop(QDropEvent* event)
-{
-    qDebug() << "Dropped on PhotoGrid" << QString(event->mimeData()->data(MIMETYPE_TILEVIEW_SELECTION));
-}
-
 Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     Module(parent),
     ui(new Ui::Library),
@@ -98,8 +26,7 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
 
     if (settings.contains(SETTINGS_SPLITTER_LIBRARY_SIZES))
     {
-        foreach(QVariant v, settings.value(
-                SETTINGS_SPLITTER_LIBRARY_SIZES).toList())
+        foreach(QVariant v, settings.value(SETTINGS_SPLITTER_LIBRARY_SIZES).toList())
         {
             l << v.toInt();
         }
@@ -121,8 +48,7 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     ui->mPhotoGrid->setCheckBoxMode(false);
 
     ui->mPhotoGrid->setDragEnabled(true);
-    ui->mPhotoGrid->setAcceptDrops(true);
-    ui->mPhotoGrid->setDndHandler(new PhotoGridDndHandler(this, this));
+    ui->mPhotoGrid->setAcceptDrops(false);
 
     //ui->mClvPhotos->setTilesPerColRow(ui->hsThumbSize->value());
     // ui->mClvPhotos->setObjectName("LibaryPhotos");

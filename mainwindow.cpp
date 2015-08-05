@@ -21,7 +21,6 @@
 // widget related stuf
 #include "widgets/translucentwindow.h"
 #include "widgets/backgroundtaskprogress.h"
-#include "widgets/dndhandler.h"
 #include "filmstriptile.h"
 
 #include "backgroundtask.h"
@@ -32,68 +31,8 @@
 
 #include "external/xxHash/xxhash.h"
 
-const QString SETTINGS_WINDOW_LOCATION          = "location";
-const QString SETTINGS_SPLITTER_FILMSTRIP_SIZES = "splitter_filmstrip";
-
 namespace PhotoStage
 {
-class FilmStripDndHandler : public Widgets::DndHandler, public QObject
-{
-    // DndHandler interface
-
-    public:
-
-        FilmStripDndHandler(QAbstractItemModel* model, QObject* parent = 0);
-
-        bool dragStart(const QModelIndex& index, QMimeData* mimeData, QPixmap& image, QPoint& hotspot);
-        void dragEnter(QDragEnterEvent* event);
-        void dragLeave(QDragLeaveEvent* event);
-        void dragOver(QDragMoveEvent* event);
-        void dragDrop(QDropEvent* event);
-
-    private:
-
-        QAbstractItemModel* mModel;
-};
-
-FilmStripDndHandler::FilmStripDndHandler(QAbstractItemModel* model, QObject* parent) :
-    mModel(model)
-{
-    setParent(parent);
-}
-
-bool FilmStripDndHandler::dragStart(const QModelIndex& index, QMimeData* mimeData, QPixmap& image, QPoint& hotspot)
-{
-    //Photo p = mModel->data(index, TileView::ImageRole).value<Photo>();
-    qDebug() << "Drag start on FilmStrip";
-
-    QByteArray data;
-    data.append("This is the drag data from FilmStrip");
-    mimeData->setData(MIMETYPE_TILEVIEW_SELECTION, data);
-
-    return true;
-}
-
-void FilmStripDndHandler::dragEnter(QDragEnterEvent* event)
-{
-    if (event->mimeData()->hasFormat(MIMETYPE_TILEVIEW_SELECTION))
-        event->acceptProposedAction();
-}
-
-void FilmStripDndHandler::dragLeave(QDragLeaveEvent* event)
-{
-}
-
-void FilmStripDndHandler::dragOver(QDragMoveEvent* event)
-{
-    event->acceptProposedAction();
-}
-
-void FilmStripDndHandler::dragDrop(QDropEvent* event)
-{
-    qDebug() << "Dropped on FilmStrip" << QString(event->mimeData()->data(MIMETYPE_TILEVIEW_SELECTION));
-}
-
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -153,7 +92,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
     ui->filmStrip->setModel(mPhotoModelProxy);
     ui->filmStrip->setDragEnabled(true);
-    ui->filmStrip->setDndHandler(new FilmStripDndHandler(mPhotoModelProxy, this));
+    ui->filmStrip->setAcceptDrops(false);
     FilmstripTile* fsTile = new FilmstripTile(ui->filmStrip);
     ui->filmStrip->setTileFlyweight(fsTile);
     ui->filmStrip->setMinimumCellHeight(80);
@@ -162,7 +101,6 @@ MainWindow::MainWindow(QWidget* parent) :
     ui->filmStrip->setOrientation(Qt::Horizontal);
     ui->filmStrip->setSelectionModel(mPhotoSelection);
     ui->filmStrip->setObjectName("Filmstrip");
-    ui->filmStrip->setAcceptDrops(true);
 
     connect(ui->filmStrip, &Widgets::TileView::doubleClickTile, this, &MainWindow::onTileDoubleClicked);
     connect(ui->filmStrip, &Widgets::TileView::visibleTilesChanged, mSourceModel, &PhotoModel::onVisibleTilesChanged);

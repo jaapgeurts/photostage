@@ -4,6 +4,7 @@
 #include <QItemSelectionRange>
 
 #include "constants.h"
+#include "dragdropinfo.h"
 #include "photomodel.h"
 #include "preferences.h"
 
@@ -232,6 +233,60 @@ Qt::DropActions PhotoModel::supportedDragActions() const
     return Qt::CopyAction | Qt::MoveAction | Qt::LinkAction;
 }
 
+Qt::DropActions PhotoModel::supportedDropActions() const
+{
+    return Qt::DropActions();
+}
+
+QStringList PhotoModel::mimeTypes() const
+{
+    QStringList list;
+
+
+    list << MIMETYPE_TILEVIEW_SELECTION;
+    return list;
+}
+
+QMimeData* PhotoModel::mimeData(const QModelIndexList& indexes) const
+{
+    QMimeData* mimeData = new QMimeData();
+
+
+    // tile from which the drag started
+    //    Photo dragPhoto = data(index, Widgets::TileView::ImageRole).value<Photo>();
+
+    //    image = QPixmap::fromImage(dragPhoto.libraryPreview().
+    //            scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    //    hotspot = QPoint(image.width() / 2, image.height() / 2);
+
+    // get the id's of all selected items
+    QList<long long> idlist;
+    foreach(QModelIndex index, indexes)
+    {
+        Photo p = data(index, Widgets::TileView::ImageRole).value<Photo>();
+
+
+        idlist << p.id();
+    }
+
+    DragDropInfo info(DragDropInfo::PhotoModel, idlist);
+    mimeData->setData(MIMETYPE_TILEVIEW_SELECTION, info.toByteArray());
+    return mimeData;
+}
+
+bool PhotoModel::canDropMimeData(const QMimeData* data,
+    Qt::DropAction action, int row, int column, const QModelIndex& parent) const
+{
+    // do not support drops for now.
+    return false;
+}
+
+bool PhotoModel::dropMimeData(const QMimeData* data,
+    Qt::DropAction action, int row, int column, const QModelIndex& parent)
+{
+    return false;
+}
+
 void PhotoModel::onVisibleTilesChanged(const QModelIndex& start, const QModelIndex& end)
 {
     QList<uint32_t> idList;
@@ -276,6 +331,7 @@ void PhotoModel::addData(const QList<long long>& idList)
     // figure out what was changed, what is new and what has been added
     int start = rowCount();
     int count = idList.size();
+
 
     qDebug() << "Imported list dump" << idList;
 

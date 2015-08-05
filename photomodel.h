@@ -5,6 +5,7 @@
 #include <QItemSelection>
 #include <QImage>
 #include <QHash>
+#include <QMimeData>
 
 #include "photo.h"
 #include "previewcache.h"
@@ -56,6 +57,13 @@ class PhotoModel : public QAbstractListModel
         long long rootPath();
 
         Qt::DropActions supportedDragActions() const;
+        Qt::DropActions supportedDropActions() const;
+        QStringList mimeTypes() const;
+        QMimeData* mimeData(const QModelIndexList& indexes) const;
+        bool canDropMimeData(const QMimeData* data,
+            Qt::DropAction action, int row, int column, const QModelIndex& parent) const;
+        bool dropMimeData(const QMimeData* data,
+            Qt::DropAction action, int row, int column, const QModelIndex& parent);
 
     public slots:
 

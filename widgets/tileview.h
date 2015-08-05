@@ -10,7 +10,6 @@
 #include <QMouseEvent>
 #include <QItemSelectionModel>
 
-#include "dndhandler.h"
 #include "abstracttile.h"
 
 namespace Widgets
@@ -32,9 +31,6 @@ class TileView : public QWidget
         void setModel(QAbstractItemModel* model);
         void setSelectionModel(QItemSelectionModel* selectionModel);
         QItemSelectionModel* selectionModel() const;
-
-        void setDndHandler(DndHandler* handler);
-        DndHandler* dndHandler();
 
         void setRootIndex(const QModelIndex& index);
 
@@ -159,10 +155,9 @@ class TileView : public QWidget
         QList<QModelIndex>* mCheckedList;
 
         // for scrolling
-        int         mViewportPosition; // contains the top x position of the scroll area
+        int    mViewportPosition;      // contains the top x position of the scroll area
 
-        QPoint      mDragStartPosition;
-        DndHandler* mDndHandler;
+        QPoint mDragStartPosition;
 
         void computeScrollBarValues();
         void computeSizes(int w, int h);

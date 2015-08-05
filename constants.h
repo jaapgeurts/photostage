@@ -8,8 +8,11 @@ const int     PREVIEW_IMG_HEIGHT = 1024;
 
 const int     HASH_INPUT_LEN = 1L << 20;
 
-const QString MIMETYPE_TILEVIEW_SELECTION     = "application/x-photostage-tileview-selection";
-const QString SETTINGS_SPLITTER_LIBRARY_SIZES = "splitter_main";
-const QString SETTINGS_LIBRARY_FILES_PATHITEM = "files/pathitem";
+const QString MIMETYPE_TILEVIEW_SELECTION = "application/x-photostage-tileview-selection";
+
+const QString SETTINGS_WINDOW_LOCATION          = "location";
+const QString SETTINGS_SPLITTER_FILMSTRIP_SIZES = "splitter_filmstrip";
+const QString SETTINGS_SPLITTER_LIBRARY_SIZES   = "splitter_main";
+const QString SETTINGS_LIBRARY_FILES_PATHITEM   = "files/pathitem";
 
 #endif // CONSTANTS

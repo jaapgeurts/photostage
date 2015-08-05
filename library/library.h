@@ -22,13 +22,9 @@ class Library;
 
 namespace PhotoStage
 {
-class PhotoGridDndHandler;
-
 class Library : public Module
 {
     Q_OBJECT
-
-    friend class PhotoGridDndHandler;
 
     public:
 
