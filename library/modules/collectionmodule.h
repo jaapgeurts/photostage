@@ -14,7 +14,6 @@ class DropHandler;
 
 class CollectionModule : public LibraryModule
 {
-
     friend class DropHandler;
 
     Q_OBJECT
@@ -27,8 +26,6 @@ class CollectionModule : public LibraryModule
 
         Widgets::FixedTreeView* mTrvwCollections;
         CollectionModel*        mCollectionModel;
-
-        void handleDrop(QDropEvent* event);
 };
 }
 #endif // PHOTOSTAGE_COLLECTIONMODULE_H

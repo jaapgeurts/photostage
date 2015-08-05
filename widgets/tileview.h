@@ -74,8 +74,8 @@ class TileView : public QWidget
         void setShowChildren(bool show);
         bool showChildren() const;
 
-        void setAllowDrag(bool allow);
-        bool allowDrag() const;
+        void setDragEnabled(bool enabled);
+        bool dragEnabled() const;
 
     signals:
 

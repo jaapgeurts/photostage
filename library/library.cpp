@@ -120,7 +120,7 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     ui->mPhotoGrid->setMaximumCellWidth(200);
     ui->mPhotoGrid->setCheckBoxMode(false);
 
-    ui->mPhotoGrid->setAllowDrag(true);
+    ui->mPhotoGrid->setDragEnabled(true);
     ui->mPhotoGrid->setAcceptDrops(true);
     ui->mPhotoGrid->setDndHandler(new PhotoGridDndHandler(this, this));
 

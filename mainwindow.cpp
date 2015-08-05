@@ -152,7 +152,7 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(ui->actionLoupeInfoCycle, &QAction::triggered, mLibrary, &Library::onCycleLoupeInfo);
 
     ui->filmStrip->setModel(mPhotoModelProxy);
-    ui->filmStrip->setAllowDrag(true);
+    ui->filmStrip->setDragEnabled(true);
     ui->filmStrip->setDndHandler(new FilmStripDndHandler(mPhotoModelProxy, this));
     FilmstripTile* fsTile = new FilmstripTile(ui->filmStrip);
     ui->filmStrip->setTileFlyweight(fsTile);

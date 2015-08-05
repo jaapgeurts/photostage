@@ -235,12 +235,12 @@ int TileView::tilesPerColRow()
     return mTilesPerColRow;
 }
 
-void TileView::setAllowDrag(bool allow)
+void TileView::setDragEnabled(bool enabled)
 {
-    mAllowDrag = allow;
+    mAllowDrag = enabled;
 }
 
-bool TileView::allowDrag() const
+bool TileView::dragEnabled() const
 {
     return mAllowDrag;
 }

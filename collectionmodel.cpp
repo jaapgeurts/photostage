@@ -1,3 +1,9 @@
+#include <QMimeData>
+
+#include <QDebug>
+
+#include "constants.h"
+#include "dragdropinfo.h"
 #include "collectionmodel.h"
 
 namespace PhotoStage
@@ -91,6 +97,80 @@ QVariant CollectionModel::data(const QModelIndex& index, int role) const
 
 Qt::DropActions CollectionModel::supportedDropActions() const
 {
-    return Qt::CopyAction;
+    return Qt::CopyAction | Qt::MoveAction;
+}
+
+Qt::ItemFlags CollectionModel::flags(const QModelIndex& index) const
+{
+    Qt::ItemFlags flags = QAbstractItemModel::flags(index);
+
+    if (index.isValid())
+        return Qt::ItemIsDropEnabled | flags;
+    else // only allow drops on valid items
+        return flags;
+}
+
+QStringList CollectionModel::mimeTypes() const
+{
+    QStringList list;
+
+    list << MIMETYPE_TILEVIEW_SELECTION;
+    return list;
+}
+
+QMimeData* CollectionModel::mimeData(const QModelIndexList& indexes) const
+{
+    return NULL;
+}
+
+bool CollectionModel::canDropMimeData(const QMimeData* mimeData,
+    Qt::DropAction action,
+    int row,
+    int column,
+    const QModelIndex& parent) const
+{
+    if (action == Qt::IgnoreAction)
+        return true;
+
+    if (column > 0)
+        return false;
+
+    if (!parent.isValid())
+        return false;
+
+    if (!mimeData->hasFormat(MIMETYPE_TILEVIEW_SELECTION))
+        return false;
+
+    return true;
+}
+
+bool CollectionModel::dropMimeData(const QMimeData* mimeData,
+    Qt::DropAction action, int row, int column, const QModelIndex& parent)
+{
+    if (action == Qt::IgnoreAction)
+        return true;
+
+    if (column > 0)
+        return false;
+
+    if (!parent.isValid())
+        return false;
+
+    if (!mimeData->hasFormat(MIMETYPE_TILEVIEW_SELECTION))
+        return false;
+
+    DragDropInfo info(mimeData->data(MIMETYPE_TILEVIEW_SELECTION));
+
+    if (info.sourceModel() == DragDropInfo::PhotoModel)
+    {
+        CollectionItem* item = data(parent, CollectionModel::CollectionRole).value<CollectionItem*>();
+        qDebug() << "Dropped on" << item->name;
+        qDebug() << "Items" << info.idList();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 }

@@ -18,16 +18,26 @@ class CollectionModel : public QAbstractItemModel
             CollectionRole = Qt::UserRole + 2
         };
 
+        // Constructors & Destructor
         CollectionModel(QObject* parent = 0);
         ~CollectionModel();
 
+        // Data access methods
         QModelIndex index(int row, int column, const QModelIndex& parent) const;
         QModelIndex parent(const QModelIndex& index) const;
         int rowCount(const QModelIndex& parent) const;
         int columnCount(const QModelIndex& parent) const;
         QVariant data(const QModelIndex& index, int role) const;
 
+        // Drag Drop related methods
         Qt::DropActions supportedDropActions() const;
+        Qt::ItemFlags flags(const QModelIndex& index) const;
+        QStringList mimeTypes() const;
+        QMimeData* mimeData(const QModelIndexList& indexes) const;
+        bool canDropMimeData(const QMimeData* mimeData,
+            Qt::DropAction action, int row, int column, const QModelIndex& parent) const;
+        bool dropMimeData(const QMimeData* mimeData,
+            Qt::DropAction action, int row, int column, const QModelIndex& parent);
 
     private:
 
