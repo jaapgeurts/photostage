@@ -1,19 +1,24 @@
 #ifndef PHOTOSTAGE_COLLECTIONDAO_H
 #define PHOTOSTAGE_COLLECTIONDAO_H
 
+#include <QObject>
+
 #include "nullable.h"
 
 #include "collectionitem.h"
 
 namespace PhotoStage
 {
-class CollectionDAO
+class DatabaseAccess;
+
+class CollectionDAO : public QObject
 {
+    friend class DatabaseAccess;
+
+    Q_OBJECT
+
     public:
 
-        static CollectionDAO* instance();
-
-        CollectionDAO();
         CollectionItem* createCollectionItems();
 
         void deleteCollectionItems(CollectionItem* root);
@@ -22,7 +27,7 @@ class CollectionDAO
 
     private:
 
-        static CollectionDAO* mInstance;
+        CollectionDAO(QObject* parent = 0);
 
         void createCollectionItemsRec(CollectionItem* root);
         long long rebuildCollectionTree(long long parent_id, long long left);

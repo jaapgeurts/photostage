@@ -1,11 +1,11 @@
-#ifndef IMPORTBACKGROUNDTASK_H
-#define IMPORTBACKGROUNDTASK_H
+#ifndef PHOTOSTAGE_IMPORTBACKGROUNDTASK_H
+#define PHOTOSTAGE_IMPORTBACKGROUNDTASK_H
 
 #include <QRunnable>
 #include <QList>
 
 #include "backgroundtask.h"
-#include "database/importdao.h"
+#include "database/databaseaccess.h"
 
 namespace PhotoStage
 {
@@ -32,7 +32,7 @@ class ImportBackgroundTask : public BackgroundTask, public QRunnable
         ImportInfo        mInfo;
 
         QList<long long>  mIdList;
-        ImportDAO*   mWorkUnit;
+        ImportDAO*        mWorkUnit;
         std::atomic<bool> mRunning;
 };
 }

@@ -41,7 +41,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
     ui->setupUi(this);
 
-    mDatabaseAccess = new DatabaseAccess();
+    mDatabaseAccess = DatabaseAccess::instance(this);
 
     QSettings  settings;
 
@@ -120,7 +120,7 @@ MainWindow::MainWindow(QWidget* parent) :
     mCurrentModule = mLibrary;
     ui->stackedWidget->setCurrentWidget(mLibrary);
 
-    mPhotoWorkUnit = PhotoDAO::instance();
+    mPhotoWorkUnit = DatabaseAccess::photoDao();
 
     mBackgroundTaskManager = new BackgroundTaskManager(ui->scrollAreaWidgetContents, this);
 
@@ -179,7 +179,6 @@ MainWindow::~MainWindow()
     }
     settings.setValue(SETTINGS_SPLITTER_FILMSTRIP_SIZES, list);
     delete ui;
-    delete mDatabaseAccess;
 }
 
 bool MainWindow::eventFilter(QObject* /*obj*/, QEvent* event)

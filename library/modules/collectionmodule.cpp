@@ -6,6 +6,7 @@
 #include <QDebug>
 
 #include "constants.h"
+#include "database/databaseaccess.h"
 #include "dragdropinfo.h"
 #include "collectionmodel.h"
 #include "collectionmodule.h"
@@ -60,13 +61,13 @@ void CollectionModule::onNewCollectionClicked()
 
         if (!index.isValid())
         {
-            CollectionDAO::instance()->addCollection(nullptr, name);
+            DatabaseAccess::collectionDao()->addCollection(nullptr, name);
         }
         else
         {
             CollectionItem* item =
                 mCollectionModel->data(index, CollectionModel::CollectionRole).value<CollectionItem*>();
-            CollectionDAO::instance()->addCollection(Nullable<long long>(item->id), name);
+            DatabaseAccess::collectionDao()->addCollection(Nullable<long long>(item->id), name);
         }
     }
 }

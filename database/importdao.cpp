@@ -11,17 +11,8 @@
 
 namespace PhotoStage
 {
-// static initializers
-ImportDAO* ImportDAO::mInstance = NULL;
-
-ImportDAO* ImportDAO::instance()
-{
-    if (mInstance == NULL)
-        mInstance = new ImportDAO();
-    return mInstance;
-}
-
-ImportDAO::ImportDAO()
+ImportDAO::ImportDAO(QObject* parent) :
+    QObject(parent)
 {
 }
 

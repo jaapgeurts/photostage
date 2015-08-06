@@ -6,16 +6,8 @@
 
 namespace PhotoStage
 {
-CollectionDAO* CollectionDAO::mInstance = NULL;
-
-CollectionDAO* CollectionDAO::instance()
-{
-    if (mInstance == NULL)
-        mInstance = new CollectionDAO();
-    return mInstance;
-}
-
-CollectionDAO::CollectionDAO()
+CollectionDAO::CollectionDAO(QObject* parent) :
+    QObject(parent)
 {
 }
 

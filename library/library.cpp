@@ -109,7 +109,7 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
 
     onShowGrid();
 
-    mPhotoWorkUnit = PhotoDAO::instance();
+    mPhotoWorkUnit = DatabaseAccess::photoDao();
 }
 
 Library::~Library()

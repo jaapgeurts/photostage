@@ -6,13 +6,13 @@ PathModel::PathModel(QObject* parent) :
     QAbstractItemModel(parent)
 {
     // Construct the file tree
-    mRootItem = PathDAO::instance()->createPathItems();
+    mRootItem = DatabaseAccess::pathDao()->createPathItems();
 }
 
 PathModel::~PathModel()
 {
     if (mRootItem != NULL)
-        PathDAO::instance()->deletePathItems(mRootItem);
+        DatabaseAccess::pathDao()->deletePathItems(mRootItem);
 }
 
 QModelIndex PathModel::index(int row, int column, const QModelIndex& parent) const
@@ -132,8 +132,8 @@ void PathModel::reload()
     beginResetModel();
 
     if (mRootItem != NULL)
-        PathDAO::instance()->deletePathItems(mRootItem);
-    mRootItem = PathDAO::instance()->createPathItems();
+        DatabaseAccess::pathDao()->deletePathItems(mRootItem);
+    mRootItem = DatabaseAccess::pathDao()->createPathItems();
     endResetModel();
 }
 }

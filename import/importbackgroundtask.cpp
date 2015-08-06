@@ -9,7 +9,7 @@ ImportBackgroundTask::ImportBackgroundTask(const ImportInfo& info) :
 {
     setDescription(QString("Importing..."));
 
-    mWorkUnit = ImportDAO::instance();
+    mWorkUnit = DatabaseAccess::importDao();
     setAutoDelete(false);
 }
 

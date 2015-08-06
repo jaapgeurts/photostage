@@ -5,12 +5,36 @@
 
 namespace PhotoStage
 {
-DatabaseAccess::DatabaseAccess(QObject* parent) : QObject(parent)
+DatabaseAccess* DatabaseAccess::mInstance      = NULL;
+PhotoDAO*       DatabaseAccess::mPhotoDAO      = NULL;
+ImportDAO*      DatabaseAccess::mImportDAO     = NULL;
+PathDAO*        DatabaseAccess::mPathDAO       = NULL;
+CollectionDAO*  DatabaseAccess::mCollectionDAO = NULL;
+
+DatabaseAccess* DatabaseAccess::instance(QObject* parent)
+{
+    if (mInstance == NULL)
+    {
+        // Create the instance
+        mInstance = new DatabaseAccess(parent);
+
+        // create all DAOs
+        mPhotoDAO      = new PhotoDAO(mInstance);
+        mPathDAO       = new PathDAO(mInstance);
+        mCollectionDAO = new CollectionDAO(mInstance);
+        mImportDAO     = new ImportDAO(mInstance);
+
+        // connect all signals and slots
+    }
+    return mInstance;
+}
+
+DatabaseAccess::DatabaseAccess(QObject* parent) :
+    QObject(parent)
 {
     mDB = QSqlDatabase::addDatabase("QSQLITE");
-    QString dbfile =  QStandardPaths::writableLocation(
-        QStandardPaths::DocumentsLocation) + QDir::separator() +
-        "photostage.db";
+    QString dbfile =  QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+        + QDir::separator() + "photostage.db";
     qDebug() << "Saving database to" << dbfile;
     mDB.setDatabaseName(dbfile);
 
@@ -32,9 +56,33 @@ DatabaseAccess::DatabaseAccess(QObject* parent) : QObject(parent)
     }
 }
 
-const QSqlDatabase& DatabaseAccess::getDb()
+DatabaseAccess::~DatabaseAccess()
+{
+}
+
+const QSqlDatabase& DatabaseAccess::getDb() const
 {
     return mDB;
+}
+
+ImportDAO* DatabaseAccess::importDao()
+{
+    return mImportDAO;
+}
+
+PathDAO* DatabaseAccess::pathDao()
+{
+    return mPathDAO;
+}
+
+CollectionDAO* DatabaseAccess::collectionDao()
+{
+    return mCollectionDAO;
+}
+
+PhotoDAO* DatabaseAccess::photoDao()
+{
+    return mPhotoDAO;
 }
 
 void DatabaseAccess::initDb()

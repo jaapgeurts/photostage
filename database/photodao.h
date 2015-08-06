@@ -1,5 +1,5 @@
-#ifndef PHOTOWORKUNIT_H
-#define PHOTOWORKUNIT_H
+#ifndef PHOTOSTAGE_PHOTOWORKUNIT_H
+#define PHOTOSTAGE_PHOTOWORKUNIT_H
 
 #include <QStringList>
 #include <QMap>
@@ -9,11 +9,15 @@
 
 namespace PhotoStage
 {
-class PhotoDAO
-{
-    public:
+class DatabaseAccess;
 
-        static PhotoDAO* instance();
+class PhotoDAO : public QObject
+{
+    friend class DatabaseAccess;
+
+    Q_OBJECT
+
+    public:
 
         void beginTransaction();
         void endTransaction();
@@ -45,13 +49,9 @@ class PhotoDAO
 
         bool IsInLibrary(long long hash) const;
 
-    protected:
-
-        PhotoDAO();
-
     private:
 
-        static PhotoDAO* mInstance;
+        PhotoDAO(QObject* parent = 0);
 
         long long rebuildKeywordTree(long long parent_id, long long left);
         void getLeftRightForPathId(long long path_id, long long& lft, long long& rgt) const;

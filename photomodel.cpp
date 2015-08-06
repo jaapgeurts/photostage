@@ -21,7 +21,7 @@ PhotoModel::PhotoModel(QObject* parent) :
     QAbstractListModel(parent),
     mRootPathId(-1)
 {
-    mWorkUnit = PhotoDAO::instance();
+    mWorkUnit = DatabaseAccess::photoDao();
 
     mThreadQueue = new ThreadQueue();
 }
@@ -151,7 +151,7 @@ void PhotoModel::previewGenerated(Photo photo, const QImage& image)
     // get actual width x height & store in db.
     photo.exifInfo().width  = image.width();
     photo.exifInfo().height = image.height();
-    PhotoDAO::instance()->updateExifInfo(photo);
+    DatabaseAccess::photoDao()->updateExifInfo(photo);
 
     QImage scaled;
 

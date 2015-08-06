@@ -1,5 +1,5 @@
-#ifndef IMPORTWORKUNIT_H
-#define IMPORTWORKUNIT_H
+#ifndef PHOTOSTAGE_IMPORTWORKUNIT_H
+#define PHOTOSTAGE_IMPORTWORKUNIT_H
 
 #include <QtSql>
 
@@ -7,11 +7,15 @@
 
 namespace PhotoStage
 {
-class ImportDAO
-{
-    public:
+class DatabaseAccess;
 
-        static ImportDAO* instance();
+class ImportDAO : public QObject
+{
+    friend class DatabaseAccess;
+
+    Q_OBJECT
+
+    public:
 
         long long importPhoto(const QFileInfo& file, const ImportOptions& options);
 
@@ -19,17 +23,13 @@ class ImportDAO
 
         long long rebuildTree(long long parent_id, long long left);
 
-    protected:
-
-        explicit ImportDAO();
-
     signals:
 
     public slots:
 
     private:
 
-        static ImportDAO* mInstance;
+        explicit ImportDAO(QObject* parent = 0);
 
         // state variables for the import process
         QString   mLastpath;

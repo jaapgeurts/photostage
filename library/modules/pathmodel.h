@@ -1,10 +1,10 @@
-#ifndef SQLPATHMODEL_H
-#define SQLPATHMODEL_H
+#ifndef PHOTOSTAGE_SQLPATHMODEL_H
+#define PHOTOSTAGE_SQLPATHMODEL_H
 
 #include <QAbstractItemModel>
 #include <QMetaType>
 
-#include "database/pathdao.h"
+#include "database/databaseaccess.h"
 
 namespace PhotoStage
 {
@@ -16,7 +16,7 @@ class PathModel : public QAbstractItemModel
 
         enum DataRole
         {
-            PathRole = Qt::UserRole + 1
+            PathRole = Qt::UserRole + 400
         };
         PathModel(QObject* parent = 0);
         ~PathModel();

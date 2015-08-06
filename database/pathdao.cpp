@@ -5,16 +5,8 @@
 
 namespace PhotoStage
 {
-PathDAO* PathDAO::mInstance = NULL;
-
-PathDAO* PathDAO::instance()
-{
-    if (mInstance == NULL)
-        mInstance = new PathDAO();
-    return mInstance;
-}
-
-PathDAO::PathDAO()
+PathDAO::PathDAO(QObject* parent) :
+    QObject(parent)
 {
 }
 

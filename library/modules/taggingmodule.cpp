@@ -3,8 +3,8 @@
 #include <QEvent>
 #include <QKeyEvent>
 
-#include "library/modules/taggingmodule.h"
-#include "database/photodao.h"
+#include "taggingmodule.h"
+#include "database/databaseaccess.h"
 
 namespace PhotoStage
 {
@@ -53,9 +53,9 @@ void TaggingModule::keywordsAdded()
 
     words = words.simplified();
     words.replace(" ", "");
-    QStringList    wordList = words.split(',');
+    QStringList wordList = words.split(',');
 
-    PhotoDAO* workUnit = PhotoDAO::instance();
+    PhotoDAO*   workUnit = DatabaseAccess::photoDao();
 
     // add keywords not yet in the database
     workUnit->insertKeywords(wordList);
@@ -88,7 +88,7 @@ void TaggingModule::keywordsChanged()
         }
     }
 
-    PhotoDAO* workUnit = PhotoDAO::instance();
+    PhotoDAO* workUnit = DatabaseAccess::photoDao();
 
     // add keywords not yet in the database
     workUnit->insertKeywords(wordList);
@@ -103,7 +103,7 @@ void TaggingModule::keywordsChanged()
 void TaggingModule::setPhotos(const QList<Photo>& list)
 {
     LibraryModule::setPhotos(list);
-    PhotoDAO* workUnit = PhotoDAO::instance();
+    PhotoDAO* workUnit = DatabaseAccess::photoDao();
 
     // <keyword,count>
     QMap<QString, int>         words = workUnit->getPhotoKeywordsCount(list);

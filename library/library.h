@@ -4,7 +4,7 @@
 #include "module.h"
 
 #include "photomodel.h"
-#include "database/photodao.h"
+#include "database/databaseaccess.h"
 #include "imagedbtile.h"
 #include "modules/taggingmodule.h"
 #include "modules/filtermodule.h"

@@ -9,16 +9,6 @@
 
 namespace PhotoStage
 {
-// static initializers
-PhotoDAO* PhotoDAO::mInstance = NULL;
-
-PhotoDAO* PhotoDAO::instance()
-{
-    if (mInstance == NULL)
-        mInstance = new PhotoDAO();
-    return mInstance;
-}
-
 void PhotoDAO::beginTransaction()
 {
     QSqlDatabase::database().transaction();
@@ -29,7 +19,8 @@ void PhotoDAO::endTransaction()
     QSqlDatabase::database().commit();
 }
 
-PhotoDAO::PhotoDAO()
+PhotoDAO::PhotoDAO(QObject* parent) :
+    QObject(parent)
 {
 }
 

@@ -11,13 +11,13 @@ namespace PhotoStage
 CollectionModel::CollectionModel(QObject* parent) :
     QAbstractItemModel(parent)
 {
-    mRootItem = CollectionDAO::instance()->createCollectionItems();
+    mRootItem = DatabaseAccess::collectionDao()->createCollectionItems();
 }
 
 CollectionModel::~CollectionModel()
 {
     if (mRootItem != NULL)
-        CollectionDAO::instance()->deleteCollectionItems(mRootItem);
+        DatabaseAccess::collectionDao()->deleteCollectionItems(mRootItem);
 }
 
 QModelIndex CollectionModel::index(int row, int column, const QModelIndex& parent) const
@@ -161,7 +161,7 @@ bool CollectionModel::dropMimeData(const QMimeData* mimeData,
     if (info.sourceModel() == DragDropInfo::PhotoModel)
     {
         CollectionItem* item = data(parent, CollectionModel::CollectionRole).value<CollectionItem*>();
-        CollectionDAO::instance()->addPhotosToCollection(item->id, info.idList());
+        DatabaseAccess::collectionDao()->addPhotosToCollection(item->id, info.idList());
         return true;
     }
     else

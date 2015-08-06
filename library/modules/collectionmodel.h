@@ -3,7 +3,7 @@
 
 #include <QAbstractItemModel>
 
-#include "database/collectiondao.h"
+#include "database/databaseaccess.h"
 
 namespace PhotoStage
 {
@@ -15,7 +15,7 @@ class CollectionModel : public QAbstractItemModel
 
         enum DataRole
         {
-            CollectionRole = Qt::UserRole + 2
+            CollectionRole = Qt::UserRole + 500
         };
 
         // Constructors & Destructor

@@ -10,7 +10,7 @@
 #include "photo.h"
 #include "previewcache.h"
 #include "threadqueue.h"
-#include "database/photodao.h"
+#include "database/databaseaccess.h"
 
 namespace PhotoStage
 {

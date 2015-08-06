@@ -1,5 +1,5 @@
-#ifndef KEYWORDINGMODULE_H
-#define KEYWORDINGMODULE_H
+#ifndef PHOTOSTAGE_KEYWORDINGMODULE_H
+#define PHOTOSTAGE_KEYWORDINGMODULE_H
 
 #include <QPlainTextEdit>
 #include <QLineEdit>
@@ -9,32 +9,32 @@
 
 namespace PhotoStage
 {
-    class TaggingModule : public LibraryModule
-    {
-        Q_OBJECT
+class TaggingModule : public LibraryModule
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            explicit TaggingModule(QWidget* parent = 0);
+        explicit TaggingModule(QWidget* parent = 0);
 
-            void setPhotos(const QList<Photo>& list);
+        void setPhotos(const QList<Photo>& list);
 
-            bool eventFilter(QObject* object, QEvent* event);
+        bool eventFilter(QObject* object, QEvent* event);
 
-        signals:
+    signals:
 
-        public slots:
+    public slots:
 
-        private slots:
+    private slots:
 
-            void keywordsChanged();
-            void keywordsAdded();
+        void keywordsChanged();
+        void keywordsAdded();
 
-        private:
+    private:
 
-            QLineEdit*      mAddKeywords;
-            QPlainTextEdit* mTxtEdtKeywords;
-    };
+        QLineEdit*      mAddKeywords;
+        QPlainTextEdit* mTxtEdtKeywords;
+};
 }
 
 #endif // KEYWORDINGMODULE_H
