@@ -1,5 +1,3 @@
-#include <QMenu>
-
 #include "library.h"
 #include "ui_library.h"
 
@@ -84,10 +82,10 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     connect(mFilesModule, &FilesModule::pathSelected, this, &Library::onPathSelected);
 
     // collections module
-    CollectionModule* cm   = new CollectionModule(ui->ModulePanel_1);
-    QMenu*            menu = new QMenu(this);
-    menu->addAction("New Collection", this, SLOT(onNewCollectionClicked()));
-    ui->ModulePanel_1->addPanel("Collections", cm, menu);
+    mCollectionModule = new CollectionModule(ui->ModulePanel_1);
+
+    ui->ModulePanel_1->addPanel("Collections", mCollectionModule, mCollectionModule->getMenu());
+    connect(mCollectionModule, &CollectionModule::collectionSelected, this, &Library::onCollectionSelected);
 
     // **** MODULES RIGHT
 
@@ -186,6 +184,11 @@ void Library::onZoomLevelChanged(int zoomLevel)
 void Library::onPathSelected(long long pathid)
 {
     emit photoSourceChanged(PhotoModel::SourceFiles, pathid);
+}
+
+void Library::onCollectionSelected(long long collectionid)
+{
+    emit photoSourceChanged(PhotoModel::SourceCollection, collectionid);
 }
 
 void Library::onThumbSizeChanged(int newValue)
@@ -309,10 +312,5 @@ void Library::onSortOrderChanged()
         mPhotoModel->sort(0, Qt::AscendingOrder);
         ui->pbSortOrder->setText("↑");
     }
-}
-
-void Library::onNewCollectionClicked()
-{
-    qDebug() << "create new collection";
 }
 }

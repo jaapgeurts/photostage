@@ -54,7 +54,7 @@ void DatabaseAccess::initDb()
     list <<
         "create unique index if not exists idx_photo_keyword on photo_keyword (photo_id, keyword_id)";
     list <<
-        "create table if not exists collection (id integer primary key AUTOINCREMENT, name varchar, parent_id integer)";
+        "create table if not exists collection (id integer primary key AUTOINCREMENT, name varchar, parent_id integer, lft integer, rgt integer)";
 
     list <<
         "create table if not exists work (id integer primary key AUTOINCREMENT, parent_id integer)";
@@ -65,6 +65,9 @@ void DatabaseAccess::initDb()
         "create table if not exists importhistory (id integer primary key AUTOINCREMENT, date_time varchar)";
     list <<
         "create table if not exists importhistory_photo (importhistory_id integer, photo_id integer)";
+
+    list <<
+        "create table if not exists collection_photo ( collection_id integer REFERENCES collection(id), photo_id integer REFERENCES photo (id));";
 
     QSqlQuery q;
     foreach(QString query, list)

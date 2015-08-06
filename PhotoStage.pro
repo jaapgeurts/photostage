@@ -103,8 +103,8 @@ SOURCES += \
     database/pathitem.cpp \
     library/modules/filesmodule.cpp \
     dragdropinfo.cpp \
-    collectionmodel.cpp \
-    pathmodel.cpp \
+    library/modules/collectionmodel.cpp \
+    library/modules/pathmodel.cpp \
     photoprivate.cpp \
     database/collectiondao.cpp \
     database/collectionitem.cpp
@@ -195,8 +195,8 @@ HEADERS  += \
     database/pathitem.h \
     library/modules/filesmodule.h \
     dragdropinfo.h \
-    collectionmodel.h \
-    pathmodel.h \
+    library/modules/collectionmodel.h \
+    library/modules/pathmodel.h \
     database/collectiondao.h \
     database/collectionitem.h
 

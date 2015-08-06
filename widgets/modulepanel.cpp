@@ -23,8 +23,7 @@ ModulePanel::~ModulePanel()
 {
 }
 
-void ModulePanel::addPanel(const QString& title, QWidget* panel,
-    QMenu* menu)
+void ModulePanel::addPanel(const QString& title, QWidget* panel, QMenu* menu)
 {
     if (mPanels.contains(title))
     {
@@ -38,13 +37,9 @@ void ModulePanel::addPanel(const QString& title, QWidget* panel,
     pbHeader->setStyleSheet("text-align: left; background: #333");
     pbHeader->setContentsMargins(0, 0, 0, 0);
     pbHeader->setProperty("title", info.title);
-    connect(pbHeader,
-        &QPushButton::clicked,
-        this,
-        &ModulePanel::onHeaderClicked);
+    connect(pbHeader, &QPushButton::clicked, this, &ModulePanel::onHeaderClicked);
 
-    panel->setSizePolicy(sizePolicy().horizontalPolicy(),
-        QSizePolicy::Fixed);
+    panel->setSizePolicy(sizePolicy().horizontalPolicy(), QSizePolicy::Fixed);
     panel->setContentsMargins(0, 0, 0, 0);
 
     if (menu != NULL)

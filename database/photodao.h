@@ -33,6 +33,8 @@ class PhotoDAO
         // ownership is transferred to the caller who should call delete on the objects
         QList<Photo> getPhotosByPath(long long path_id, bool includeSubDirs = true) const;
 
+        QList<Photo> getPhotosByCollectionId(long long collection_id, bool includeSubDirs) const;
+
         QList<Photo> getPhotosById(QList<long long> idList) const;
         void filterList(QList<long long>& list, long long rootPathId, bool includeSubDirs) const;
 
@@ -51,8 +53,9 @@ class PhotoDAO
 
         static PhotoDAO* mInstance;
 
-        long long rebuildTree(long long parent_id, long long left);
+        long long rebuildKeywordTree(long long parent_id, long long left);
         void getLeftRightForPathId(long long path_id, long long& lft, long long& rgt) const;
+        void getLeftRightForCollectionId(long long collection_id, long long& lft, long long& rgt) const;
         QString joinIds(const QList<long long>& idList) const;
 };
 }

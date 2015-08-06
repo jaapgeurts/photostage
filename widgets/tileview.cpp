@@ -23,6 +23,7 @@ TileView::TileView(QWidget* parent) :
     mOldStart(-1),
     mOldEnd(-1),
     mShowChildren(false),
+    mAllowDrag(false),
     mOrientation(Qt::Vertical),
     mTilesPerColRow(0),
     //    mHighlightedTile(-1),
@@ -30,8 +31,7 @@ TileView::TileView(QWidget* parent) :
     mListModel(NULL),
     mSelectionModel(NULL),
     mViewportPosition(0),
-    mDragStartPosition(),
-    mAllowDrag(false)
+    mDragStartPosition()
 {
     mScrollBar = new QScrollBar(mOrientation, this);
     mScrollBar->setMinimum(0);
@@ -706,7 +706,7 @@ void TileView::mouseMoveEvent(QMouseEvent* event)
 
     if (mTile != NULL)
     {
-        int      row      = posToIndex(event->pos());
+        int      row      = posToIndex(mDragStartPosition);
         TileInfo tileInfo = createTileInfo(row);
         QPixmap  image(tileInfo.width, tileInfo.height);
         image.fill(Qt::transparent);
@@ -715,13 +715,22 @@ void TileView::mouseMoveEvent(QMouseEvent* event)
         mTile->render(p, tileInfo, item);
 
         drag->setPixmap(image);
-        QPoint hotspot(event->pos().x() % mComputedCellWidth, event->pos().y() % mComputedCellHeight);
+        int offsetx = 0;
+        int offsety = 0;
+
+        if (mOrientation == Qt::Vertical)
+            offsety = mViewportPosition %  mComputedCellHeight;
+        else
+            offsetx =  mViewportPosition %  mComputedCellWidth;
+        QPoint hotspot((mDragStartPosition.x() + offsetx) % mComputedCellWidth,
+            (mDragStartPosition.y() + offsety) % mComputedCellHeight);
 
         if (!hotspot.isNull())
             drag->setHotSpot(hotspot);
     }
 
     Qt::DropAction dropAction = drag->exec(mListModel->supportedDragActions());
+    // now do nothing with the drop action yet.
 }
 
 void TileView::dragEnterEvent(QDragEnterEvent* event)

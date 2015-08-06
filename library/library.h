@@ -70,11 +70,12 @@ class Library : public Module
 
     private slots:
 
-        void onNewCollectionClicked();
         void onCustomContextMenu(const QPoint& pos);
         void onThumbSizeChanged(int);
         void onZoomLevelChanged(int zoomLevel);
+
         void onPathSelected(long long pathid);
+        void onCollectionSelected(long long collectionid);
 
     private:
 
@@ -88,6 +89,7 @@ class Library : public Module
         Photo                      mCurrentPhoto;
         QItemSelectionModel*       mSelectionModel;
         FilesModule*               mFilesModule;
+        CollectionModule*          mCollectionModule;
 };
 }
 

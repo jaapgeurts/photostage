@@ -24,18 +24,17 @@ class FilesModule : public LibraryModule
 
         void pathSelected(long long pathid);
 
-    protected:
+    private slots:
 
-        bool eventFilter(QObject* obj, QEvent* event);
+        void onFilesClicked(const QModelIndex& index);
+        void onPathModelRowsAdded(const QModelIndex&, int, int);
+        void onPathModelRowsRemoved(const QModelIndex&, int, int);
 
     private:
 
         Widgets::FixedTreeView* mTrvwFiles;
-        PathModel*  mPathModel;
+        PathModel*              mPathModel;
 
-        void onPathModelRowsAdded(const QModelIndex&, int, int);
-        void onPathModelRowsRemoved(const QModelIndex&, int, int);
-        void onFilesClicked(const QModelIndex&);
         bool handleDrop(QDropEvent* event);
 };
 }

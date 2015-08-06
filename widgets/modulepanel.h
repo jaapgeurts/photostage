@@ -1,5 +1,5 @@
-#ifndef MODULEPANEL_H
-#define MODULEPANEL_H
+#ifndef PHOTOSTAGE_MODULEPANEL_H
+#define PHOTOSTAGE_MODULEPANEL_H
 
 #include <QPushButton>
 #include <QWidget>
@@ -8,39 +8,38 @@
 
 namespace PhotoStage
 {
-    struct PanelInfo
-    {
-        QString title;
-        QWidget* header;
-        QPushButton* btnMenu;
-        QMenu* menu;
-        QWidget* panel;
-    };
+struct PanelInfo
+{
+    QString      title;
+    QWidget*     header;
+    QPushButton* btnMenu;
+    QMenu*       menu;
+    QWidget*     panel;
+};
 
-    class ModulePanel : public QWidget
-    {
-        Q_OBJECT
+class ModulePanel : public QWidget
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            explicit ModulePanel(QWidget* parent = 0);
-            ~ModulePanel();
+        explicit ModulePanel(QWidget* parent = 0);
+        ~ModulePanel();
 
-            void addPanel(const QString& title, QWidget* panel,
-                QMenu* menu = 0);
-            void removePanel(const QString& title);
+        void addPanel(const QString& title, QWidget* panel, QMenu* menu = 0);
+        void removePanel(const QString& title);
 
-        signals:
+    signals:
 
-        private slots:
+    private slots:
 
-            void onHeaderClicked();
-            void onMenuClicked(bool);
+        void onHeaderClicked();
+        void onMenuClicked(bool);
 
-        private:
+    private:
 
-            QHash<QString, PanelInfo> mPanels;
-    };
+        QHash<QString, PanelInfo> mPanels;
+};
 }
 
 #endif // MODULEPANEL_H

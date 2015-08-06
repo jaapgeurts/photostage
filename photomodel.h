@@ -67,7 +67,7 @@ class PhotoModel : public QAbstractListModel
 
     public slots:
 
-        void setRootPath(SourceType source, long long pathId);
+        void setRootPath(SourceType source, long long id);
         void onVisibleTilesChanged(const QModelIndex& start, const QModelIndex& end);
 
     private slots:

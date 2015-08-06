@@ -21,6 +21,16 @@ class CollectionModule : public LibraryModule
     public:
 
         CollectionModule(QWidget* parent);
+        QMenu* getMenu();
+
+    signals:
+
+        void collectionSelected(long long id);
+
+    private slots:
+
+        void onFilesClicked(const QModelIndex& index);
+        void onNewCollectionClicked();
 
     private:
 

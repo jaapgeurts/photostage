@@ -14,7 +14,8 @@ void MetaDataModule::setPhoto(Photo& photo)
 {
     clearAll();
 
-    setMetaData(photo);
+    if (!photo.isNull())
+        setMetaData(photo);
 }
 
 void MetaDataModule::clearAll()

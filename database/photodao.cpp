@@ -144,7 +144,7 @@ void PhotoDAO::insertKeywords(const QStringList& words)
     }
     // TODO: improve performance and don't rebuild tree on each insert.
     QSqlDatabase::database().commit();
-    rebuildTree(parent, 1);
+    rebuildKeywordTree(parent, 1);
 }
 
 void PhotoDAO::assignKeywords(const QStringList& words, const QList<Photo>& list)
@@ -416,6 +416,25 @@ void PhotoDAO::deletePhotos(const QList<Photo>& list, bool deleteFile)
     }
 }
 
+void PhotoDAO::getLeftRightForCollectionId(long long collection_id, long long& lft, long long& rgt) const
+{
+    QSqlQuery q;
+
+    q.prepare("select lft,rgt from collection where id = :id;");
+    q.bindValue(":id", collection_id);
+
+    if (!q.exec() && !q.isValid())
+    {
+        qDebug() << "Query failed" << q.executedQuery();
+        qDebug() << q.lastError();
+        return;
+    }
+    q.next();
+
+    lft = q.value(0).toLongLong();
+    rgt = q.value(1).toLongLong();
+}
+
 void PhotoDAO::getLeftRightForPathId(long long path_id, long long& lft, long long& rgt) const
 {
     QSqlQuery q;
@@ -505,7 +524,74 @@ QList<Photo> PhotoDAO::getPhotosByPath(long long path_id, bool includeSubDirs) c
     return list;
 }
 
-long long PhotoDAO::rebuildTree(long long parent_id, long long left)
+QList<Photo> PhotoDAO::getPhotosByCollectionId(long long collection_id, bool includeSubDirs) const
+{
+    QSqlQuery    q;
+
+    QList<Photo> list;
+    q.clear();
+
+    if (includeSubDirs)
+    {
+        long long lft, rgt;
+        getLeftRightForCollectionId(collection_id, lft, rgt);
+
+        // FIXME: this is not correct.
+        q.prepare(
+            "select p.id, p.filename, d.path,p.rating,p.color,p.flag, \
+              p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
+              p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
+              p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
+                p.width, p.height  \
+            from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
+            child.* from path child join path ancestor \
+            on child.lft >= ancestor.lft \
+            and child.lft <= ancestor.rgt \
+            group by child.lft \
+            order by child.lft) as d on p.path_id = d.id \
+                join collection_photo cp on p.id =  cp.photo_id \
+                join collection c on cp.collection_id = c.id \
+            and c.lft between :lft and :rgt;" );
+        q.bindValue(":lft", lft);
+        q.bindValue(":rgt", rgt);
+    }
+    else
+    {
+        q.prepare(
+            "select p.id, p.filename, d.path,p.rating,p.color,p.flag, \
+              p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
+              p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
+              p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
+                p.width, p.height  \
+            from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
+            child.* from path child join path ancestor \
+            on child.lft >= ancestor.lft \
+            and child.lft <= ancestor.rgt \
+            group by child.lft \
+            order by child.lft) as d on p.path_id = d.id \
+            and cp.collection_id = :collectionid \
+            join collection_photo cp on p.id =  cp.photo_id;" );
+        q.bindValue(":collectionid", collection_id);
+    }
+    q.bindValue(":separator", QDir::separator());
+
+    if (!q.exec() && !q.isValid())
+    {
+        qDebug() << "Query failed" << q.executedQuery();
+        qDebug() << q.lastError();
+        return list;
+    }
+
+    while (q.next())
+    {
+        Photo p(q);
+        p.setKeywords(getPhotoKeywords(p));
+        list.append(p);
+    }
+    return list;
+}
+
+long long PhotoDAO::rebuildKeywordTree(long long parent_id, long long left)
 {
     // the right value of this node is the left value + 1
 
@@ -523,7 +609,7 @@ long long PhotoDAO::rebuildTree(long long parent_id, long long left)
     while (q.next())
     {
         long long id = q.value(0).toLongLong();
-        right = rebuildTree(id, right);
+        right = rebuildKeywordTree(id, right);
     }
 
     q.prepare("update keyword set lft=:left, rgt=:right where id=:parent_id;");

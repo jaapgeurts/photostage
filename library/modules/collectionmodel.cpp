@@ -97,7 +97,7 @@ QVariant CollectionModel::data(const QModelIndex& index, int role) const
 
 Qt::DropActions CollectionModel::supportedDropActions() const
 {
-    return Qt::CopyAction | Qt::MoveAction;
+    return Qt::CopyAction;
 }
 
 Qt::ItemFlags CollectionModel::flags(const QModelIndex& index) const
@@ -124,10 +124,7 @@ QMimeData* CollectionModel::mimeData(const QModelIndexList& indexes) const
 }
 
 bool CollectionModel::canDropMimeData(const QMimeData* mimeData,
-    Qt::DropAction action,
-    int row,
-    int column,
-    const QModelIndex& parent) const
+    Qt::DropAction action, int row, int column, const QModelIndex& parent) const
 {
     if (action == Qt::IgnoreAction)
         return true;
@@ -164,8 +161,7 @@ bool CollectionModel::dropMimeData(const QMimeData* mimeData,
     if (info.sourceModel() == DragDropInfo::PhotoModel)
     {
         CollectionItem* item = data(parent, CollectionModel::CollectionRole).value<CollectionItem*>();
-        qDebug() << "Dropped on" << item->name;
-        qDebug() << "Items" << info.idList();
+        CollectionDAO::instance()->addPhotosToCollection(item->id, info.idList());
         return true;
     }
     else

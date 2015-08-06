@@ -194,17 +194,18 @@ void PhotoModel::imageTranslated(Photo photo, const QImage& image)
     photo.setIsDownloading(false);
 }
 
-void PhotoModel::setRootPath(PhotoModel::SourceType source, long long pathId)
+void PhotoModel::setRootPath(PhotoModel::SourceType source, long long id)
 {
     beginResetModel();
-    mRootPathId = pathId;
+
+    mRootPathId = id;
 
     // cancel all running jobs
     mThreadQueue->cancel();
 
     if (source == SourceFiles)
     {
-        mPhotoList = mWorkUnit->getPhotosByPath(pathId, Preferences::instance()->library_include_subfolders);
+        mPhotoList = mWorkUnit->getPhotosByPath(id, Preferences::instance()->library_include_subfolders);
         mPhotoIndexMap.clear();
         int i = 0;
         foreach(Photo p, mPhotoList)
@@ -216,8 +217,15 @@ void PhotoModel::setRootPath(PhotoModel::SourceType source, long long pathId)
     }
     else if (source == SourceCollection)
     {
-        // TODO: not yet implemented
-        //mPhotoInfoList = mWorkUnit->getPhotosByCollection(id);
+        mPhotoList = mWorkUnit->getPhotosByCollectionId(id, Preferences::instance()->library_include_subfolders);
+        mPhotoIndexMap.clear();
+        int i = 0;
+        foreach(Photo p, mPhotoList)
+        {
+            p.setOwner(this);
+            mPhotoIndexMap.insert(p.id(), index(i));
+            i++;
+        }
     }
     // should also cancel all open threads
     endResetModel();
@@ -230,7 +238,7 @@ long long PhotoModel::rootPath()
 
 Qt::DropActions PhotoModel::supportedDragActions() const
 {
-    return Qt::CopyAction | Qt::MoveAction | Qt::LinkAction;
+    return Qt::CopyAction;
 }
 
 Qt::DropActions PhotoModel::supportedDropActions() const
@@ -242,7 +250,6 @@ QStringList PhotoModel::mimeTypes() const
 {
     QStringList list;
 
-
     list << MIMETYPE_TILEVIEW_SELECTION;
     return list;
 }
@@ -250,7 +257,6 @@ QStringList PhotoModel::mimeTypes() const
 QMimeData* PhotoModel::mimeData(const QModelIndexList& indexes) const
 {
     QMimeData* mimeData = new QMimeData();
-
 
     // tile from which the drag started
     //    Photo dragPhoto = data(index, Widgets::TileView::ImageRole).value<Photo>();
@@ -264,7 +270,6 @@ QMimeData* PhotoModel::mimeData(const QModelIndexList& indexes) const
     foreach(QModelIndex index, indexes)
     {
         Photo p = data(index, Widgets::TileView::ImageRole).value<Photo>();
-
 
         idlist << p.id();
     }
@@ -331,7 +336,6 @@ void PhotoModel::addData(const QList<long long>& idList)
     // figure out what was changed, what is new and what has been added
     int start = rowCount();
     int count = idList.size();
-
 
     qDebug() << "Imported list dump" << idList;
 

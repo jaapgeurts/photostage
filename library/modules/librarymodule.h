@@ -2,6 +2,7 @@
 #define LIBRARYMODULE
 
 #include <QWidget>
+#include <QMenu>
 
 #include "photo.h"
 
@@ -29,6 +30,8 @@ class LibraryModule : public QWidget
         {
             return mPhotoInfoList;
         }
+
+        virtual QMenu* getMenu();
 
     protected:
 
