@@ -9,7 +9,6 @@ ImportBackgroundTask::ImportBackgroundTask(const ImportInfo& info) :
 {
     setDescription(QString("Importing..."));
 
-    mWorkUnit = DatabaseAccess::importDao();
     setAutoDelete(false);
 }
 
@@ -28,26 +27,16 @@ void ImportBackgroundTask::run()
     int                      i = 0;
 
     QListIterator<QFileInfo> it(mInfo.files());
-    mWorkUnit->beginImport();
+    DatabaseAccess::photoDao()->beginImport();
 
     while (it.hasNext() && mRunning)
     {
         QFileInfo info = it.next();
-        long long id   = mWorkUnit->importPhoto(info, mInfo.options());
-
-        if (id == -1)
-            qDebug() << "There was an error importing file:" << info.filePath();
-        else
-            mIdList.append(id);
+        DatabaseAccess::photoDao()->importPhoto(info, mInfo.options());
         i++;
         emit progressUpdated(i);
     }
     emit taskFinished(this);
-}
-
-const QList<long long>& ImportBackgroundTask::resultList()
-{
-    return mIdList;
 }
 
 void ImportBackgroundTask::start()

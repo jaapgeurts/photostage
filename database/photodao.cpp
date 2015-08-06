@@ -5,6 +5,9 @@
 #include <QDir>
 
 #include "photodao.h"
+#include "databaseaccess.h"
+#include "dbutils.h"
+#include "previewcache.h"
 #include "utils.h"
 
 namespace PhotoStage
@@ -26,6 +29,9 @@ PhotoDAO::PhotoDAO(QObject* parent) :
 
 void PhotoDAO::setRating(const QList<Photo>& list, int rating)
 {
+    if (list.isEmpty())
+        return;
+
     QSqlQuery q;
     QString   query = "update photo set rating=:rating where id in (:id)";
 
@@ -42,10 +48,14 @@ void PhotoDAO::setRating(const QList<Photo>& list, int rating)
     q.prepare(query);
     q.bindValue(":rating", rating);
     q.exec();
+    emit photosChanged(list);
 }
 
 void PhotoDAO::setFlag(const QList<Photo>& list, Photo::Flag flag)
 {
+    if (list.isEmpty())
+        return;
+
     QSqlQuery q;
     QString   query = ("update photo set flag=:flag where id in (:id)");
 
@@ -62,11 +72,14 @@ void PhotoDAO::setFlag(const QList<Photo>& list, Photo::Flag flag)
     q.prepare(query);
     q.bindValue(":flag", (int)flag);
     q.exec();
+    emit photosChanged(list);
 }
 
-void PhotoDAO::setColorLabel(const QList<Photo>& list,
-    Photo::ColorLabel color)
+void PhotoDAO::setColorLabel(const QList<Photo>& list, Photo::ColorLabel color)
 {
+    if (list.isEmpty())
+        return;
+
     QSqlQuery q;
     QString   query = ("update photo set color=:color where id in (:id)");
 
@@ -83,11 +96,12 @@ void PhotoDAO::setColorLabel(const QList<Photo>& list,
     q.prepare(query);
     q.bindValue(":color", (int)color);
     q.exec();
+    emit photosChanged(list);
 }
 
 void PhotoDAO::insertKeywords(const QStringList& words)
 {
-    if (words.size() == 0)
+    if (words.isEmpty())
         return;
 
     // find keywords already in the database
@@ -103,6 +117,10 @@ void PhotoDAO::insertKeywords(const QStringList& words)
     {
         newWords.removeAll(q.value(1).toString());
     }
+
+    // if there is nothing to insert then bail.
+    if (newWords.isEmpty())
+        return;
 
     // get the root id ( a single root is needed )
     q.clear();
@@ -136,10 +154,17 @@ void PhotoDAO::insertKeywords(const QStringList& words)
     // TODO: improve performance and don't rebuild tree on each insert.
     QSqlDatabase::database().commit();
     rebuildKeywordTree(parent, 1);
+    emit keywordsAdded();
 }
 
 void PhotoDAO::assignKeywords(const QStringList& words, const QList<Photo>& list)
 {
+    if (list.isEmpty())
+        return;
+
+    if (words.isEmpty())
+        return;
+
     QSqlQuery q;
     QString   word;
     QSqlDatabase::database().transaction();
@@ -160,10 +185,18 @@ void PhotoDAO::assignKeywords(const QStringList& words, const QList<Photo>& list
         }
     }
     QSqlDatabase::database().commit();
+    // TODO: consider photosChanged() vs keywordAssignmentsChanged()
+    emit keywordsAssignmentChanged(list);
 }
 
-void PhotoDAO::removeKeywordsExcept(const QStringList& words, const QList<Photo>& list)
+void PhotoDAO::unAssignKeywordsExcept(const QStringList& words, const QList<Photo>& list)
 {
+    if (list.isEmpty())
+        return;
+
+    if (words.isEmpty())
+        return;
+
     QSqlQuery q;
 
     QString   query =
@@ -190,6 +223,143 @@ void PhotoDAO::removeKeywordsExcept(const QStringList& words, const QList<Photo>
         qDebug() << q.lastError();
         qDebug() << q.lastQuery();
     }
+
+    emit photosChanged(list);
+}
+
+void PhotoDAO::beginImport()
+{
+    mLastPath.clear();
+    mLastPathId = -1;
+}
+
+void PhotoDAO::importPhoto(const QFileInfo& file, const ImportOptions& options)
+{
+    long long ret = -1;
+
+    qDebug() << "Importing file" << file.canonicalFilePath();
+    QString fileName = file.fileName();
+    QString srcpath  = file.canonicalFilePath();
+    QString dstdir   = options.destinationDir().canonicalFilePath();
+    QString dstpath  = dstdir + QDir::separator() + fileName;
+
+    bool    copySuccess = false;
+
+    //take action on the file(in case of copy & move)
+    switch (options.importMode())
+    {
+        case ImportOptions::ImportAdd:
+            // do nothing. just import the filepaths into the DB
+            dstpath     = srcpath;
+            dstdir      = file.canonicalPath();
+            copySuccess = true;
+            break;
+
+        case ImportOptions::ImportCopy:
+
+            copySuccess = QFile::copy(srcpath, dstpath);
+
+            if (!copySuccess)
+                qDebug() << "File copy failed from" << srcpath << "to" <<
+                    dstpath;
+            break;
+
+        case ImportOptions::ImportMove:
+            // move each file
+            copySuccess = QFile::rename(srcpath, dstpath);     // rename moves if on different filesystems
+
+            if (!copySuccess)
+                qDebug() << "File move failed from" << srcpath << "to" <<
+                    dstpath;
+            break;
+    }
+
+    if (!copySuccess)
+        return;
+
+    if (mLastPath != dstdir)
+    {
+        mLastPath = dstdir;
+        // TODO: find way to prevent this call
+        QStringList pathlist = dstdir.split(QDir::separator(), QString::KeepEmptyParts);
+        mLastPathId = DatabaseAccess::pathDao()->createPaths(pathlist);
+    }
+
+    // read all exif data.
+    ExivFacade* ex = ExivFacade::createExivReader();
+
+    ExifInfo    ei;
+
+    if (!ex->openFile(srcpath))
+        qDebug() << "Skipping exif info";
+    else
+        ei = ex->data();
+    delete(ex);
+
+    QFileInfo fi(srcpath);
+    long long hash = computeImageFileHash(fi);
+
+    if (ei.dateTimeOriginal == nullptr)
+        ei.dateTimeOriginal = fi.lastModified();
+
+    if (ei.dateTimeDigitized == nullptr)
+        ei.dateTimeDigitized = fi.created();
+
+    QSqlQuery q;
+    q.prepare(
+        "insert into photo (path_id,filename,photo_hash, iso, exposure_time, \
+        focal_length, datetime_original, datetime_digitized, rotation, \
+        longitude, lattitude, copyright, artist, aperture, flash, lens_name,  \
+        make, model, width, height ) \
+        values (:path, :filename,:hash,:iso,:exposure_time,:focal_length,\
+            :datetime_original,:datetime_digitized,:rotation,:longitude, \
+            :lattitude,:copyright,:artist,:aperture,:flash,:lens_name, \
+            :make, :model, :width, :height)");
+    q.bindValue(":path", mLastPathId);
+    q.bindValue(":filename", fileName);
+    q.bindValue(":hash", hash);
+    q.bindValue(":iso", setDbValue(ei.isoSpeed));
+    q.bindValue(":exposure_time", setDbValue(ei.exposureTime));
+    q.bindValue(":focal_length", setDbValue(ei.focalLength));
+    q.bindValue(":datetime_original", setDbValue(ei.dateTimeOriginal));
+    q.bindValue(":datetime_digitized", setDbValue(ei.dateTimeDigitized));
+    q.bindValue(":rotation", ei.rotation);
+
+    if (ei.location != nullptr)
+    {
+        q.bindValue(":longitude", ei.location->longitude());
+        q.bindValue(":lattitude", ei.location->latitude());
+    }
+    else
+    {
+        q.bindValue(":longitude", QVariant(QVariant::Double));
+        q.bindValue(":lattitude", QVariant(QVariant::Double));
+    }
+    q.bindValue(":copyright", setDbValue(ei.copyright));
+    q.bindValue(":artist", setDbValue(ei.artist));
+    q.bindValue(":aperture", setDbValue(ei.aperture));
+    q.bindValue(":flash", setDbValue(ei.flash));
+    q.bindValue(":lens_name", setDbValue(ei.lensName));
+    q.bindValue(":make", setDbValue(ei.make));
+    q.bindValue(":model", setDbValue(ei.model));
+    q.bindValue(":width", ei.width);
+    q.bindValue(":height", ei.height);
+
+    if (!q.exec())
+    {
+        qDebug() << "Can't insert" << fileName << "into DB";
+        qDebug() << q.lastError();
+    }
+    else
+    {
+        ret = q.lastInsertId().toLongLong();
+        // make sure the global preview cache does not store an image with the same key
+        // this is probably a left over cache entry from before.
+        PreviewCache::globalCache()->remove(QString::number(ret));
+    }
+
+    if (ret != -1)
+        emit photosAdded(mLastPathId, ret);
 }
 
 // return keywords for the selected photos, and the count each keyword appears
@@ -303,60 +473,11 @@ QList<Photo> PhotoDAO::getPhotosById(QList<long long> idList) const
     return list;
 }
 
-void PhotoDAO::filterList(QList<long long>& list, long long rootPathId, bool includeSubDirs) const
-{
-    QString query;
-
-    // get the list of Id's that fall under the rootPath
-    if (includeSubDirs)
-    {
-        // get left and right of the path root
-        long long lft, rgt;
-
-        getLeftRightForPathId(rootPathId, lft, rgt);
-
-        query =
-            "select p.id from photo p join (select child.* from path child join path ancestor \
-            on child.lft >= ancestor.lft \
-            and child.lft <= ancestor.rgt \
-            group by child.lft order by child.lft) as d on p.path_id = d.id \
-            and d.lft between :lft and :rgt and p.id in (:idList);";
-        query.replace(":lft", QString::number(lft));
-        query.replace(":rgt", QString::number(rgt));
-    }
-    else
-    {
-        query =
-            "select p.id from photo p join (select child.* from path child join path ancestor \
-                on child.lft >= ancestor.lft \
-                and child.lft <= ancestor.rgt \
-                group by child.lft order by child.lft) as d on p.path_id = d.id \
-                and p.path_id = :pathid and p.id in (:idList);";
-        query.replace(":pathid", QString::number(rootPathId));
-    }
-    QString photoids = joinIds(list);
-    query.replace(":idList", photoids);
-
-    QSqlQuery q;
-
-    if (!q.exec(query) && !q.isValid())
-    {
-        qDebug() << "Query failed" << q.executedQuery();
-        qDebug() << q.lastError();
-        return;
-    }
-
-    QList<long long> newList;
-
-    while (q.next())
-    {
-        newList << q.value(0).toLongLong();
-    }
-    list = newList;
-}
-
 void PhotoDAO::deletePhotos(const QList<Photo>& list, bool deleteFile)
 {
+    if (list.isEmpty())
+        return;
+
     QSqlQuery q;
     QString   photo_ids;
 
@@ -405,6 +526,7 @@ void PhotoDAO::deletePhotos(const QList<Photo>& list, bool deleteFile)
                 qDebug() << "File" << path << "could not be removed";
         }
     }
+    emit photosDeleted(list);
 }
 
 void PhotoDAO::getLeftRightForCollectionId(long long collection_id, long long& lft, long long& rgt) const
@@ -616,7 +738,7 @@ long long PhotoDAO::rebuildKeywordTree(long long parent_id, long long left)
     return right + 1;
 }
 
-void PhotoDAO::updateExifInfo(const Photo& photo) const
+void PhotoDAO::updateExifInfo(Photo& photo)
 {
     QSqlQuery       q;
 
@@ -634,21 +756,23 @@ void PhotoDAO::updateExifInfo(const Photo& photo) const
         qDebug() << q.lastError();
     }
 
-    return;
+    QList<Photo> list;
+    list << photo;
+    emit         photosChanged(list);
 }
 
-void PhotoDAO::regenerateHash(Photo& p)
+void PhotoDAO::regenerateHash(Photo& photo)
 {
-    QString   path = p.srcImagePath();
+    QString   path = photo.srcImagePath();
     // only scan the first 1MB
     long long hash = computeImageFileHash(path);
 
-    p.setHash(hash);
+    photo.setHash(hash);
 
     QSqlQuery q;
     q.prepare("update photo set photo_hash=:hash where id = :photoid");
-    q.bindValue(":hash", p.hash());
-    q.bindValue(":photoid", p.id());
+    q.bindValue(":hash", photo.hash());
+    q.bindValue(":photoid", photo.id());
 
     if (!q.exec())
     {
@@ -656,7 +780,9 @@ void PhotoDAO::regenerateHash(Photo& p)
         qDebug() << q.lastError();
     }
 
-    return;
+    QList<Photo> list;
+    list << photo;
+    emit         photosChanged(list);
 }
 
 bool PhotoDAO::IsInLibrary(long long hash) const

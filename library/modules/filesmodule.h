@@ -18,8 +18,6 @@ class FilesModule : public LibraryModule
         FilesModule(QWidget* parent = 0);
         ~FilesModule();
 
-        void reload();
-
     signals:
 
         void pathSelected(long long pathid);
@@ -27,8 +25,6 @@ class FilesModule : public LibraryModule
     private slots:
 
         void onFilesClicked(const QModelIndex& index);
-        void onPathModelRowsAdded(const QModelIndex&, int, int);
-        void onPathModelRowsRemoved(const QModelIndex&, int, int);
 
     private:
 

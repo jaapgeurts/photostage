@@ -4,7 +4,6 @@
 #include <QtSql>
 
 #include "collectiondao.h"
-#include "importdao.h"
 #include "pathdao.h"
 #include "photodao.h"
 
@@ -23,15 +22,27 @@ class DatabaseAccess : public QObject
         const QSqlDatabase& getDb() const;
 
         static PhotoDAO* photoDao();
-        static ImportDAO* importDao();
         static PathDAO* pathDao();
         static CollectionDAO* collectionDao();
 
     signals:
 
-        void a();
+        void keywordsAdded();
+        void keywordsDeleted();
+        void keywordsAssignmentChanged(const QList<Photo>& photos);
+
+        void photosChanged(const QList<Photo>& photos);
+        void photosAdded(long long pathid, long long photoid);
+        void photosDeleted(const QList<Photo>& photos);
+
+        void pathsChanged();
+
+        void collectionAdded();
+        void collectionsChanged();
 
     public slots:
+
+        void onPhotosDeleted(const QList<Photo>& photos);
 
     private:
 
@@ -40,7 +51,6 @@ class DatabaseAccess : public QObject
         QSqlDatabase           mDB;
 
         static PhotoDAO*       mPhotoDAO;
-        static ImportDAO*      mImportDAO;
         static PathDAO*        mPathDAO;
         static CollectionDAO*  mCollectionDAO;
 

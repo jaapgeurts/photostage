@@ -25,8 +25,6 @@ CollectionModule::CollectionModule(QWidget* parent) : LibraryModule(parent)
     mTrvwCollections->setModel(mCollectionModel);
 
     connect(mTrvwCollections, &Widgets::FixedTreeView::clicked, this, &CollectionModule::onFilesClicked);
-    //    connect(mCollectionModel, &CollectionModel::rowsInserted, this, &CollectionModule::onPathModelRowsAdded);
-    //    connect(mCollectionModel, &CollectionModel::rowsRemoved, this, &CollectionModule::onPathModelRowsRemoved);
 
     setLayout(new QVBoxLayout(this));
     layout()->addWidget(mTrvwCollections);

@@ -6,7 +6,11 @@ PathModel::PathModel(QObject* parent) :
     QAbstractItemModel(parent)
 {
     // Construct the file tree
-    mRootItem = DatabaseAccess::pathDao()->createPathItems();
+    mRootItem = DatabaseAccess::pathDao()->getPathItems();
+
+    DatabaseAccess* dbAccess = DatabaseAccess::instance();
+
+    connect(dbAccess, &DatabaseAccess::pathsChanged, this, &PathModel::onPathsChanged);
 }
 
 PathModel::~PathModel()
@@ -127,13 +131,15 @@ QVariant PathModel::headerData(int /*section*/, Qt::Orientation /*orientation*/,
     return QVariant();
 }
 
-void PathModel::reload()
+void PathModel::onPathsChanged()
 {
     beginResetModel();
 
     if (mRootItem != NULL)
         DatabaseAccess::pathDao()->deletePathItems(mRootItem);
-    mRootItem = DatabaseAccess::pathDao()->createPathItems();
+
+    mRootItem = DatabaseAccess::pathDao()->getPathItems();
+
     endResetModel();
 }
 }

@@ -1,5 +1,5 @@
-#ifndef IMPORTINFO_H
-#define IMPORTINFO_H
+#ifndef PHOTOSTAGE_IMPORTINFO_H
+#define PHOTOSTAGE_IMPORTINFO_H
 
 #include <QList>
 #include <QFileInfo>
@@ -9,26 +9,24 @@
 
 namespace PhotoStage
 {
-    class ImportInfo
-    {
-        public:
+class ImportInfo
+{
+    public:
 
-            ImportInfo()
-            {
-            }
+        ImportInfo();
 
-            ImportInfo(const ImportInfo& src);
-            explicit ImportInfo(const QList<QFileInfo>& sourceFiles,
-                const QFileInfo& destinationPath,
-                ImportOptions::ImportMode mode);
+        ImportInfo(const ImportInfo& src);
+        explicit ImportInfo(const QList<QFileInfo>& sourceFiles,
+            const QFileInfo& destinationPath,
+            ImportOptions::ImportMode mode);
 
-            const QList<QFileInfo>& files() const;
-            const ImportOptions options() const;
+        const QList<QFileInfo>& files() const;
+        const ImportOptions options() const;
 
-        private:
+    private:
 
-            QList<QFileInfo> mSourceFiles;
-            ImportOptions    mOptions;
-    };
+        QList<QFileInfo> mSourceFiles;
+        ImportOptions    mOptions;
+};
 }
-#endif // IMPORTINFO_H
+#endif // PHOTOSTAGE_IMPORTINFO_H

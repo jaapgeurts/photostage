@@ -94,7 +94,7 @@ void TaggingModule::keywordsChanged()
     workUnit->insertKeywords(wordList);
 
     // remove all keywords from all photos
-    workUnit->removeKeywordsExcept(exceptWords, mPhotoInfoList);
+    workUnit->unAssignKeywordsExcept(exceptWords, mPhotoInfoList);
 
     // reassign all keywords to the photo
     workUnit->assignKeywords(wordList, mPhotoInfoList);

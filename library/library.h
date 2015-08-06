@@ -39,8 +39,6 @@ class Library : public Module
         bool canSelectUpDown();
         int tilesPerRowOrCol();
 
-        void reloadPathModel();
-
     signals:
 
         void photoSourceChanged(PhotoModel::SourceType type, long long id);

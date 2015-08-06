@@ -501,22 +501,11 @@ void MainWindow::onDeletePhotos()
     {
         QList<Photo> list = mPhotoModelProxy->toList(mPhotoSelection->selection());
         mPhotoWorkUnit->deletePhotos(list, false);
-        foreach(QItemSelectionRange range, mPhotoSelection->selection())
-        {
-            mPhotoModelProxy->removeRows(range.top(), range.height());
-        }
-        // TODO: consider moving this to a central place.(the work manager)
-        mLibrary->reloadPathModel();
     }
     else if (msgBox.clickedButton() == libAndDisk)
     {
         QList<Photo> list = mPhotoModelProxy->toList(mPhotoSelection->selection());
         mPhotoWorkUnit->deletePhotos(list, true);
-        foreach(QItemSelectionRange range, mPhotoSelection->selection())
-        {
-            mPhotoModelProxy->removeRows(range.top(), range.height());
-        }
-        mLibrary->reloadPathModel();
     } // else do nothing
 }
 
@@ -654,20 +643,8 @@ void MainWindow::onActionLightsOff()
 
 void MainWindow::onImportFinished(BackgroundTask* task)
 {
-    ImportBackgroundTask* t = static_cast<ImportBackgroundTask*>(task);
-
-    QList<long long>      resultList = t->resultList();
-
-    // remove any values from this list that are not visible (ie. do not belong to the model)
-    // TODO: change subdirectory setting here
-    mPhotoWorkUnit->filterList(resultList, mSourceModel->rootPath(), true);
-
-    mSourceModel->addData(resultList);
-
     task->deleteLater();
     // update the files tree as well and the collection tree
-
-    mLibrary->reloadPathModel();
 }
 
 void MainWindow::onModelReset()

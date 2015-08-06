@@ -99,7 +99,6 @@ SOURCES += \
     widgets/translucentwindow.cpp \
     database/pathdao.cpp \
     database/photodao.cpp \
-    database/importdao.cpp \
     database/pathitem.cpp \
     library/modules/filesmodule.cpp \
     dragdropinfo.cpp \
@@ -191,7 +190,6 @@ HEADERS  += \
     widgets/translucentwindow.h \
     database/pathdao.h \
     database/photodao.h \
-    database/importdao.h \
     database/pathitem.h \
     library/modules/filesmodule.h \
     dragdropinfo.h \

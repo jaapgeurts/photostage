@@ -31,8 +31,6 @@ class ImportBackgroundTask : public BackgroundTask, public QRunnable
         QString           mName;
         ImportInfo        mInfo;
 
-        QList<long long>  mIdList;
-        ImportDAO*        mWorkUnit;
         std::atomic<bool> mRunning;
 };
 }

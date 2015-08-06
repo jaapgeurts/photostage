@@ -152,10 +152,6 @@ int Library::tilesPerRowOrCol()
     return ui->mPhotoGrid->tilesPerColRow();
 }
 
-void Library::reloadPathModel()
-{
-    mFilesModule->reload();
-}
 
 void Library::setSelectionModel(QItemSelectionModel* selectionModel)
 {

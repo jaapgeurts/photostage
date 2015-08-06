@@ -11,7 +11,11 @@ namespace PhotoStage
 CollectionModel::CollectionModel(QObject* parent) :
     QAbstractItemModel(parent)
 {
-    mRootItem = DatabaseAccess::collectionDao()->createCollectionItems();
+    mRootItem = DatabaseAccess::collectionDao()->getCollectionItems();
+
+    DatabaseAccess* dbAccess = DatabaseAccess::instance();
+
+    connect(dbAccess, &DatabaseAccess::collectionsChanged, this, &CollectionModel::onCollectionsChanged);
 }
 
 CollectionModel::~CollectionModel()
@@ -168,5 +172,17 @@ bool CollectionModel::dropMimeData(const QMimeData* mimeData,
     {
         return false;
     }
+}
+
+void CollectionModel::onCollectionsChanged()
+{
+    beginResetModel();
+
+    if (mRootItem != NULL)
+        DatabaseAccess::collectionDao()->deleteCollectionItems(mRootItem);
+
+    mRootItem = DatabaseAccess::collectionDao()->getCollectionItems();
+
+    endResetModel();
 }
 }

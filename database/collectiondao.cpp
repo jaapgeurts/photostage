@@ -11,7 +11,7 @@ CollectionDAO::CollectionDAO(QObject* parent) :
 {
 }
 
-CollectionItem* CollectionDAO::createCollectionItems()
+CollectionItem* CollectionDAO::getCollectionItems()
 {
     // first create the root item
     QSqlQuery query;
@@ -29,13 +29,13 @@ CollectionItem* CollectionDAO::createCollectionItems()
                 query.value(1).toString(),
                 query.value(2).toLongLong());
 
-        createCollectionItemsRec(rootItem);
+        getCollectionItemsRec(rootItem);
     }
     return rootItem;
 }
 
 // TODO: convert this to lft/rgt tree function instead of recursive
-void CollectionDAO::createCollectionItemsRec(CollectionItem* root)
+void CollectionDAO::getCollectionItemsRec(CollectionItem* root)
 {
     QSqlQuery query;
     QString   queryText = QString(
@@ -60,7 +60,7 @@ void CollectionDAO::createCollectionItemsRec(CollectionItem* root)
         item->cumulative = item->count;
         item->parent     = root;
         root->children.append(item);
-        createCollectionItemsRec(item);
+        getCollectionItemsRec(item);
         root->cumulative +=  item->cumulative;
     }
 }
@@ -106,6 +106,8 @@ void CollectionDAO::addCollection(const Nullable<long long>& parentid, const QSt
 
     // TODO: improve performance and don't rebuild tree on each insert.
     rebuildCollectionTree(parent, 1);
+
+    emit collectionAdded();
 }
 
 void CollectionDAO::deleteCollectionItems(CollectionItem* root)
@@ -138,6 +140,7 @@ void CollectionDAO::addPhotosToCollection(long long collectionId, const QList<lo
             qDebug() << q.lastQuery();
         }
     }
+    emit collectionsChanged();
 }
 
 long long CollectionDAO::rebuildCollectionTree(long long parent_id, long long left)

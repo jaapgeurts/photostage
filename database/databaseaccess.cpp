@@ -7,7 +7,6 @@ namespace PhotoStage
 {
 DatabaseAccess* DatabaseAccess::mInstance      = NULL;
 PhotoDAO*       DatabaseAccess::mPhotoDAO      = NULL;
-ImportDAO*      DatabaseAccess::mImportDAO     = NULL;
 PathDAO*        DatabaseAccess::mPathDAO       = NULL;
 CollectionDAO*  DatabaseAccess::mCollectionDAO = NULL;
 
@@ -22,9 +21,23 @@ DatabaseAccess* DatabaseAccess::instance(QObject* parent)
         mPhotoDAO      = new PhotoDAO(mInstance);
         mPathDAO       = new PathDAO(mInstance);
         mCollectionDAO = new CollectionDAO(mInstance);
-        mImportDAO     = new ImportDAO(mInstance);
 
-        // connect all signals and slots
+        // photo dao connections
+        connect(mPhotoDAO, &PhotoDAO::keywordsAdded, mInstance, &DatabaseAccess::keywordsAdded);
+        connect(mPhotoDAO, &PhotoDAO::keywordsDeleted, mInstance, &DatabaseAccess::keywordsDeleted);
+        connect(mPhotoDAO, &PhotoDAO::keywordsAssignmentChanged, mInstance, &DatabaseAccess::keywordsAssignmentChanged);
+
+        connect(mPhotoDAO, &PhotoDAO::photosAdded, mInstance, &DatabaseAccess::photosAdded);
+        connect(mPhotoDAO, &PhotoDAO::photosAdded, mInstance, &DatabaseAccess::pathsChanged);
+        connect(mPhotoDAO, &PhotoDAO::photosDeleted, mInstance, &DatabaseAccess::onPhotosDeleted);
+        connect(mPhotoDAO, &PhotoDAO::photosChanged, mInstance, &DatabaseAccess::photosChanged);
+
+        // PathDAO connections
+        connect(mPathDAO, &PathDAO::pathsChanged, mInstance, &DatabaseAccess::pathsChanged);
+
+        // Collection connections
+        connect(mCollectionDAO, &CollectionDAO::collectionAdded, mInstance, &DatabaseAccess::collectionAdded);
+        connect(mCollectionDAO, &CollectionDAO::collectionsChanged, mInstance, &DatabaseAccess::collectionsChanged);
     }
     return mInstance;
 }
@@ -65,11 +78,6 @@ const QSqlDatabase& DatabaseAccess::getDb() const
     return mDB;
 }
 
-ImportDAO* DatabaseAccess::importDao()
-{
-    return mImportDAO;
-}
-
 PathDAO* DatabaseAccess::pathDao()
 {
     return mPathDAO;
@@ -78,6 +86,22 @@ PathDAO* DatabaseAccess::pathDao()
 CollectionDAO* DatabaseAccess::collectionDao()
 {
     return mCollectionDAO;
+}
+
+void DatabaseAccess::onPhotosDeleted(const QList<Photo>& photos)
+{
+    emit photosDeleted(photos);
+    emit pathsChanged();
+    emit collectionsChanged();
+
+    // check if any photos are in a collection then emit collection changed as well
+    //    foreach(Photo photo, photos)
+    //    {
+    //        Nullable<long long> id = mCollectionDAO->collectionIdForPhoto(photo);
+
+    //        if (id != nullptr)
+    //            emit collectionChanged(id);
+    //    }
 }
 
 PhotoDAO* DatabaseAccess::photoDao()

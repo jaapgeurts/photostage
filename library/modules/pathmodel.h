@@ -40,7 +40,7 @@ class PathModel : public QAbstractItemModel
 
     public slots:
 
-        void reload();
+        void onPathsChanged();
 
     private:
 

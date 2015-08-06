@@ -72,9 +72,14 @@ class PhotoModel : public QAbstractListModel
 
     private slots:
 
-        void previewGenerated(Photo photo, const QImage& image);
-        void imageTranslated(Photo photo, const QImage& image);
-        void previewLoaded(Photo photo, const QImage& image);
+        // from DAO
+        void onPhotosAdded(long long pathid, long long photoid);
+        void onPhotosDeleted(const QList<Photo>& photos);
+        void onPhotosChanged(const QList<Photo>& photos);
+
+        void onPreviewGenerated(Photo photo, const QImage& image);
+        void onImageTranslated(Photo photo, const QImage& image);
+        void onPreviewLoaded(Photo photo, const QImage& image);
 
     private:
 
@@ -84,7 +89,8 @@ class PhotoModel : public QAbstractListModel
         QList<Photo>                  mPhotoList;
         QHash<long long, QModelIndex> mPhotoIndexMap;
         QHash<long long, uint32_t>    mRunningThreads;
-        long long                     mRootPathId;
+        long long                     mRootId;
+        SourceType                    mPhotoSource;
 
         void loadImage(Photo& photo);
         void convertImage(Photo& photo);

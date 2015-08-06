@@ -19,11 +19,15 @@ namespace PhotoStage
 {
 PhotoModel::PhotoModel(QObject* parent) :
     QAbstractListModel(parent),
-    mRootPathId(-1)
+    mRootId(-1),
+    mThreadQueue(new ThreadQueue())
 {
     mWorkUnit = DatabaseAccess::photoDao();
+    DatabaseAccess* dbAccess = DatabaseAccess::instance();
 
-    mThreadQueue = new ThreadQueue();
+    connect(dbAccess, &DatabaseAccess::photosAdded, this, &PhotoModel::onPhotosAdded);
+    connect(dbAccess, &DatabaseAccess::photosDeleted, this, &PhotoModel::onPhotosDeleted);
+    connect(dbAccess, &DatabaseAccess::photosChanged, this, &PhotoModel::onPhotosChanged);
 }
 
 PhotoModel::~PhotoModel()
@@ -93,7 +97,7 @@ void PhotoModel::loadImage(Photo& photo)
 
     PreviewCacheLoaderJob* plj = new PreviewCacheLoaderJob(photo);
 
-    plj->connect(plj, &PreviewCacheLoaderJob::imageReady, this, &PhotoModel::previewLoaded);
+    plj->connect(plj, &PreviewCacheLoaderJob::imageReady, this, &PhotoModel::onPreviewLoaded);
     uint32_t id = mThreadQueue->addJob(plj);
     mRunningThreads.insert(photo.id(), id);
 }
@@ -107,12 +111,12 @@ void PhotoModel::convertImage(Photo& photo)
     ColorTransformJob* cfj = new ColorTransformJob(photo);
 
     // convert the image to sRGB
-    cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::imageTranslated);
+    cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::onImageTranslated);
     uint32_t id = mThreadQueue->addJob(cfj);
     mRunningThreads.insert(photo.id(), id);
 }
 
-void PhotoModel::previewLoaded(Photo photo, const QImage& image)
+void PhotoModel::onPreviewLoaded(Photo photo, const QImage& image)
 {
     if (!image.isNull())
     {
@@ -123,7 +127,7 @@ void PhotoModel::previewLoaded(Photo photo, const QImage& image)
         ColorTransformJob* cfj = new ColorTransformJob(photo);
 
         // convert the image to sRGB
-        cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::imageTranslated);
+        cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::onImageTranslated);
         uint32_t id = mThreadQueue->addJob(cfj);
 
         mRunningThreads.insert(photo.id(), id);
@@ -133,13 +137,13 @@ void PhotoModel::previewLoaded(Photo photo, const QImage& image)
         // no image available in the cache.
         // generate a preview from the original image
         PreviewGeneratorJob* il = new PreviewGeneratorJob(photo);
-        il->connect(il, &PreviewGeneratorJob::imageReady, this, &PhotoModel::previewGenerated);
+        il->connect(il, &PreviewGeneratorJob::imageReady, this, &PhotoModel::onPreviewGenerated);
         uint32_t             id = mThreadQueue->addJob(il);
         mRunningThreads.insert(photo.id(), id);
     }
 }
 
-void PhotoModel::previewGenerated(Photo photo, const QImage& image)
+void PhotoModel::onPreviewGenerated(Photo photo, const QImage& image)
 {
     if (image.isNull())
     {
@@ -175,12 +179,12 @@ void PhotoModel::previewGenerated(Photo photo, const QImage& image)
     ColorTransformJob* cfj = new ColorTransformJob(photo);
 
     // convert the image to sRGB
-    cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::imageTranslated);
+    cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::onImageTranslated);
     uint32_t id = mThreadQueue->addJob(cfj);
     mRunningThreads.insert(photo.id(), id);
 }
 
-void PhotoModel::imageTranslated(Photo photo, const QImage& image)
+void PhotoModel::onImageTranslated(Photo photo, const QImage& image)
 {
     if (!image.isNull())
     {
@@ -198,7 +202,8 @@ void PhotoModel::setRootPath(PhotoModel::SourceType source, long long id)
 {
     beginResetModel();
 
-    mRootPathId = id;
+    mRootId      = id;
+    mPhotoSource = source;
 
     // cancel all running jobs
     mThreadQueue->cancel();
@@ -233,7 +238,7 @@ void PhotoModel::setRootPath(PhotoModel::SourceType source, long long id)
 
 long long PhotoModel::rootPath()
 {
-    return mRootPathId;
+    return mRootId;
 }
 
 Qt::DropActions PhotoModel::supportedDragActions() const
@@ -320,6 +325,58 @@ void PhotoModel::onVisibleTilesChanged(const QModelIndex& start, const QModelInd
     }
 }
 
+void PhotoModel::onPhotosAdded(long long pathid, long long photoid)
+{
+    if (mPhotoSource == SourceFiles && pathid == mRootId)
+    {
+        int              start = rowCount();
+
+        QList<long long> idList;
+        idList << photoid;
+        QList<Photo>     list = mWorkUnit->getPhotosById(idList);
+
+        beginInsertRows(QModelIndex(), start, start );
+        foreach(Photo info, list)
+        {
+            info.setOwner(this);
+            mPhotoList.append(info);
+        }
+        endInsertRows();
+    }
+}
+
+void PhotoModel::onPhotosDeleted(const QList<Photo>& photos)
+{
+    foreach(Photo photo, photos)
+    {
+        int count = mPhotoList.size();
+        int i;
+
+        for (i = 0; i < count; i++)
+            if (photo.id() == mPhotoList.at(i).id())
+                break;
+
+
+        beginRemoveRows(QModelIndex(), i, i);
+        mPhotoList.removeAt(i);
+        endRemoveRows();
+    }
+}
+
+void PhotoModel::onPhotosChanged(const QList<Photo>& photos)
+{
+    foreach(Photo photo, photos)
+    {
+        int count = mPhotoList.size();
+        int i;
+
+        for (i = 0; i < count; i++)
+            if (photo.id() == mPhotoList.at(i).id())
+                emit dataChanged(index(i), index(i));
+
+    }
+}
+
 bool PComp(const Photo& a, const Photo& b)
 {
     return a.id() < b.id();
@@ -328,25 +385,7 @@ bool PComp(const Photo& a, const Photo& b)
 void PhotoModel::refreshData(const QList<Photo>& list)
 {
     // for now just emit that all data has changed. the tileview doesnt check anyway
-    emit dataChanged(index(0, 0), index(rowCount() - 1, 0));
-}
-
-void PhotoModel::addData(const QList<long long>& idList)
-{
-    // figure out what was changed, what is new and what has been added
-    int start = rowCount();
-    int count = idList.size();
-
-    qDebug() << "Imported list dump" << idList;
-
-    QList<Photo> list = mWorkUnit->getPhotosById(idList);
-    beginInsertRows(QModelIndex(), start, start + count - 1);
-    foreach(Photo info, list)
-    {
-        info.setOwner(this);
-        mPhotoList.append(info);
-    }
-    endInsertRows();
+    emit dataChanged(index(0), index(rowCount() - 1));
 }
 
 bool PhotoModel::removeRows(int row, int count, const QModelIndex& parent)

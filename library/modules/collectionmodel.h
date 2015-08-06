@@ -39,6 +39,9 @@ class CollectionModel : public QAbstractItemModel
         bool dropMimeData(const QMimeData* mimeData,
             Qt::DropAction action, int row, int column, const QModelIndex& parent);
 
+private slots:
+        void onCollectionsChanged();
+
     private:
 
         CollectionItem* mRootItem;

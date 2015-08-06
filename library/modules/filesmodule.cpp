@@ -25,8 +25,6 @@ FilesModule::FilesModule(QWidget* parent) : LibraryModule(parent)
     mTrvwFiles->setModel(mPathModel);
 
     connect(mTrvwFiles, &Widgets::FixedTreeView::clicked, this, &FilesModule::onFilesClicked);
-    connect(mPathModel, &PathModel::rowsInserted, this, &FilesModule::onPathModelRowsAdded);
-    connect(mPathModel, &PathModel::rowsRemoved, this, &FilesModule::onPathModelRowsRemoved);
 
     setLayout(new QVBoxLayout(this));
     layout()->addWidget(mTrvwFiles);
@@ -59,26 +57,11 @@ FilesModule::~FilesModule()
     }
 }
 
-void FilesModule::reload()
-{
-    mPathModel->reload();
-}
-
 void FilesModule::onFilesClicked(const QModelIndex& index)
 {
     // TODO: get the path model and get the file to query and show only those images in the view
     PathItem* item = mPathModel->data(index, PathModel::PathRole).value<PathItem*>();
 
     emit      pathSelected(item->id);
-}
-
-void FilesModule::onPathModelRowsAdded(const QModelIndex& /*parent*/, int /*start*/, int /*end*/)
-{
-    mPathModel->reload();
-}
-
-void FilesModule::onPathModelRowsRemoved(const QModelIndex& /*parent*/, int /*start*/, int /*end*/)
-{
-    mPathModel->reload();
 }
 }

@@ -6,6 +6,7 @@
 #include <QList>
 
 #include "photo.h"
+#include "importinfo.h"
 
 namespace PhotoStage
 {
@@ -28,7 +29,10 @@ class PhotoDAO : public QObject
 
         void insertKeywords(const QStringList& words);
         void assignKeywords(const QStringList& words, const QList<Photo>& list);
-        void removeKeywordsExcept(const QStringList& words, const QList<Photo>& list);
+        void unAssignKeywordsExcept(const QStringList& words, const QList<Photo>& list);
+
+        void beginImport();
+        void importPhoto(const QFileInfo& file, const ImportOptions& options);
 
         QMap<QString, int> getPhotoKeywordsCount(const QList<Photo>& list) const;
         QStringList getPhotoKeywords(const Photo& photo) const;
@@ -40,16 +44,28 @@ class PhotoDAO : public QObject
         QList<Photo> getPhotosByCollectionId(long long collection_id, bool includeSubDirs) const;
 
         QList<Photo> getPhotosById(QList<long long> idList) const;
-        void filterList(QList<long long>& list, long long rootPathId, bool includeSubDirs) const;
 
         void deletePhotos(const QList<Photo>& list, bool deleteFile);
 
-        void updateExifInfo(const Photo& photo) const;
-        void regenerateHash(Photo& p);
+        void updateExifInfo(Photo& photo);
+        void regenerateHash(Photo& photo);
 
         bool IsInLibrary(long long hash) const;
 
+    signals:
+
+        void keywordsAdded();
+        void keywordsDeleted();
+        void keywordsAssignmentChanged(const QList<Photo>& photos);
+
+        void photosChanged(const QList<Photo>& photos);
+        void photosAdded(long long pathid, long long photoid);
+        void photosDeleted(const QList<Photo>& photos);
+
     private:
+
+        QString   mLastPath;
+        long long mLastPathId;
 
         PhotoDAO(QObject* parent = 0);
 
@@ -59,4 +75,4 @@ class PhotoDAO : public QObject
         QString joinIds(const QList<long long>& idList) const;
 };
 }
-#endif // PHOTOWORKUNIT_H
+#endif // PHOTOSTAGE_PHOTOWORKUNIT_H

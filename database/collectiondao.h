@@ -4,7 +4,7 @@
 #include <QObject>
 
 #include "nullable.h"
-
+#include "photo.h"
 #include "collectionitem.h"
 
 namespace PhotoStage
@@ -19,17 +19,26 @@ class CollectionDAO : public QObject
 
     public:
 
-        CollectionItem* createCollectionItems();
+        CollectionItem* getCollectionItems();
 
         void deleteCollectionItems(CollectionItem* root);
         void addPhotosToCollection(long long collectionId, const QList<long long>& photoIds);
         void addCollection(const Nullable<long long>& parentid, const QString& name);
 
+        //    Nullable<long long> collectionIdForPhoto(const Photo& photo) const;
+
+    signals:
+
+        void collectionAdded();
+        void collectionsChanged();
+
+        //        void collectionDeleted();
+
     private:
 
         CollectionDAO(QObject* parent = 0);
 
-        void createCollectionItemsRec(CollectionItem* root);
+        void getCollectionItemsRec(CollectionItem* root);
         long long rebuildCollectionTree(long long parent_id, long long left);
 };
 }
