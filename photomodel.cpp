@@ -28,6 +28,8 @@ PhotoModel::PhotoModel(QObject* parent) :
     connect(dbAccess, &DatabaseAccess::photosAdded, this, &PhotoModel::onPhotosAdded);
     connect(dbAccess, &DatabaseAccess::photosDeleted, this, &PhotoModel::onPhotosDeleted);
     connect(dbAccess, &DatabaseAccess::photosChanged, this, &PhotoModel::onPhotosChanged);
+
+    connect(dbAccess, &DatabaseAccess::collectionPhotosRemoved, this,  &PhotoModel::onPhotosDeletedFromCollection);
 }
 
 PhotoModel::~PhotoModel()
@@ -198,7 +200,7 @@ void PhotoModel::onImageTranslated(Photo photo, const QImage& image)
     photo.setIsDownloading(false);
 }
 
-void PhotoModel::setRootPath(PhotoModel::SourceType source, long long id)
+void PhotoModel::setRootSourceId(PhotoModel::SourceType source, long long id)
 {
     beginResetModel();
 
@@ -236,7 +238,7 @@ void PhotoModel::setRootPath(PhotoModel::SourceType source, long long id)
     endResetModel();
 }
 
-long long PhotoModel::rootPath()
+long long PhotoModel::rootId()
 {
     return mRootId;
 }
@@ -297,6 +299,11 @@ bool PhotoModel::dropMimeData(const QMimeData* data,
     return false;
 }
 
+PhotoModel::SourceType PhotoModel::rootSource() const
+{
+    return mPhotoSource;
+}
+
 void PhotoModel::onVisibleTilesChanged(const QModelIndex& start, const QModelIndex& end)
 {
     QList<uint32_t> idList;
@@ -325,24 +332,25 @@ void PhotoModel::onVisibleTilesChanged(const QModelIndex& start, const QModelInd
     }
 }
 
-void PhotoModel::onPhotosAdded(long long pathid, long long photoid)
+void PhotoModel::onPhotosAdded(long long pathid, const QList<long long>& idList)
 {
-    if (mPhotoSource == SourceFiles && pathid == mRootId)
+    int          start = rowCount();
+
+    QList<Photo> list = mWorkUnit->getPhotosById(idList);
+
+    beginInsertRows(QModelIndex(), start, start );
+    foreach(Photo info, list)
     {
-        int              start = rowCount();
-
-        QList<long long> idList;
-        idList << photoid;
-        QList<Photo>     list = mWorkUnit->getPhotosById(idList);
-
-        beginInsertRows(QModelIndex(), start, start );
-        foreach(Photo info, list)
-        {
-            info.setOwner(this);
-            mPhotoList.append(info);
-        }
-        endInsertRows();
+        info.setOwner(this);
+        mPhotoList.append(info);
     }
+    endInsertRows();
+}
+
+void PhotoModel::onPhotosDeletedFromCollection(long long collectionid, const QList<Photo>& photos)
+{
+    if (mPhotoSource == SourceCollection && collectionid == mRootId)
+        onPhotosDeleted(photos);
 }
 
 void PhotoModel::onPhotosDeleted(const QList<Photo>& photos)

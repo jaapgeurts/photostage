@@ -484,14 +484,28 @@ void MainWindow::onDeletePhotos()
     // TODO: if the view is in File view, offer option to delete from disk.
     // if view is in Collection view, then only offer to remove from collection
 
-    QMessageBox msgBox;
+    QMessageBox  msgBox;
+    QPushButton* libAndDisk = NULL;
+    QPushButton* libOnly    = NULL;
 
-    msgBox.setWindowTitle("Delete photos");
-    msgBox.setText(QString("Do you wish to delete %1 photos?").arg(mPhotoSelection->selection().indexes().size()));
+    msgBox.setText(QString(tr("Do you wish to delete %1 photos?")).arg(mPhotoSelection->selection().indexes().size()));
     msgBox.setIcon(QMessageBox::Warning);
     msgBox.setStandardButtons(QMessageBox::Cancel);
-    QPushButton* libOnly    = msgBox.addButton("From Library Only", QMessageBox::AcceptRole);
-    QPushButton* libAndDisk = msgBox.addButton("From Library and Disk", QMessageBox::DestructiveRole);
+
+    QString deleteAction = tr("From Collection only");
+    QString windowTitle  = tr("Remove photos");
+
+    if (mSourceModel->rootSource() == PhotoModel::SourceFiles)
+    {
+        libAndDisk   = msgBox.addButton(tr("From Library and Disk"), QMessageBox::DestructiveRole);
+        deleteAction = tr("From Library Only");
+        windowTitle  = tr("Delete photos");
+    }
+
+    msgBox.setWindowTitle(windowTitle);
+
+    libOnly = msgBox.addButton(deleteAction, QMessageBox::AcceptRole);
+
     msgBox.setDefaultButton(QMessageBox::Cancel);
     msgBox.setEscapeButton(QMessageBox::Cancel);
 
@@ -500,9 +514,13 @@ void MainWindow::onDeletePhotos()
     if (msgBox.clickedButton() == libOnly)
     {
         QList<Photo> list = mPhotoModelProxy->toList(mPhotoSelection->selection());
-        mPhotoWorkUnit->deletePhotos(list, false);
+
+        if (mSourceModel->rootSource() == PhotoModel::SourceFiles)
+            mPhotoWorkUnit->deletePhotos(list, false);
+        else if (mSourceModel->rootSource() == PhotoModel::SourceCollection)
+            DatabaseAccess::collectionDao()->removePhotosFromCollection(mSourceModel->rootId(), list);
     }
-    else if (msgBox.clickedButton() == libAndDisk)
+    else if (msgBox.clickedButton() == libAndDisk && mSourceModel->rootSource() == PhotoModel::SourceFiles)
     {
         QList<Photo> list = mPhotoModelProxy->toList(mPhotoSelection->selection());
         mPhotoWorkUnit->deletePhotos(list, true);
@@ -670,7 +688,7 @@ void MainWindow::onFilterApplied(const PhotoFilterInfo& info)
 
 void MainWindow::onPhotoSourceChanged(PhotoModel::SourceType type, long long id)
 {
-    mSourceModel->setRootPath(type, id);
+    mSourceModel->setRootSourceId(type, id);
 
     mPhotoModelProxy->setSortRole(Photo::DateTimeRole);
     mPhotoModelProxy->sort(0, Qt::AscendingOrder);

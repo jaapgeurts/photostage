@@ -32,13 +32,14 @@ class DatabaseAccess : public QObject
         void keywordsAssignmentChanged(const QList<Photo>& photos);
 
         void photosChanged(const QList<Photo>& photos);
-        void photosAdded(long long pathid, long long photoid);
+        void photosAdded(long long pathid, const QList<long long>& list);
         void photosDeleted(const QList<Photo>& photos);
 
         void pathsChanged();
 
         void collectionAdded();
         void collectionsChanged();
+        void collectionPhotosRemoved(long long collectionid, const QList<Photo>& list);
 
     public slots:
 

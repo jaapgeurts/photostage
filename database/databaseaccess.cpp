@@ -38,6 +38,7 @@ DatabaseAccess* DatabaseAccess::instance(QObject* parent)
         // Collection connections
         connect(mCollectionDAO, &CollectionDAO::collectionAdded, mInstance, &DatabaseAccess::collectionAdded);
         connect(mCollectionDAO, &CollectionDAO::collectionsChanged, mInstance, &DatabaseAccess::collectionsChanged);
+        connect(mCollectionDAO, &CollectionDAO::photosRemoved, mInstance, &DatabaseAccess::collectionPhotosRemoved);
     }
     return mInstance;
 }

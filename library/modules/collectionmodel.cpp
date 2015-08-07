@@ -16,6 +16,7 @@ CollectionModel::CollectionModel(QObject* parent) :
     DatabaseAccess* dbAccess = DatabaseAccess::instance();
 
     connect(dbAccess, &DatabaseAccess::collectionsChanged, this, &CollectionModel::onCollectionsChanged);
+    connect(dbAccess, &DatabaseAccess::collectionPhotosRemoved, this, &CollectionModel::onCollectionPhotosRemoved);
 }
 
 CollectionModel::~CollectionModel()
@@ -184,5 +185,10 @@ void CollectionModel::onCollectionsChanged()
     mRootItem = DatabaseAccess::collectionDao()->getCollectionItems();
 
     endResetModel();
+}
+
+void CollectionModel::onCollectionPhotosRemoved(long long collectionid, const QList<Photo>& list)
+{
+    onCollectionsChanged();
 }
 }

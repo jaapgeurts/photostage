@@ -43,7 +43,7 @@ class PhotoDAO : public QObject
 
         QList<Photo> getPhotosByCollectionId(long long collection_id, bool includeSubDirs) const;
 
-        QList<Photo> getPhotosById(QList<long long> idList) const;
+        QList<Photo> getPhotosById(const QList<long long> idList) const;
 
         void deletePhotos(const QList<Photo>& list, bool deleteFile);
 
@@ -59,7 +59,7 @@ class PhotoDAO : public QObject
         void keywordsAssignmentChanged(const QList<Photo>& photos);
 
         void photosChanged(const QList<Photo>& photos);
-        void photosAdded(long long pathid, long long photoid);
+        void photosAdded(long long pathid, const QList<long long>& photos);
         void photosDeleted(const QList<Photo>& photos);
 
     private:
@@ -72,7 +72,6 @@ class PhotoDAO : public QObject
         long long rebuildKeywordTree(long long parent_id, long long left);
         void getLeftRightForPathId(long long path_id, long long& lft, long long& rgt) const;
         void getLeftRightForCollectionId(long long collection_id, long long& lft, long long& rgt) const;
-        QString joinIds(const QList<long long>& idList) const;
 };
 }
 #endif // PHOTOSTAGE_PHOTOWORKUNIT_H

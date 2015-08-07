@@ -2,6 +2,7 @@
 #include <QSqlQuery>
 #include <QDebug>
 
+#include "dbutils.h"
 #include "collectiondao.h"
 
 namespace PhotoStage
@@ -141,6 +142,27 @@ void CollectionDAO::addPhotosToCollection(long long collectionId, const QList<lo
         }
     }
     emit collectionsChanged();
+}
+
+void CollectionDAO::removePhotosFromCollection(long long collectionid, const QList<Photo>& list)
+{
+    QSqlQuery q;
+
+    QString   query = "delete from collection_photo where collection_id = :cid and photo_id in (:photoids);";
+
+    QString   photoids = joinIds(list);
+
+    query.replace(":photoids", photoids);
+    q.prepare(query);
+    q.bindValue(":cid", collectionid);
+
+    if (!q.exec())
+    {
+        qDebug() << q.lastError();
+        qDebug() << q.lastQuery();
+    }
+
+    emit photosRemoved(collectionid, list);
 }
 
 long long CollectionDAO::rebuildCollectionTree(long long parent_id, long long left)

@@ -68,4 +68,28 @@ void getDbValue(QSqlQuery& q, int col, Nullable<bool>& out)
 {
     out = q.value(col).isNull() ? nullptr : Nullable<bool>(q.value(col).toBool());
 }
+
+QString joinIds(const QList<long long>& idList)
+{
+    QString photoids;
+
+    foreach(long long id, idList)
+    {
+        photoids += QString::number(id) + ",";
+    }
+    photoids.chop(1);
+    return photoids;
+}
+
+QString joinIds(const QList<Photo>& idList)
+{
+    QString ids;
+
+    foreach(Photo info, idList)
+    {
+        ids += QString::number(info.id()) + ",";
+    }
+    ids.chop(1);
+    return ids;
+}
 }

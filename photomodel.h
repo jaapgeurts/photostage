@@ -54,7 +54,7 @@ class PhotoModel : public QAbstractListModel
         QList<Photo> toList(const QItemSelection& selection) const;
 
         bool removeRows(int row, int count, const QModelIndex& parent);
-        long long rootPath();
+        long long rootId();
 
         Qt::DropActions supportedDragActions() const;
         Qt::DropActions supportedDropActions() const;
@@ -65,16 +65,19 @@ class PhotoModel : public QAbstractListModel
         bool dropMimeData(const QMimeData* data,
             Qt::DropAction action, int row, int column, const QModelIndex& parent);
 
+        SourceType rootSource() const;
+
     public slots:
 
-        void setRootPath(SourceType source, long long id);
+        void setRootSourceId(SourceType source, long long id);
         void onVisibleTilesChanged(const QModelIndex& start, const QModelIndex& end);
 
     private slots:
 
         // from DAO
-        void onPhotosAdded(long long pathid, long long photoid);
+        void onPhotosAdded(long long pathid, const QList<long long>& idList);
         void onPhotosDeleted(const QList<Photo>& photos);
+        void onPhotosDeletedFromCollection(long long collectionid, const QList<Photo>& photos);
         void onPhotosChanged(const QList<Photo>& photos);
 
         void onPreviewGenerated(Photo photo, const QImage& image);

@@ -318,28 +318,51 @@ QImage PreviewGeneratorJob::rawThumb(const QString& path)
         qDebug() << "loadRaw() opening" << reader.Filename();
         map = reader.readFile();
     }
-    catch (FileIOException& e)
+    catch (const FileIOException& e)
     {
         qDebug() << "Error reading raw" << e.what();
         return image;
     }
 
     // remove raw from here
+    if (map == NULL)
+    {
+        qDebug() << "Can't acquire map for raw file" << path;
+        return image;
+    }
 
-    RawDecoder* decoder;
+    RawDecoder* decoder=NULL;
     try
     {
         RawParser parser(map);
         decoder = parser.getDecoder();
     }
-    catch (RawDecoderException& e)
+    catch (const RawDecoderException& e)
     {
+        qDebug() << "(1) Can't acquire decoder for" << path;
+        return image;
+    }
+
+    if (decoder == NULL)
+    {
+        qDebug() << "(2) Can't acquire decoder for" << path;
+        return image;
     }
     decoder->failOnUnknown = 0;
     decoder->checkSupport(Metadata::metaData());
 
-    decoder->decodeRaw();
-    decoder->decodeMetaData(Metadata::metaData());
+    try
+    {
+        decoder->decodeRaw();
+        decoder->decodeMetaData(Metadata::metaData());
+    }
+    catch (const RawDecoderException& e)
+    {
+        qDebug() << "Can't decode image" << path;
+        qDebug() << "Exception:" << e.what();
+        return image;
+    }
+
     RawImage     raw = decoder->mRaw;
     //raw->scaleBlackWhite();
     int          bl = raw->blackLevel;

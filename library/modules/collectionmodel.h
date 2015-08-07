@@ -39,8 +39,10 @@ class CollectionModel : public QAbstractItemModel
         bool dropMimeData(const QMimeData* mimeData,
             Qt::DropAction action, int row, int column, const QModelIndex& parent);
 
-private slots:
+    private slots:
+
         void onCollectionsChanged();
+        void onCollectionPhotosRemoved(long long collectionid, const QList<Photo>& list);
 
     private:
 

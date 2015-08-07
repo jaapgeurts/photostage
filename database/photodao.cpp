@@ -35,15 +35,8 @@ void PhotoDAO::setRating(const QList<Photo>& list, int rating)
     QSqlQuery q;
     QString   query = "update photo set rating=:rating where id in (:id)";
 
-    QString   ids;
-    Photo     info;
+    QString   ids = joinIds(list);
 
-    foreach(info, list)
-    {
-        ids += QString::number(info.id()) + ",";
-        info.setRating(rating);
-    }
-    ids.chop(1);
     query.replace(":id", ids);
     q.prepare(query);
     q.bindValue(":rating", rating);
@@ -59,15 +52,7 @@ void PhotoDAO::setFlag(const QList<Photo>& list, Photo::Flag flag)
     QSqlQuery q;
     QString   query = ("update photo set flag=:flag where id in (:id)");
 
-    QString   ids;
-    Photo     info;
-
-    foreach(info, list)
-    {
-        ids += QString::number(info.id()) + ",";
-        info.setFlag(flag);
-    }
-    ids.chop(1);
+    QString   ids = joinIds(list);
     query.replace(":id", ids);
     q.prepare(query);
     q.bindValue(":flag", (int)flag);
@@ -83,15 +68,8 @@ void PhotoDAO::setColorLabel(const QList<Photo>& list, Photo::ColorLabel color)
     QSqlQuery q;
     QString   query = ("update photo set color=:color where id in (:id)");
 
-    QString   ids;
-    Photo     info;
+    QString   ids = joinIds(list);
 
-    foreach(info, list)
-    {
-        ids += QString::number(info.id()) + ",";
-        info.setColorLabel(color);
-    }
-    ids.chop(1);
     query.replace(":id", ids);
     q.prepare(query);
     q.bindValue(":color", (int)color);
@@ -205,14 +183,8 @@ void PhotoDAO::unAssignKeywordsExcept(const QStringList& words, const QList<Phot
             and keyword_id not in  \
             ( select id from keyword where keyword in (':keywords'))";
 
-    Photo   info;
-    QString photo_id;
+    QString photo_id = joinIds(list);
 
-    foreach(info, list)
-    {
-        photo_id += QString::number(info.id()) + ",";
-    }
-    photo_id.chop(1);
     QString keywords = words.join("','");
 
     query.replace(":photo_id", photo_id);
@@ -359,7 +331,11 @@ void PhotoDAO::importPhoto(const QFileInfo& file, const ImportOptions& options)
     }
 
     if (ret != -1)
-        emit photosAdded(mLastPathId, ret);
+    {
+        QList<long long> list;
+        list << ret;
+        emit             photosAdded(mLastPathId, list);
+    }
 }
 
 // return keywords for the selected photos, and the count each keyword appears
@@ -371,14 +347,8 @@ QMap<QString, int> PhotoDAO::getPhotoKeywordsCount(const QList<Photo>& list) con
             from keyword k, photo_keyword pk on k.id = pk.keyword_id \
             where pk.photo_id in (:photo_ids) \
             group by k.keyword order by k.keyword ";
-    QString   photo_ids;
-    Photo     info;
+    QString   photo_ids = joinIds(list);
 
-    foreach(info, list)
-    {
-        photo_ids += QString::number(info.id()) + ",";
-    }
-    photo_ids.chop(1);
     query.replace(":photo_ids", photo_ids);
 
     if (!q.exec(query))
@@ -420,19 +390,7 @@ QStringList PhotoDAO::getPhotoKeywords(const Photo& photo) const
     return list;
 }
 
-QString PhotoDAO::joinIds(const QList<long long>& idList) const
-{
-    QString photoids;
-
-    foreach(long long id, idList)
-    {
-        photoids += QString::number(id) + ",";
-    }
-    photoids.chop(1);
-    return photoids;
-}
-
-QList<Photo> PhotoDAO::getPhotosById(QList<long long> idList) const
+QList<Photo> PhotoDAO::getPhotosById(const QList<long long> idList) const
 {
     QSqlQuery q;
     QString   query = QString(
