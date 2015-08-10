@@ -5,11 +5,11 @@
 
 #include "nullable.h"
 #include "photo.h"
-#include "collectionitem.h"
 
 namespace PhotoStage
 {
 class DatabaseAccess;
+class CollectionItem;
 
 class CollectionDAO : public QObject
 {
@@ -21,12 +21,13 @@ class CollectionDAO : public QObject
 
         enum CollectionSource
         {
-            UserSource = 1,
-            WorkSource,
-            ImportSource
+            UserSource   = 0x01,
+            WorkSource   = 0x02,
+            ImportSource = 0x04
         };
+        Q_DECLARE_FLAGS(CollectionSources, CollectionSource)
 
-        CollectionItem* getCollectionItems(CollectionSource source);
+        CollectionItem * getCollectionItems(CollectionSources source);
 
         void deleteCollectionItems(CollectionItem* root);
         void addPhotosToCollection(long long collectionId, const QList<long long>& photoIds);
@@ -50,7 +51,7 @@ class CollectionDAO : public QObject
 
         CollectionDAO(QObject* parent = 0);
 
-        void getCollectionItemsRec(CollectionItem* root);
+        void getCollectionItemsRec(CollectionItem* root, long long id, CollectionSource source);
         long long rebuildCollectionTree(long long parent_id, long long left);
 
         long long addCollectionInternal(const Nullable<long long>& parentid,
@@ -58,4 +59,7 @@ class CollectionDAO : public QObject
             const QString& name);
 };
 }
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(PhotoStage::CollectionDAO::CollectionSources)
+
 #endif // PHOTOSTAGE_COLLECTIONDAO_H

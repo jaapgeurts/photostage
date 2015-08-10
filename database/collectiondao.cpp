@@ -5,60 +5,61 @@
 #include "dbutils.h"
 #include "collectiondao.h"
 #include "databaseaccess.h"
+#include "collectionitem.h"
 
 namespace PhotoStage
 {
-static const QString SOURCE_NAME_USER   = "USER";
-static const QString SOURCE_NAME_WORK   = "WORK";
-static const QString SOURCE_NAME_IMPORT = "IMPORT";
+static const QString SOURCE_NAME_USER   = "__USER";
+static const QString SOURCE_NAME_WORK   = "__WORK";
+static const QString SOURCE_NAME_IMPORT = "__IMPORT";
 
 CollectionDAO::CollectionDAO(QObject* parent) :
     QObject(parent)
 {
 }
 
-CollectionItem* CollectionDAO::getCollectionItems(CollectionSource source)
+CollectionItem* CollectionDAO::getCollectionItems(CollectionSources sources)
 {
     // first create the root item
-    QSqlQuery query;
-    QString   src;
+    QSqlQuery q;
+    QString   query = "select id, name, parent_id from collection where parent_id is NULL and ( 1=0 ";
 
-    switch (source)
+    if (sources & UserSource)
+        query += " or name = '" + SOURCE_NAME_USER + "'";
+
+    if (sources & WorkSource)
+        query += " or name = '" + SOURCE_NAME_WORK + "'";
+
+    if (sources & ImportSource)
+        query += " or name = '" + SOURCE_NAME_IMPORT + "'";
+
+    query += " );";
+
+    if (!q.exec(query))
+        qDebug() << q.lastError();
+    qDebug () << q.lastQuery();
+
+    CollectionItem* rootItem = new CollectionItem(-1, "ROOT ITEM", -1);
+
+    while (q.next())
     {
-        case UserSource:
-            src = SOURCE_NAME_USER;
-            break;
+        long long        id   = q.value(0).toLongLong();
+        QString          name = q.value(1).toString();
+        CollectionSource source;
 
-        case WorkSource:
-            src = SOURCE_NAME_WORK;
-            break;
-
-        case ImportSource:
-            src = SOURCE_NAME_IMPORT;
-            break;
-    }
-
-    query.prepare("select id, name, parent_id from collection where parent_id is NULL and name = :name;");
-    query.bindValue(":name", src);
-
-    if (!query.exec())
-        qDebug() << query.lastError();
-
-    CollectionItem* rootItem = NULL;
-
-    if (query.first())
-    {
-        rootItem = new CollectionItem(query.value(0).toLongLong(),
-                query.value(1).toString(),
-                query.value(2).toLongLong());
-
-        getCollectionItemsRec(rootItem);
+        if (name == SOURCE_NAME_IMPORT)
+            source = ImportSource;
+        else if (name == SOURCE_NAME_WORK)
+            source = WorkSource;
+        else // (name == SOURCE_NAME_USER)
+            source = UserSource;
+        getCollectionItemsRec(rootItem, id, source);
     }
     return rootItem;
 }
 
 // TODO: convert this to lft/rgt tree function instead of recursive
-void CollectionDAO::getCollectionItemsRec(CollectionItem* root)
+void CollectionDAO::getCollectionItemsRec(CollectionItem* root, long long id, CollectionSource source)
 {
     QSqlQuery query;
     QString   queryText = QString(
@@ -66,11 +67,12 @@ void CollectionDAO::getCollectionItemsRec(CollectionItem* root)
         from collection c left outer join collection_photo cf \
                      on c.id = cf.collection_id \
         where parent_id = :parent_id \
-        group by c.id, c.name, c.parent_id");
+        group by c.id, c.name, c.parent_id \
+        order by c.name;");
 
     query.prepare(queryText);
 
-    query.bindValue(":parent_id", root->id);
+    query.bindValue(":parent_id", id);
     query.exec();
 
     //int total = 0;
@@ -82,8 +84,9 @@ void CollectionDAO::getCollectionItemsRec(CollectionItem* root)
         item->count      = query.value(3).toInt();
         item->cumulative = item->count;
         item->parent     = root;
+        item->source     = source;
         root->children.append(item);
-        getCollectionItemsRec(item);
+        getCollectionItemsRec(item, item->id, source);
         root->cumulative +=  item->cumulative;
     }
 }

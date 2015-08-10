@@ -2,17 +2,18 @@
 
 #include <QDebug>
 
+#include "database/collectionitem.h"
 #include "constants.h"
 #include "dragdropinfo.h"
 #include "collectionmodel.h"
 
 namespace PhotoStage
 {
-CollectionModel::CollectionModel(QObject* parent, CollectionDAO::CollectionSource source) :
+CollectionModel::CollectionModel(QObject* parent, CollectionDAO::CollectionSources sources) :
     QAbstractItemModel(parent),
-    mCollectionSource(source) // default collection source is user source
+    mCollectionSources(sources) // default collection source is user source
 {
-    mRootItem = DatabaseAccess::collectionDao()->getCollectionItems(source);
+    mRootItem = DatabaseAccess::collectionDao()->getCollectionItems(sources);
 
     DatabaseAccess* dbAccess = DatabaseAccess::instance();
 
@@ -142,7 +143,7 @@ bool CollectionModel::canDropMimeData(const QMimeData* mimeData,
     if (!parent.isValid())
         return false;
 
-    if (mCollectionSource != CollectionDAO::UserSource && mCollectionSource != CollectionDAO::WorkSource)
+    if (!(mCollectionSources& CollectionDAO::UserSource) && !(mCollectionSources & CollectionDAO::WorkSource))
         return false; // only allow drops on User Collection and WorkSource collection. Exclude import history collections
 
     if (!mimeData->hasFormat(MIMETYPE_TILEVIEW_SELECTION))
@@ -163,7 +164,7 @@ bool CollectionModel::dropMimeData(const QMimeData* mimeData,
     if (!parent.isValid())
         return false;
 
-    if (mCollectionSource != CollectionDAO::UserSource && mCollectionSource != CollectionDAO::WorkSource)
+    if (!(mCollectionSources& CollectionDAO::UserSource) && !(mCollectionSources & CollectionDAO::WorkSource))
         return false; // only allow drops on User Collection and WorkSource collection. Exclude import history collections
 
     if (!mimeData->hasFormat(MIMETYPE_TILEVIEW_SELECTION))
@@ -190,7 +191,7 @@ void CollectionModel::onCollectionsChanged()
     if (mRootItem != NULL)
         DatabaseAccess::collectionDao()->deleteCollectionItems(mRootItem);
 
-    mRootItem = DatabaseAccess::collectionDao()->getCollectionItems(mCollectionSource);
+    mRootItem = DatabaseAccess::collectionDao()->getCollectionItems(mCollectionSources);
 
     endResetModel();
 }

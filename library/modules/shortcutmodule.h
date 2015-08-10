@@ -26,15 +26,12 @@ class ShortcutModule : public LibraryModule
 
     private slots:
 
-        void onWorkListClicked(const QModelIndex& index);
-        void onImportListClicked(const QModelIndex& index);
+        void onListClicked(const QModelIndex& index);
 
     private:
 
-        Widgets::FixedListView* mLvWorkList;
-        Widgets::FixedListView* mLvImportList;
-        CollectionModel*        mWorkModel;
-        CollectionModel*        mImportModel;
+        Widgets::FixedListView* mLvShortcutList;
+        CollectionModel*        mCollectionModel;
 };
 }
 #endif // SHORTCUTMODULE_H

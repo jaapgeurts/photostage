@@ -19,7 +19,7 @@ class CollectionModel : public QAbstractItemModel
         };
 
         // Constructors & Destructor
-        CollectionModel(QObject* parent = 0, CollectionDAO::CollectionSource source = CollectionDAO::UserSource);
+        CollectionModel(QObject* parent = 0, CollectionDAO::CollectionSources source = CollectionDAO::UserSource);
         ~CollectionModel();
 
         // Data access methods
@@ -47,8 +47,8 @@ class CollectionModel : public QAbstractItemModel
 
     private:
 
-        CollectionItem*                 mRootItem;
-        CollectionDAO::CollectionSource mCollectionSource;
+        CollectionItem*                  mRootItem;
+        CollectionDAO::CollectionSources mCollectionSources;
 };
 }
 

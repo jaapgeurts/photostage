@@ -6,6 +6,7 @@
 
 #include "constants.h"
 #include "database/databaseaccess.h"
+#include "database/collectionitem.h"
 #include "dragdropinfo.h"
 #include "collectionmodel.h"
 #include "collectionmodule.h"

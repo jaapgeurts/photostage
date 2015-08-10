@@ -5,6 +5,8 @@
 #include <QList>
 #include <QMetaType>
 
+#include "collectiondao.h"
+
 namespace PhotoStage
 {
 class CollectionItem
@@ -14,13 +16,14 @@ class CollectionItem
         CollectionItem();
         CollectionItem(long long id, const QString& name, long long parent_id);
 
-        QString                name;
-        long long              id;
-        long long              parentId;
-        CollectionItem*        parent;
-        int                    count;
-        int                    cumulative;
-        QList<CollectionItem*> children;
+        QString                         name;
+        long long                       id;
+        long long                       parentId;
+        CollectionItem*                 parent;
+        int                             count;
+        int                             cumulative;
+        QList<CollectionItem*>          children;
+        CollectionDAO::CollectionSource source;
 };
 }
 Q_DECLARE_METATYPE(PhotoStage::CollectionItem)
