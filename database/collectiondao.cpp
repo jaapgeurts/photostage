@@ -184,11 +184,14 @@ long long CollectionDAO::addCollection(const Nullable<long long>& parentid, cons
     return addCollectionInternal(parentid, SOURCE_NAME_USER, name);
 }
 
-long long CollectionDAO::addImportCollection()
+long long CollectionDAO::addImportCollection(int amount)
 {
     QDateTime dt = QDateTime::currentDateTime();
 
-    return addCollectionInternal(nullptr, SOURCE_NAME_IMPORT, dt.toString());
+    QString   name =
+        QString("Import %1 photos on %2").arg(amount).arg(QLocale::system().toString(dt, QLocale::ShortFormat));
+
+    return addCollectionInternal(nullptr, SOURCE_NAME_IMPORT, name);
 }
 
 long long CollectionDAO::addWorkCollection(const QString& name)

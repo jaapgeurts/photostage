@@ -77,6 +77,8 @@ class Library : public Module
 
         void onPathSelected(long long pathid);
         void onCollectionSelected(long long collectionid);
+        void onWorkCollectionSelected(long long id);
+        void onImportCollectionSelected(long long id);
 
     private:
 
@@ -91,6 +93,7 @@ class Library : public Module
         QItemSelectionModel*       mSelectionModel;
         FilesModule*               mFilesModule;
         CollectionModule*          mCollectionModule;
+        ShortcutModule*            mShortcutModule;
 };
 }
 

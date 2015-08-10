@@ -30,7 +30,7 @@ void ImportBackgroundTask::run()
     DatabaseAccess::photoDao()->beginImport();
 
     // create the new Import Collection
-    long long importcollectionid = DatabaseAccess::collectionDao()->addImportCollection();
+    long long importcollectionid = DatabaseAccess::collectionDao()->addImportCollection(mInfo.files().size());
 
     while (it.hasNext() && mRunning)
     {

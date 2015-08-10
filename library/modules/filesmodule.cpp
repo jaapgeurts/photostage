@@ -57,6 +57,14 @@ FilesModule::~FilesModule()
     }
 }
 
+void FilesModule::sourceChanged(PhotoModel::SourceType source)
+{
+    if (source != PhotoModel::SourceFiles)
+    {
+        mTrvwFiles->selectionModel()->clear();
+    }
+}
+
 void FilesModule::onFilesClicked(const QModelIndex& index)
 {
     // TODO: get the path model and get the file to query and show only those images in the view

@@ -34,12 +34,29 @@ ShortcutModule::ShortcutModule(QWidget* parent) :
     layout()->setContentsMargins(0, 0, 0, 0);
 }
 
+void ShortcutModule::sourceChanged(PhotoModel::SourceType source)
+{
+    if (source == PhotoModel::SourceCollectionUser || source == PhotoModel::SourceFiles)
+    {
+        mLvImportList->selectionModel()->clear();
+        mLvWorkList->selectionModel()->clear();
+    }
+    else if (source == PhotoModel::SourceCollectionImport)
+    {
+        mLvWorkList->selectionModel()->clear();
+    }
+    else if (source == PhotoModel::SourceCollectionWork)
+    {
+        mLvImportList->selectionModel()->clear();
+    }
+}
+
 void ShortcutModule::onWorkListClicked(const QModelIndex& index)
 {
     // TODO: get the path model and get the file to query and show only those images in the view
     CollectionItem* item = mWorkModel->data(index, CollectionModel::CollectionRole).value<CollectionItem*>();
 
-    emit            collectionSelected(item->id);
+    emit            workCollectionSelected(item->id);
 }
 
 void ShortcutModule::onImportListClicked(const QModelIndex& index)
@@ -47,6 +64,6 @@ void ShortcutModule::onImportListClicked(const QModelIndex& index)
     // TODO: get the path model and get the file to query and show only those images in the view
     CollectionItem* item = mImportModel->data(index, CollectionModel::CollectionRole).value<CollectionItem*>();
 
-    emit            collectionSelected(item->id);
+    emit            importCollectionSelected(item->id);
 }
 }

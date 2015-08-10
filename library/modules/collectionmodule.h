@@ -7,11 +7,10 @@
 #include "librarymodule.h"
 #include "widgets/fixedtreeview.h"
 #include "collectionmodel.h"
+#include "photomodel.h"
 
 namespace PhotoStage
 {
-class DropHandler;
-
 class CollectionModule : public LibraryModule
 {
     friend class DropHandler;
@@ -21,6 +20,8 @@ class CollectionModule : public LibraryModule
     public:
 
         CollectionModule(QWidget* parent);
+
+        void sourceChanged(PhotoModel::SourceType source);
 
     public slots:
 

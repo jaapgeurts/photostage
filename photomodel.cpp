@@ -222,7 +222,7 @@ void PhotoModel::setRootSourceId(PhotoModel::SourceType source, long long id)
             i++;
         }
     }
-    else if (source == SourceCollection)
+    else if (source == SourceCollectionUser || source == SourceCollectionImport || source == SourceCollectionWork)
     {
         mPhotoList = mWorkUnit->getPhotosByCollectionId(id, Preferences::instance()->library_include_subfolders);
         mPhotoIndexMap.clear();
@@ -349,7 +349,7 @@ void PhotoModel::onPhotosAdded(long long pathid, const QList<long long>& idList)
 
 void PhotoModel::onPhotosDeletedFromCollection(long long collectionid, const QList<Photo>& photos)
 {
-    if (mPhotoSource == SourceCollection && collectionid == mRootId)
+    if (mPhotoSource == SourceCollectionUser && collectionid == mRootId)
         onPhotosDeleted(photos);
 }
 

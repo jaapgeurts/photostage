@@ -131,6 +131,7 @@ QVariant PathModel::headerData(int /*section*/, Qt::Orientation /*orientation*/,
     return QVariant();
 }
 
+
 void PathModel::onPathsChanged()
 {
     beginResetModel();

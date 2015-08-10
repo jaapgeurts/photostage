@@ -5,6 +5,7 @@
 #include "database/databaseaccess.h"
 #include "collectionmodel.h"
 #include "widgets/fixedlistview.h"
+#include "photomodel.h"
 
 namespace PhotoStage
 {
@@ -16,9 +17,12 @@ class ShortcutModule : public LibraryModule
 
         explicit ShortcutModule(QWidget* parent = 0);
 
+        void sourceChanged(PhotoModel::SourceType source);
+
     signals:
 
-        void collectionSelected(long long id);
+        void workCollectionSelected(long long id);
+        void importCollectionSelected(long long id);
 
     private slots:
 

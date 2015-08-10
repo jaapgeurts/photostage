@@ -30,6 +30,14 @@ CollectionModule::CollectionModule(QWidget* parent) : LibraryModule(parent)
     layout()->setContentsMargins(0, 0, 0, 0);
 }
 
+void CollectionModule::sourceChanged(PhotoModel::SourceType source)
+{
+    if (source != PhotoModel::SourceCollectionUser)
+    {
+        mTrvwCollections->selectionModel()->clear();
+    }
+}
+
 void CollectionModule::onNewCollection()
 {
     bool    ok;

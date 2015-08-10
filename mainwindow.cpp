@@ -485,11 +485,24 @@ void MainWindow::onDeletePhotos()
     // TODO: if the view is in File view, offer option to delete from disk.
     // if view is in Collection view, then only offer to remove from collection
 
-    QMessageBox  msgBox;
+    QMessageBox msgBox;
+
+    if (mSourceModel->rootSource() == PhotoModel::SourceCollectionImport)
+    {
+        msgBox.setText(tr(
+                "You can't delete photo's from an import collection. You can delete the photo's from disk through the files view or delete the whole collection."));
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.setDefaultButton(QMessageBox::Ok);
+        msgBox.setEscapeButton(QMessageBox::Ok);
+        msgBox.exec();
+        return;
+    }
+
     QPushButton* libAndDisk = NULL;
     QPushButton* libOnly    = NULL;
 
-    msgBox.setText(QString(tr("Do you wish to delete %1 photos?")).arg(mPhotoSelection->selection().indexes().size()));
+    msgBox.setText(tr("Do you wish to delete %1 photos?").arg(mPhotoSelection->selection().indexes().size()));
     msgBox.setIcon(QMessageBox::Warning);
     msgBox.setStandardButtons(QMessageBox::Cancel);
 
@@ -518,7 +531,7 @@ void MainWindow::onDeletePhotos()
 
         if (mSourceModel->rootSource() == PhotoModel::SourceFiles)
             mPhotoWorkUnit->deletePhotos(list, false);
-        else if (mSourceModel->rootSource() == PhotoModel::SourceCollection)
+        else if (mSourceModel->rootSource() == PhotoModel::SourceCollectionUser)
             DatabaseAccess::collectionDao()->removePhotosFromCollection(mSourceModel->rootId(), list);
     }
     else if (msgBox.clickedButton() == libAndDisk && mSourceModel->rootSource() == PhotoModel::SourceFiles)

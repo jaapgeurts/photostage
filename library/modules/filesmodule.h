@@ -6,6 +6,7 @@
 #include "pathmodel.h"
 #include "librarymodule.h"
 #include "widgets/fixedtreeview.h"
+#include "photomodel.h"
 
 namespace PhotoStage
 {
@@ -17,6 +18,8 @@ class FilesModule : public LibraryModule
 
         FilesModule(QWidget* parent = 0);
         ~FilesModule();
+
+        void sourceChanged(PhotoModel::SourceType source);
 
     signals:
 
@@ -30,8 +33,6 @@ class FilesModule : public LibraryModule
 
         Widgets::FixedTreeView* mTrvwFiles;
         PathModel*              mPathModel;
-
-        bool handleDrop(QDropEvent* event);
 };
 }
 #endif // PHOTOSTAGE_FILESMODULE_H

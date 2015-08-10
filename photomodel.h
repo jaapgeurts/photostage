@@ -24,8 +24,10 @@ class PhotoModel : public QAbstractListModel
 
         enum SourceType
         {
-            SourceFiles      = 1,
-            SourceCollection = 2
+            SourceFiles = 1,
+            SourceCollectionUser,
+            SourceCollectionWork,
+            SourceCollectionImport
         };
 
         // constructors

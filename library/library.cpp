@@ -79,9 +79,10 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     menu = new QMenu(this);
     menu->addAction("New Collection", this, SLOT(onNewCollection()));
     menu->addAction("New Work Collection", this, SLOT(onNewWorkCollection()));
-    ShortcutModule* sm = new ShortcutModule(ui->ModulePanel_1);
-    ui->ModulePanel_1->addPanel("Shortcuts", sm, menu);
-    connect(sm, &ShortcutModule::collectionSelected, this, &Library::onCollectionSelected);
+    mShortcutModule = new ShortcutModule(ui->ModulePanel_1);
+    ui->ModulePanel_1->addPanel("Shortcuts", mShortcutModule, menu);
+    connect(mShortcutModule, &ShortcutModule::workCollectionSelected, this, &Library::onWorkCollectionSelected);
+    connect(mShortcutModule, &ShortcutModule::importCollectionSelected, this, &Library::onImportCollectionSelected);
 
     // Files module
     mFilesModule = new FilesModule(ui->ModulePanel_1);
@@ -187,12 +188,32 @@ void Library::onZoomLevelChanged(int zoomLevel)
 
 void Library::onPathSelected(long long pathid)
 {
+    mCollectionModule->sourceChanged(PhotoModel::SourceFiles);
+    mShortcutModule->sourceChanged(PhotoModel::SourceFiles);
     emit photoSourceChanged(PhotoModel::SourceFiles, pathid);
 }
 
 void Library::onCollectionSelected(long long collectionid)
 {
-    emit photoSourceChanged(PhotoModel::SourceCollection, collectionid);
+    mShortcutModule->sourceChanged(PhotoModel::SourceCollectionUser);
+    mFilesModule->sourceChanged(PhotoModel::SourceCollectionUser);
+    emit photoSourceChanged(PhotoModel::SourceCollectionUser, collectionid);
+}
+
+void Library::onWorkCollectionSelected(long long id)
+{
+    mCollectionModule->sourceChanged(PhotoModel::SourceCollectionWork);
+    mFilesModule->sourceChanged(PhotoModel::SourceCollectionWork);
+    mShortcutModule->sourceChanged(PhotoModel::SourceCollectionWork);
+    emit photoSourceChanged(PhotoModel::SourceCollectionWork, id);
+}
+
+void Library::onImportCollectionSelected(long long id)
+{
+    mCollectionModule->sourceChanged(PhotoModel::SourceCollectionImport);
+    mFilesModule->sourceChanged(PhotoModel::SourceCollectionImport);
+    mShortcutModule->sourceChanged(PhotoModel::SourceCollectionImport);
+    emit photoSourceChanged(PhotoModel::SourceCollectionImport, id);
 }
 
 void Library::onThumbSizeChanged(int newValue)
