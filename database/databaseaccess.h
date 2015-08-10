@@ -25,6 +25,9 @@ class DatabaseAccess : public QObject
         static PathDAO* pathDao();
         static CollectionDAO* collectionDao();
 
+        void beginTransaction();
+        void endTransaction();
+
     signals:
 
         void keywordsAdded();
@@ -37,7 +40,7 @@ class DatabaseAccess : public QObject
 
         void pathsChanged();
 
-        void collectionAdded();
+        void collectionAdded(long long id);
         void collectionsChanged();
         void collectionPhotosRemoved(long long collectionid, const QList<Photo>& list);
 

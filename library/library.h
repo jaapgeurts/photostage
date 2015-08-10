@@ -59,6 +59,9 @@ class Library : public Module
 
         void onCycleLoupeInfo();
 
+        void onNewCollection();
+        void onNewWorkCollection();
+
         // For clicks on the tile
         //    void rotateLeftClicked(const QModelIndex& index);
         //    void rotateRightClicked(const QModelIndex& index);

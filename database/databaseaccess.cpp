@@ -60,9 +60,7 @@ DatabaseAccess::DatabaseAccess(QObject* parent) :
     if (tables.contains("photo", Qt::CaseInsensitive)
         && tables.contains("path", Qt::CaseInsensitive)
         && tables.contains("keyword", Qt::CaseInsensitive)
-        && tables.contains("photo_keyword", Qt::CaseInsensitive)
-        && tables.contains("collection", Qt::CaseInsensitive)
-        && tables.contains("import_history", Qt::CaseInsensitive))
+        && tables.contains("collection", Qt::CaseInsensitive))
         qDebug() << "Tables already exist.";
     else
     {
@@ -72,6 +70,16 @@ DatabaseAccess::DatabaseAccess(QObject* parent) :
 
 DatabaseAccess::~DatabaseAccess()
 {
+}
+
+void DatabaseAccess::beginTransaction()
+{
+    mDB.transaction();
+}
+
+void DatabaseAccess::endTransaction()
+{
+    mDB.commit();
 }
 
 const QSqlDatabase& DatabaseAccess::getDb() const
@@ -133,12 +141,6 @@ void DatabaseAccess::initDb()
         "create table if not exists work (id integer primary key AUTOINCREMENT, parent_id integer)";
     list <<
         "create table if not exists work_photo (work_id integer, photo_id integer)";
-
-    list <<
-        "create table if not exists importhistory (id integer primary key AUTOINCREMENT, date_time varchar)";
-    list <<
-        "create table if not exists importhistory_photo (importhistory_id integer, photo_id integer)";
-
     list <<
         "create table if not exists collection_photo ( collection_id integer REFERENCES collection(id), photo_id integer REFERENCES photo (id));";
 

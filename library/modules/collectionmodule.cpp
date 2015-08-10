@@ -1,4 +1,3 @@
-#include <QMenu>
 #include <QFileSystemModel>
 #include <QVBoxLayout>
 #include <QInputDialog>
@@ -31,24 +30,7 @@ CollectionModule::CollectionModule(QWidget* parent) : LibraryModule(parent)
     layout()->setContentsMargins(0, 0, 0, 0);
 }
 
-void CollectionModule::onFilesClicked(const QModelIndex& index)
-{
-    // TODO: get the path model and get the file to query and show only those images in the view
-    CollectionItem* item = mCollectionModel->data(index, CollectionModel::CollectionRole).value<CollectionItem*>();
-
-    emit            collectionSelected(item->id);
-}
-
-QMenu* CollectionModule::getMenu()
-{
-    QMenu* menu = new QMenu(this);
-
-    menu->addAction("New Collection", this, SLOT(onNewCollectionClicked()));
-
-    return menu;
-}
-
-void CollectionModule::onNewCollectionClicked()
+void CollectionModule::onNewCollection()
 {
     bool    ok;
     QString name = QInputDialog::getText(this, "New Collection", "Name", QLineEdit::Normal, QString(), &ok);
@@ -68,5 +50,13 @@ void CollectionModule::onNewCollectionClicked()
             DatabaseAccess::collectionDao()->addCollection(Nullable<long long>(item->id), name);
         }
     }
+}
+
+void CollectionModule::onFilesClicked(const QModelIndex& index)
+{
+    // TODO: get the path model and get the file to query and show only those images in the view
+    CollectionItem* item = mCollectionModel->data(index, CollectionModel::CollectionRole).value<CollectionItem*>();
+
+    emit            collectionSelected(item->id);
 }
 }

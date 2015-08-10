@@ -19,8 +19,8 @@ namespace PhotoStage
 {
 PhotoModel::PhotoModel(QObject* parent) :
     QAbstractListModel(parent),
-    mRootId(-1),
-    mThreadQueue(new ThreadQueue())
+    mThreadQueue(new ThreadQueue()),
+    mRootId(-1)
 {
     mWorkUnit = DatabaseAccess::photoDao();
     DatabaseAccess* dbAccess = DatabaseAccess::instance();

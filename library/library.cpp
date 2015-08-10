@@ -1,3 +1,5 @@
+#include <QInputDialog>
+
 #include "library.h"
 #include "ui_library.h"
 
@@ -52,8 +54,7 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     // ui->mClvPhotos->setObjectName("LibaryPhotos");
 
     ui->mPhotoGrid->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->mPhotoGrid, &Widgets::TileView::customContextMenuRequested,
-        this, &Library::onCustomContextMenu);
+    connect(ui->mPhotoGrid, &Widgets::TileView::customContextMenuRequested, this, &Library::onCustomContextMenu);
     connect(ui->mPhotoGrid, &Widgets::TileView::doubleClickTile, this, &Library::onTileDoubleClicked);
     connect(ui->mPhotoGrid, &Widgets::TileView::visibleTilesChanged,
         (PhotoModel*)mPhotoModel->sourceModel(), &PhotoModel::onVisibleTilesChanged);
@@ -72,9 +73,15 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     ui->ModulePanel_1->addPanel("Filter", fm);
     connect(fm, &FilterModule::modelFilterApplied, this, &Library::modelFilterApplied);
 
+    QMenu* menu;
+
     // shortcuts module
+    menu = new QMenu(this);
+    menu->addAction("New Collection", this, SLOT(onNewCollection()));
+    menu->addAction("New Work Collection", this, SLOT(onNewWorkCollection()));
     ShortcutModule* sm = new ShortcutModule(ui->ModulePanel_1);
-    ui->ModulePanel_1->addPanel("Shortcuts", sm);
+    ui->ModulePanel_1->addPanel("Shortcuts", sm, menu);
+    connect(sm, &ShortcutModule::collectionSelected, this, &Library::onCollectionSelected);
 
     // Files module
     mFilesModule = new FilesModule(ui->ModulePanel_1);
@@ -84,7 +91,9 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     // collections module
     mCollectionModule = new CollectionModule(ui->ModulePanel_1);
 
-    ui->ModulePanel_1->addPanel("Collections", mCollectionModule, mCollectionModule->getMenu());
+    menu = new QMenu(this);
+    menu->addAction("New Collection", this, SLOT(onNewCollection()));
+    ui->ModulePanel_1->addPanel("Collections", mCollectionModule, menu);
     connect(mCollectionModule, &CollectionModule::collectionSelected, this, &Library::onCollectionSelected);
 
     // **** MODULES RIGHT
@@ -151,7 +160,6 @@ int Library::tilesPerRowOrCol()
 {
     return ui->mPhotoGrid->tilesPerColRow();
 }
-
 
 void Library::setSelectionModel(QItemSelectionModel* selectionModel)
 {
@@ -264,6 +272,22 @@ void Library::onTileDoubleClicked(const QModelIndex& /*index*/)
 void Library::onCycleLoupeInfo()
 {
     ui->mLoupeView->cycleInfoMode();
+}
+
+void Library::onNewCollection()
+{
+    mCollectionModule->onNewCollection();
+}
+
+void Library::onNewWorkCollection()
+{
+    bool    ok;
+    QString name = QInputDialog::getText(this, "New Work Collection", "Name", QLineEdit::Normal, QString(), &ok);
+
+    if (ok && !name.isEmpty())
+    {
+        DatabaseAccess::collectionDao()->addWorkCollection(name);
+    }
 }
 
 void Library::onShowLoupe()

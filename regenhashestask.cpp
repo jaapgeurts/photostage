@@ -32,7 +32,7 @@ void RegenHashesTask::run()
 
     QListIterator<Photo> it(mPhotoList);
 
-    mPhotoWorkUnit->beginTransaction();
+    DatabaseAccess::instance()->beginTransaction();
 
     while (it.hasNext() && mRunning)
     {
@@ -41,7 +41,7 @@ void RegenHashesTask::run()
         i++;
         emit progressUpdated(i);
     }
-    mPhotoWorkUnit->endTransaction();
+    DatabaseAccess::instance()->endTransaction();
     emit taskFinished(this);
 }
 

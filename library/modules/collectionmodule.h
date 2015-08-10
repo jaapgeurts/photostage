@@ -21,7 +21,10 @@ class CollectionModule : public LibraryModule
     public:
 
         CollectionModule(QWidget* parent);
-        QMenu* getMenu();
+
+    public slots:
+
+        void onNewCollection();
 
     signals:
 
@@ -30,7 +33,6 @@ class CollectionModule : public LibraryModule
     private slots:
 
         void onFilesClicked(const QModelIndex& index);
-        void onNewCollectionClicked();
 
     private:
 

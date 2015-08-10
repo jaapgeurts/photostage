@@ -29,10 +29,13 @@ void ImportBackgroundTask::run()
     QListIterator<QFileInfo> it(mInfo.files());
     DatabaseAccess::photoDao()->beginImport();
 
+    // create the new Import Collection
+    long long importcollectionid = DatabaseAccess::collectionDao()->addImportCollection();
+
     while (it.hasNext() && mRunning)
     {
         QFileInfo info = it.next();
-        DatabaseAccess::photoDao()->importPhoto(info, mInfo.options());
+        DatabaseAccess::photoDao()->importPhoto(importcollectionid, info, mInfo.options());
         i++;
         emit progressUpdated(i);
     }

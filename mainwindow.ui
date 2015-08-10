@@ -396,7 +396,7 @@
      <addaction name="separator"/>
      <addaction name="actionColorNone"/>
     </widget>
-    <addaction name="actionAdd_to_Quick_Collection"/>
+    <addaction name="actionAddToWorkCollection"/>
     <addaction name="separator"/>
     <addaction name="actionShowInFileBrowser"/>
     <addaction name="separator"/>
@@ -472,6 +472,10 @@
      <addaction name="actionRegenPreviews"/>
      <addaction name="actionRegenHashes"/>
     </widget>
+    <addaction name="separator"/>
+    <addaction name="actionNewCollection"/>
+    <addaction name="actionNewWorkCollection"/>
+    <addaction name="separator"/>
     <addaction name="menuGenerate"/>
    </widget>
    <widget class="QMenu" name="menuMetadata">
@@ -610,9 +614,9 @@
     <string>Print</string>
    </property>
   </action>
-  <action name="actionAdd_to_Quick_Collection">
+  <action name="actionAddToWorkCollection">
    <property name="text">
-    <string>Add to Quick Collection</string>
+    <string>Add to Work Collection</string>
    </property>
   </action>
   <action name="actionShowInFileBrowser">
@@ -980,6 +984,16 @@
   <action name="actionRegenHashes">
    <property name="text">
     <string>Hashes</string>
+   </property>
+  </action>
+  <action name="actionNewCollection">
+   <property name="text">
+    <string>New Collection</string>
+   </property>
+  </action>
+  <action name="actionNewWorkCollection">
+   <property name="text">
+    <string>New Work Collection</string>
    </property>
   </action>
  </widget>
@@ -1562,6 +1576,8 @@
   <slot>onDeletePhotos()</slot>
   <slot>onDeleteRejectedPhotos()</slot>
   <slot>onShowInFileBrowser()</slot>
+  <slot>onActionNewWorkCollection()</slot>
+  <slot>onActionNewCollection()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="moduleNavGroup"/>

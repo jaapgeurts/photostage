@@ -19,7 +19,7 @@ class CollectionModel : public QAbstractItemModel
         };
 
         // Constructors & Destructor
-        CollectionModel(QObject* parent = 0);
+        CollectionModel(QObject* parent = 0, CollectionDAO::CollectionSource source = CollectionDAO::UserSource);
         ~CollectionModel();
 
         // Data access methods
@@ -35,18 +35,20 @@ class CollectionModel : public QAbstractItemModel
         QStringList mimeTypes() const;
         QMimeData* mimeData(const QModelIndexList& indexes) const;
         bool canDropMimeData(const QMimeData* mimeData,
-            Qt::DropAction action, int row, int column, const QModelIndex& parent) const;
+            Qt::DropAction action, int, int column, const QModelIndex& parent) const;
         bool dropMimeData(const QMimeData* mimeData,
             Qt::DropAction action, int row, int column, const QModelIndex& parent);
 
     private slots:
 
         void onCollectionsChanged();
+        void onCollectionAdded(long long id);
         void onCollectionPhotosRemoved(long long collectionid, const QList<Photo>& list);
 
     private:
 
-        CollectionItem* mRootItem;
+        CollectionItem*                 mRootItem;
+        CollectionDAO::CollectionSource mCollectionSource;
 };
 }
 

@@ -4,22 +4,44 @@
 
 #include "dbutils.h"
 #include "collectiondao.h"
+#include "databaseaccess.h"
 
 namespace PhotoStage
 {
+static const QString SOURCE_NAME_USER   = "USER";
+static const QString SOURCE_NAME_WORK   = "WORK";
+static const QString SOURCE_NAME_IMPORT = "IMPORT";
+
 CollectionDAO::CollectionDAO(QObject* parent) :
     QObject(parent)
 {
 }
 
-CollectionItem* CollectionDAO::getCollectionItems()
+CollectionItem* CollectionDAO::getCollectionItems(CollectionSource source)
 {
     // first create the root item
     QSqlQuery query;
+    QString   src;
 
-    QString   queryText = QString("select id, name, parent_id from collection where parent_id is NULL");
+    switch (source)
+    {
+        case UserSource:
+            src = SOURCE_NAME_USER;
+            break;
 
-    if (!query.exec(queryText))
+        case WorkSource:
+            src = SOURCE_NAME_WORK;
+            break;
+
+        case ImportSource:
+            src = SOURCE_NAME_IMPORT;
+            break;
+    }
+
+    query.prepare("select id, name, parent_id from collection where parent_id is NULL and name = :name;");
+    query.bindValue(":name", src);
+
+    if (!query.exec())
         qDebug() << query.lastError();
 
     CollectionItem* rootItem = NULL;
@@ -66,17 +88,21 @@ void CollectionDAO::getCollectionItemsRec(CollectionItem* root)
     }
 }
 
-void CollectionDAO::addCollection(const Nullable<long long>& parentid, const QString& name)
+long long CollectionDAO::addCollectionInternal(const Nullable<long long>& parentid,
+    const QString& rootname,
+    const QString& name)
 {
     long long parent;
     QSqlQuery q;
 
     if (parentid == nullptr)
     {
-        // add as a root item. make sure there is a single empty root item first.
+        // add as a root item. make sure there is a sentinel root item first named USER.
+        // These are the user created collections
         // get the root id ( a single root is needed )
         q.clear();
-        q.prepare("select id from collection where parent_id is NULL");
+        q.prepare("select id from collection where parent_id is NULL and name = :name;");
+        q.bindValue(":name", rootname);
         q.exec();
 
         if (q.first())
@@ -87,7 +113,9 @@ void CollectionDAO::addCollection(const Nullable<long long>& parentid, const QSt
         {
             // insert root because there is none.
             q.clear();
-            q.exec("insert into collection (name,parent_id) values('',NULL) ");
+            q.prepare("insert into collection (name,parent_id) values(:name,NULL) ");
+            q.bindValue(":name", rootname);
+            q.exec();
             parent = q.lastInsertId().toLongLong();
         }
     }
@@ -105,10 +133,14 @@ void CollectionDAO::addCollection(const Nullable<long long>& parentid, const QSt
     if (!q.exec())
         qDebug() << q.lastError();
 
+    long long newid = q.lastInsertId().toLongLong();
+
     // TODO: improve performance and don't rebuild tree on each insert.
     rebuildCollectionTree(parent, 1);
 
-    emit collectionAdded();
+    emit collectionAdded(newid);
+
+    return newid;
 }
 
 void CollectionDAO::deleteCollectionItems(CollectionItem* root)
@@ -125,6 +157,8 @@ void CollectionDAO::deleteCollectionItems(CollectionItem* root)
 
 void CollectionDAO::addPhotosToCollection(long long collectionId, const QList<long long>& photoIds)
 {
+    // TODO: wrap this in transaction
+    DatabaseAccess::instance()->beginTransaction();
     QSqlQuery q;
     QString   query("insert into collection_photo (collection_id,photo_id) values (:id,:photo_id);");
 
@@ -141,7 +175,25 @@ void CollectionDAO::addPhotosToCollection(long long collectionId, const QList<lo
             qDebug() << q.lastQuery();
         }
     }
+    DatabaseAccess::instance()->endTransaction();
     emit collectionsChanged();
+}
+
+long long CollectionDAO::addCollection(const Nullable<long long>& parentid, const QString& name)
+{
+    return addCollectionInternal(parentid, SOURCE_NAME_USER, name);
+}
+
+long long CollectionDAO::addImportCollection()
+{
+    QDateTime dt = QDateTime::currentDateTime();
+
+    return addCollectionInternal(nullptr, SOURCE_NAME_IMPORT, dt.toString());
+}
+
+long long CollectionDAO::addWorkCollection(const QString& name)
+{
+    return addCollectionInternal(nullptr, SOURCE_NAME_WORK, name);
 }
 
 void CollectionDAO::removePhotosFromCollection(long long collectionid, const QList<Photo>& list)

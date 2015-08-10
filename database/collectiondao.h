@@ -19,18 +19,28 @@ class CollectionDAO : public QObject
 
     public:
 
-        CollectionItem* getCollectionItems();
+        enum CollectionSource
+        {
+            UserSource = 1,
+            WorkSource,
+            ImportSource
+        };
+
+        CollectionItem* getCollectionItems(CollectionSource source);
 
         void deleteCollectionItems(CollectionItem* root);
         void addPhotosToCollection(long long collectionId, const QList<long long>& photoIds);
-        void addCollection(const Nullable<long long>& parentid, const QString& name);
-        void removePhotosFromCollection(long long collectionid, const QList<Photo>& list);
+
+        long long addCollection(const Nullable<long long>& parentid, const QString& name);
+        long long addImportCollection();
+        long long addWorkCollection(const QString& name);
 
         //    Nullable<long long> collectionIdForPhoto(const Photo& photo) const;
+        void removePhotosFromCollection(long long collectionid, const QList<Photo>& list);
 
     signals:
 
-        void collectionAdded();
+        void collectionAdded(long long id);
         void collectionsChanged();
         void photosRemoved(long long collectionid, const QList<Photo>& list);
 
@@ -42,6 +52,10 @@ class CollectionDAO : public QObject
 
         void getCollectionItemsRec(CollectionItem* root);
         long long rebuildCollectionTree(long long parent_id, long long left);
+
+        long long addCollectionInternal(const Nullable<long long>& parentid,
+            const QString& rootname,
+            const QString& name);
 };
 }
 #endif // PHOTOSTAGE_COLLECTIONDAO_H

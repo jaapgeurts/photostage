@@ -83,7 +83,6 @@ SOURCES += \
     widgets/abstracttile.cpp \
     widgets/actionstategroup.cpp \
     widgets/backgroundtaskprogress.cpp \
-    widgets/fixedtreeview.cpp \
     widgets/histogram.cpp \
     widgets/loupeview.cpp \
     widgets/mapview/abstractmarker.cpp \
@@ -96,6 +95,7 @@ SOURCES += \
     widgets/mapview/openstreetmapmapprovider.cpp \
     widgets/modulepanel.cpp \
     widgets/tileview.cpp \
+    widgets/fixedtreeview.cpp \
     widgets/translucentwindow.cpp \
     database/pathdao.cpp \
     database/photodao.cpp \
@@ -106,7 +106,8 @@ SOURCES += \
     library/modules/pathmodel.cpp \
     photoprivate.cpp \
     database/collectiondao.cpp \
-    database/collectionitem.cpp
+    database/collectionitem.cpp \
+    widgets/fixedlistview.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -196,7 +197,8 @@ HEADERS  += \
     library/modules/collectionmodel.h \
     library/modules/pathmodel.h \
     database/collectiondao.h \
-    database/collectionitem.h
+    database/collectionitem.h \
+    widgets/fixedlistview.h
 
 FORMS    += \
     mainwindow.ui \

@@ -29,8 +29,6 @@
 
 #include "constants.h"
 
-#include "external/xxHash/xxhash.h"
-
 namespace PhotoStage
 {
 MainWindow::MainWindow(QWidget* parent) :
@@ -87,6 +85,9 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(mLibrary, &Library::photoSourceChanged, this, &MainWindow::onPhotoSourceChanged);
     connect(mLibrary, &Library::modelFilterApplied, this, &MainWindow::onFilterApplied);
     connect(mLibrary, &Library::customContextMenuRequested, this, &MainWindow::onLibraryContextMenu);
+
+    connect(ui->actionNewCollection, &QAction::triggered, mLibrary, &Library::onNewCollection);
+    connect(ui->actionNewWorkCollection, &QAction::triggered, mLibrary, &Library::onNewWorkCollection);
 
     connect(ui->actionLoupeInfoCycle, &QAction::triggered, mLibrary, &Library::onCycleLoupeInfo);
 
@@ -155,7 +156,7 @@ MainWindow::MainWindow(QWidget* parent) :
     mActionStatePhoto.addAction(ui->actionDeletePhotos);
     mActionStatePhoto.addAction(ui->actionDeleteRejectedPhotos);
 
-    mActionStatePhoto.addAction(ui->actionAdd_to_Quick_Collection);
+    mActionStatePhoto.addAction(ui->actionAddToWorkCollection);
 
     mActionStatePhoto.addAction(ui->actionEdit_Capture_Time);
 

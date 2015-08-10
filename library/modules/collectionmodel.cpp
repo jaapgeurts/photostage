@@ -8,15 +8,17 @@
 
 namespace PhotoStage
 {
-CollectionModel::CollectionModel(QObject* parent) :
-    QAbstractItemModel(parent)
+CollectionModel::CollectionModel(QObject* parent, CollectionDAO::CollectionSource source) :
+    QAbstractItemModel(parent),
+    mCollectionSource(source) // default collection source is user source
 {
-    mRootItem = DatabaseAccess::collectionDao()->getCollectionItems();
+    mRootItem = DatabaseAccess::collectionDao()->getCollectionItems(source);
 
     DatabaseAccess* dbAccess = DatabaseAccess::instance();
 
     connect(dbAccess, &DatabaseAccess::collectionsChanged, this, &CollectionModel::onCollectionsChanged);
     connect(dbAccess, &DatabaseAccess::collectionPhotosRemoved, this, &CollectionModel::onCollectionPhotosRemoved);
+    connect(dbAccess, &DatabaseAccess::collectionAdded, this, &CollectionModel::onCollectionAdded);
 }
 
 CollectionModel::~CollectionModel()
@@ -72,7 +74,7 @@ int CollectionModel::rowCount(const QModelIndex& parent) const
         return 0;
 }
 
-int CollectionModel::columnCount(const QModelIndex& parent) const
+int CollectionModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return 1;
 }
@@ -123,13 +125,13 @@ QStringList CollectionModel::mimeTypes() const
     return list;
 }
 
-QMimeData* CollectionModel::mimeData(const QModelIndexList& indexes) const
+QMimeData* CollectionModel::mimeData(const QModelIndexList& /*indexes*/) const
 {
     return NULL;
 }
 
 bool CollectionModel::canDropMimeData(const QMimeData* mimeData,
-    Qt::DropAction action, int row, int column, const QModelIndex& parent) const
+    Qt::DropAction action, int /*row*/, int column, const QModelIndex& parent) const
 {
     if (action == Qt::IgnoreAction)
         return true;
@@ -139,6 +141,9 @@ bool CollectionModel::canDropMimeData(const QMimeData* mimeData,
 
     if (!parent.isValid())
         return false;
+
+    if (mCollectionSource != CollectionDAO::UserSource && mCollectionSource != CollectionDAO::WorkSource)
+        return false; // only allow drops on User Collection and WorkSource collection. Exclude import history collections
 
     if (!mimeData->hasFormat(MIMETYPE_TILEVIEW_SELECTION))
         return false;
@@ -147,7 +152,7 @@ bool CollectionModel::canDropMimeData(const QMimeData* mimeData,
 }
 
 bool CollectionModel::dropMimeData(const QMimeData* mimeData,
-    Qt::DropAction action, int row, int column, const QModelIndex& parent)
+    Qt::DropAction action, int /*row*/, int column, const QModelIndex& parent)
 {
     if (action == Qt::IgnoreAction)
         return true;
@@ -157,6 +162,9 @@ bool CollectionModel::dropMimeData(const QMimeData* mimeData,
 
     if (!parent.isValid())
         return false;
+
+    if (mCollectionSource != CollectionDAO::UserSource && mCollectionSource != CollectionDAO::WorkSource)
+        return false; // only allow drops on User Collection and WorkSource collection. Exclude import history collections
 
     if (!mimeData->hasFormat(MIMETYPE_TILEVIEW_SELECTION))
         return false;
@@ -182,9 +190,14 @@ void CollectionModel::onCollectionsChanged()
     if (mRootItem != NULL)
         DatabaseAccess::collectionDao()->deleteCollectionItems(mRootItem);
 
-    mRootItem = DatabaseAccess::collectionDao()->getCollectionItems();
+    mRootItem = DatabaseAccess::collectionDao()->getCollectionItems(mCollectionSource);
 
     endResetModel();
+}
+
+void CollectionModel::onCollectionAdded(long long id)
+{
+    onCollectionsChanged();
 }
 
 void CollectionModel::onCollectionPhotosRemoved(long long collectionid, const QList<Photo>& list)

@@ -32,7 +32,7 @@ class PhotoDAO : public QObject
         void unAssignKeywordsExcept(const QStringList& words, const QList<Photo>& list);
 
         void beginImport();
-        void importPhoto(const QFileInfo& file, const ImportOptions& options);
+        void importPhoto(long long collectionid, const QFileInfo& file, const ImportOptions& options);
 
         QMap<QString, int> getPhotoKeywordsCount(const QList<Photo>& list) const;
         QStringList getPhotoKeywords(const Photo& photo) const;

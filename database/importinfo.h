@@ -16,7 +16,7 @@ class ImportInfo
         ImportInfo();
 
         ImportInfo(const ImportInfo& src);
-        explicit ImportInfo(const QList<QFileInfo>& sourceFiles,
+        explicit ImportInfo( const QList<QFileInfo>& sourceFiles,
             const QFileInfo& destinationPath,
             ImportOptions::ImportMode mode);
 

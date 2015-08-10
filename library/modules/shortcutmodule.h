@@ -1,29 +1,36 @@
-#ifndef SHORTCUTMODULE_H
-#define SHORTCUTMODULE_H
-
-#include <QPushButton>
-#include <QComboBox>
+#ifndef PHOTOSTAGE_SHORTCUTMODULE_H
+#define PHOTOSTAGE_SHORTCUTMODULE_H
 
 #include "librarymodule.h"
+#include "database/databaseaccess.h"
+#include "collectionmodel.h"
+#include "widgets/fixedlistview.h"
 
 namespace PhotoStage
 {
-    class ShortcutModule : public LibraryModule
-    {
-        Q_OBJECT
+class ShortcutModule : public LibraryModule
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            explicit ShortcutModule(QWidget* parent = 0);
+        explicit ShortcutModule(QWidget* parent = 0);
 
-        signals:
+    signals:
 
-        public slots:
+        void collectionSelected(long long id);
 
-        private:
+    private slots:
 
-            QPushButton* mWorkCollection;
-            QComboBox*   mImportHistory;
-    };
+        void onWorkListClicked(const QModelIndex& index);
+        void onImportListClicked(const QModelIndex& index);
+
+    private:
+
+        Widgets::FixedListView* mLvWorkList;
+        Widgets::FixedListView* mLvImportList;
+        CollectionModel*        mWorkModel;
+        CollectionModel*        mImportModel;
+};
 }
 #endif // SHORTCUTMODULE_H

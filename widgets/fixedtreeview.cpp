@@ -1,6 +1,4 @@
 #include <QHeaderView>
-#include <QEvent>
-#include <QDragMoveEvent>
 
 #include <QDebug>
 

@@ -12,16 +12,6 @@
 
 namespace PhotoStage
 {
-void PhotoDAO::beginTransaction()
-{
-    QSqlDatabase::database().transaction();
-}
-
-void PhotoDAO::endTransaction()
-{
-    QSqlDatabase::database().commit();
-}
-
 PhotoDAO::PhotoDAO(QObject* parent) :
     QObject(parent)
 {
@@ -117,7 +107,7 @@ void PhotoDAO::insertKeywords(const QStringList& words)
     }
 
     // insert all the keywords.
-    QSqlDatabase::database().transaction();
+    DatabaseAccess::instance()->beginTransaction();
     q.clear();
     q.prepare("insert into keyword (keyword,parent_id) values ( :keyword , :parent )");
     q.bindValue(":parent", parent);
@@ -130,7 +120,7 @@ void PhotoDAO::insertKeywords(const QStringList& words)
             qDebug() << q.lastError();
     }
     // TODO: improve performance and don't rebuild tree on each insert.
-    QSqlDatabase::database().commit();
+    DatabaseAccess::instance()->endTransaction();
     rebuildKeywordTree(parent, 1);
     emit keywordsAdded();
 }
@@ -145,7 +135,7 @@ void PhotoDAO::assignKeywords(const QStringList& words, const QList<Photo>& list
 
     QSqlQuery q;
     QString   word;
-    QSqlDatabase::database().transaction();
+    DatabaseAccess::instance()->beginTransaction();
 
     q.prepare(
         "insert into photo_keyword (photo_id, keyword_id) \
@@ -162,7 +152,7 @@ void PhotoDAO::assignKeywords(const QStringList& words, const QList<Photo>& list
             q.exec();
         }
     }
-    QSqlDatabase::database().commit();
+    DatabaseAccess::instance()->endTransaction();
     // TODO: consider photosChanged() vs keywordAssignmentsChanged()
     emit keywordsAssignmentChanged(list);
 }
@@ -205,7 +195,7 @@ void PhotoDAO::beginImport()
     mLastPathId = -1;
 }
 
-void PhotoDAO::importPhoto(const QFileInfo& file, const ImportOptions& options)
+void PhotoDAO::importPhoto(long long collectionid, const QFileInfo& file, const ImportOptions& options)
 {
     long long ret = -1;
 
@@ -334,7 +324,8 @@ void PhotoDAO::importPhoto(const QFileInfo& file, const ImportOptions& options)
     {
         QList<long long> list;
         list << ret;
-        emit             photosAdded(mLastPathId, list);
+        DatabaseAccess::collectionDao()->addPhotosToCollection(collectionid, list);
+        emit photosAdded(mLastPathId, list);
     }
 }
 

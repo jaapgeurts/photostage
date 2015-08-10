@@ -1,5 +1,5 @@
-#ifndef FIXEDTREEVIEW_H
-#define FIXEDTREEVIEW_H
+#ifndef WIDGETS_FIXEDTREEVIEW_H
+#define WIDGETS_FIXEDTREEVIEW_H
 
 #include <QWidget>
 #include <QTreeView>
