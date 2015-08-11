@@ -15,6 +15,10 @@ void FixedListView::setModel(QAbstractItemModel* model)
     QListView::setModel(model);
 
     setMinimumHeight(CalculateHeight());
+
+    connect(model, &QAbstractItemModel::modelReset, this, &FixedListView::onModelReset);
+    connect(model, &QAbstractItemModel::rowsInserted, this, &FixedListView::onRowsAddedDeleted);
+    connect(model, &QAbstractItemModel::rowsRemoved, this, &FixedListView::onRowsAddedDeleted);
 }
 
 QSize FixedListView::sizeHint() const
@@ -35,5 +39,15 @@ int FixedListView::CalculateHeight() const
     }
 
     return h;
+}
+
+void FixedListView::onRowsAddedDeleted(const QModelIndex& /*index*/, int /*first*/, int /*last*/)
+{
+    setMinimumHeight(CalculateHeight());
+}
+
+void FixedListView::onModelReset()
+{
+    setMinimumHeight(CalculateHeight());
 }
 }

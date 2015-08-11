@@ -11,6 +11,7 @@ FixedTreeView::FixedTreeView(QWidget* parent) :
 {
     connect(this, &QTreeView::expanded, this, &FixedTreeView::onItemExpanded);
     connect(this, &QTreeView::collapsed, this, &FixedTreeView::onItemCollapsed);
+
     setAnimated(true);
     header()->close();
     // setViewport(NULL);
@@ -21,12 +22,26 @@ void FixedTreeView::setModel(QAbstractItemModel* model)
 {
     QTreeView::setModel(model);
 
+    connect(model, &QAbstractItemModel::modelReset, this, &FixedTreeView::onModelReset);
+    connect(model, &QAbstractItemModel::rowsInserted, this, &FixedTreeView::onRowsAddedDeleted);
+    connect(model, &QAbstractItemModel::rowsRemoved, this, &FixedTreeView::onRowsAddedDeleted);
+
     setMinimumHeight(CalculateHeight());
 }
 
 QSize FixedTreeView::sizeHint() const
 {
     return QSize(width(), CalculateHeight());
+}
+
+void FixedTreeView::onRowsAddedDeleted(const QModelIndex& index, int first, int last)
+{
+    setMinimumHeight(CalculateHeight());
+}
+
+void FixedTreeView::onModelReset()
+{
+    setMinimumHeight(CalculateHeight());
 }
 
 int FixedTreeView::CalculateHeight() const

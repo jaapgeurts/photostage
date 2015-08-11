@@ -8,23 +8,29 @@
 
 namespace PhotoStage
 {
-TaggingModule::TaggingModule(QWidget* parent) : LibraryModule(parent)
+TaggingModule::TaggingModule(QWidget* parent) :
+    LibraryModule(parent)
 {
     mTxtEdtKeywords = new QPlainTextEdit(this);
     mTxtEdtKeywords->setContentsMargins(0, 0, 0, 0);
+
     mAddKeywords = new QLineEdit(this);
     mAddKeywords->setContentsMargins(0, 0, 0, 0);
+
     QVBoxLayout* vbLayout = new QVBoxLayout(this);
     vbLayout->addWidget(mTxtEdtKeywords);
     vbLayout->addWidget(mAddKeywords);
     vbLayout->setContentsMargins(0, 0, 0, 0);
     vbLayout->setSpacing(0);
+
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    connect(mAddKeywords, &QLineEdit::returnPressed,
-        this, &TaggingModule::keywordsAdded);
+    connect(mAddKeywords, &QLineEdit::returnPressed, this, &TaggingModule::onKeywordsAdded);
 
     mTxtEdtKeywords->installEventFilter(this);
+
+    DatabaseAccess* dbAccess = DatabaseAccess::instance();
+    connect(dbAccess, &DatabaseAccess::keywordsAssignmentChanged, this, &TaggingModule::onKeywordsAssignmentsChanged);
 }
 
 bool TaggingModule::eventFilter(QObject* object, QEvent* event)
@@ -39,7 +45,7 @@ bool TaggingModule::eventFilter(QObject* object, QEvent* event)
         {
             case Qt::Key_Enter:
             case Qt::Key_Return:
-                keywordsChanged();
+                onKeywordsChanged();
                 swallowed = true;
                 break;
         }
@@ -47,7 +53,12 @@ bool TaggingModule::eventFilter(QObject* object, QEvent* event)
     return swallowed;
 }
 
-void TaggingModule::keywordsAdded()
+void TaggingModule::onKeywordsAssignmentsChanged(const QList<Photo>& list)
+{
+    showKeywords();
+}
+
+void TaggingModule::onKeywordsAdded()
 {
     QString words = mAddKeywords->text();
 
@@ -55,7 +66,7 @@ void TaggingModule::keywordsAdded()
     words.replace(" ", "");
     QStringList wordList = words.split(',');
 
-    PhotoDAO*   workUnit = DatabaseAccess::photoDao();
+    KeywordDAO* workUnit = DatabaseAccess::keywordDao();
 
     // add keywords not yet in the database
     workUnit->insertKeywords(wordList);
@@ -64,7 +75,7 @@ void TaggingModule::keywordsAdded()
     workUnit->assignKeywords(wordList, mPhotoInfoList);
 }
 
-void TaggingModule::keywordsChanged()
+void TaggingModule::onKeywordsChanged()
 {
     QString words = mTxtEdtKeywords->document()->toPlainText();
 
@@ -88,7 +99,7 @@ void TaggingModule::keywordsChanged()
         }
     }
 
-    PhotoDAO* workUnit = DatabaseAccess::photoDao();
+    KeywordDAO* workUnit = DatabaseAccess::keywordDao();
 
     // add keywords not yet in the database
     workUnit->insertKeywords(wordList);
@@ -103,12 +114,18 @@ void TaggingModule::keywordsChanged()
 void TaggingModule::setPhotos(const QList<Photo>& list)
 {
     LibraryModule::setPhotos(list);
-    PhotoDAO* workUnit = DatabaseAccess::photoDao();
+
+    showKeywords();
+}
+
+void TaggingModule::showKeywords()
+{
+    KeywordDAO* workUnit = DatabaseAccess::keywordDao();
 
     // <keyword,count>
-    QMap<QString, int>         words = workUnit->getPhotoKeywordsCount(list);
+    QMap<QString, int>         words = workUnit->getPhotoKeywordsCount(photos());
 
-    int                        count = list.size();
+    int                        count = photos().size();
 
     QString                    text;
     QMapIterator<QString, int> i(words);

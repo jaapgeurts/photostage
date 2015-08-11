@@ -90,9 +90,12 @@ QVariant CollectionModel::data(const QModelIndex& index, int role) const
     switch (role)
     {
         case Qt::DisplayRole:
-            return QString("%1 (%2/%3)").arg(item->name,
-                       QString::number(item->count),
-                       QString::number(item->cumulative));
+
+            if (item->source == CollectionDAO::WorkSource || item->source == CollectionDAO::ImportSource)
+                return QString("%1 (%2)").arg(item->name, QString::number(item->count));
+            else
+                return QString("%1 (%2/%3)").arg(item->name,
+                           QString::number(item->count), QString::number(item->cumulative));
 
         case CollectionModel::CollectionRole:
             return QVariant::fromValue<CollectionItem*>(item);

@@ -13,6 +13,11 @@ class FixedListView : public QListView
         void setModel(QAbstractItemModel* model);
         QSize sizeHint() const;
 
+    private slots:
+
+        void onModelReset();
+        void onRowsAddedDeleted(const QModelIndex&, int, int);
+
     private:
 
         int CalculateHeight() const;

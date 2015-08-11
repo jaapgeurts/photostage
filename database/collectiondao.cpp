@@ -37,7 +37,7 @@ CollectionItem* CollectionDAO::getCollectionItems(CollectionSources sources)
 
     if (!q.exec(query))
         qDebug() << q.lastError();
-    qDebug () << q.lastQuery();
+    // qDebug() << q.lastQuery();
 
     CollectionItem* rootItem = new CollectionItem(-1, "ROOT ITEM", -1);
 
@@ -192,7 +192,7 @@ long long CollectionDAO::addImportCollection(int amount)
     QDateTime dt = QDateTime::currentDateTime();
 
     QString   name =
-        QString("Import %1 photos on %2").arg(amount).arg(QLocale::system().toString(dt, QLocale::ShortFormat));
+        tr("Import %1").arg(QLocale::system().toString(dt, QLocale::ShortFormat));
 
     return addCollectionInternal(nullptr, SOURCE_NAME_IMPORT, name);
 }

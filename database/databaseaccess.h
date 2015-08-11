@@ -6,6 +6,7 @@
 #include "collectiondao.h"
 #include "pathdao.h"
 #include "photodao.h"
+#include "keyworddao.h"
 
 namespace PhotoStage
 {
@@ -24,6 +25,7 @@ class DatabaseAccess : public QObject
         static PhotoDAO* photoDao();
         static PathDAO* pathDao();
         static CollectionDAO* collectionDao();
+        static KeywordDAO* keywordDao();
 
         void beginTransaction();
         void endTransaction();
@@ -57,6 +59,7 @@ class DatabaseAccess : public QObject
         static PhotoDAO*       mPhotoDAO;
         static PathDAO*        mPathDAO;
         static CollectionDAO*  mCollectionDAO;
+        static KeywordDAO*     mKeywordDAO;
 
         explicit DatabaseAccess(QObject* parent = 0);
 

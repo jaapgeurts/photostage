@@ -5,10 +5,12 @@
 
 namespace PhotoStage
 {
-DatabaseAccess* DatabaseAccess::mInstance      = NULL;
+DatabaseAccess* DatabaseAccess::mInstance = NULL;
+
 PhotoDAO*       DatabaseAccess::mPhotoDAO      = NULL;
 PathDAO*        DatabaseAccess::mPathDAO       = NULL;
 CollectionDAO*  DatabaseAccess::mCollectionDAO = NULL;
+KeywordDAO*     DatabaseAccess::mKeywordDAO    = NULL;
 
 DatabaseAccess* DatabaseAccess::instance(QObject* parent)
 {
@@ -21,12 +23,15 @@ DatabaseAccess* DatabaseAccess::instance(QObject* parent)
         mPhotoDAO      = new PhotoDAO(mInstance);
         mPathDAO       = new PathDAO(mInstance);
         mCollectionDAO = new CollectionDAO(mInstance);
+        mKeywordDAO    = new KeywordDAO(mInstance);
+
+        // keyword dao connections
+        connect(mKeywordDAO, &KeywordDAO::keywordsAdded, mInstance, &DatabaseAccess::keywordsAdded);
+        connect(mKeywordDAO, &KeywordDAO::keywordsDeleted, mInstance, &DatabaseAccess::keywordsDeleted);
+        connect(mKeywordDAO, &KeywordDAO::keywordsAssignmentChanged, mInstance,
+            &DatabaseAccess::keywordsAssignmentChanged);
 
         // photo dao connections
-        connect(mPhotoDAO, &PhotoDAO::keywordsAdded, mInstance, &DatabaseAccess::keywordsAdded);
-        connect(mPhotoDAO, &PhotoDAO::keywordsDeleted, mInstance, &DatabaseAccess::keywordsDeleted);
-        connect(mPhotoDAO, &PhotoDAO::keywordsAssignmentChanged, mInstance, &DatabaseAccess::keywordsAssignmentChanged);
-
         connect(mPhotoDAO, &PhotoDAO::photosAdded, mInstance, &DatabaseAccess::photosAdded);
         connect(mPhotoDAO, &PhotoDAO::photosAdded, mInstance, &DatabaseAccess::pathsChanged);
         connect(mPhotoDAO, &PhotoDAO::photosDeleted, mInstance, &DatabaseAccess::onPhotosDeleted);
@@ -95,6 +100,11 @@ PathDAO* DatabaseAccess::pathDao()
 CollectionDAO* DatabaseAccess::collectionDao()
 {
     return mCollectionDAO;
+}
+
+KeywordDAO* DatabaseAccess::keywordDao()
+{
+    return mKeywordDAO;
 }
 
 void DatabaseAccess::onPhotosDeleted(const QList<Photo>& photos)

@@ -286,15 +286,15 @@ QMimeData* PhotoModel::mimeData(const QModelIndexList& indexes) const
     return mimeData;
 }
 
-bool PhotoModel::canDropMimeData(const QMimeData* data,
-    Qt::DropAction action, int row, int column, const QModelIndex& parent) const
+bool PhotoModel::canDropMimeData(const QMimeData* /*data*/,
+    Qt::DropAction /*action*/, int /*row*/, int /*column*/, const QModelIndex& /*parent*/) const
 {
     // do not support drops for now.
     return false;
 }
 
-bool PhotoModel::dropMimeData(const QMimeData* data,
-    Qt::DropAction action, int row, int column, const QModelIndex& parent)
+bool PhotoModel::dropMimeData(const QMimeData* /*data*/,
+    Qt::DropAction /*action*/, int /*row*/, int /*column*/, const QModelIndex& /*parent*/)
 {
     return false;
 }
@@ -332,7 +332,7 @@ void PhotoModel::onVisibleTilesChanged(const QModelIndex& start, const QModelInd
     }
 }
 
-void PhotoModel::onPhotosAdded(long long pathid, const QList<long long>& idList)
+void PhotoModel::onPhotosAdded(long long /*pathid*/, const QList<long long>& idList)
 {
     int          start = rowCount();
 
@@ -385,12 +385,7 @@ void PhotoModel::onPhotosChanged(const QList<Photo>& photos)
     }
 }
 
-bool PComp(const Photo& a, const Photo& b)
-{
-    return a.id() < b.id();
-}
-
-void PhotoModel::refreshData(const QList<Photo>& list)
+void PhotoModel::refreshData(const QList<Photo>& /*list*/)
 {
     // for now just emit that all data has changed. the tileview doesnt check anyway
     emit dataChanged(index(0), index(rowCount() - 1));

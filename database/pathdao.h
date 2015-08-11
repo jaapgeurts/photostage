@@ -38,7 +38,7 @@ class PathDAO : public QObject
 
     private:
 
-        PathDAO(QObject* parent = 0);
+        explicit PathDAO(QObject* parent = 0);
 
         long long rebuildPathTree(long long parent_id, long long left);
         int insertPathRec(QSqlQuery& q, const QStringList& path, int pos, int parentid);

@@ -13,6 +13,7 @@
 #include "modules/shortcutmodule.h"
 #include "modules/libraryhistogrammodule.h"
 #include "modules/metadatamodule.h"
+#include "modules/keywordmodule.h"
 #include "photosortfilterproxymodel.h"
 
 namespace Ui
@@ -85,7 +86,7 @@ class Library : public Module
         Ui::Library*               ui;
         PhotoSortFilterProxyModel* mPhotoModel;
         PhotoDAO*                  mPhotoWorkUnit;
-        TaggingModule*             mKeywording;
+        TaggingModule*             mTagging;
         LibraryHistogramModule*    mHistogramModule;
         MetaDataModule*            mMetaDataModule;
         QFont                      mFontAccessFoundIcons;
@@ -94,6 +95,7 @@ class Library : public Module
         FilesModule*               mFilesModule;
         CollectionModule*          mCollectionModule;
         ShortcutModule*            mShortcutModule;
+        KeywordModule*             mKeywordModule;
 };
 }
 

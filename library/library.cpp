@@ -3,9 +3,6 @@
 #include "library.h"
 #include "ui_library.h"
 
-// models
-#include "sqlkeywordmodel.h"
-
 #include "dragdropinfo.h"
 #include "constants.h"
 
@@ -70,7 +67,7 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     // Filter module
 
     FilterModule* fm = new FilterModule(ui->ModulePanel_1);
-    ui->ModulePanel_1->addPanel("Filter", fm);
+    ui->ModulePanel_1->addPanel(tr("Filter"), fm);
     connect(fm, &FilterModule::modelFilterApplied, this, &Library::modelFilterApplied);
 
     QMenu* menu;
@@ -80,42 +77,39 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     menu->addAction("New Collection", this, SLOT(onNewCollection()));
     menu->addAction("New Work Collection", this, SLOT(onNewWorkCollection()));
     mShortcutModule = new ShortcutModule(ui->ModulePanel_1);
-    ui->ModulePanel_1->addPanel("Shortcuts", mShortcutModule, menu);
+    ui->ModulePanel_1->addPanel(tr("Ad-hoc Collections"), mShortcutModule, menu);
     connect(mShortcutModule, &ShortcutModule::workCollectionSelected, this, &Library::onWorkCollectionSelected);
     connect(mShortcutModule, &ShortcutModule::importCollectionSelected, this, &Library::onImportCollectionSelected);
 
     // Files module
     mFilesModule = new FilesModule(ui->ModulePanel_1);
-    ui->ModulePanel_1->addPanel("Folders", mFilesModule);
+    ui->ModulePanel_1->addPanel(tr("Folders"), mFilesModule);
     connect(mFilesModule, &FilesModule::pathSelected, this, &Library::onPathSelected);
 
     // collections module
     mCollectionModule = new CollectionModule(ui->ModulePanel_1);
 
     menu = new QMenu(this);
-    menu->addAction("New Collection", this, SLOT(onNewCollection()));
-    ui->ModulePanel_1->addPanel("Collections", mCollectionModule, menu);
+    menu->addAction(tr("New Collection"), this, SLOT(onNewCollection()));
+    ui->ModulePanel_1->addPanel(tr("Collections"), mCollectionModule, menu);
     connect(mCollectionModule, &CollectionModule::collectionSelected, this, &Library::onCollectionSelected);
 
     // **** MODULES RIGHT
 
     mHistogramModule = new LibraryHistogramModule(ui->ModulePanel_2);
-    ui->ModulePanel_2->addPanel("Histogram", mHistogramModule);
+    ui->ModulePanel_2->addPanel(tr("Histogram"), mHistogramModule);
 
-    // Keywording (editing keywords module)
-    mKeywording = new TaggingModule(ui->ModulePanel_2);
-    ui->ModulePanel_2->addPanel("Keywords", mKeywording);
+    // Tagging (editing keywords module)
+    mTagging = new TaggingModule(ui->ModulePanel_2);
+    ui->ModulePanel_2->addPanel(tr("Tagging"), mTagging);
 
     // **** MODULE
     // Keyword list module
-    Widgets::FixedTreeView* trvwKeywords = new Widgets::FixedTreeView(ui->ModulePanel_2);
-    SqlKeywordModel*        keywordModel = new SqlKeywordModel(this);
-    trvwKeywords->setModel(keywordModel);
-    trvwKeywords->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    ui->ModulePanel_2->addPanel("Keyword List", trvwKeywords);
+    mKeywordModule = new KeywordModule(ui->ModulePanel_2);
+    ui->ModulePanel_2->addPanel(tr("Keyword List"), mKeywordModule);
 
     mMetaDataModule = new MetaDataModule(ui->ModulePanel_2);
-    ui->ModulePanel_2->addPanel("Meta Data", mMetaDataModule);
+    ui->ModulePanel_2->addPanel(tr("Meta Data"), mMetaDataModule);
 
     onShowGrid();
 
@@ -264,7 +258,7 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected, const QIte
     foreach (QModelIndex index, selected.indexes())
     photos.append(mPhotoModel->data(index, Widgets::TileView::ImageRole).value<Photo>());
 
-    mKeywording->setPhotos(photos);
+    mTagging->setPhotos(photos);
 }
 
 void Library::onCurrentPhotoChanged(const QModelIndex& current, const QModelIndex& /*previous*/)

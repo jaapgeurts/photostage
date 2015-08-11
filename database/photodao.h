@@ -1,8 +1,6 @@
 #ifndef PHOTOSTAGE_PHOTOWORKUNIT_H
 #define PHOTOSTAGE_PHOTOWORKUNIT_H
 
-#include <QStringList>
-#include <QMap>
 #include <QList>
 
 #include "photo.h"
@@ -20,22 +18,12 @@ class PhotoDAO : public QObject
 
     public:
 
-        void beginTransaction();
-        void endTransaction();
-
         void setRating(const QList<Photo>& list, int rating);
         void setFlag(const QList<Photo>& list, Photo::Flag flag);
         void setColorLabel(const QList<Photo>& list, Photo::ColorLabel color);
 
-        void insertKeywords(const QStringList& words);
-        void assignKeywords(const QStringList& words, const QList<Photo>& list);
-        void unAssignKeywordsExcept(const QStringList& words, const QList<Photo>& list);
-
         void beginImport();
         void importPhoto(long long collectionid, const QFileInfo& file, const ImportOptions& options);
-
-        QMap<QString, int> getPhotoKeywordsCount(const QList<Photo>& list) const;
-        QStringList getPhotoKeywords(const Photo& photo) const;
 
         // Photo Items are created here.
         // ownership is transferred to the caller who should call delete on the objects
@@ -54,10 +42,6 @@ class PhotoDAO : public QObject
 
     signals:
 
-        void keywordsAdded();
-        void keywordsDeleted();
-        void keywordsAssignmentChanged(const QList<Photo>& photos);
-
         void photosChanged(const QList<Photo>& photos);
         void photosAdded(long long pathid, const QList<long long>& photos);
         void photosDeleted(const QList<Photo>& photos);
@@ -67,9 +51,8 @@ class PhotoDAO : public QObject
         QString   mLastPath;
         long long mLastPathId;
 
-        PhotoDAO(QObject* parent = 0);
+        explicit PhotoDAO(QObject* parent = 0);
 
-        long long rebuildKeywordTree(long long parent_id, long long left);
         void getLeftRightForPathId(long long path_id, long long& lft, long long& rgt) const;
         void getLeftRightForCollectionId(long long collection_id, long long& lft, long long& rgt) const;
 };

@@ -76,7 +76,7 @@ SOURCES += \
     previewcache.cpp \
     regenhashestask.cpp \
     runnable.cpp \
-    sqlkeywordmodel.cpp \
+    library/modules/keywordmodel.cpp \
     threadqueue.cpp \
     timeadjustdialog.cpp \
     utils.cpp \
@@ -107,7 +107,10 @@ SOURCES += \
     photoprivate.cpp \
     database/collectiondao.cpp \
     database/collectionitem.cpp \
-    widgets/fixedlistview.cpp
+    widgets/fixedlistview.cpp \
+    library/modules/keywordmodule.cpp \
+    database/keyworddao.cpp \
+    database/keyworditem.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -168,7 +171,7 @@ HEADERS  += \
     previewcache.h \
     regenhashestask.h \
     runnable.h \
-    sqlkeywordmodel.h \
+    library/modules/keywordmodel.h \
     threadqueue.h \
     timeadjustdialog.h \
     utils.h \
@@ -198,7 +201,10 @@ HEADERS  += \
     library/modules/pathmodel.h \
     database/collectiondao.h \
     database/collectionitem.h \
-    widgets/fixedlistview.h
+    widgets/fixedlistview.h \
+    library/modules/keywordmodule.h \
+    database/keyworddao.h \
+    database/keyworditem.h
 
 FORMS    += \
     mainwindow.ui \

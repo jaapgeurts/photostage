@@ -27,13 +27,16 @@ class TaggingModule : public LibraryModule
 
     private slots:
 
-        void keywordsChanged();
-        void keywordsAdded();
+        void onKeywordsChanged();
+        void onKeywordsAdded();
+        void onKeywordsAssignmentsChanged(const QList<Photo>& list);
 
     private:
 
         QLineEdit*      mAddKeywords;
         QPlainTextEdit* mTxtEdtKeywords;
+
+        void showKeywords();
 };
 }
 

@@ -62,10 +62,8 @@ class PhotoModel : public QAbstractListModel
         Qt::DropActions supportedDropActions() const;
         QStringList mimeTypes() const;
         QMimeData* mimeData(const QModelIndexList& indexes) const;
-        bool canDropMimeData(const QMimeData* data,
-            Qt::DropAction action, int row, int column, const QModelIndex& parent) const;
-        bool dropMimeData(const QMimeData* data,
-            Qt::DropAction action, int row, int column, const QModelIndex& parent);
+        bool canDropMimeData(const QMimeData*, Qt::DropAction, int, int, const QModelIndex&) const;
+        bool dropMimeData(const QMimeData*, Qt::DropAction, int, int, const QModelIndex&);
 
         SourceType rootSource() const;
 
