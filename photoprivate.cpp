@@ -35,7 +35,7 @@ Photo::PhotoPrivate::PhotoPrivate(QSqlQuery& q) :
 
     // p.id, p.filename, c.directory,p.rating,p.color,p.flag, \
     // p.iso, p.aperture, p.exposure_time, p.focal_length, p.datetime_original,\
-    // p.datetime_digitized, p.rotatation, p.lattitude, p.longitude, \
+    // p.datetime_digitized, p.rotatation, p.latitude, p.longitude, \
     // p.copyright, p.artist, p.flash, p.lens_name, p.make, p.model
     getDbValue(q, 6, mExifInfo.isoSpeed);
     getDbValue(q, 7, mExifInfo.aperture);

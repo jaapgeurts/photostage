@@ -199,12 +199,12 @@ void CollectionModel::onCollectionsChanged()
     endResetModel();
 }
 
-void CollectionModel::onCollectionAdded(long long id)
+void CollectionModel::onCollectionAdded(long long /*id*/)
 {
     onCollectionsChanged();
 }
 
-void CollectionModel::onCollectionPhotosRemoved(long long collectionid, const QList<Photo>& list)
+void CollectionModel::onCollectionPhotosRemoved(long long, const QList<Photo>&)
 {
     onCollectionsChanged();
 }

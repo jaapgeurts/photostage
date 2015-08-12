@@ -31,6 +31,9 @@ void PhotoDAO::setRating(const QList<Photo>& list, int rating)
     q.prepare(query);
     q.bindValue(":rating", rating);
     q.exec();
+
+    foreach(Photo p, list)
+    p.setRating(rating);
     emit photosChanged(list);
 }
 
@@ -47,6 +50,9 @@ void PhotoDAO::setFlag(const QList<Photo>& list, Photo::Flag flag)
     q.prepare(query);
     q.bindValue(":flag", (int)flag);
     q.exec();
+    foreach(Photo p, list)
+    p.setFlag(flag);
+
     emit photosChanged(list);
 }
 
@@ -56,7 +62,7 @@ void PhotoDAO::setColorLabel(const QList<Photo>& list, Photo::ColorLabel color)
         return;
 
     QSqlQuery q;
-    QString   query = ("update photo set color=:color where id in (:id)");
+    QString   query = "update photo set color=:color where id in (:id)";
 
     QString   ids = joinIds(list);
 
@@ -64,6 +70,35 @@ void PhotoDAO::setColorLabel(const QList<Photo>& list, Photo::ColorLabel color)
     q.prepare(query);
     q.bindValue(":color", (int)color);
     q.exec();
+    foreach(Photo p, list)
+    p.setColorLabel(color);
+
+    emit photosChanged(list);
+}
+
+void PhotoDAO::assignGeoCoordinate(const QGeoCoordinate& coord, const QList<Photo>& list)
+{
+    if (list.isEmpty())
+        return;
+
+    QSqlQuery q;
+    QString   query = "update photo set longitude=:longitude, latitude=:latitude where id in (:id)";
+
+    QString   ids = joinIds(list);
+
+    query.replace(":id", ids);
+    q.prepare(query);
+    q.bindValue(":longitude", coord.longitude());
+    q.bindValue(":latitude", coord.latitude());
+
+    if (!q.exec())
+    {
+        qDebug() << "Can't update photo";
+        qDebug() << q.lastError();
+    }
+    foreach(Photo p, list)
+    p.exifInfo().location = coord;
+
     emit photosChanged(list);
 }
 
@@ -149,11 +184,11 @@ void PhotoDAO::importPhoto(long long collectionid, const QFileInfo& file, const 
     q.prepare(
         "insert into photo (path_id,filename,photo_hash, iso, exposure_time, \
         focal_length, datetime_original, datetime_digitized, rotation, \
-        longitude, lattitude, copyright, artist, aperture, flash, lens_name,  \
+        longitude, latitude, copyright, artist, aperture, flash, lens_name,  \
         make, model, width, height ) \
         values (:path, :filename,:hash,:iso,:exposure_time,:focal_length,\
             :datetime_original,:datetime_digitized,:rotation,:longitude, \
-            :lattitude,:copyright,:artist,:aperture,:flash,:lens_name, \
+            :latitude,:copyright,:artist,:aperture,:flash,:lens_name, \
             :make, :model, :width, :height)");
     q.bindValue(":path", mLastPathId);
     q.bindValue(":filename", fileName);
@@ -168,12 +203,12 @@ void PhotoDAO::importPhoto(long long collectionid, const QFileInfo& file, const 
     if (ei.location != nullptr)
     {
         q.bindValue(":longitude", ei.location->longitude());
-        q.bindValue(":lattitude", ei.location->latitude());
+        q.bindValue(":latitude", ei.location->latitude());
     }
     else
     {
         q.bindValue(":longitude", QVariant(QVariant::Double));
-        q.bindValue(":lattitude", QVariant(QVariant::Double));
+        q.bindValue(":latitude", QVariant(QVariant::Double));
     }
     q.bindValue(":copyright", setDbValue(ei.copyright));
     q.bindValue(":artist", setDbValue(ei.artist));
@@ -213,7 +248,7 @@ QList<Photo> PhotoDAO::getPhotosById(const QList<long long> idList) const
     QString   query = QString(
         "select p.id, p.filename, d.path ,p.rating,p.color,p.flag, \
                 p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
-                p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
+                p.datetime_digitized, p.rotation, p.latitude,p.longitude, \
                 p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
                 p.width, p.height  \
               from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
@@ -364,7 +399,7 @@ QList<Photo> PhotoDAO::getPhotosByPath(long long path_id, bool includeSubDirs) c
         q.prepare(
             "select p.id, p.filename, d.path,p.rating,p.color,p.flag, \
               p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
-              p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
+              p.datetime_digitized, p.rotation, p.latitude,p.longitude, \
               p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
                 p.width, p.height  \
             from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
@@ -382,7 +417,7 @@ QList<Photo> PhotoDAO::getPhotosByPath(long long path_id, bool includeSubDirs) c
         q.prepare(
             "select p.id, p.filename, d.path,p.rating,p.color,p.flag, \
               p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
-              p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
+              p.datetime_digitized, p.rotation, p.latitude,p.longitude, \
               p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
                 p.width, p.height  \
             from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
@@ -428,7 +463,7 @@ QList<Photo> PhotoDAO::getPhotosByCollectionId(long long collection_id, bool inc
         q.prepare(
             "select p.id, p.filename, d.path,p.rating,p.color,p.flag, \
               p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
-              p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
+              p.datetime_digitized, p.rotation, p.latitude,p.longitude, \
               p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
                 p.width, p.height  \
             from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
@@ -448,7 +483,7 @@ QList<Photo> PhotoDAO::getPhotosByCollectionId(long long collection_id, bool inc
         q.prepare(
             "select p.id, p.filename, d.path,p.rating,p.color,p.flag, \
               p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
-              p.datetime_digitized, p.rotation, p.lattitude,p.longitude, \
+              p.datetime_digitized, p.rotation, p.latitude,p.longitude, \
               p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
                 p.width, p.height  \
             from photo p join (select group_concat(ancestor.directory ,:separator) as path, \

@@ -14,9 +14,7 @@ class PhotoMarker : public MapView::AbstractMarker
         PhotoMarker(QObject* parent = 0);
 
         QSize size() const;
-        void paint(QPainter& painter,
-            const MapView::MarkerInfo& info,
-            const QVariant& data);
+        void paint(QPainter& painter, const MapView::MarkerInfo& info, const QVariant& data);
 
     private:
 

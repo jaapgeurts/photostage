@@ -24,6 +24,7 @@ class MapView : public QWidget
 
         QSize sizeHint() const;
         void setCurrentCoord(const QGeoCoordinate& coord);
+        QGeoCoordinate currentCoord() const;
 
         void addLayer(Layer* layer);
 
@@ -41,6 +42,10 @@ class MapView : public QWidget
 
     signals:
 
+        void zoomLevelChanged(int level);
+        void centerChanged(const QGeoCoordinate& coordinate);
+        void contextMenuRequested(const QGeoCoordinate& coordinate, const QPoint& pos);
+
     protected:
 
         void paintEvent(QPaintEvent*);
@@ -49,6 +54,7 @@ class MapView : public QWidget
         void mouseReleaseEvent(QMouseEvent* event);
         void mouseMoveEvent(QMouseEvent* event);
         void wheelEvent(QWheelEvent* event);
+        void contextMenuEvent(QContextMenuEvent* event);
 
     private slots:
 

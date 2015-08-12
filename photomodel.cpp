@@ -9,7 +9,7 @@
 #include "preferences.h"
 
 #include "widgets/tileview.h"
-#include "widgets/mapview/layer.h"
+#include "widgets/mapview/modelindexlayer.h"
 
 #include "jobs/previewgeneratorjob.h"
 #include "jobs/colortransformjob.h"
@@ -71,11 +71,11 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
 
         case Widgets::TileView::ImageRole:
         case Photo::DataRole:
-        case MapView::Layer::DataRole:
+        case MapView::ModelIndexLayer::DataRole:
             photo = mPhotoList.at(index.row());
             return QVariant::fromValue<Photo>(photo);
 
-        case MapView::Layer::GeoCoordinateRole:
+        case MapView::ModelIndexLayer::GeoCoordinateRole:
         {
             Nullable<QGeoCoordinate> coord = mPhotoList.at(index.row()).exifInfo().location;
 

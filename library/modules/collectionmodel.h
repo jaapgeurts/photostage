@@ -42,8 +42,8 @@ class CollectionModel : public QAbstractItemModel
     private slots:
 
         void onCollectionsChanged();
-        void onCollectionAdded(long long id);
-        void onCollectionPhotosRemoved(long long collectionid, const QList<Photo>& list);
+        void onCollectionAdded(long long);
+        void onCollectionPhotosRemoved(long long /*collectionid*/, const QList<Photo>& /*list*/);
 
     private:
 

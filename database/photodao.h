@@ -21,6 +21,7 @@ class PhotoDAO : public QObject
         void setRating(const QList<Photo>& list, int rating);
         void setFlag(const QList<Photo>& list, Photo::Flag flag);
         void setColorLabel(const QList<Photo>& list, Photo::ColorLabel color);
+        void assignGeoCoordinate(const QGeoCoordinate& coord, const QList<Photo>& list);
 
         void beginImport();
         void importPhoto(long long collectionid, const QFileInfo& file, const ImportOptions& options);

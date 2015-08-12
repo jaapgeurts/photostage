@@ -9,6 +9,7 @@ namespace MapView
 {
 MapView::MapView(QWidget* parent) :
     QWidget(parent),
+    mCurrentCoord(),
     mZoomLevel(8),
     mTileBounds(0, 0, 0, 0),
     mIsPanning(false),
@@ -18,8 +19,10 @@ MapView::MapView(QWidget* parent) :
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     mZoomSlider = new QSlider(Qt::Vertical, this);
     mZoomSlider->resize(30, 150);
-    connect(mZoomSlider, &QSlider::valueChanged,
-        this, &MapView::onZoomLevelChanged);
+
+    connect(mZoomSlider, &QSlider::valueChanged, this, &MapView::onZoomLevelChanged);
+
+    setContextMenuPolicy(Qt::DefaultContextMenu);
 
     setCursor(QCursor(Qt::OpenHandCursor));
 
@@ -39,8 +42,7 @@ QSize MapView::sizeHint() const
 void MapView::setMapProvider(MapProvider* provider)
 {
     mMapProvider = provider;
-    connect(mMapProvider, &MapProvider::tileAvailable,
-        this, &MapView::onTileAvailable);
+    connect(mMapProvider, &MapProvider::tileAvailable, this, &MapView::onTileAvailable);
     mZoomSlider->setMinimum(mMapProvider->minZoomLevel());
     mZoomSlider->setMaximum(mMapProvider->maxZoomLevel());
     mZoomSlider->setValue(mZoomLevel);
@@ -61,14 +63,14 @@ QGeoRectangle MapView::mapBounds() const
     QGeoRectangle grect;
 
     grect.setTopLeft(mOriginCoord);
-    grect.setBottomRight(mMapProvider->moveCoord(mOriginCoord,
-        width(), height(), mZoomLevel));
+    grect.setBottomRight(mMapProvider->moveCoord(mOriginCoord, width(), height(), mZoomLevel));
     return grect;
 }
 
 void MapView::setZoomLevel(int level)
 {
     mZoomLevel = level;
+    mZoomSlider->setValue(level);
 }
 
 MapProvider* MapView::mapProvider() const
@@ -130,32 +132,39 @@ void MapView::onZoomLevelChanged(int value)
     mTileList.clear();
     computeTileBounds();
     // recalculate origin because of new zoomlevel
-    mOriginCoord = mMapProvider->moveCoord(mCurrentCoord,
-            -width() / 2, -height() / 2, mZoomLevel);
-    mOriginPixels =
-        mMapProvider->coordToPixel(mOriginCoord, mZoomLevel);
+    mOriginCoord  = mMapProvider->moveCoord(mCurrentCoord, -width() / 2, -height() / 2, mZoomLevel);
+    mOriginPixels = mMapProvider->coordToPixel(mOriginCoord, mZoomLevel);
     fetchTiles();
 
     foreach(Layer * layer, mLayers)
-    layer->viewChanged();
+    {
+        layer->viewChanged();
+    }
+    emit zoomLevelChanged(value);
 }
 
 void MapView::setCurrentCoord(const QGeoCoordinate& coord)
 {
     // only reset view location if the coord
     // is not visible on screen already
+
     if (coord.isValid() && !mapBounds().contains(coord))
     {
         mCurrentCoord = coord;
-        mOriginCoord  = mMapProvider->moveCoord(mCurrentCoord,
-                -width() / 2, -height() / 2, mZoomLevel);
-        mOriginPixels =
-            mMapProvider->coordToPixel(mOriginCoord, mZoomLevel);
+        mOriginCoord  = mMapProvider->moveCoord(mCurrentCoord, -width() / 2, -height() / 2, mZoomLevel);
+        mOriginPixels = mMapProvider->coordToPixel(mOriginCoord, mZoomLevel);
         fetchTiles();
 
         foreach(Layer * layer, mLayers)
-        layer->viewChanged();
+        {
+            layer->viewChanged();
+        }
     }
+}
+
+QGeoCoordinate MapView::currentCoord() const
+{
+    return mCurrentCoord;
 }
 
 void MapView::moveOrigin(const QPoint& delta)
@@ -165,14 +174,16 @@ void MapView::moveOrigin(const QPoint& delta)
             delta.x(), delta.y(), mZoomLevel);
 
     // recompute the origin of the screen
-    mOriginCoord = mMapProvider->moveCoord(mCurrentCoord,
-            -width() / 2, -height() / 2, mZoomLevel);
+    mOriginCoord  = mMapProvider->moveCoord(mCurrentCoord, -width() / 2, -height() / 2, mZoomLevel);
     mOriginPixels = mMapProvider->coordToPixel(mOriginCoord, mZoomLevel);
 
     computeTileBounds();
 
     foreach(Layer * layer, mLayers)
-    layer->viewChanged();
+    {
+        layer->viewChanged();
+    }
+    emit centerChanged(mCurrentCoord);
 }
 
 void MapView::fetchTiles()
@@ -201,12 +212,17 @@ void MapView::resizeEvent(QResizeEvent*)
     mZoomSlider->resize(30, height() / 2 - 60);
     mZoomSlider->move(width() - 40, 30);
     foreach(Layer * layer, mLayers)
-    layer->viewChanged();
+    {
+        layer->viewChanged();
+    }
     update();
 }
 
 void MapView::mousePressEvent(QMouseEvent* event)
 {
+    if (event->buttons() & Qt::RightButton)
+        return;
+
     bool swallowed = false;
 
     foreach(Layer * layer, mLayers)
@@ -265,20 +281,12 @@ void MapView::mouseMoveEvent(QMouseEvent* event)
     }
     else
     {
-        bool found = false;
+        // for each layer send the event until eaten.
         foreach(Layer * layer, mLayers)
         {
-            if (layer->intersectsMarker(event->pos()))
-            {
-                found = true;
+            if (!layer->mouseMoveEvent(event))
                 break;
-            }
         }
-
-        if (found)
-            setCursor(QCursor(Qt::ArrowCursor));
-        else
-            setCursor(QCursor(Qt::OpenHandCursor));
     }
 }
 
@@ -296,10 +304,8 @@ void MapView::wheelEvent(QWheelEvent* event)
         // TODO: allow zooming in on mouse location;
         QPoint         delta =  -pos;
 
-        QGeoCoordinate zoomCoord = mMapProvider
-            ->pixelToCoord(pos + mOriginPixels, mZoomLevel);
-        mCurrentCoord = mMapProvider->moveCoord(zoomCoord,
-                delta.x() + width() / 2,
+        QGeoCoordinate zoomCoord = mMapProvider->pixelToCoord(pos + mOriginPixels, mZoomLevel);
+        mCurrentCoord = mMapProvider->moveCoord(zoomCoord, delta.x() + width() / 2,
                 delta.y() + height() / 2, mZoomLevel + steps);
 
         mZoomSlider->setValue(mZoomLevel + steps);
@@ -309,6 +315,11 @@ void MapView::wheelEvent(QWheelEvent* event)
     {
         event->ignore();
     }
+}
+
+void MapView::contextMenuEvent(QContextMenuEvent* event)
+{
+    emit contextMenuRequested(mMapProvider->pixelToCoord(event->pos() + mOriginPixels, mZoomLevel), event->pos());
 }
 
 void MapView::paintEvent(QPaintEvent* /*event*/)

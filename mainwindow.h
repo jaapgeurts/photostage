@@ -10,7 +10,7 @@
 #include "library/library.h"
 #include "develop/develop.h"
 #include "widgets/actionstategroup.h"
-#include "cartography/map.h"
+#include "cartography/cartography.h"
 #include "database/databaseaccess.h"
 #include "backgroundtaskmanager.h"
 #include "photosortfilterproxymodel.h"
@@ -120,7 +120,7 @@ class MainWindow : public QMainWindow
         // module ui pointers
         Library*                   mLibrary;
         Develop*                   mDevelop;
-        Map*                       mMap;
+        Cartography*                       mMap;
         Module*                    mCurrentModule;
         PhotoSortFilterProxyModel* mPhotoModelProxy;
         PhotoModel*                mSourceModel;

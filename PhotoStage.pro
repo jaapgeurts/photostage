@@ -28,7 +28,6 @@ SOURCES += \
     aboutdialog.cpp \
     backgroundtask.cpp \
     backgroundtaskmanager.cpp \
-    cartography/map.cpp \
     cartography/photomarker.cpp \
     database/databaseaccess.cpp \
     database/dbutils.cpp \
@@ -110,7 +109,9 @@ SOURCES += \
     widgets/fixedlistview.cpp \
     library/modules/keywordmodule.cpp \
     database/keyworddao.cpp \
-    database/keyworditem.cpp
+    database/keyworditem.cpp \
+    cartography/cartography.cpp \
+    widgets/mapview/modelindexlayer.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -118,7 +119,6 @@ HEADERS  += \
     aboutdialog.h \
     backgroundtask.h \
     backgroundtaskmanager.h \
-    cartography/map.h \
     cartography/photomarker.h \
     constants.h \
     database/databaseaccess.h \
@@ -204,7 +204,9 @@ HEADERS  += \
     widgets/fixedlistview.h \
     library/modules/keywordmodule.h \
     database/keyworddao.h \
-    database/keyworditem.h
+    database/keyworditem.h \
+    cartography/cartography.h \
+    widgets/mapview/modelindexlayer.h
 
 FORMS    += \
     mainwindow.ui \

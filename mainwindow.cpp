@@ -113,7 +113,7 @@ MainWindow::MainWindow(QWidget* parent) :
 
     // ***************
     // Create the MAP MODULE
-    mMap = new Map(mPhotoModelProxy, this);
+    mMap = new Cartography(mPhotoModelProxy, this);
     ui->stackedWidget->addWidget(mMap);
     mMap->setSelectionModel(mPhotoSelection);
 
