@@ -44,13 +44,12 @@ MainWindow::MainWindow(QWidget* parent) :
     QSettings  settings;
 
     QList<int> l;
-    settings.beginGroup("mainwindow");
+    settings.beginGroup(SETTINGS_GROUP_MAINWINDOW);
     move(settings.value(SETTINGS_WINDOW_LOCATION).toPoint());
 
     if (settings.contains(SETTINGS_SPLITTER_FILMSTRIP_SIZES))
     {
-        foreach(QVariant v, settings.value(
-                SETTINGS_SPLITTER_FILMSTRIP_SIZES).toList())
+        foreach(QVariant v, settings.value(SETTINGS_SPLITTER_FILMSTRIP_SIZES).toList())
         {
             l << v.toInt();
         }
@@ -60,6 +59,8 @@ MainWindow::MainWindow(QWidget* parent) :
         l << 600 << 200;
     }
     ui->splitter->setSizes(l);
+
+    settings.endGroup();
 
     mSourceModel     = new PhotoModel(this);
     mPhotoModelProxy = new PhotoSortFilterProxyModel(this);
@@ -170,7 +171,7 @@ MainWindow::~MainWindow()
     mBackgroundTaskManager->cancelAll();
     //QDesktopWidget * desktop = QApplication::desktop();
     QSettings settings;
-    settings.beginGroup("mainwindow");
+    settings.beginGroup(SETTINGS_GROUP_MAINWINDOW);
 
     settings.setValue(SETTINGS_WINDOW_LOCATION, pos());
     QVariantList list;
@@ -179,6 +180,7 @@ MainWindow::~MainWindow()
         list << size;
     }
     settings.setValue(SETTINGS_SPLITTER_FILMSTRIP_SIZES, list);
+    settings.endGroup();
     delete ui;
 }
 
@@ -438,6 +440,8 @@ void MainWindow::onActionAboutTriggered()
 void MainWindow::onActionEditTimeTriggered()
 {
     TimeAdjustDialog* timeAdjustDialog = new TimeAdjustDialog(this);
+
+    timeAdjustDialog->setPhoto(currentPhoto());
 
     /*int code = */ timeAdjustDialog->exec();
     delete timeAdjustDialog;

@@ -16,9 +16,19 @@ const QString SETTINGS_LATITUDE          = "latitude";
 const QString SETTINGS_LONGITUDE         = "longitude";
 const QString SETTINGS_ZOOMLEVEL         = "zoomlevel";
 
+// IMPORT DIALOG SETTINGS
+const QString SETTINGS_GROUP_IMPORTDIALOG = "importdialog";
+const QString SETTINGS_IMPORTMODE         = "importmode";
+const QString SETTINGS_IMPORT_SOURCEPATH  = "sourcepath";
+
+// MAIN WINDOW SETTINGS
+const QString SETTINGS_GROUP_MAINWINDOW         = "mainwindow";
 const QString SETTINGS_WINDOW_LOCATION          = "location";
 const QString SETTINGS_SPLITTER_FILMSTRIP_SIZES = "splitter_filmstrip";
-const QString SETTINGS_SPLITTER_LIBRARY_SIZES   = "splitter_main";
-const QString SETTINGS_LIBRARY_FILES_PATHITEM   = "files/pathitem";
+
+// LIBRARY SETTINGS
+const QString SETTINGS_GROUP_LIBRARY          = "library";
+const QString SETTINGS_SPLITTER_LIBRARY_SIZES = "splitter_main";
+const QString SETTINGS_LIBRARY_FILES_PATHITEM = "files/pathitem";
 
 #endif // CONSTANTS

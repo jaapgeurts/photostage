@@ -18,7 +18,7 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     ui->setupUi(this);
 
     QSettings  settings;
-    settings.beginGroup("library");
+    settings.beginGroup(SETTINGS_GROUP_LIBRARY);
     QList<int> l;
 
     if (settings.contains(SETTINGS_SPLITTER_LIBRARY_SIZES))
@@ -33,6 +33,7 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
         l << 200 << 600 << 200;
     }
     ui->splitterMain->setSizes(l);
+    settings.endGroup();
 
     ImageDbTile* tile = new ImageDbTile(ui->mPhotoGrid);
     // connect(tile,&ImageDbTile::rotateLeftClicked, this, &Library::rotateLeftClicked);
@@ -120,7 +121,7 @@ Library::~Library()
 {
     QSettings settings;
 
-    settings.beginGroup("library");
+    settings.beginGroup(SETTINGS_GROUP_LIBRARY);
     QVariantList list;
 
     foreach(int size, ui->splitterMain->sizes())
@@ -129,6 +130,7 @@ Library::~Library()
     }
     settings.setValue(SETTINGS_SPLITTER_LIBRARY_SIZES, list);
 
+    settings.endGroup();
     delete ui;
 }
 

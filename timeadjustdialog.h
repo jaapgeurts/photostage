@@ -1,7 +1,9 @@
-#ifndef TIMEADJUSTDIALOG_H
-#define TIMEADJUSTDIALOG_H
+#ifndef PHOTOSTAGE_TIMEADJUSTDIALOG_H
+#define PHOTOSTAGE_TIMEADJUSTDIALOG_H
 
 #include <QDialog>
+
+#include "photo.h"
 
 namespace Ui
 {
@@ -19,10 +21,17 @@ class TimeAdjustDialog : public QDialog
         explicit TimeAdjustDialog(QWidget* parent = 0);
         ~TimeAdjustDialog();
 
+        void setPhoto(const Photo& photo);
+
+    protected:
+
+        bool eventFilter(QObject* obj, QEvent* event);
+
     private:
 
         Ui::TimeAdjustDialog* ui;
+        Photo                 mPhoto;
 };
 }
 
-#endif // TIMEADJUSTDIALOG_H
+#endif //PHOTOSTAGE_TIMEADJUSTDIALOG_H

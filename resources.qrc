@@ -12,4 +12,10 @@
     <qresource prefix="/icons">
         <file alias="map-pin.png">resources/icons/map-pin.png</file>
     </qresource>
+    <qresource prefix="/images">
+        <file alias="worldmap.jpg">resources/worldmap.jpg</file>
+    </qresource>
+    <qresource prefix="/data">
+        <file alias="tz_world.txt">resources/tz_world.txt</file>
+    </qresource>
 </RCC>

@@ -22,15 +22,13 @@ int main(int argc, char* argv[])
 
     // Load extra fonts
     /*int id =*/ //QFontDatabase::addApplicationFont(":/fonts/font-awesome.ttf");
-    int         id = QFontDatabase::addApplicationFont(
-        ":/fonts/foundation-icons-general.ttf");
-    QStringList l = QFontDatabase::applicationFontFamilies(id);
+    int         id = QFontDatabase::addApplicationFont(":/fonts/foundation-icons-general.ttf");
+    QStringList l  = QFontDatabase::applicationFontFamilies(id);
 
     qDebug() << "Loaded fonts:" << l;
 
-    id = QFontDatabase::addApplicationFont(
-        ":/fonts/foundation-icons-accessibility.ttf");
-    l = QFontDatabase::applicationFontFamilies(id);
+    id = QFontDatabase::addApplicationFont(":/fonts/foundation-icons-accessibility.ttf");
+    l  = QFontDatabase::applicationFontFamilies(id);
     qDebug() << "Loaded fonts:" << l;
 
     // Setup application details

@@ -19,7 +19,6 @@ class ModelIndexLayer : public Layer
         enum LayerRole
         {
             GeoCoordinateRole = Qt::UserRole + 200,
-            CountRole         = Qt::UserRole,
             DataRole          = Qt::UserRole
         };
 

@@ -9,6 +9,8 @@
 
 #include "imagefiletile.h"
 
+#include "constants.h"
+
 namespace PhotoStage
 {
 ImportDialog::ImportDialog(QWidget* parent) :
@@ -19,17 +21,10 @@ ImportDialog::ImportDialog(QWidget* parent) :
 
     setWindowIcon(QIcon());
 
-    // add our own CellFlowView
-    mCfvPhotos = new Widgets::TileView(ui->frmMain);
-    mCfvPhotos->setTileFlyweight(new ImageFileTile());
-    mCfvPhotos->setMinimumCellWidth(125);
-    mCfvPhotos->setMaximumCellWidth(175);
-    mCfvPhotos->setCheckBoxMode(true);
-
-    //QPushButton* btn = new QPushButton("Hello",ui->frmMain);
-    QHBoxLayout* hbLayout = (QHBoxLayout*)ui->frmMain->layout();
-    hbLayout->insertWidget(1, mCfvPhotos);
-    hbLayout->setStretchFactor(mCfvPhotos, 1);
+    ui->mCfvPhotos->setTileFlyweight(new ImageFileTile());
+    ui->mCfvPhotos->setMinimumCellWidth(125);
+    ui->mCfvPhotos->setMaximumCellWidth(175);
+    ui->mCfvPhotos->setCheckBoxMode(true);
 
     /***
      * Source file model
@@ -46,12 +41,15 @@ ImportDialog::ImportDialog(QWidget* parent) :
     ui->trvwSource->hideColumn(2);
     ui->trvwSource->hideColumn(3);
     ui->trvwSource->expand(srcindex);
+
+    // READ Settings
     QSettings settings;
-    settings.beginGroup("imageportdialog");
+    //qDebug() << settings.fileName();
+    settings.beginGroup(SETTINGS_GROUP_IMPORTDIALOG);
 
-    mImportMode = ImportOptions::ImportCopy;
-
-    mImportMode = (ImportOptions::ImportMode)settings.value("importmode").toInt();
+    qDebug() << "all group" << settings.allKeys();
+    int val = settings.value(SETTINGS_IMPORTMODE, (int)ImportOptions::ImportCopy).toInt();
+    mImportMode = (ImportOptions::ImportMode)val;
 
     switch (mImportMode)
     {
@@ -68,7 +66,7 @@ ImportDialog::ImportDialog(QWidget* parent) :
             break;
     }
 
-    QString     str = settings.value("sourcepath").toString();
+    QString     str = settings.value(SETTINGS_IMPORT_SOURCEPATH).toString();
     qDebug() << "Setting path:" << str;
     QModelIndex index    = mSourceDrivesModel->index(str);
     QModelIndex dirIndex = index;
@@ -78,16 +76,14 @@ ImportDialog::ImportDialog(QWidget* parent) :
         index = index.parent();
     }
     while (index.isValid());
-    ui->trvwSource->selectionModel()->setCurrentIndex(dirIndex,
-        QItemSelectionModel::ClearAndSelect);
+    ui->trvwSource->selectionModel()->setCurrentIndex(dirIndex, QItemSelectionModel::ClearAndSelect);
 
     /***
      * Destination File Model
      */
     mDestinationDrivesModel =  new QFileSystemModel(this);
     mDestinationDrivesModel->setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    /* QModelIndex destIndex = */ mDestinationDrivesModel->setRootPath(
-        "/Volumes");
+    /* QModelIndex destIndex = */ mDestinationDrivesModel->setRootPath("/Volumes");
     ui->trvwDestination->setModel(mDestinationDrivesModel);
 
 #ifdef Q_OS_MAC
@@ -105,20 +101,18 @@ ImportDialog::ImportDialog(QWidget* parent) :
      */
 
     mFilesModel = new ImageFileSystemModel(this);
-    mCfvPhotos->setModel(mFilesModel);
+    ui->mCfvPhotos->setModel(mFilesModel);
     //    mFilesSelectionModel = new QItemSelectionModel(mFilesModel,this);
     //    mCfvPhotos->setSelectionModel(mFilesSelectionModel);
 
-    mCfvPhotos->setRootIndex(mFilesModel->setRootPath(str));
+    ui->mCfvPhotos->setRootIndex(mFilesModel->setRootPath(str));
     ui->btnImport->setEnabled(false);
-    ui->btnImport->setToolTip(
-        "You must select images before you can import.");
+    ui->btnImport->setToolTip(tr("You must select images before you can import."));
 
     // TODO: change to selection model
-    connect(mCfvPhotos->selectionModel(), &QItemSelectionModel::selectionChanged,
-        this, &ImportDialog::onFilesSelected);
+    connect(ui->mCfvPhotos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ImportDialog::onFilesSelected);
 
-    connect(mCfvPhotos, &Widgets::TileView::checkedItemsChanged, this, &ImportDialog::onCheckedItemsChanged);
+    connect(ui->mCfvPhotos, &Widgets::TileView::checkedItemsChanged, this, &ImportDialog::onCheckedItemsChanged);
 }
 
 ImportDialog::~ImportDialog()
@@ -126,18 +120,18 @@ ImportDialog::~ImportDialog()
     if (result() == QDialog::Accepted)
     {
         QSettings   settings;
-        settings.beginGroup("importdialog");
+        settings.beginGroup(SETTINGS_GROUP_IMPORTDIALOG);
         QModelIndex index = ui->trvwSource->currentIndex();
 
         if (index.isValid())
         {
             QString path =
                 mSourceDrivesModel->fileInfo(index).absoluteFilePath();
-            settings.setValue("sourcepath", path);
+            settings.setValue(SETTINGS_IMPORT_SOURCEPATH, path);
             qDebug() << "Saving last path" << path;
         }
         // TODO: save importmode
-        settings.setValue("importmode", (int)mImportMode);
+        settings.setValue(SETTINGS_IMPORTMODE, (int)mImportMode);
     }
     delete ui;
 }
@@ -147,7 +141,7 @@ void ImportDialog::onSourceDirClicked(const QModelIndex& index)
     QString path = mSourceDrivesModel->fileInfo(index).absoluteFilePath();
 
     mFilesModel->clearCache();
-    mCfvPhotos->setRootIndex(mFilesModel->setRootPath(path));
+    ui->mCfvPhotos->setRootIndex(mFilesModel->setRootPath(path));
     validateForm();
 }
 
@@ -169,7 +163,7 @@ void ImportDialog::onIncludeSubdirs()
 
 void ImportDialog::validateForm()
 {
-    if (mCfvPhotos->checkedItems().size() == 0)
+    if (ui->mCfvPhotos->checkedItems().size() == 0)
     {
         ui->btnImport->setEnabled(false);
         ui->btnImport->setToolTip(
@@ -201,7 +195,7 @@ void ImportDialog::onDestinationDirClicked(const QModelIndex& index)
 ImportInfo ImportDialog::importInfo()
 {
     QList<QFileInfo> list;
-    foreach(QModelIndex index, mCfvPhotos->checkedItems())
+    foreach(QModelIndex index, ui->mCfvPhotos->checkedItems())
     {
         list.append(mFilesModel->fileInfo(index));
     }

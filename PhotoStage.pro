@@ -111,7 +111,8 @@ SOURCES += \
     database/keyworddao.cpp \
     database/keyworditem.cpp \
     cartography/cartography.cpp \
-    widgets/mapview/modelindexlayer.cpp
+    widgets/mapview/modelindexlayer.cpp \
+    widgets/timezonepicker.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -206,7 +207,8 @@ HEADERS  += \
     database/keyworddao.h \
     database/keyworditem.h \
     cartography/cartography.h \
-    widgets/mapview/modelindexlayer.h
+    widgets/mapview/modelindexlayer.h \
+    widgets/timezonepicker.h
 
 FORMS    += \
     mainwindow.ui \

@@ -2,11 +2,14 @@
 
 namespace PhotoStage
 {
-ImportOptions::ImportOptions(const QFileInfo& destDir,
-    const ImportMode& mode)
+ImportOptions::ImportOptions()
 {
-    mDestinationDir = destDir;
-    mImportMode     = mode;
+}
+
+ImportOptions::ImportOptions(const QFileInfo& destDir, const ImportMode& mode) :
+    mDestinationDir(destDir),
+    mImportMode(mode)
+{
 }
 
 const QFileInfo& ImportOptions::destinationDir() const
