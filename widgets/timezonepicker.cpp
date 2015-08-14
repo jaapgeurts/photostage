@@ -10,17 +10,17 @@ namespace Widgets
 {
 TimezonePicker::TimezonePicker(QWidget* parent) :
     QWidget(parent),
-    mBackground(":/images/worldmap.jpg")
+    mBackground(":/images/worldmap.jpg"),
+    mFontGeneralFoundIcons(QFont("General Foundicons", 22))
 {
     parseCountries();
 
     setMouseTracking(true);
 
-    QTimeZone tz("Asia/Ho_Chi_Minh");
-    qDebug() << "HCM offset:" << tz.standardTimeOffset(QDateTime::currentDateTime());
-    qDebug() << "+7:" << QTimeZone::availableTimeZoneIds(25200);
-
     mCountryMap = createMap();
+    mMenu       = new QMenu(this);
+    mMenu->addAction(tr("Home"), this, SLOT(plantHomeFlag()));
+    mMenu->addAction(tr("Destination"), this, SLOT(plantDestinationFlag()));
 }
 
 TimezonePicker::~TimezonePicker()
@@ -207,7 +207,28 @@ void TimezonePicker::mouseMoveEvent(QMouseEvent* event)
     update();
 }
 
-QHash<int, QStringList*> TimezonePicker::createMap()
+void TimezonePicker::mouseReleaseEvent(QMouseEvent* event)
+{
+    if (event->button() | Qt::LeftButton)
+    {
+        mLastClickLocation = event->pos();
+        mMenu->popup(mapToGlobal(event->pos()));
+    }
+}
+
+int TimezonePicker::plantHomeFlag()
+{
+    mHomeFlagLocation = pointToGeo(mLastClickLocation);
+    update();
+}
+
+int TimezonePicker::plantDestinationFlag()
+{
+    mDestinationFlagLocation = pointToGeo(mLastClickLocation);
+    update();
+}
+
+QHash<int, QStringList*> TimezonePicker::createMap() const
 {
     QHash<int, QStringList*> map;
 
@@ -227,7 +248,7 @@ QHash<int, QStringList*> TimezonePicker::createMap()
     return map;
 }
 
-TimezoneArea* TimezonePicker::contains(const QPoint& pos)
+TimezoneArea* TimezonePicker::contains(const QPoint& pos) const
 {
     foreach(TimezoneArea * a, mTimezoneAreas)
     {
@@ -241,16 +262,16 @@ TimezoneArea* TimezonePicker::contains(const QPoint& pos)
     return NULL;
 }
 
-void TimezonePicker::makePath(QPainterPath& path, const TimezoneArea* a)
+void TimezonePicker::makePath(QPainterPath& path, const TimezoneArea* a) const
 {
     //        if (!a.timezonename.startsWith("Europe"))
     //            continue;
     // only draw main polygon. (ignore the cutout polygons
     const QList<QGeoCoordinate> list = a->polygons.at(0);
     const QGeoCoordinate        c1   = list.at(0);
-    int                         x1   = (c1.longitude() + 180.0) / 360.0 * mBackgroundScaled.width();
-    int                         y1   = mBackgroundScaled.height() -
-        (c1.latitude() + 90.0) / 180.0 * mBackgroundScaled.height();
+    const QPoint                p1   = geoToPoint(c1);
+    int                         x1   = p1.x();
+    int                         y1   = p1.y();
 
     path.moveTo(x1, y1);
 
@@ -260,10 +281,9 @@ void TimezonePicker::makePath(QPainterPath& path, const TimezoneArea* a)
     while (i < size)
     {
         const QGeoCoordinate c2 = list.at(i);
-
-        int                  x2 = (c2.longitude() + 180.0) / 360.0 * mBackgroundScaled.width();
-        int                  y2 = mBackgroundScaled.height() -
-            (c2.latitude() + 90.0) / 180.0 * mBackgroundScaled.height();
+        const QPoint         p2 = geoToPoint(c2);
+        int                  x2 = p2.x();
+        int                  y2 = p2.y();
 
         if (x1 != x2 || y1 != y2) // don't draw what we can't see
             path.lineTo(x2, y2);
@@ -291,6 +311,37 @@ void TimezonePicker::paintEvent(QPaintEvent* event)
         else
             painter.drawPath(path);
     }
+
+    QString icon = "";
+    painter.setFont(mFontGeneralFoundIcons);
+
+    if (mHomeFlagLocation.isValid())
+    {
+        QPen   pen(Qt::yellow);
+        painter.setPen(pen);
+        QPoint p = geoToPoint(mHomeFlagLocation);
+        painter.drawText(p, icon);
+    }
+
+    if (mDestinationFlagLocation.isValid())
+    {
+        QPen pen(Qt::cyan);
+        painter.setPen(pen);
+        QPoint p = geoToPoint(mDestinationFlagLocation);
+        painter.drawText(p, icon);
+    }
+}
+
+QPoint TimezonePicker::geoToPoint(const QGeoCoordinate& coord) const
+{
+    return QPoint((coord.longitude() + 180) / 360 * mBackgroundScaled.width(),
+               mBackgroundScaled.height() - (coord.latitude() + 90) / 180 * mBackgroundScaled.height());
+}
+
+QGeoCoordinate TimezonePicker::pointToGeo(const QPoint& point) const
+{
+    return QGeoCoordinate((double)(mBackgroundScaled.height() - point.y()) / mBackgroundScaled.height() * 180 - 90,
+               (double)point.x() / mBackgroundScaled.width() * 360 - 180);
 }
 
 void TimezonePicker::resizeEvent(QResizeEvent* event)

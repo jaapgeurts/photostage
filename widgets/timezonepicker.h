@@ -9,6 +9,7 @@
 #include <QList>
 #include <QGeoCoordinate>
 #include <QHash>
+#include <QMenu>
 
 namespace Widgets
 {
@@ -21,6 +22,8 @@ struct TimezoneArea
 
 class TimezonePicker : public QWidget
 {
+    Q_OBJECT
+
     public:
 
         TimezonePicker(QWidget* parent = 0);
@@ -32,6 +35,12 @@ class TimezonePicker : public QWidget
         void resizeEvent(QResizeEvent* event);
 
         void mouseMoveEvent(QMouseEvent* event);
+        void mouseReleaseEvent(QMouseEvent* event);
+
+    private slots:
+
+        int plantHomeFlag();
+        int plantDestinationFlag();
 
     private:
 
@@ -39,12 +48,20 @@ class TimezonePicker : public QWidget
         QPixmap                  mBackgroundScaled;
         QList<TimezoneArea*>     mTimezoneAreas;
         QHash<int, QStringList*> mCountryMap;
+        QMenu*                   mMenu;
+        QGeoCoordinate           mHomeFlagLocation;
+        QGeoCoordinate           mDestinationFlagLocation;
+        QPoint                   mLastClickLocation;
+        QFont                    mFontGeneralFoundIcons;
 
         void parseCountries();
-        void makePath(QPainterPath& path, const TimezoneArea* a);
-        TimezoneArea* contains(const QPoint& pos);
+        void makePath(QPainterPath& path, const TimezoneArea* a) const;
+        TimezoneArea* contains(const QPoint& pos) const;
 
-        QHash<int, QStringList*> createMap();
+        QHash<int, QStringList*> createMap() const;
+
+        QGeoCoordinate pointToGeo(const QPoint& point) const;
+        QPoint geoToPoint(const QGeoCoordinate& coord) const;
 };
 }
 #endif // TIMEZONEPICKER_H

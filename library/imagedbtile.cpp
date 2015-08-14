@@ -87,13 +87,10 @@ void ImageDbTile::render(QPainter& painter, const Widgets::TileInfo& tileInfo, c
                 painter.setFont(mFontGeneralFoundIcons);
 
                 if (info.flag() == Photo::FlagPick)
-                {
                     pen.setColor(Qt::white);
-                }
                 else if (info.flag() == Photo::FlagReject)
-                {
                     pen.setColor(Qt::black);
-                }
+
                 QString icon = "";     // flag icon
 
                 painter.setPen(pen);
