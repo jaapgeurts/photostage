@@ -1,12 +1,14 @@
 #ifndef WIDGETS_TIMEZONEPICKER_H
 #define WIDGETS_TIMEZONEPICKER_H
 
+#include <QStringList>
 #include <QWidget>
 #include <QPaintEvent>
 #include <QPixmap>
 #include <QResizeEvent>
 #include <QList>
 #include <QGeoCoordinate>
+#include <QHash>
 
 namespace Widgets
 {
@@ -33,14 +35,16 @@ class TimezonePicker : public QWidget
 
     private:
 
-        QPixmap              mBackground;
-        QPixmap              mBackgroundScaled;
-        QList<TimezoneArea*> mTimezoneAreas;
-        TimezoneArea*        mHighlighted;
+        QPixmap                  mBackground;
+        QPixmap                  mBackgroundScaled;
+        QList<TimezoneArea*>     mTimezoneAreas;
+        QHash<int, QStringList*> mCountryMap;
 
         void parseCountries();
         void makePath(QPainterPath& path, const TimezoneArea* a);
         TimezoneArea* contains(const QPoint& pos);
+
+        QHash<int, QStringList*> createMap();
 };
 }
 #endif // TIMEZONEPICKER_H

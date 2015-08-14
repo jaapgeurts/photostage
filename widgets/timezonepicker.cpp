@@ -15,12 +15,21 @@ TimezonePicker::TimezonePicker(QWidget* parent) :
     parseCountries();
 
     setMouseTracking(true);
+
+    QTimeZone tz("Asia/Ho_Chi_Minh");
+    qDebug() << "HCM offset:" << tz.standardTimeOffset(QDateTime::currentDateTime());
+    qDebug() << "+7:" << QTimeZone::availableTimeZoneIds(25200);
+
+    mCountryMap = createMap();
 }
 
 TimezonePicker::~TimezonePicker()
 {
     qDeleteAll(mTimezoneAreas);
     mTimezoneAreas.clear();
+
+    qDeleteAll(mCountryMap.values());
+    mCountryMap.clear();
 }
 
 void TimezonePicker::parseCountries()
@@ -79,7 +88,7 @@ void TimezonePicker::parseCountries()
                         state = COORDINATELIST;
                     else if (l == ')')
                     {
-                        qDebug() << "Adding country/timezone" << tzArea->timezonename;
+                        // qDebug() << "Adding country/timezone" << tzArea->timezonename;
                         mTimezoneAreas.append(tzArea);
                     }
                     else
@@ -181,26 +190,41 @@ void TimezonePicker::mouseMoveEvent(QMouseEvent* event)
         QTimeZone tz(tzArea->timezonename.toLocal8Bit());
 
         // now get all countries for this timezone
-        QList<QByteArray> countries = QTimeZone::availableTimeZoneIds(tz.country());
+        QStringList* countries =  mCountryMap.value(tz.standardTimeOffset(QDateTime::currentDateTime()));
 
-        foreach(QByteArray a, countries)
+        foreach(TimezoneArea * a, mTimezoneAreas)
         {
-            qDebug() << QString::fromLocal8Bit(a);
+            a->isHighlighted = false;
+
+            foreach(QString ba, *countries)
+            {
+                if (a->timezonename == ba)
+                    a->isHighlighted = true;
+            }
         }
     }
 
-    if (mHighlighted != tzArea)
+    update();
+}
+
+QHash<int, QStringList*> TimezonePicker::createMap()
+{
+    QHash<int, QStringList*> map;
+
+    QList<QByteArray>        ianaList = QTimeZone::availableTimeZoneIds();
+    foreach(QByteArray a, ianaList)
     {
-        if (mHighlighted != NULL)
-            mHighlighted->isHighlighted = false;
+        QTimeZone z(a);
 
-        mHighlighted = tzArea;
+        int       offset = z.standardTimeOffset(QDateTime::currentDateTime());
 
-        if (mHighlighted != NULL)
-            mHighlighted->isHighlighted = true;
+        if (!map.contains(offset))
+            map.insert(offset, new QStringList());
 
-        update();
+        map.value(offset)->append(QString(a));
     }
+
+    return map;
 }
 
 TimezoneArea* TimezonePicker::contains(const QPoint& pos)
