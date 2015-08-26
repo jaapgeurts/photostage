@@ -1,5 +1,5 @@
-#ifndef PREVIEWINFO_H
-#define PREVIEWINFO_H
+#ifndef PHOTOSTAGE_PREVIEWINFO_H
+#define PHOTOSTAGE_PREVIEWINFO_H
 
 #include <QString>
 #include <QImage>
@@ -21,4 +21,4 @@ class PreviewInfo
 }
 Q_DECLARE_METATYPE(PhotoStage::PreviewInfo)
 
-#endif // PREVIEWINFO_H
+#endif // PHOTOSTAGE_PREVIEWINFO_H

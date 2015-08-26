@@ -1,5 +1,5 @@
-#ifndef EXIVFACADE_H
-#define EXIVFACADE_H
+#ifndef PHOTOSTAGE_EXIVFACADE_H
+#define PHOTOSTAGE_EXIVFACADE_H
 
 #include <QImage>
 #include <QDateTime>
@@ -28,26 +28,26 @@ struct ExifInfo
     Nullable<QString> model;
 
     // Image details
-    Rotation rotation;
+    Rotation                 rotation;
     Nullable<QGeoCoordinate> location;
-    Nullable<QDateTime> dateTimeOriginal;
-    Nullable<QDateTime> dateTimeDigitized;
-    Nullable<QString> copyright;
-    Nullable<QString> artist;
+    Nullable<QDateTime>      dateTimeOriginal;
+    Nullable<QDateTime>      dateTimeDigitized;
+    Nullable<QString>        copyright;
+    Nullable<QString>        artist;
 
     int width;
     int height;
 
     // photo tech details
-    Nullable<float> exposureTime;
-    Nullable<float> aperture;
+    Nullable<float>   exposureTime;
+    Nullable<float>   aperture;
     Nullable<uint8_t> isoSpeed;
-    Nullable<bool> flash;
-    float rgbCoeffients[3]; // white balance coefficients
+    Nullable<bool>    flash;
+    float             rgbCoeffients[3]; // white balance coefficients
 
     // Lens details
     Nullable<QString> lensName;
-    Nullable<float> focalLength;
+    Nullable<float>   focalLength;
 
     QString formatExposure() const;
     QString formatDimension() const;
@@ -63,9 +63,10 @@ class ExivFacade
         {
         };
 
-        virtual bool openFile(const QString& path) = 0;
-        virtual QImage getPreview()                = 0;
-        virtual ExifInfo data()                    = 0;
+        virtual bool openFile(const QString& path)    = 0;
+        virtual bool openData(const QByteArray& data) = 0;
+        virtual QImage getPreview()                   = 0;
+        virtual ExifInfo data()                       = 0;
 
     protected:
 
@@ -73,4 +74,4 @@ class ExivFacade
 };
 }
 
-#endif // EXIVFACADE_H
+#endif // PHOTOSTAGE_EXIVFACADE_H

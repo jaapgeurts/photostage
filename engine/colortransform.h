@@ -1,5 +1,5 @@
-#ifndef COLOR_H
-#define COLOR_H
+#ifndef PHOTOSTAGE_COLOR_H
+#define PHOTOSTAGE_COLOR_H
 
 #include <QImage>
 #include <QHash>
@@ -26,18 +26,16 @@ class ColorTransform
 
         // convenience functions that retain the result for future use
         static ColorTransform getTransform(const QString& iden,
-            const QString& from,
-            const QString& to,
-            Format inFormat =  FORMAT_FLOAT,
-            Format outFormat = FORMAT_FLOAT);
+            const QString& from, const QString& to, Format inFormat =  FORMAT_FLOAT, Format outFormat = FORMAT_FLOAT);
+        static ColorTransform getTransform(const QByteArray& srcProfile,
+            const QString& to, Format inFormat, Format outFormat);
 
         static QString getMonitorProfilePath();
 
         ColorTransform();
-        ColorTransform(const QString& from,
-            const QString& to,
-            Format inFormat = FORMAT_FLOAT,
-            Format outFormat = FORMAT_FLOAT);
+        ColorTransform(const QString& from, const QString& to,
+            Format inFormat = FORMAT_FLOAT, Format outFormat = FORMAT_FLOAT);
+        ColorTransform(const QByteArray& srcProfile, const QString& to, Format inFormat, Format outFormat);
         ColorTransform(const cmsHTRANSFORM& cmsTransform);
         ~ColorTransform();
 
@@ -56,4 +54,4 @@ class ColorTransform
         QSharedPointer<char>                  mHTransform;
 };
 }
-#endif // COLOR_H
+#endif // PHOTOSTAGE_COLOR_H

@@ -19,7 +19,7 @@ class ColorTransformJob  : public QObject, public Runnable
 
         QVariant run();
         void finished(QVariant result);
-        void error(const QString& error);
+        void error(const QString&);
         void cancel();
 
     signals:

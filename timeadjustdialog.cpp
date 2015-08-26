@@ -1,3 +1,6 @@
+#include <QTimeZone>
+#include <QDebug>
+
 #include "timeadjustdialog.h"
 #include "ui_timeadjustdialog.h"
 
@@ -11,6 +14,22 @@ TimeAdjustDialog::TimeAdjustDialog(QWidget* parent) :
 
     ui->setupUi(this);
     ui->lblPhoto->installEventFilter(this);
+
+    connect(ui->tzPicker, &Widgets::TimezonePicker::homeTimezoneSelected,
+        this, &TimeAdjustDialog::onHomeTimezoneSelected);
+    connect(ui->tzPicker, &Widgets::TimezonePicker::destinationTimezoneSelected,
+        this, &TimeAdjustDialog::onDestinationTimezoneSelected);
+
+    QStringList       timezones;
+    QList<QByteArray> available = QTimeZone::availableTimeZoneIds();
+    foreach(QByteArray a, available)
+    {
+        QString s(a);
+
+        timezones.append(s);
+    }
+    ui->cbHome->addItems(timezones);
+    ui->cbDestination->addItems(timezones);
 }
 
 TimeAdjustDialog::~TimeAdjustDialog()
@@ -29,6 +48,18 @@ bool TimeAdjustDialog::eventFilter(QObject* obj, QEvent* event)
         return true;
     }
     return QObject::eventFilter(obj, event);
+}
+
+void TimeAdjustDialog::onHomeTimezoneSelected(const QString& tzName)
+{
+    qDebug() << "Home selected" << tzName;
+    ui->cbHome->setCurrentText(tzName);
+}
+
+void TimeAdjustDialog::onDestinationTimezoneSelected(const QString& tzName)
+{
+    qDebug() << "Dest selected" << tzName;
+    ui->cbDestination->setCurrentText(tzName);
 }
 
 void TimeAdjustDialog::setPhoto(const Photo& photo)

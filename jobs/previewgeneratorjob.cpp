@@ -9,6 +9,7 @@
 #include "import/exivfacade.h"
 #include "engine/colortransform.h"
 #include "engine/pipelinebuilder.h"
+#include "io/jpegio.h"
 
 template<typename T>
 static inline long max(T x, T y)
@@ -90,25 +91,39 @@ void PreviewGeneratorJob::cancel()
 QImage PreviewGeneratorJob::genThumb(const QString& path)
 {
     // TODO: catch errors and emit error(QString)
-    QImage  image;
+    QImage image;
+
+    // load the file into a buffer first.
+    QFile file(path);
+
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        qDebug("Can't open file");
+        return image;
+    }
+    QByteArray memFile = file.readAll();
+    file.close();
 
     QString suffix = QFileInfo(path).suffix().toUpper();
 
+    // TODOL
     if (suffix == "NEF" || suffix == "CR2" || suffix == "CRW")
     {
         qDebug() << "Load raw" << path;
 
-        image = rawThumb(path);
+        image = rawThumb(memFile);
     }
     else
     {
-        qDebug() << "Load jpg" << path;
-        QImage pixmap = QImage(path);
+        // Read using JPEG library
+        //qDebug() << "Load jpg" << path;
+        QByteArray iccProfile;
+        QImage     pixmap = JpegIO::readFile(memFile, iccProfile);
 
         // rotate the image if necessary
         ExivFacade* ex = ExivFacade::createExivReader();
 
-        if (!ex->openFile(path))
+        if (!ex->openData(memFile))
         {
             qDebug() << "Error loading exif data from image";
             return image;
@@ -131,7 +146,8 @@ QImage PreviewGeneratorJob::genThumb(const QString& path)
                 break;
 
             default:
-                qDebug() << "Unimplemented rotation value";
+                // qDebug() << "Unimplemented rotation value";
+                break;
         }
 
         if (!pixmap.isNull())
@@ -143,10 +159,19 @@ QImage PreviewGeneratorJob::genThumb(const QString& path)
 
             if (pixmap.format() == QImage::Format_RGB32)
             {
-                fmt       = ColorTransform::FORMAT_RGB32;
-                toWorking = ColorTransform::getTransform("sRGB-Melissa-RGB32",
-                        "sRGB", WORKING_COLOR_SPACE,
-                        fmt, ColorTransform::FORMAT_RGB32);
+                fmt = ColorTransform::FORMAT_RGB32;
+
+                if (!iccProfile.isEmpty())
+                {
+                    // use the embedded JPeg profile
+                    toWorking = ColorTransform::getTransform(iccProfile, WORKING_COLOR_SPACE,
+                            fmt, ColorTransform::FORMAT_RGB32);
+                }
+                else
+                {
+                    toWorking = ColorTransform::getTransform("sRGB-Melissa-RGB32",
+                            "sRGB", WORKING_COLOR_SPACE, fmt, ColorTransform::FORMAT_RGB32);
+                }
             }
             else if (pixmap.format() == QImage::Format_Grayscale8)
             {
@@ -155,8 +180,7 @@ QImage PreviewGeneratorJob::genThumb(const QString& path)
                 //                qDebug() << "Channels" << pixmap.bitPlaneCount();
                 fmt       = ColorTransform::FORMAT_GRAYSCALE8;
                 toWorking = ColorTransform::getTransform("sRGB-Melissa-Gray8",
-                        "sRGB", WORKING_COLOR_SPACE,
-                        fmt, ColorTransform::FORMAT_RGB32);
+                        "sRGB", WORKING_COLOR_SPACE, fmt, ColorTransform::FORMAT_RGB32);
             }
             else
             {
@@ -297,13 +321,13 @@ void PreviewGeneratorJob::getMatrix(float* in, float* out)
     compute_inverse(in, out);
 }
 
-QImage PreviewGeneratorJob::rawThumb(const QString& path)
+QImage PreviewGeneratorJob::rawThumb(const QByteArray& memFile)
 {
     QImage      image;
 
     ExivFacade* ex = ExivFacade::createExivReader();
 
-    if (!ex->openFile(path))
+    if (!ex->openData(memFile))
     {
         qDebug() << "Error loading exif data from image";
         return image;
@@ -311,12 +335,13 @@ QImage PreviewGeneratorJob::rawThumb(const QString& path)
     ExifInfo ex_info = ex->data();
     delete(ex);
 
-    FileReader reader(strdup(path.toLocal8Bit().data()));
-    FileMap*   map;
+    //FileReader reader(strdup(path.toLocal8Bit().data()));
+    QSharedPointer<FileMap> map;
     try
     {
-        qDebug() << "loadRaw() opening" << reader.Filename();
-        map = reader.readFile();
+        // qDebug() << "loadRaw() opening" << reader.Filename();
+        //        map = reader.readFile();
+        map = QSharedPointer<FileMap>(new FileMap((uchar8*)memFile.constData(), (uint32)memFile.length()));
     }
     catch (const FileIOException& e)
     {
@@ -327,25 +352,25 @@ QImage PreviewGeneratorJob::rawThumb(const QString& path)
     // remove raw from here
     if (map == NULL)
     {
-        qDebug() << "Can't acquire map for raw file" << path;
+        qDebug() << "Can't acquire map for raw file";
         return image;
     }
 
-    RawDecoder* decoder=NULL;
+    RawDecoder* decoder = NULL;
     try
     {
-        RawParser parser(map);
+        RawParser parser(map.data());
         decoder = parser.getDecoder();
     }
     catch (const RawDecoderException& e)
     {
-        qDebug() << "(1) Can't acquire decoder for" << path;
+        qDebug() << "(1) Can't acquire decoder for";
         return image;
     }
 
     if (decoder == NULL)
     {
-        qDebug() << "(2) Can't acquire decoder for" << path;
+        qDebug() << "(2) Can't acquire decoder for";
         return image;
     }
     decoder->failOnUnknown = 0;
@@ -358,7 +383,7 @@ QImage PreviewGeneratorJob::rawThumb(const QString& path)
     }
     catch (const RawDecoderException& e)
     {
-        qDebug() << "Can't decode image" << path;
+        qDebug() << "Can't decode image";
         qDebug() << "Exception:" << e.what();
         return image;
     }

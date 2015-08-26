@@ -1,5 +1,5 @@
-#ifndef PREVIEWCACHELOADERJOB_H
-#define PREVIEWCACHELOADERJOB_H
+#ifndef PHOTOSTAGE_PREVIEWCACHELOADERJOB_H
+#define PHOTOSTAGE_PREVIEWCACHELOADERJOB_H
 
 #include <QObject>
 #include "runnable.h"
@@ -17,7 +17,7 @@ class PreviewCacheLoaderJob :   public QObject, public Runnable
 
         QVariant run();
         void finished(QVariant result);
-        void error(const QString& error);    
+        void error(const QString&);
         void cancel();
 
 signals:
@@ -29,4 +29,4 @@ signals:
         Photo mPhoto;
 };
 }
-#endif // PREVIEWCACHELOADERJOB_H
+#endif // PHOTOSTAGE_PREVIEWCACHELOADERJOB_H

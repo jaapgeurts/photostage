@@ -29,9 +29,14 @@ class TimezonePicker : public QWidget
         TimezonePicker(QWidget* parent = 0);
         ~TimezonePicker();
 
+    signals:
+
+        void homeTimezoneSelected(const QString& tzName);
+        void destinationTimezoneSelected(const QString& tzName);
+
     protected:
 
-        void paintEvent(QPaintEvent* event);
+        void paintEvent(QPaintEvent*);
         void resizeEvent(QResizeEvent* event);
 
         void mouseMoveEvent(QMouseEvent* event);
@@ -39,8 +44,8 @@ class TimezonePicker : public QWidget
 
     private slots:
 
-        int plantHomeFlag();
-        int plantDestinationFlag();
+        void plantHomeFlag();
+        void plantDestinationFlag();
 
     private:
 

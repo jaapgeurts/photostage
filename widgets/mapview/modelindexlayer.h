@@ -45,9 +45,9 @@ class ModelIndexLayer : public Layer
 
     private slots:
 
-        void onRowsAdded(const QModelIndex& parent, int first, int last);
-        void onRowsRemoved(const QModelIndex& parent, int first, int last);
-        void onDataChanged(const QModelIndex& topleft, const QModelIndex& bottomright, const QVector<int>& roles);
+        void onRowsAdded(const QModelIndex&, int, int);
+        void onRowsRemoved(const QModelIndex&, int, int);
+        void onDataChanged(const QModelIndex&, const QModelIndex&, const QVector<int>&);
 
     private:
 

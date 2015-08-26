@@ -99,6 +99,8 @@ void PhotoModel::loadImage(Photo& photo)
 
     PreviewCacheLoaderJob* plj = new PreviewCacheLoaderJob(photo);
 
+    // TODO: decide wether the image is a "normal" JPEG, then load in parallel
+    // if the image is RAW and uses Halide, then load sequentual.
     plj->connect(plj, &PreviewCacheLoaderJob::imageReady, this, &PhotoModel::onPreviewLoaded);
     uint32_t id = mThreadQueue->addJob(plj);
     mRunningThreads.insert(photo.id(), id);

@@ -29,7 +29,7 @@ class TaggingModule : public LibraryModule
 
         void onKeywordsChanged();
         void onKeywordsAdded();
-        void onKeywordsAssignmentsChanged(const QList<Photo>& list);
+        void onKeywordsAssignmentsChanged(const QList<Photo>&);
 
     private:
 

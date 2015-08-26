@@ -187,7 +187,7 @@ long long CollectionDAO::addCollection(const Nullable<long long>& parentid, cons
     return addCollectionInternal(parentid, SOURCE_NAME_USER, name);
 }
 
-long long CollectionDAO::addImportCollection(int amount)
+long long CollectionDAO::addImportCollection(int /*amount*/)
 {
     QDateTime dt = QDateTime::currentDateTime();
 

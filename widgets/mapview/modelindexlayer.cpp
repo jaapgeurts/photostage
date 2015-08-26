@@ -247,19 +247,19 @@ void ModelIndexLayer::viewChanged()
     //    }
 }
 
-void ModelIndexLayer::onRowsAdded(const QModelIndex& parent, int first, int last)
+void ModelIndexLayer::onRowsAdded(const QModelIndex& /*parent*/, int /*first*/, int /*last*/)
 {
     qDebug () << "rows added";
 }
 
-void ModelIndexLayer::onRowsRemoved(const QModelIndex& parent, int first, int last)
+void ModelIndexLayer::onRowsRemoved(const QModelIndex& /*parent*/, int /*first*/, int /*last*/)
 {
     qDebug () << "rows removed";
 }
 
-void ModelIndexLayer::onDataChanged(const QModelIndex& topleft,
-    const QModelIndex& bottomright,
-    const QVector<int>& roles)
+void ModelIndexLayer::onDataChanged(const QModelIndex& /*topleft*/,
+    const QModelIndex& /*bottomright*/,
+    const QVector<int>& /*roles*/)
 {
     viewChanged();
 }

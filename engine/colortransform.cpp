@@ -4,6 +4,7 @@
 #include "colortransform.h"
 
 #include "platform.h"
+#include "utils.h"
 
 namespace PhotoStage
 {
@@ -12,10 +13,7 @@ QHash<QString, ColorTransform> ColorTransform::mTransformCache;
 QString                        ColorTransform::mMonitorProfilePath;
 
 ColorTransform ColorTransform::getTransform(const QString& iden,
-    const QString& from,
-    const QString& to,
-    Format inFormat,
-    Format outFormat)
+    const QString& from, const QString& to, Format inFormat, Format outFormat)
 {
     if (mTransformCache.contains(iden))
     {
@@ -27,6 +25,14 @@ ColorTransform ColorTransform::getTransform(const QString& iden,
         mTransformCache.insert(iden, transform );
         return transform;
     }
+}
+
+ColorTransform ColorTransform::getTransform(const QByteArray& srcProfile,
+    const QString& to, Format inFormat, Format outFormat)
+{
+    ColorTransform transform(srcProfile, to, inFormat, outFormat);
+
+    return transform;
 }
 
 QString ColorTransform::getMonitorProfilePath()
@@ -47,24 +53,14 @@ static void transform_delete(char* d)
 {
     cmsHTRANSFORM transform = (cmsHTRANSFORM)d;
 
-
     cmsDeleteTransform(transform);
 }
 
-ColorTransform::ColorTransform(const QString& from,
-    const QString& to,
-    Format inFormat,
-    Format outFormat)
+ColorTransform::ColorTransform(const QByteArray& srcProfile, const QString& to, Format inFormat, Format outFormat)
 {
     cmsHPROFILE hInProfile, hOutProfile;
 
-    QString     fromProfile =
-        "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" +
-        from +
-        ".icc";
-
-    QString toProfile;
-
+    QString     toProfile;
 
     if (to.at(0) == QDir::separator())
     {
@@ -76,9 +72,8 @@ ColorTransform::ColorTransform(const QString& from,
             "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + to +
             ".icc";
 
-    hInProfile  = cmsOpenProfileFromFile(fromProfile.toLocal8Bit().data(), "r");
-    hOutProfile =
-        cmsOpenProfileFromFile(toProfile.toLocal8Bit().data(), "r");
+    hInProfile  = cmsOpenProfileFromMem(srcProfile.constData(), srcProfile.length());
+    hOutProfile = cmsOpenProfileFromFile(toProfile.toLocal8Bit().data(), "r");
 
 #define MY_TYPE (FLOAT_SH(1) | COLORSPACE_SH(PT_RGB) | CHANNELS_SH(3) | \
     BYTES_SH(4) | DOSWAP_SH(1))
@@ -95,12 +90,55 @@ ColorTransform::ColorTransform(const QString& from,
         outputFormat = TYPE_BGRA_8;
 
     mHTransform =
-        QSharedPointer<char>((char*)cmsCreateTransform(hInProfile,
-            inputFormat,
-            hOutProfile,
-            outputFormat,
-            INTENT_PERCEPTUAL,
+        QSharedPointer<char>((char*)cmsCreateTransform(hInProfile, inputFormat,
+            hOutProfile, outputFormat, INTENT_PERCEPTUAL,
             0), transform_delete);
+
+    cmsCloseProfile(hInProfile);
+    cmsCloseProfile(hOutProfile);
+}
+
+ColorTransform::ColorTransform(const QString& from, const QString& to, Format inFormat, Format outFormat)
+{
+    cmsHPROFILE hInProfile, hOutProfile;
+
+    QString     fromProfile =
+        "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" +
+        from +
+        ".icc";
+
+    QString toProfile;
+
+    if (to.at(0) == QDir::separator())
+    {
+        toProfile = to;
+        qDebug() << "Loading monitor profile";
+    }
+    else
+        toProfile =
+            "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + to +
+            ".icc";
+
+    hInProfile  = cmsOpenProfileFromFile(fromProfile.toLocal8Bit().data(), "r");
+    hOutProfile = cmsOpenProfileFromFile(toProfile.toLocal8Bit().data(), "r");
+
+#define MY_TYPE (FLOAT_SH(1) | COLORSPACE_SH(PT_RGB) | CHANNELS_SH(3) | \
+    BYTES_SH(4) | DOSWAP_SH(1))
+
+    cmsUInt32Number inputFormat  = MY_TYPE;
+    cmsUInt32Number outputFormat = MY_TYPE;
+
+    if (inFormat == FORMAT_RGB32)
+        inputFormat = TYPE_BGRA_8;
+    else if (inFormat == FORMAT_GRAYSCALE8)
+        inputFormat = (COLORSPACE_SH(PT_RGB) | CHANNELS_SH(1) | BYTES_SH(1));
+
+    if (outFormat == FORMAT_RGB32)
+        outputFormat = TYPE_BGRA_8;
+
+    mHTransform =
+        QSharedPointer<char>((char*)cmsCreateTransform(hInProfile, inputFormat,
+            hOutProfile, outputFormat, INTENT_PERCEPTUAL, 0), transform_delete);
 
     cmsCloseProfile(hInProfile);
     cmsCloseProfile(hOutProfile);
@@ -121,15 +159,12 @@ Image ColorTransform::transformImage(const Image& inImage) const
 
     //qDebug() << "Has alpha" << (inImage.hasAlphaChannel() ? "yes" : "no");
 
-    Image  outImage(inImage.size());
+    Image        outImage(inImage.size());
 
-    float* inbuf  = inImage.data();
-    float* outbuf = outImage.data();
+    const float* inbuf  = inImage.data();
+    float*       outbuf = outImage.data();
 
-
-    cmsDoTransform(
-        (cmsHTRANSFORM)mHTransform.data(), inbuf, outbuf,
-        inImage.width() * inImage.height());
+    cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inbuf, outbuf, inImage.width() * inImage.height());
 
     return outImage;
 }
@@ -140,44 +175,39 @@ QImage ColorTransform::transformToQImage(const Image& inImage) const
     int    width  = outImage.width();
     int    height = outImage.height();
 
-
     for (int y = 0; y < height; y++)
     {
         const float* inLine  = inImage.scanLine(y);
         uint8_t*     outLine = outImage.scanLine(y);
 
-        cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inLine, outLine,
-            width);
-        //        for (int x = 0; x < width; x++)
-        //            for (int c = 0; c < 3; c++)
-        //                outLine[x * 4 + c] = (uint8_t)(inLine[x * 3 + c] * 255.0);
+        cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inLine, outLine, width);
     }
     return outImage;
 }
 
 QImage ColorTransform::transformQImage(const QImage& inImage) const
 {
-    QImage outImage(inImage.size(), QImage::Format_RGB32);
+    int      width  = inImage.width();
+    int      height = inImage.height();
 
-    int    width  = outImage.width();
-    int    height = outImage.height();
-
+    uint8_t* buffer = new uint8_t[width * height * 4];
 
     for (int y = 0; y < height; y++)
     {
         const uint8_t* inLine  = inImage.constScanLine(y);
-        uint8_t*       outLine = outImage.scanLine(y);
+        uint8_t*       outLine = &buffer[y * width * 4];
 
-        cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inLine, outLine,
-            width);
+        cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inLine, outLine, width);
 
         // TODO: optimization.. littleCMS can convert in place
         // when source and dest image format organization are the same
-        // set alpha value
         for (int x = 0; x < width; x++)
+            // set alpha value to 0xff (because little CMS does not)
             outLine[x * 4 + 3] = 0xff;
     }
-    return outImage;
+
+    return QImage(buffer, width, height, 4 * width,
+               QImage::Format_RGB32, PhotoStageFreeImageBuffer, buffer);
 }
 
 Image ColorTransform::transformFromQImage(const QImage& inImage) const
@@ -186,13 +216,11 @@ Image ColorTransform::transformFromQImage(const QImage& inImage) const
     int   height = inImage.height();
     int   width  = inImage.width();
 
-
     for (int y = 0; y < height; y++)
     {
         const uint8_t* inLine  = inImage.constScanLine(y);
         float*         outLine = outImage.scanLine(y);
-        cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inLine, outLine,
-            width);
+        cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inLine, outLine, width);
     }
     return outImage;
 }

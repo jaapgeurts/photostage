@@ -21,9 +21,7 @@ QSize PhotoMarker::size() const
     return QSize(24, 24 + 8);
 }
 
-void PhotoMarker::paint(QPainter& painter,
-    const MapView::MarkerInfo& info,
-    const QVariant& data)
+void PhotoMarker::paint(QPainter& painter, const MapView::MarkerInfo& info, const QVariant& /*data*/)
 {
     painter.setRenderHint(QPainter::Antialiasing);
     QBrush b;

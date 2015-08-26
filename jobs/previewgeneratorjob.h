@@ -51,7 +51,7 @@ class PreviewGeneratorJob : public QObject, public Runnable
         //        void vmultm(float* V, float* M, float* out);
         void normalize(float* M);
         QImage genThumb(const QString& path);
-        QImage rawThumb(const QString& path);
+        QImage rawThumb(const QByteArray &memFile);
         void getMatrix(float* in, float* out);
 };
 

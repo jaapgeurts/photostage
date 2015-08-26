@@ -24,7 +24,7 @@ class PhotoSortFilterProxyModel : public QSortFilterProxyModel
 
     protected:
 
-        bool filterAcceptsRow(int source_row, const QModelIndex& source_parent) const;
+        bool filterAcceptsRow(int source_row, const QModelIndex&) const;
 
     private:
 

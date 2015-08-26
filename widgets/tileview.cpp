@@ -743,7 +743,7 @@ void TileView::dragEnterEvent(QDragEnterEvent* event)
         event->ignore();
 }
 
-void TileView::dragLeaveEvent(QDragLeaveEvent* event)
+void TileView::dragLeaveEvent(QDragLeaveEvent* /*event*/)
 {
 }
 

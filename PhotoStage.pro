@@ -14,7 +14,8 @@ TEMPLATE =
 DEPENDPATH += .
 INCLUDEPATH += . \
                $$PWD/external/exiv2/include \
-               $$PWD/external/halide/include
+               $$PWD/external/halide/include \
+               $$PWD/external/libjpeg-turbo
 
 # Qt uses libstdc++
 CONFIG += c++11
@@ -112,7 +113,8 @@ SOURCES += \
     database/keyworditem.cpp \
     cartography/cartography.cpp \
     widgets/mapview/modelindexlayer.cpp \
-    widgets/timezonepicker.cpp
+    widgets/timezonepicker.cpp \
+    io/jpegio.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -208,7 +210,8 @@ HEADERS  += \
     database/keyworditem.h \
     cartography/cartography.h \
     widgets/mapview/modelindexlayer.h \
-    widgets/timezonepicker.h
+    widgets/timezonepicker.h \
+    io/jpegio.h
 
 FORMS    += \
     mainwindow.ui \
@@ -230,6 +233,7 @@ DISTFILES += \
 
 include($$PWD/external/rawspeed/rawspeed.pri)
 include($$PWD/external/xxHash/xxhash.pri)
+include($$PWD/external/iccjpeg/iccjpeg.pri)
 
 
 unix:!macx {
@@ -266,11 +270,13 @@ win32 {
 LIBS += \
             $$PWD/external/exiv2/lib/libexiv2.a \
             $$PWD/external/halide/lib/libHalide.a \
+            $$PWD/external/libjpeg-turbo/libjpeg.a \
+            $$PWD/external/libjpeg-turbo/libturbojpeg.a \
 # for libexiv2
             -lexpat \
             -lz \
 # end libexiv2
-            -ljpeg \
+         #   -ljpeg \
             -lpng \
             -llcms2
 

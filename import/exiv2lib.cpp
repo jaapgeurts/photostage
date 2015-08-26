@@ -117,15 +117,36 @@ bool Exiv2Lib::openFile(const QString& path)
     }
     catch (BasicError<char> e)
     {
-        qDebug() << "Error Exiv2" << e.what();
+        qDebug() << "Exiv2 error reading file" << e.what();
         return false;
     }
 
+    return populateExifInfo();
+}
+
+bool Exiv2Lib::openData(const QByteArray& data)
+{
+    try
+    {
+        mImageFile = ImageFactory::open((const byte*)data.constData(), (long)data.length());
+    }
+    catch (BasicError<char> e)
+    {
+        qDebug() << "Exiv2 error reading data" << e.what();
+        return false;
+    }
+
+    return populateExifInfo();
+}
+
+bool Exiv2Lib::populateExifInfo()
+{
     if (mImageFile.get() == NULL && mImageFile.get()->good())
     {
         qDebug() << "Exiv2:: no image or not good";
         return false;
     }
+
     mImageFile->readMetadata();
 
     ExifData& data = mImageFile->exifData();
@@ -265,7 +286,7 @@ void Exiv2Lib::setWhiteBalanceCoeffsNikon(ExifData& data, float wb[3])
 
     if (pos != data.end())
     {
-        if (*mExifInfo.model== "NIKON D300")
+        if (*mExifInfo.model == "NIKON D300")
         {
             wb[0] = 1.0f;
             wb[1] = 1.0f;

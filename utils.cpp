@@ -55,6 +55,13 @@ long long computeImageFileHash(const QString& path)
 
     return computeImageFileHash(file);
 }
+
+void PhotoStageFreeImageBuffer(void* info)
+{
+    uint8_t* buffer = static_cast<uint8_t*>(info);
+
+    delete [] buffer;
+}
 }
 // this code is needed for RawSpeed
 

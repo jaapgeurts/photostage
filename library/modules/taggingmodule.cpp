@@ -53,7 +53,7 @@ bool TaggingModule::eventFilter(QObject* object, QEvent* event)
     return swallowed;
 }
 
-void TaggingModule::onKeywordsAssignmentsChanged(const QList<Photo>& list)
+void TaggingModule::onKeywordsAssignmentsChanged(const QList<Photo>& /*list*/)
 {
     showKeywords();
 }

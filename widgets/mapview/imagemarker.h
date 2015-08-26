@@ -16,9 +16,7 @@ class ImageMarker : public AbstractMarker
         ImageMarker(const QImage& img, QObject* parent);
 
         QSize size() const;
-        void paint(QPainter& painter,
-            const MarkerInfo& info,
-            const QVariant& data);
+        void paint(QPainter& painter, const MarkerInfo&, const QVariant&);
 
     private:
 

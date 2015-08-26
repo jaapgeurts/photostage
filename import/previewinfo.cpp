@@ -3,15 +3,15 @@
 namespace PhotoStage
 {
 PreviewInfo::PreviewInfo() :
-    filePath(),
     image(),
+    filePath(),
     isInLibrary(false)
 {
 }
 
 PreviewInfo::PreviewInfo(const QImage& img, const QString& path) :
-    filePath(path),
     image(img),
+    filePath(path),
     isInLibrary(false)
 {
 }

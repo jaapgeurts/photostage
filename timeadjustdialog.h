@@ -27,6 +27,11 @@ class TimeAdjustDialog : public QDialog
 
         bool eventFilter(QObject* obj, QEvent* event);
 
+    private slots:
+
+        void onHomeTimezoneSelected(const QString& tzName);
+        void onDestinationTimezoneSelected(const QString& tzName);
+
     private:
 
         Ui::TimeAdjustDialog* ui;

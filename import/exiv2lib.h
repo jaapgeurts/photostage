@@ -1,5 +1,5 @@
-#ifndef EXIV2_H
-#define EXIV2_H
+#ifndef PHOTOSTAGE_EXIV2_H
+#define PHOTOSTAGE_EXIV2_H
 
 #include "exivfacade.h"
 
@@ -17,6 +17,7 @@ class Exiv2Lib : public ExivFacade
         Exiv2Lib();
 
         bool openFile(const QString& path);
+        bool openData(const QByteArray& data);
         QImage getPreview();
         ExifInfo data();
 
@@ -31,7 +32,8 @@ class Exiv2Lib : public ExivFacade
         void readCanonNotes(Exiv2::ExifData& data);
         void readNikonNotes(Exiv2::ExifData& data);
 
+        bool populateExifInfo();
 };
 }
 
-#endif // EXIV2_H
+#endif // PHOTOSTAGE_EXIV2_H

@@ -203,7 +203,7 @@ bool getExifBytes(Exiv2::ExifData& data, const QString& key, uint8_t* buf, size_
 
         if (pos != data.end())
         {
-            if (size != pos->size())
+            if (size != (size_t)pos->size())
                 return false;
             pos->copy(buf, Exiv2::littleEndian);
             return true;

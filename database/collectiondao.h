@@ -33,7 +33,7 @@ class CollectionDAO : public QObject
         void addPhotosToCollection(long long collectionId, const QList<long long>& photoIds);
 
         long long addCollection(const Nullable<long long>& parentid, const QString& name);
-        long long addImportCollection(int amount);
+        long long addImportCollection(int);
         long long addWorkCollection(const QString& name);
 
         //    Nullable<long long> collectionIdForPhoto(const Photo& photo) const;

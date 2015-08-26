@@ -25,7 +25,7 @@ void PreviewCacheLoaderJob::finished(QVariant result)
     emit imageReady(mPhoto, result.value<QImage>());
 }
 
-void PreviewCacheLoaderJob::error(const QString& error)
+void PreviewCacheLoaderJob::error(const QString& /*error*/)
 {
 }
 

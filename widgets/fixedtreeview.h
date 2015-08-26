@@ -20,7 +20,7 @@ class FixedTreeView : public QTreeView
         void onItemExpanded(const QModelIndex& index);
         void onItemCollapsed(const QModelIndex& index);
 
-        void onRowsAddedDeleted(const QModelIndex& index, int first, int last);
+        void onRowsAddedDeleted(const QModelIndex&, int, int);
         void onModelReset();
 
     private:

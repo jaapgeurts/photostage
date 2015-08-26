@@ -16,7 +16,7 @@ namespace PhotoStage
 
             // this operation operates on the whole array
             // change the contents of the array
-            virtual void opArray(float*, int width, int height)
+            virtual void opArray(float*, int /*width*/, int /*height*/)
             {
             };
     };

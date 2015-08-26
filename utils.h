@@ -22,6 +22,8 @@ QRect fitFrame(const QSize& src, const QSize& dst);
 long long computeImageFileHash(QFile& file);
 long long computeImageFileHash(const QFileInfo& info);
 long long computeImageFileHash(const QString& path);
+
+void PhotoStageFreeImageBuffer(void* info);
 }
 
 #endif // PHOTOSTAGE_UTILS_H

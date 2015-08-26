@@ -31,7 +31,7 @@ void ColorTransformJob::finished(QVariant result)
     emit   imageReady(mPhoto, image);
 }
 
-void ColorTransformJob::error(const QString& error)
+void ColorTransformJob::error(const QString& /*error*/)
 {
 }
 

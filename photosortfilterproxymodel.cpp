@@ -9,8 +9,7 @@ PhotoSortFilterProxyModel::PhotoSortFilterProxyModel(QObject* parent) :
 {
 }
 
-bool PhotoSortFilterProxyModel::filterAcceptsRow(int source_row,
-    const QModelIndex& source_parent) const
+bool PhotoSortFilterProxyModel::filterAcceptsRow(int source_row, const QModelIndex& /*source_parent*/) const
 {
     Photo p = sourceModel()->data(sourceModel()
             ->index(source_row, 0), Photo::DataRole).value<Photo>();
@@ -103,7 +102,7 @@ QList<Photo> PhotoSortFilterProxyModel::toList() const
 
     for (int i = 0; i < c; i++)
     {
-        Photo p = data(index(i,0), Photo::DataRole).value<Photo>();
+        Photo p = data(index(i, 0), Photo::DataRole).value<Photo>();
         list.append(p);
     }
     return list;

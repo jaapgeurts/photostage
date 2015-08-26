@@ -18,7 +18,7 @@ QSize ImageMarker::size() const
     return mIcon.size();
 }
 
-void ImageMarker::paint(QPainter& painter, const MarkerInfo& info, const QVariant& data)
+void ImageMarker::paint(QPainter& painter, const MarkerInfo& /*info*/, const QVariant& /*data*/)
 {
     //painter->drawText(10,10,"X");
     painter.drawImage(0, 0, mIcon);

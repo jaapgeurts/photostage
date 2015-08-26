@@ -34,7 +34,7 @@ QSize FixedTreeView::sizeHint() const
     return QSize(width(), CalculateHeight());
 }
 
-void FixedTreeView::onRowsAddedDeleted(const QModelIndex& index, int first, int last)
+void FixedTreeView::onRowsAddedDeleted(const QModelIndex& /*index*/, int /*first*/, int /*last*/)
 {
     setMinimumHeight(CalculateHeight());
 }

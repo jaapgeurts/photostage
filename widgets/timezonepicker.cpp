@@ -216,15 +216,27 @@ void TimezonePicker::mouseReleaseEvent(QMouseEvent* event)
     }
 }
 
-int TimezonePicker::plantHomeFlag()
+void TimezonePicker::plantHomeFlag()
 {
-    mHomeFlagLocation = pointToGeo(mLastClickLocation);
+    TimezoneArea* a = contains(mLastClickLocation);
+
+    if (a != NULL)
+    {
+        mHomeFlagLocation = pointToGeo(mLastClickLocation);
+        emit homeTimezoneSelected(a->timezonename);
+    }
     update();
 }
 
-int TimezonePicker::plantDestinationFlag()
+void TimezonePicker::plantDestinationFlag()
 {
-    mDestinationFlagLocation = pointToGeo(mLastClickLocation);
+    TimezoneArea* a = contains(mLastClickLocation);
+
+    if (a != NULL)
+    {
+        mDestinationFlagLocation = pointToGeo(mLastClickLocation);
+        emit destinationTimezoneSelected(a->timezonename);
+    }
     update();
 }
 
@@ -293,7 +305,7 @@ void TimezonePicker::makePath(QPainterPath& path, const TimezoneArea* a) const
     path.closeSubpath();
 }
 
-void TimezonePicker::paintEvent(QPaintEvent* event)
+void TimezonePicker::paintEvent(QPaintEvent* /*event*/)
 {
     QPainter painter(this);
 
@@ -325,7 +337,7 @@ void TimezonePicker::paintEvent(QPaintEvent* event)
 
     if (mDestinationFlagLocation.isValid())
     {
-        QPen pen(Qt::cyan);
+        QPen   pen(Qt::cyan);
         painter.setPen(pen);
         QPoint p = geoToPoint(mDestinationFlagLocation);
         painter.drawText(p, icon);

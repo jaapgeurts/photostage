@@ -179,7 +179,7 @@ Image Image::fromFile(const QString& filename)
     data    = new uint16_t[width * height * channels];
     const unsigned int stride = width * channels;
 
-    for (size_t i = 0; i < height; i++)
+    for (int i = 0; i < height; i++)
     {
         png_uint_32 q =  stride * i;
         rowPtrs[i] = (png_bytep)data + q * 2;
