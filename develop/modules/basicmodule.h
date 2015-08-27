@@ -1,7 +1,8 @@
-#ifndef BASIC_H
-#define BASIC_H
+#ifndef PHOTOSTAGE_BASICMODULE_H
+#define PHOTOSTAGE_BASICMODULE_H
 
 #include "developmodule.h"
+#include "engine/basicoperation.h"
 
 namespace Ui
 {
@@ -26,6 +27,7 @@ class BasicModule : public DevelopModule
     private:
 
         Ui::BasicModule* ui;
+        BasicOperation   mBasicOperation;
 };
 }
-#endif // BASIC_H
+#endif // PHOTOSTAGE_BASICMODULE_H

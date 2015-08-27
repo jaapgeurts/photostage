@@ -181,10 +181,8 @@ Func rotate(Func f, Expr angle, Expr centerX, Expr centerY)
     centerX = centerY;
     centerY = temp;
     Func out;
-    Expr newX = (x - centerX) * cos(angle) - sin(angle) * (y - centerY) +
-        centerX;
-    Expr newY = sin(angle) * (x - centerX) + cos(angle) * (y - centerY) +
-        centerY;
+    Expr newX = (x - centerX) * cos(angle) - sin(angle) * (y - centerY) + centerX;
+    Expr newY = sin(angle) * (x - centerX) + cos(angle) * (y - centerY) + centerY;
 
     // out(x, y) = bicubic(f, newX, newY);
     out(x, y) = f(y, x);

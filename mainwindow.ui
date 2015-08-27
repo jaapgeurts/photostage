@@ -348,6 +348,9 @@
     <property name="title">
      <string>Edit</string>
     </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="separator"/>
     <addaction name="actionCut"/>
     <addaction name="actionCopy"/>
     <addaction name="actionPaste"/>
@@ -994,6 +997,22 @@
   <action name="actionNewWorkCollection">
    <property name="text">
     <string>New Work Collection</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Z</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Redo</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+Z</string>
    </property>
   </action>
  </widget>

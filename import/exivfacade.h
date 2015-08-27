@@ -23,6 +23,8 @@ struct ExifInfo
         Rotate90CCW      = 8  // rotate 90 CCW
     };
 
+    QString profileName;
+
     // Camera tech details
     Nullable<QString> make;
     Nullable<QString> model;

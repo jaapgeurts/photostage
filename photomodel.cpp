@@ -163,8 +163,7 @@ void PhotoModel::onPreviewGenerated(Photo photo, const QImage& image)
 
     QImage scaled;
 
-    if (image.width() > PREVIEW_IMG_WIDTH &&
-        image.height() > PREVIEW_IMG_HEIGHT)
+    if (image.width() > PREVIEW_IMG_WIDTH && image.height() > PREVIEW_IMG_HEIGHT)
     { // only scale images down. never scale up.
         scaled = image.scaled(PREVIEW_IMG_WIDTH, PREVIEW_IMG_HEIGHT,
                 Qt::KeepAspectRatio, Qt::SmoothTransformation);

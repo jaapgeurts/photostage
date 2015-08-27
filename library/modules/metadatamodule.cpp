@@ -34,6 +34,7 @@ void MetaDataModule::clearAll()
     ui->leLens->clear();
     ui->leGPS->clear();
     ui->leDimensions->clear();
+    ui->leColorProfile->clear();
 }
 
 void MetaDataModule::setMetaData(const Photo& p)
@@ -81,5 +82,8 @@ void MetaDataModule::setMetaData(const Photo& p)
 
     if (ei.location != nullptr)
         ui->leGPS->setText(ei.location->toString(QGeoCoordinate::DegreesMinutesWithHemisphere));
+
+    if (!ei.profileName.isNull())
+        ui->leColorProfile->setText(ei.profileName);
 }
 }

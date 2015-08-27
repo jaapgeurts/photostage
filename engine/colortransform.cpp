@@ -68,11 +68,16 @@ ColorTransform::ColorTransform(const QByteArray& srcProfile, const QString& to, 
         qDebug() << "Loading monitor profile";
     }
     else
-        toProfile =
-            "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + to +
-            ".icc";
+        toProfile = "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + to + ".icc";
 
-    hInProfile  = cmsOpenProfileFromMem(srcProfile.constData(), srcProfile.length());
+    hInProfile = cmsOpenProfileFromMem(srcProfile.constData(), srcProfile.length());
+
+    wchar_t str[1024] = {0};
+
+    int     res = cmsGetProfileInfo(hInProfile, cmsInfoDescription, "en", "US", str, 255 * sizeof(wchar_t));
+
+    mProfileName = QString::fromWCharArray(str);
+
     hOutProfile = cmsOpenProfileFromFile(toProfile.toLocal8Bit().data(), "r");
 
 #define MY_TYPE (FLOAT_SH(1) | COLORSPACE_SH(PT_RGB) | CHANNELS_SH(3) | \
@@ -102,10 +107,9 @@ ColorTransform::ColorTransform(const QString& from, const QString& to, Format in
 {
     cmsHPROFILE hInProfile, hOutProfile;
 
-    QString     fromProfile =
-        "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" +
-        from +
-        ".icc";
+    QString     fromProfile = "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + from + ".icc";
+
+    mProfileName = from;
 
     QString toProfile;
 
@@ -151,6 +155,11 @@ ColorTransform::~ColorTransform()
 bool ColorTransform::isValid() const
 {
     return mHTransform != NULL;
+}
+
+const QString& ColorTransform::profileName()
+{
+    return mProfileName;
 }
 
 Image ColorTransform::transformImage(const Image& inImage) const

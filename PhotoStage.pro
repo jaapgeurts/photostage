@@ -114,7 +114,8 @@ SOURCES += \
     cartography/cartography.cpp \
     widgets/mapview/modelindexlayer.cpp \
     widgets/timezonepicker.cpp \
-    io/jpegio.cpp
+    io/jpegio.cpp \
+    engine/basicoperation.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -211,7 +212,8 @@ HEADERS  += \
     cartography/cartography.h \
     widgets/mapview/modelindexlayer.h \
     widgets/timezonepicker.h \
-    io/jpegio.h
+    io/jpegio.h \
+    engine/basicoperation.h
 
 FORMS    += \
     mainwindow.ui \

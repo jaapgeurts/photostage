@@ -40,6 +40,7 @@ class ColorTransform
         ~ColorTransform();
 
         bool isValid() const;
+        const QString& profileName();
 
         Image transformImage(const Image& inImage) const;
         QImage transformToQImage(const Image& inImage) const;
@@ -52,6 +53,7 @@ class ColorTransform
         static QString                        mMonitorProfilePath;
 
         QSharedPointer<char>                  mHTransform;
+        QString                               mProfileName;
 };
 }
 #endif // PHOTOSTAGE_COLOR_H

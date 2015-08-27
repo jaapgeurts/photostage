@@ -118,7 +118,9 @@ QImage PreviewGeneratorJob::genThumb(const QString& path)
         // Read using JPEG library
         //qDebug() << "Load jpg" << path;
         QByteArray iccProfile;
-        QImage     pixmap = JpegIO::readFile(memFile, iccProfile);
+        // use QImage loading. this ignores embedded profiles
+        //QImage     pixmap = QImage::fromData(memFile);
+        QImage pixmap = JpegIO::readFile(memFile, iccProfile);
 
         // rotate the image if necessary
         ExivFacade* ex = ExivFacade::createExivReader();
@@ -166,11 +168,13 @@ QImage PreviewGeneratorJob::genThumb(const QString& path)
                     // use the embedded JPeg profile
                     toWorking = ColorTransform::getTransform(iccProfile, WORKING_COLOR_SPACE,
                             fmt, ColorTransform::FORMAT_RGB32);
+                    mPhoto.exifInfo().profileName = toWorking.profileName();
                 }
                 else
                 {
                     toWorking = ColorTransform::getTransform("sRGB-Melissa-RGB32",
                             "sRGB", WORKING_COLOR_SPACE, fmt, ColorTransform::FORMAT_RGB32);
+                    mPhoto.exifInfo().profileName = "sRGB (Assumed)";
                 }
             }
             else if (pixmap.format() == QImage::Format_Grayscale8)
@@ -181,6 +185,7 @@ QImage PreviewGeneratorJob::genThumb(const QString& path)
                 fmt       = ColorTransform::FORMAT_GRAYSCALE8;
                 toWorking = ColorTransform::getTransform("sRGB-Melissa-Gray8",
                         "sRGB", WORKING_COLOR_SPACE, fmt, ColorTransform::FORMAT_RGB32);
+                mPhoto.exifInfo().profileName = "sRGB (Assumed)";
             }
             else
             {
