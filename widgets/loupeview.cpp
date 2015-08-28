@@ -131,7 +131,7 @@ void LoupeView::paintEvent(QPaintEvent* /*event*/)
         {
             const PhotoStage::ExifInfo& ei = mPhoto.exifInfo();
             painter.drawText(40, 50, mPhoto.srcImagePath());
-            QString         exp = ei.isoSpeed == nullptr ? "" : QString(", ISO %1").arg(*ei.isoSpeed);
+            QString                     exp = ei.isoSpeed == nullptr ? "" : QString(", ISO %1").arg(*ei.isoSpeed);
             painter.drawText(40, 80, ei.formatExposure() + exp);
 
             QString fl = ei.focalLength == nullptr ? "" : QString("%1mm ").arg(*ei.focalLength);

@@ -23,7 +23,11 @@ long long computeImageFileHash(QFile& file);
 long long computeImageFileHash(const QFileInfo& info);
 long long computeImageFileHash(const QString& path);
 
-void PhotoStageFreeImageBuffer(void* info);
+template <typename T>
+void deleteArray(T buf[])
+{
+    delete [] buf;
+}
 }
 
 #endif // PHOTOSTAGE_UTILS_H

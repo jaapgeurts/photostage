@@ -80,8 +80,7 @@ ColorTransform::ColorTransform(const QByteArray& srcProfile, const QString& to, 
 
     hOutProfile = cmsOpenProfileFromFile(toProfile.toLocal8Bit().data(), "r");
 
-#define MY_TYPE (FLOAT_SH(1) | COLORSPACE_SH(PT_RGB) | CHANNELS_SH(3) | \
-    BYTES_SH(4) | DOSWAP_SH(1))
+#define MY_TYPE (FLOAT_SH(1) | COLORSPACE_SH(PT_RGB) | CHANNELS_SH(3) | BYTES_SH(4) | DOSWAP_SH(1))
 
     cmsUInt32Number inputFormat  = MY_TYPE;
     cmsUInt32Number outputFormat = MY_TYPE;
@@ -90,14 +89,17 @@ ColorTransform::ColorTransform(const QByteArray& srcProfile, const QString& to, 
         inputFormat = TYPE_BGRA_8;
     else if (inFormat == FORMAT_GRAYSCALE8)
         inputFormat = (COLORSPACE_SH(PT_RGB) | CHANNELS_SH(1) | BYTES_SH(1));
+    else if (inFormat == FORMAT_RGB48_PLANAR)
+        inputFormat = TYPE_BGR_16_PLANAR;
 
     if (outFormat == FORMAT_RGB32)
         outputFormat = TYPE_BGRA_8;
+    else if (outFormat == FORMAT_RGB48_PLANAR)
+        outputFormat = TYPE_BGR_16_PLANAR;
 
     mHTransform =
         QSharedPointer<char>((char*)cmsCreateTransform(hInProfile, inputFormat,
-            hOutProfile, outputFormat, INTENT_PERCEPTUAL,
-            0), transform_delete);
+            hOutProfile, outputFormat, INTENT_PERCEPTUAL, 0), transform_delete);
 
     cmsCloseProfile(hInProfile);
     cmsCloseProfile(hOutProfile);
@@ -136,9 +138,13 @@ ColorTransform::ColorTransform(const QString& from, const QString& to, Format in
         inputFormat = TYPE_BGRA_8;
     else if (inFormat == FORMAT_GRAYSCALE8)
         inputFormat = (COLORSPACE_SH(PT_RGB) | CHANNELS_SH(1) | BYTES_SH(1));
+    else if (inFormat == FORMAT_RGB48_PLANAR)
+        inputFormat = TYPE_BGR_16_PLANAR;
 
     if (outFormat == FORMAT_RGB32)
         outputFormat = TYPE_BGRA_8;
+    else if (outFormat == FORMAT_RGB48_PLANAR)
+        outputFormat = TYPE_BGR_16_PLANAR;
 
     mHTransform =
         QSharedPointer<char>((char*)cmsCreateTransform(hInProfile, inputFormat,
@@ -168,10 +174,10 @@ Image ColorTransform::transformImage(const Image& inImage) const
 
     //qDebug() << "Has alpha" << (inImage.hasAlphaChannel() ? "yes" : "no");
 
-    Image        outImage(inImage.size());
+    Image           outImage(inImage.size());
 
-    const float* inbuf  = inImage.data();
-    float*       outbuf = outImage.data();
+    const uint16_t* inbuf  = inImage.data();
+    uint16_t*       outbuf = outImage.data();
 
     cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inbuf, outbuf, inImage.width() * inImage.height());
 
@@ -186,8 +192,8 @@ QImage ColorTransform::transformToQImage(const Image& inImage) const
 
     for (int y = 0; y < height; y++)
     {
-        const float* inLine  = inImage.scanLine(y);
-        uint8_t*     outLine = outImage.scanLine(y);
+        const uint16_t* inLine  = inImage.scanLine(y);
+        uint8_t*        outLine = outImage.scanLine(y);
 
         cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inLine, outLine, width);
     }
@@ -215,8 +221,7 @@ QImage ColorTransform::transformQImage(const QImage& inImage) const
             outLine[x * 4 + 3] = 0xff;
     }
 
-    return QImage(buffer, width, height, 4 * width,
-               QImage::Format_RGB32, PhotoStageFreeImageBuffer, buffer);
+    return QImage(buffer, width, height, 4 * width, QImage::Format_RGB32, (QImageCleanupFunction)deleteArray<uint8_t>, buffer);
 }
 
 Image ColorTransform::transformFromQImage(const QImage& inImage) const
@@ -228,7 +233,7 @@ Image ColorTransform::transformFromQImage(const QImage& inImage) const
     for (int y = 0; y < height; y++)
     {
         const uint8_t* inLine  = inImage.constScanLine(y);
-        float*         outLine = outImage.scanLine(y);
+        uint16_t*         outLine = outImage.scanLine(y);
         cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inLine, outLine, width);
     }
     return outImage;

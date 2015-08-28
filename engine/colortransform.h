@@ -21,7 +21,8 @@ class ColorTransform
             FORMAT_FLOAT,
             FORMAT_RGB32,     // 8bit channels (RGB channel + extra)
             FORMAT_GRAYSCALE8,
-            FORMAT_RGB48     //  16 bit channels RRRR GGGG BBBB
+            FORMAT_RGB48,    //  16 bit channels RRRR GGGG BBBB
+            FORMAT_RGB48_PLANAR,
         };
 
         // convenience functions that retain the result for future use

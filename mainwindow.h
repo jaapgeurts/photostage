@@ -105,6 +105,7 @@ class MainWindow : public QMainWindow
         void onPhotoModelRowsRemoved(const QModelIndex& parent, int start, int end);
         void onFilterApplied(const PhotoFilterInfo& info);
         void onPhotoSourceChanged(PhotoModel::SourceType type, long long id);
+        void onPhotoModelDataChanged(const QModelIndex&, const QModelIndex&, const QVector<int>&);
 
         void onShowGrid();
         void onShowLoupe();
@@ -120,7 +121,7 @@ class MainWindow : public QMainWindow
         // module ui pointers
         Library*                   mLibrary;
         Develop*                   mDevelop;
-        Cartography*                       mMap;
+        Cartography*               mMap;
         Module*                    mCurrentModule;
         PhotoSortFilterProxyModel* mPhotoModelProxy;
         PhotoModel*                mSourceModel;

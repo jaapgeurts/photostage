@@ -92,7 +92,7 @@ QImage JpegIO::readFile(const QByteArray& memFile, QByteArray& iccProfile)
     jpeg_destroy_decompress(&cinfo);
 
     return QImage(buffer, width, height, pixel_size * width,
-               QImage::Format_RGB32, PhotoStageFreeImageBuffer, buffer);
+               QImage::Format_RGB32, (QImageCleanupFunction)deleteArray<uint8_t>, buffer);
 }
 
 JpegIO::JpegIO()

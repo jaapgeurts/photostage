@@ -21,8 +21,7 @@ Develop::Develop(QWidget* parent) :
 
     if (settings.contains(SETTINGS_SPLITTER_DEVELOP_SIZES))
     {
-        foreach(QVariant v, settings.value(
-                SETTINGS_SPLITTER_DEVELOP_SIZES).toList())
+        foreach(QVariant v, settings.value(SETTINGS_SPLITTER_DEVELOP_SIZES).toList())
         {
             l << v.toInt();
         }
@@ -46,8 +45,7 @@ Develop::Develop(QWidget* parent) :
     // Basic
     mBasicModule = new BasicModule(ui->DevelopPanel);
     ui->DevelopPanel->addPanel("Basic", mBasicModule);
-    connect(mBasicModule, &BasicModule::parametersAdjusted,
-        this, &Develop::onDevelopSettingsChanged);
+    connect(mBasicModule, &BasicModule::parametersAdjusted, this, &Develop::onDevelopSettingsChanged);
 }
 
 Develop::~Develop()
@@ -80,6 +78,11 @@ void Develop::setPhoto(Photo photo)
     else
         // TODO: if invisible, defer loading until visible
         mLoadPhoto = true;
+}
+
+void Develop::onPhotoUpdated()
+{
+    ui->developView->update();
 }
 
 void Develop::onDevelopSettingsChanged()

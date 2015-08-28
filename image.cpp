@@ -6,71 +6,78 @@
 #include <engine/colortransform.h>
 
 #include "image.h"
+#include "utils.h"
 
-#define PNG_SIG_SIZE 8
+const int PNG_SIG_SIZE = 8;
 
 namespace PhotoStage
 {
-Image::Image() :
-    mPixels()
+Image::Image()
 {
-    mWidth  = 0;
-    mHeight = 0;
+    d = QSharedPointer<ImagePrivate>(new ImagePrivate());
 }
 
-template <typename T_>
-static void do_delete(T_ buf[])
+Image::Image(int width, int height)
 {
-    qDebug() << "Delete called on mPixels";
-    delete[] buf;
+    d = QSharedPointer<ImagePrivate>(new ImagePrivate(width, height));
 }
 
-Image::Image(int width, int height) :
-    mPixels(new float[width * height * IMG_NO_CHANNELS], do_delete<float>)     // three channels;
+Image::Image(const QSize& size)
 {
-    mWidth  = width;
-    mHeight = height;
-}
-
-Image::Image(const QSize& size) :
-    mPixels(
-        new float[size.width() * size.height() * IMG_NO_CHANNELS],
-        do_delete<float>)
-{
-    mWidth  = size.width();
-    mHeight = size.height();
+    d = QSharedPointer<ImagePrivate>(new ImagePrivate(size));
 }
 
 Image::~Image()
 {
 }
 
-Image Image::clone() const
+Image::ImagePrivate::ImagePrivate() :
+    mPixels(NULL),
+    mWidth(0),
+    mHeight(0)
 {
-    qDebug() << "Cloning image";
-    Image image;
-    image.mWidth  = this->mWidth;
-    image.mHeight = this->mHeight;
-    image.mPixels =
-        QSharedPointer<float>(new float[mWidth * mHeight * IMG_NO_CHANNELS],
-            do_delete<float>);
-
-    memcpy(image.mPixels.data(),
-        this->mPixels.data(),
-        sizeof(float) * mWidth * mHeight * IMG_NO_CHANNELS);
-    return image;
 }
 
-static void userReadData(png_structp pngPtr,
-    png_bytep data,
-    png_size_t length)
+Image::ImagePrivate::ImagePrivate(int width, int height) :
+    mPixels(new uint16_t[width * height * IMG_DEPTH]),
+    mWidth(width),
+    mHeight(height)
+{
+}
+
+Image::ImagePrivate::ImagePrivate(const QSize& size) :
+    mPixels(new uint16_t[size.width() * size.height() * IMG_DEPTH]),
+    mWidth(size.width()),
+    mHeight(size.height())
+{
+}
+
+Image::ImagePrivate::~ImagePrivate()
+{
+    if (mPixels != NULL)
+        delete [] mPixels;
+}
+
+Image Image::fromFile(const QString& filename)
+{
+    if (filename.endsWith("png", Qt::CaseInsensitive))
+        return ImagePrivate::fromFilePNG(filename);
+}
+
+bool Image::saveToFile(const QString& filename) const
+{
+    if (filename.endsWith("png", Qt::CaseInsensitive))
+        return d->saveToFilePNG(filename);
+}
+
+static void userReadData(png_structp pngPtr, png_bytep data, png_size_t length)
 {
     png_voidp a = png_get_io_ptr(pngPtr);
 
     ((QFile*)a)->read((char*)data, length);
 }
 
-Image Image::fromFile(const QString& filename)
+Image Image::ImagePrivate::fromFilePNG(const QString& filename)
 {
     png_bytep* rowPtrs = NULL;
     uint16_t*  data    = NULL;
@@ -97,10 +104,7 @@ Image Image::fromFile(const QString& filename)
         return Image();
     }
 
-    png_structp pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING,
-            NULL,
-            NULL,
-            NULL);
+    png_structp pngPtr = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
     if (!pngPtr)
     {
@@ -192,23 +196,16 @@ Image Image::fromFile(const QString& filename)
 
     Image image(width, height);
 
-    // convert the image to float rep.
+    // convert the image to planar
+
+    uint16_t* pixels = image.data();
 
     for (int y = 0; y < height; y++)
-    {
-        float* pixels = image.scanLine(y);
-
         for (int x = 0; x < width; x++)
-        {
-            pixels[x *
-            IMG_NO_CHANNELS] =
-                (float)(data[y * stride + x * 3 + 2] / 65535.0);
-            pixels[x * IMG_NO_CHANNELS +
-            1] =  (float)(data[y * stride + x * 3 + 1] / 65535.0);
-            pixels[x * IMG_NO_CHANNELS +
-            2] =  (float)(data[y * stride + x * 3 + 0] / 65535.0);
-        }
-    }
+            for (int c = 0; c < 3; c++)
+                pixels[c * width * height + y * width + c] = data[y * stride + x * IMG_DEPTH + c];
+
+
     delete [] data;
 
     return image;
@@ -219,27 +216,23 @@ Image Image::fromQImage(const QImage& image)
     // TODO: now only RGB32 images are supported
     if (image.format() != QImage::Format_RGB32)
     {
-        qDebug() << "Image is not in RGB32 format. Actual QImage::Format" <<
-            image.format();
+        qDebug() << "Image is not in RGB32 format. Actual QImage::Format" << image.format();
         return Image();
     }
 
     //do color conversion here
-    ColorTransform toWorking = ColorTransform::getTransform(
-        "sRGB-Melissa-RGB32",
-        "sRGB",
-        WORKING_COLOR_SPACE,
-        ColorTransform::FORMAT_RGB32,
-        ColorTransform::FORMAT_FLOAT);
+    ColorTransform toWorking = ColorTransform::getTransform("sRGB-Melissa-RGB32",
+            "sRGB", WORKING_COLOR_SPACE,
+            ColorTransform::FORMAT_RGB32,
+            ColorTransform::FORMAT_RGB48_PLANAR);
     return toWorking.transformFromQImage(image);
 }
 
 QImage Image::toQImage() const
 {
     ColorTransform toRgb = ColorTransform::getTransform("Melissa-sRGB-RGB32",
-            WORKING_COLOR_SPACE,
-            "sRGB",
-            ColorTransform::FORMAT_FLOAT,
+            WORKING_COLOR_SPACE, "sRGB",
+            ColorTransform::FORMAT_RGB48_PLANAR,
             ColorTransform::FORMAT_RGB32);
 
     return toRgb.transformToQImage(*this);
@@ -261,7 +254,7 @@ static void userFlush(png_structp pngPtr)
     ((QFile*)a)->flush();
 }
 
-bool Image::saveToFile(const QString& filename) const
+bool Image::ImagePrivate::saveToFilePNG(const QString& filename) const
 {
     // FIXME image is not normalized.
     QFile     file(filename);
@@ -323,24 +316,14 @@ bool Image::saveToFile(const QString& filename) const
 
     png_set_swap(pngPtr);
 
-    row = new uint16_t[mWidth * IMG_NO_CHANNELS];
+    row = new uint16_t[mWidth * IMG_DEPTH];
 
     for (int y = 0; y < mHeight; y++)
     {
-        float* inLine = scanLine(y);
-
         for (int x = 0; x < mWidth; x++)
         {
-            // FIXME: image is not normalized to 0..1 so values results will be clipped.
-            // should use littleCMS to convert to 16 bit correctly
-            row[x * 3 +
-            2] = (uint16_t)(inLine[x * IMG_NO_CHANNELS] * 0xffff);
-            row[x * 3 +
-            1] =
-                (uint16_t)(inLine[x * IMG_NO_CHANNELS + 1] * 0xffff);
-            row[x * 3 +
-            0] =
-                (uint16_t)(inLine[x * IMG_NO_CHANNELS + 2] * 0xffff);
+            for (int c = 0; c < 3; c++)
+                row[x * IMG_DEPTH + c] = mPixels[c * mWidth * mHeight + y * mWidth + c];
         }
         png_write_row(pngPtr, (png_const_bytep)row);
     }
@@ -354,31 +337,31 @@ bool Image::saveToFile(const QString& filename) const
 
 int Image::width() const
 {
-    return mWidth;
+    return d->mWidth;
 }
 
 int Image::height() const
 {
-    return mHeight;
+    return d->mHeight;
 }
 
 QSize Image::size() const
 {
-    return QSize(mWidth, mHeight);
+    return QSize(d->mWidth, d->mHeight);
 }
 
-float* Image::data() const
+uint16_t* Image::data() const
 {
-    return mPixels.data();
+    return d->mPixels;
 }
 
-float* Image::scanLine(int l) const
+uint16_t* Image::scanLine(int l) const
 {
-    return &(mPixels.data()[l * mWidth * IMG_NO_CHANNELS]);
+    return &(d->mPixels[l * d->mWidth * IMG_DEPTH]);
 }
 
 bool Image::isNull() const
 {
-    return mPixels.isNull();
+    return d->mPixels == NULL;
 }
 }

@@ -9,18 +9,18 @@
 
 namespace PhotoStage
 {
-const int IMG_NO_CHANNELS = 3;
+const int IMG_DEPTH = 3;
 
 class Image
 {
+    class ImagePrivate;
+
     public:
 
         Image();
         Image(int width, int height);
         Image(const QSize& size);
         ~Image();
-
-        Image clone() const;
 
         // static convenience functions
         static Image fromFile(const QString& filename);
@@ -34,16 +34,35 @@ class Image
         int height() const;
         QSize size() const;
 
-        float* data() const;
-        float* scanLine(int l) const;
+        uint16_t* data() const;
+        uint16_t* scanLine(int l) const;
 
         bool isNull() const;
 
     private:
 
-        QSharedPointer<float> mPixels;
-        int                   mWidth;
-        int                   mHeight;
+        QSharedPointer<ImagePrivate> d;
+
+        class ImagePrivate
+        {
+            friend class Image;
+
+            public:
+
+                ImagePrivate();
+                ImagePrivate(int width, int height);
+                ImagePrivate(const QSize& size);
+                ~ImagePrivate();
+
+            private:
+
+                uint16_t* mPixels;
+                int       mWidth;
+                int       mHeight;
+
+                static Image fromFilePNG(const QString& filename);
+                bool saveToFilePNG(const QString& filename) const;
+        };
 };
 }
 

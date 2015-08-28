@@ -70,6 +70,7 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(mSourceModel, &PhotoModel::modelReset, this, &MainWindow::onModelReset);
     connect(mSourceModel, &PhotoModel::rowsInserted, this, &MainWindow::onPhotoModelRowsInserted);
     connect(mSourceModel, &PhotoModel::rowsRemoved, this, &MainWindow::onPhotoModelRowsRemoved);
+    connect(mSourceModel, &PhotoModel::dataChanged, this, &MainWindow::onPhotoModelDataChanged);
 
     mPhotoSelection = new QItemSelectionModel(mPhotoModelProxy, this);
     // set up connections
@@ -697,6 +698,13 @@ void MainWindow::onPhotoModelRowsInserted(const QModelIndex& /*parent*/, int /*s
 void MainWindow::onPhotoModelRowsRemoved(const QModelIndex& /*parent*/, int /*start*/, int /*end*/)
 {
     updateInformationBar();
+}
+
+void MainWindow::onPhotoModelDataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/,
+    const QVector<int>& /*roles*/)
+{
+    // update the develop module in case a photo was reloaded
+    mDevelop->onPhotoUpdated();
 }
 
 void MainWindow::onFilterApplied(const PhotoFilterInfo& info)

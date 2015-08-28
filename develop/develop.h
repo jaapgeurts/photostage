@@ -30,6 +30,10 @@ class Develop : public Module
 
         void setPhoto(Photo photo);
 
+    public slots:
+
+        void onPhotoUpdated();
+
     protected:
 
         void showEvent(QShowEvent*);
