@@ -21,36 +21,36 @@ Photo::Photo(QSqlQuery& q)
 
 long long Photo::id() const
 {
-    return d->id();
+    return d->mId;
 }
 
-void Photo::setOriginal(const QImage& image)
+void Photo::setOriginalImage(const Image& image)
 {
-    d->setOriginal(image);
+    d->mOriginal = image;
 }
 
-const QImage& Photo::original() const
+const Image& Photo::originalImage() const
 {
-    return d->original();
+    return d->mOriginal;
 }
 
 void Photo::setLibraryPreview(const QImage& image)
 {
-    d->setLibraryPreview(image);
+    d->mLibraryPreview = image;
 }
 
 void Photo::setLibraryPreviewsRGB(const QImage& image)
 {
-    d->setLibraryPreviewsRGB(image);
+    d->mLibraryPreviewsRGB = image;
 }
 
 const QImage& Photo::libraryPreview()
 {
-    const QImage& img = d->libraryPreview();
+    const QImage& img = d->mLibraryPreview;
 
     if (img.isNull())
     {
-        d->owner()->loadImage(*this);
+        d->mOwner->loadImage(*this);
     }
     return img;
 }
@@ -60,80 +60,85 @@ const QImage& Photo::libraryPreviewsRGB()
     // make sure the library preview is avaialble,
     // if it is not trigger download
 
-    if (d->libraryPreviewsRGB().isNull())
+    if (d->mLibraryPreviewsRGB.isNull())
     {
-        if (d->libraryPreview().isNull())
+        if (d->mLibraryPreview.isNull())
             libraryPreview();
         else
-            d->owner()->convertImage(*this);
+            d->mOwner->convertImage(*this);
     }
 
-    return d->libraryPreviewsRGB();
+    return d->mLibraryPreviewsRGB;
 }
 
 void Photo::setSrcImagePath(const QString& path)
 {
-    d->setSrcImagePath(path);
+    d->mSrcImagePath = path;
 }
 
 const QString& Photo::srcImagePath() const
 {
-    return d->srcImagePath();
+    return d->mSrcImagePath;
 }
 
 void Photo::setExifInfo(const ExifInfo& exifInfo)
 {
-    d->setExifInfo(exifInfo);
+    d->mExifInfo = exifInfo;
 }
 
 ExifInfo& Photo::exifInfo()
 {
-    return d->exifInfo();
+    return d->mExifInfo;
 }
 
 const ExifInfo& Photo::exifInfo() const
 {
-    return d->exifInfo();
+    return d->mExifInfo;
 }
 
 void Photo::setRating(int rating)
 {
-    d->setRating(rating);
+    if (rating < 0 || rating > 5)
+    {
+        qDebug() << "Rating out of range. Must be between 0<=rating<=5";
+        return;
+    }
+    d->mRating = rating;
 }
 
 int Photo::rating() const
 {
-    return d->rating();
+    return d->mRating;
 }
 
 void Photo::setColorLabel(ColorLabel label)
 {
-    d->setColorLabel(label);
+    d->mColorLabel = label;
 }
 
 Photo::ColorLabel Photo::colorLabel() const
 {
-    return d->colorLabel();
+    return d->mColorLabel;
 }
 
 void Photo::setFlag(Flag flag)
 {
-    d->setFlag(flag);
+    d->mFlag = flag;
 }
 
 Photo::Flag Photo::flag() const
 {
-    return d->flag();
+    return d->mFlag;
 }
 
 long long Photo::hash() const
 {
-    return d->hash();
+    return d->mHashCode;
 }
 
 void Photo::setHash(long long code)
 {
-    d->setHash(code);
+    d->mHashCode = code;
 }
 
 bool Photo::isNull() const
@@ -143,26 +148,26 @@ bool Photo::isNull() const
 
 void Photo::setIsDownloading(bool value)
 {
-    d->setIsDownloading(value);
+    d->mIsDownloading = value;
 }
 
 bool Photo::isDownloading() const
 {
-    return d->isDownloading();
+    return d->mIsDownloading;
 }
 
 void Photo::setKeywords(const QStringList& list)
 {
-    d->setKeywords(list);
+    d->mKeywords = list;
 }
 
 QStringList Photo::keywords() const
 {
-    return d->keywords();
+    return d->mKeywords;
 }
 
 void Photo::setOwner(PhotoModel* model)
 {
-    d->setOwner(model);
+    d->mOwner = model;
 }
 }

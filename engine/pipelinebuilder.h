@@ -1,11 +1,10 @@
-#ifndef PIPELINE_BUILDER_H
-#define PIPELINE_BUILDER_H
-
-#include <QObject>
-#include <QImage>
+#ifndef PHOTOSTAGE_PIPELINEBUILDER_H
+#define PHOTOSTAGE_PIPELINEBUILDER_H
 
 #include <Halide.h>
 #include <lcms2.h>
+
+#include "image.h"
 
 namespace PhotoStage
 {
@@ -34,7 +33,7 @@ class PipelineBuilder
 
         void prepare();
 
-        QImage execute(int width, int height);
+        PhotoStage::Image execute(int width, int height);
 
     private:
 
@@ -60,8 +59,8 @@ class PipelineBuilder
 
         Halide::Func           mPipeline;
 
-//        int                    mWidth;
-//        int                    mHeight;
+        //        int                    mWidth;
+        //        int                    mHeight;
 
         // Little CMS variable
         cmsHTRANSFORM mHRawTransform;
@@ -70,4 +69,4 @@ class PipelineBuilder
 };
 }
 
-#endif // PIPELINE_H
+#endif // PHOTOSTAGE_PIPELINEBUILDER_H

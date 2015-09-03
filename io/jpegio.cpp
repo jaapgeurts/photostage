@@ -1,98 +1,143 @@
 #include <QDebug>
 #include <setjmp.h>
 
+#include "engine/colortransform.h"
 #include "jpeglib.h"
 #include "jpegio.h"
+#include "image.h"
 #include "external/iccjpeg/iccjpeg.h"
 #include "utils.h"
 
 namespace PhotoStage
 {
-struct my_error_mgr
-{
-    struct jpeg_error_mgr pub;  /* "public" fields */
-
-    jmp_buf setjmp_buffer;      /* for return to caller */
-};
-
-typedef struct my_error_mgr* my_error_ptr;
-
 void my_error_exit (j_common_ptr cinfo)
 {
-    /* cinfo->err really points to a my_error_mgr struct, so coerce pointer */
-    my_error_ptr myerr = (my_error_ptr)cinfo->err;
-
     qDebug() << "jpeg decode error";
 
-    /* Always display the message. */
-    /* We could postpone this until after returning, if we chose. */
-    (*cinfo->err->output_message)(cinfo);
+    char jpegLastErrorMsg[JMSG_LENGTH_MAX];
+    /* Create the message */
+    ( *( cinfo->err->format_message ))( cinfo, jpegLastErrorMsg );
 
-    /* Return control to the setjmp point */
-    longjmp(myerr->setjmp_buffer, 1);
+    /* Throw the exception */
+    throw std::runtime_error( jpegLastErrorMsg );
 }
 
-QImage JpegIO::readFile(const QByteArray& memFile, QByteArray& iccProfile)
+Image JpegIO::fromFile(const QString& filename, const ExifInfo& ex_info)
 {
+    QFile f(filename);
+
+    if (!f.open(QFile::ReadOnly))
+    {
+        qDebug() << "Can't open file" << filename;
+        return Image();
+    }
+
+    QByteArray a = f.readAll();
+    return fromFile(a, ex_info);
+}
+
+Image JpegIO::fromFile(const QByteArray& memFile, const ExifInfo& ex_info)
+{
+    QByteArray                    iccProfile;
+    Image                         outImage;
+
     struct jpeg_decompress_struct cinfo;
-    struct my_error_mgr           jerr;
+    struct jpeg_error_mgr         jerr;
 
     // setup error handling so that we will jump to our own code
-    cinfo.err           = jpeg_std_error(&jerr.pub);
-    jerr.pub.error_exit = my_error_exit;
+    cinfo.err       = jpeg_std_error(&jerr);
+    jerr.error_exit = my_error_exit;
 
-    if (setjmp(jerr.setjmp_buffer))
+    try
     {
-        qDebug() << "return from jpeg decode error";
+        // setup the structs
+        jpeg_create_decompress(&cinfo);
+        jpeg_mem_src(&cinfo, (const unsigned char*)memFile.constData(), memFile.length());
+
+        setup_read_icc_profile(&cinfo);
+
+        // read the header
+        jpeg_read_header(&cinfo, TRUE);
+
+        jpeg_start_decompress(&cinfo);
+
+        int      width      = cinfo.output_width;
+        int      height     = cinfo.output_height;
+        int      pixel_size = cinfo.output_components;
+        uint8_t* buffer     = new uint8_t[width * height * pixel_size];
+        uint8_t* line[1];
+
+        //qDebug() << "reading jpeg" << width << "," << height << "," << pixel_size;
+
+        cinfo.out_color_space = JCS_EXT_BGR;
+
+        while (cinfo.output_scanline < height)
+        {
+            line[0] = &buffer[cinfo.output_scanline * pixel_size * width];
+            jpeg_read_scanlines(&cinfo, line, 1);
+        }
+
+        // Convert to Image format and
+        Image::Rotation r = Image::DontRotate;
+
+        switch (ex_info.rotation)
+        {
+            case ExifInfo::Rotate90CW:
+                r = Image::Rotate90CW;
+                break;
+
+            case ExifInfo::Rotate90CCW:
+                r = Image::Rotate90CCW;
+                break;
+        }
+        outImage = Image(width, height, pixel_size, buffer, r);
+
+        // now read the ICC profile if there is any.
+        uint8_t* icc_profile_buf;
+        uint32_t buflen;
+
+        if (read_icc_profile(&cinfo, &icc_profile_buf, &buflen))
+        {
+            qDebug() << "Found profile in JPEG";
+            // There was a profile. read it into a buffer and pass it to QByteArray
+            iccProfile = QByteArray((const char*)icc_profile_buf, buflen);
+            free(icc_profile_buf);
+        }
+        jpeg_destroy_decompress(&cinfo);
+    }
+    catch (std::runtime_error& e)
+    {
+        qDebug() << "JPEG decode error" << e.what();
 
         jpeg_destroy_decompress(&cinfo);
-        return QImage();
+        return outImage;
     }
 
-    // setup the structs
-    jpeg_create_decompress(&cinfo);
-    jpeg_mem_src(&cinfo, (const unsigned char*)memFile.constData(), memFile.length());
+    // Change the picture's color profile to Melissa32
+    ColorTransform toWorking;
 
-    setup_read_icc_profile(&cinfo);
-
-    // read the header
-    jpeg_read_header(&cinfo, TRUE);
-
-    jpeg_start_decompress(&cinfo);
-
-    int      width      = cinfo.output_width;
-    int      height     = cinfo.output_height;
-    int      pixel_size = cinfo.output_components + 1;
-    uint8_t* buffer     = new uint8_t[width * height * pixel_size];
-    uint8_t* line[1];
-
-    //qDebug() << "reading jpeg" << width << "," << height << "," << pixel_size;
-
-    // set the output to BGRX so that it aligns to 32bit (expected format for QImage)
-    cinfo.out_color_space = JCS_EXT_BGRX;
-
-    while (cinfo.output_scanline < height)
+    if (!iccProfile.isEmpty())
     {
-        line[0] = &buffer[cinfo.output_scanline * pixel_size * width];
-        jpeg_read_scanlines(&cinfo, line, 1);
+        // use the embedded JPeg profile
+        toWorking = ColorTransform::getTransform(iccProfile, WORKING_COLOR_SPACE,
+                ColorTransform::FORMAT_RGB48_PLANAR, ColorTransform::FORMAT_RGB48_PLANAR);
+        //  mPhoto.exifInfo().profileName = toWorking.profileName();
     }
-
-    // now read the ICC profile if there is any.
-
-    uint8_t* icc_profile_buf;
-    uint32_t buflen;
-
-    if (read_icc_profile(&cinfo, &icc_profile_buf, &buflen))
+    else
     {
-        qDebug() << "Found profile in JPEG";
-        // There was a profile. read it into a buffer and pass it to QByteArray
-        iccProfile = QByteArray((const char*)icc_profile_buf, buflen);
-        free(icc_profile_buf);
+        // Assume default JPEG images are in sRGB format.
+        toWorking = ColorTransform::getTransform("sRGB-Melissa-RGB32",
+                "sRGB", WORKING_COLOR_SPACE, ColorTransform::FORMAT_RGB48_PLANAR, ColorTransform::FORMAT_RGB48_PLANAR);
+        //  mPhoto.exifInfo().profileName = "sRGB (Assumed)";
     }
-    jpeg_destroy_decompress(&cinfo);
 
-    return QImage(buffer, width, height, pixel_size * width,
-               QImage::Format_RGB32, (QImageCleanupFunction)deleteArray<uint8_t>, buffer);
+    return toWorking.transformImage(outImage);
+}
+
+bool JpegIO::saveToFile(const Image& image, const QString& filename)
+{
+    qDebug() << "bool JpegIO::saveToFile(const Image& image, const QString& filename) NOT IMPLEMENTED";
+    return false;
 }
 
 JpegIO::JpegIO()

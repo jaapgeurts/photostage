@@ -29,7 +29,7 @@ Func BasicOperation::exposure(Func in, Halide::Param<float> EV)
     return compensated;
 }
 
-QImage BasicOperation::execute(const QImage& image, float EV)
+PhotoStage::Image BasicOperation::execute(const PhotoStage::Image& image, float EV)
 {
     int width  = image.width();
     int height = image.height();
@@ -39,55 +39,23 @@ QImage BasicOperation::execute(const QImage& image, float EV)
     Param<float> paramEV("Param<float> EV");
     paramEV.set(EV);
 
-    Image<uint16_t> input = createImage(image);
+    Buffer                  inBuf(UInt(16), width, height, 3, 0, (uint8_t*)image.data(), "SrcImage");
+    Halide::Image<uint16_t> input(inBuf);
 
     // perform operation
     Func srcData;
     srcData(x, y, c) = input(x, y, c);
 
-    Func            process = exposure(srcData, paramEV);
-    Image<uint16_t> output  = process.realize(image.width(), image.height(), 3);
+    uint16_t* outdata = new uint16_t[width * height * 3];
+    Func      process = exposure(srcData, paramEV);
+    Buffer    outBuf(UInt(160), width, height, 3, 0, (uint8_t*)outdata, "DstImage");
+    process.realize(outBuf);
+    outBuf.copy_to_host();
 
-    uint16_t*       outdata = (uint16_t*)output.data();
-
-    // squeeze the image back into an 8bit QImage
-    // images are stored in Halide as planar
-    QImage outImage(width, height, QImage::Format_RGB32);
-
-    for (int y = 0; y < height; y++)
-    {
-        uint8_t* dst = outImage.scanLine(y);
-
-        for (int x = 0; x < width; x++)
-            for (int c = 0; c < 3; c++)
-                dst[x * 4 + c] = (uint8_t)(outdata[c * width * height + y * width + x] / 256.0f);
-
-    }
-
-    return outImage;
+    // Image will take ownership of the buffer
+    return PhotoStage::Image(width, height, outdata);
 }
 
-Image<uint16_t> BasicOperation::createImage(const QImage& image)
-{
-    int                     width  = image.width();
-    int                     height = image.height();
 
-    Halide::Image<uint16_t> img(width, height, 3, "Source Image");
-    uint16_t*               dst = img.data();
 
-    // const uint8_t*          src = image.constBits();
-
-    // copy the image to Halide Image as planar
-    for (int y = 0; y < height; y++)
-    {
-        const uint8_t* src = image.constScanLine(y);
-
-        for (int x = 0; x < width; x++)
-            for (int c = 0; c < 3; c++)
-                dst[c * width * height + y * width + x] = src[x * 4 + c] * 256;
-
-    }
-
-    return img;
-}
 }

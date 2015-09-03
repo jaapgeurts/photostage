@@ -54,9 +54,6 @@ SOURCES += \
     import/importdialog.cpp \
     import/previewfileloader.cpp \
     import/previewinfo.cpp \
-    jobs/colortransformjob.cpp \
-    jobs/previewcacheloaderjob.cpp \
-    jobs/previewgeneratorjob.cpp \
     library/imagedbtile.cpp \
     library/library.cpp \
     library/modules/collectionmodule.cpp \
@@ -115,7 +112,13 @@ SOURCES += \
     widgets/mapview/modelindexlayer.cpp \
     widgets/timezonepicker.cpp \
     io/jpegio.cpp \
-    engine/basicoperation.cpp
+    engine/basicoperation.cpp \
+    imageprivate.cpp \
+    io/pngio.cpp \
+    jobs/imageloaderjob.cpp \
+    jobs/colortransformjob.cpp \
+    io/rawio.cpp \
+    engine/dimensionoperation.cpp
 
     #processing/amaze_demosaic_RT.c
 
@@ -151,9 +154,6 @@ HEADERS  += \
     import/importdialog.h \
     import/previewfileloader.h \
     import/previewinfo.h \
-    jobs/colortransformjob.h \
-    jobs/previewcacheloaderjob.h \
-    jobs/previewgeneratorjob.h \
     library/imagedbtile.h \
     library/library.h \
     library/modules/collectionmodule.h \
@@ -213,7 +213,12 @@ HEADERS  += \
     widgets/mapview/modelindexlayer.h \
     widgets/timezonepicker.h \
     io/jpegio.h \
-    engine/basicoperation.h
+    engine/basicoperation.h \
+    io/pngio.h \
+    jobs/imageloaderjob.h \
+    jobs/colortransformjob.h \
+    io/rawio.h \
+    engine/dimensionoperation.h
 
 FORMS    += \
     mainwindow.ui \

@@ -11,9 +11,8 @@
 #include "widgets/tileview.h"
 #include "widgets/mapview/modelindexlayer.h"
 
-#include "jobs/previewgeneratorjob.h"
+#include "jobs/imageloaderjob.h"
 #include "jobs/colortransformjob.h"
-#include "jobs/previewcacheloaderjob.h"
 
 namespace PhotoStage
 {
@@ -97,13 +96,34 @@ void PhotoModel::loadImage(Photo& photo)
 
     photo.setIsDownloading(true);
 
-    PreviewCacheLoaderJob* plj = new PreviewCacheLoaderJob(photo);
-
-    // TODO: decide wether the image is a "normal" JPEG, then load in parallel
-    // if the image is RAW and uses Halide, then load sequentual.
-    plj->connect(plj, &PreviewCacheLoaderJob::imageReady, this, &PhotoModel::onPreviewLoaded);
-    uint32_t id = mThreadQueue->addJob(plj);
+    ImageLoaderJob* ilj = new ImageLoaderJob(photo);
+    ilj->connect(ilj, &ImageLoaderJob::imageReady, this, &PhotoModel::onImageLoaded);
+    ilj->connect(ilj, &ImageLoaderJob::exifUpdated, this, &PhotoModel::onExifUpdated);
+    uint32_t id = mThreadQueue->addJob(ilj);
     mRunningThreads.insert(photo.id(), id);
+}
+
+void PhotoModel::onExifUpdated(Photo photo)
+{
+    // get actual width x height & store in db.
+    DatabaseAccess::photoDao()->updateExifInfo(photo);
+}
+
+void PhotoModel::onImageLoaded(Photo photo, const QImage& image)
+{
+    if (!image.isNull())
+    {
+        photo.setLibraryPreview(image);
+    }
+    else
+    {
+        qDebug() << "Failed to load preview.. Prevent loop";
+        photo.setLibraryPreview(QImage(":/images/loading_failed.jpg"));
+    }
+    QVector<int> roles;
+    emit         dataChanged(mPhotoIndexMap.value(photo.id()), mPhotoIndexMap.value(photo.id()), roles);
+    mRunningThreads.remove(photo.id());
+    photo.setIsDownloading(false);
 }
 
 void PhotoModel::convertImage(Photo& photo)
@@ -112,73 +132,6 @@ void PhotoModel::convertImage(Photo& photo)
         return;
 
     photo.setIsDownloading(true);
-    ColorTransformJob* cfj = new ColorTransformJob(photo);
-
-    // convert the image to sRGB
-    cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::onImageTranslated);
-    uint32_t id = mThreadQueue->addJob(cfj);
-    mRunningThreads.insert(photo.id(), id);
-}
-
-void PhotoModel::onPreviewLoaded(Photo photo, const QImage& image)
-{
-    if (!image.isNull())
-    {
-        // The image was succesfully loaded from disk cache
-        photo.setLibraryPreview(image);
-        photo.setOriginal(image);
-
-        ColorTransformJob* cfj = new ColorTransformJob(photo);
-
-        // convert the image to sRGB
-        cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::onImageTranslated);
-        uint32_t id = mThreadQueue->addJob(cfj);
-
-        mRunningThreads.insert(photo.id(), id);
-    }
-    else
-    {
-        // no image available in the cache.
-        // generate a preview from the original image
-        PreviewGeneratorJob* il = new PreviewGeneratorJob(photo);
-        il->connect(il, &PreviewGeneratorJob::imageReady, this, &PhotoModel::onPreviewGenerated);
-        uint32_t             id = mThreadQueue->addJob(il);
-        mRunningThreads.insert(photo.id(), id);
-    }
-}
-
-void PhotoModel::onPreviewGenerated(Photo photo, const QImage& image)
-{
-    if (image.isNull())
-    {
-        photo.setIsDownloading(false);
-        mRunningThreads.remove(photo.id());
-        return;
-    }
-
-    // get actual width x height & store in db.
-    photo.exifInfo().width  = image.width();
-    photo.exifInfo().height = image.height();
-    DatabaseAccess::photoDao()->updateExifInfo(photo);
-
-    QImage scaled;
-
-    if (image.width() > PREVIEW_IMG_WIDTH && image.height() > PREVIEW_IMG_HEIGHT)
-    { // only scale images down. never scale up.
-        scaled = image.scaled(PREVIEW_IMG_WIDTH, PREVIEW_IMG_HEIGHT,
-                Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    }
-    else
-    {
-        scaled = image;
-    }
-    QString key = QString::number(photo.id());
-
-    PreviewCache::globalCache()->put(key, scaled);
-
-    // TODO: original = null
-    photo.setLibraryPreview(scaled);
-
     ColorTransformJob* cfj = new ColorTransformJob(photo);
 
     // convert the image to sRGB

@@ -170,12 +170,7 @@ const QString& ColorTransform::profileName()
 
 Image ColorTransform::transformImage(const Image& inImage) const
 {
-    //PhotoData result = PhotoData(inImage.size());
-
-    //qDebug() << "Has alpha" << (inImage.hasAlphaChannel() ? "yes" : "no");
-
     Image           outImage(inImage.size());
-
     const uint16_t* inbuf  = inImage.data();
     uint16_t*       outbuf = outImage.data();
 
@@ -221,7 +216,8 @@ QImage ColorTransform::transformQImage(const QImage& inImage) const
             outLine[x * 4 + 3] = 0xff;
     }
 
-    return QImage(buffer, width, height, 4 * width, QImage::Format_RGB32, (QImageCleanupFunction)deleteArray<uint8_t>, buffer);
+    return QImage(buffer, width, height, 4 * width, QImage::Format_RGB32,
+               (QImageCleanupFunction)deleteArray<uint8_t>, buffer);
 }
 
 Image ColorTransform::transformFromQImage(const QImage& inImage) const
@@ -233,7 +229,7 @@ Image ColorTransform::transformFromQImage(const QImage& inImage) const
     for (int y = 0; y < height; y++)
     {
         const uint8_t* inLine  = inImage.constScanLine(y);
-        uint16_t*         outLine = outImage.scanLine(y);
+        uint16_t*      outLine = outImage.scanLine(y);
         cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inLine, outLine, width);
     }
     return outImage;

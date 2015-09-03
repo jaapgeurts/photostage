@@ -1,15 +1,9 @@
 #include <QDebug>
-#include <QFileInfo>
-#include <QThread>
 
-#include <lcms2.h>
+#include "rawio.h"
 
-#include "constants.h"
-#include "previewgeneratorjob.h"
 #include "import/exivfacade.h"
-#include "engine/colortransform.h"
 #include "engine/pipelinebuilder.h"
-#include "io/jpegio.h"
 
 template<typename T>
 static inline long max(T x, T y)
@@ -54,154 +48,12 @@ CameraMetaData* Metadata::metaData()
     return mMetaData;
 }
 
-PreviewGeneratorJob::PreviewGeneratorJob(const Photo& photo) :
-    QObject(NULL),
-    mPhoto(photo)
-{
-    setName("PreviewGeneratorJob");
-}
-
-PreviewGeneratorJob::~PreviewGeneratorJob()
+RawIO::RawIO()
 {
 }
 
-QVariant PreviewGeneratorJob::run()
+Image RawIO::fromFile(const QString& filename)
 {
-    QImage image = genThumb(mPhoto.srcImagePath());
-
-    return image;
-}
-
-void PreviewGeneratorJob::finished(QVariant result)
-{
-    QImage image = result.value<QImage>();
-    emit   imageReady(mPhoto, image);
-}
-
-void PreviewGeneratorJob::error(const QString& error)
-{
-    qDebug() << "Error during image load or gen thumb" << error;
-}
-
-void PreviewGeneratorJob::cancel()
-{
-    mPhoto.setIsDownloading(false);
-}
-
-QImage PreviewGeneratorJob::genThumb(const QString& path)
-{
-    // TODO: catch errors and emit error(QString)
-    QImage image;
-
-    // load the file into a buffer first.
-    QFile file(path);
-
-    if (!file.open(QIODevice::ReadOnly))
-    {
-        qDebug("Can't open file");
-        return image;
-    }
-    QByteArray memFile = file.readAll();
-    file.close();
-
-    QString suffix = QFileInfo(path).suffix().toUpper();
-
-    // TODOL
-    if (suffix == "NEF" || suffix == "CR2" || suffix == "CRW")
-    {
-        qDebug() << "Load raw" << path;
-
-        image = rawThumb(memFile);
-    }
-    else
-    {
-        // Read using JPEG library
-        //qDebug() << "Load jpg" << path;
-        QByteArray iccProfile;
-        // use QImage loading. this ignores embedded profiles
-        //QImage     pixmap = QImage::fromData(memFile);
-        QImage pixmap = JpegIO::readFile(memFile, iccProfile);
-
-        // rotate the image if necessary
-        ExivFacade* ex = ExivFacade::createExivReader();
-
-        if (!ex->openData(memFile))
-        {
-            qDebug() << "Error loading exif data from image";
-            return image;
-        }
-        ExifInfo ex_info = ex->data();
-        delete(ex);
-
-        QTransform m;
-
-        switch (ex_info.rotation)
-        {
-            case ExifInfo::Rotate90CCW:
-                m.rotate(-90);
-                pixmap = pixmap.transformed(m);
-                break;
-
-            case ExifInfo::Rotate90CW:
-                m.rotate(90);
-                pixmap = pixmap.transformed(m);
-                break;
-
-            default:
-                // qDebug() << "Unimplemented rotation value";
-                break;
-        }
-
-        if (!pixmap.isNull())
-        {
-            // Assume default JPEG images are in sRGB format.
-            // Convert the picture to MelissaRGB space
-            ColorTransform::Format fmt;
-            ColorTransform         toWorking;
-
-            if (pixmap.format() == QImage::Format_RGB32)
-            {
-                fmt = ColorTransform::FORMAT_RGB32;
-
-                if (!iccProfile.isEmpty())
-                {
-                    // use the embedded JPeg profile
-                    toWorking = ColorTransform::getTransform(iccProfile, WORKING_COLOR_SPACE,
-                            fmt, ColorTransform::FORMAT_RGB32);
-                    mPhoto.exifInfo().profileName = toWorking.profileName();
-                }
-                else
-                {
-                    toWorking = ColorTransform::getTransform("sRGB-Melissa-RGB32",
-                            "sRGB", WORKING_COLOR_SPACE, fmt, ColorTransform::FORMAT_RGB32);
-                    mPhoto.exifInfo().profileName = "sRGB (Assumed)";
-                }
-            }
-            else if (pixmap.format() == QImage::Format_Grayscale8)
-            {
-                //                qDebug() << "alpha" << pixmap.hasAlphaChannel();
-                //                qDebug() << "bpp" << pixmap.depth();
-                //                qDebug() << "Channels" << pixmap.bitPlaneCount();
-                fmt       = ColorTransform::FORMAT_GRAYSCALE8;
-                toWorking = ColorTransform::getTransform("sRGB-Melissa-Gray8",
-                        "sRGB", WORKING_COLOR_SPACE, fmt, ColorTransform::FORMAT_RGB32);
-                mPhoto.exifInfo().profileName = "sRGB (Assumed)";
-            }
-            else
-            {
-                qDebug() << "**** QImage format not supported";
-                return image;
-            }
-
-            image = toWorking.transformQImage(pixmap);
-        }
-    }
-
-    if (image.isNull())
-    {
-        qDebug() << "image loading failed";
-    }
-    return image;
 }
 
 /**
@@ -210,7 +62,7 @@ QImage PreviewGeneratorJob::genThumb(const QString& path)
  * @param dst (out parameter) the result
  * @return true, if successful, false if the inverse doesn't exist
  */
-bool PreviewGeneratorJob::compute_inverse(const float src[9], float dst[9])
+bool RawIO::compute_inverse(const float src[9], float dst[9])
 {
     bool result = false;
 
@@ -252,7 +104,7 @@ bool PreviewGeneratorJob::compute_inverse(const float src[9], float dst[9])
     return result;
 }
 
-void PreviewGeneratorJob::dump_matrix(const QString& name, float m[9])
+void RawIO::dump_matrix(const QString& name, float m[9])
 {
     QString space = QString(name.length(), ' ');
 
@@ -263,7 +115,7 @@ void PreviewGeneratorJob::dump_matrix(const QString& name, float m[9])
     qDebug() << space << "└";
 }
 
-int PreviewGeneratorJob::compute_cct(float R, float G, float B)
+int RawIO::compute_cct(float R, float G, float B)
 {
     // see here for more details
     // http://dsp.stackexchange.com/questions/8949/how-do-i-calculate-the-color-temperature-of-the-light-source-illuminating-an-ima
@@ -282,7 +134,7 @@ int PreviewGeneratorJob::compute_cct(float R, float G, float B)
     return CCT;
 }
 
-void PreviewGeneratorJob::mmultm(float* A, float* B, float* out)
+void RawIO::mmultm(float* A, float* B, float* out)
 {
     out[0] = A[0] * B[0] + A[1] * B[3] + A[2] * B[6];
     out[1] = A[0] * B[1] + A[1] * B[4] + A[2] * B[7];
@@ -297,11 +149,7 @@ void PreviewGeneratorJob::mmultm(float* A, float* B, float* out)
     out[8] = A[6] * B[2] + A[7] * B[5] + A[8] * B[8];
 }
 
-//void ImageFileLoader::vmultm(float* V,float* M,float* out)
-//{
-//}
-
-void PreviewGeneratorJob::normalize(float* M)
+void RawIO::normalize(float* M)
 {
     float sum;
 
@@ -317,7 +165,7 @@ void PreviewGeneratorJob::normalize(float* M)
     }
 }
 
-void PreviewGeneratorJob::getMatrix(float* in, float* out)
+void RawIO::getMatrix(float* in, float* out)
 {
     for (int i = 0; i < 9; i++)
         in[i] /= 10000;
@@ -326,19 +174,9 @@ void PreviewGeneratorJob::getMatrix(float* in, float* out)
     compute_inverse(in, out);
 }
 
-QImage PreviewGeneratorJob::rawThumb(const QByteArray& memFile)
+Image RawIO::fromFile(const QByteArray& memFile, const ExifInfo& ex_info)
 {
-    QImage      image;
-
-    ExivFacade* ex = ExivFacade::createExivReader();
-
-    if (!ex->openData(memFile))
-    {
-        qDebug() << "Error loading exif data from image";
-        return image;
-    }
-    ExifInfo ex_info = ex->data();
-    delete(ex);
+    Image image;
 
     //FileReader reader(strdup(path.toLocal8Bit().data()));
     QSharedPointer<FileMap> map;

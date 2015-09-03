@@ -29,8 +29,6 @@ class ColorTransformJob  : public QObject, public Runnable
     private:
 
         Photo mPhoto;
-
-
 };
 }
 #endif // PHOTOSTAGE_COLORTRANSFORMJOB_H

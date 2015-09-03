@@ -7,10 +7,7 @@
 
 namespace PhotoStage
 {
-Photo::PhotoPrivate::PhotoPrivate(PhotoModel* owner,
-    const QImage& image,
-    const QString& filename,
-    long long id) :
+Photo::PhotoPrivate::PhotoPrivate(PhotoModel* owner, const QImage& image, const QString& filename, long long id) :
     mId(id),
     mLibraryPreview(image),
     mSrcImagePath(filename),
@@ -20,7 +17,7 @@ Photo::PhotoPrivate::PhotoPrivate(PhotoModel* owner,
 }
 
 Photo::PhotoPrivate::PhotoPrivate(QSqlQuery& q) :
-    mOwner(NULL),
+    mOwner(nullptr),
     mIsDownloading(false)
 {
     mId = q.value(0).toLongLong();
@@ -62,143 +59,5 @@ Photo::PhotoPrivate::PhotoPrivate(QSqlQuery& q) :
 
 Photo::PhotoPrivate::~PhotoPrivate()
 {
-}
-
-void Photo::PhotoPrivate::setOriginal(const QImage& image)
-{
-    mOriginal = image;
-}
-
-const QImage& Photo::PhotoPrivate::original() const
-{
-    return mOriginal;
-}
-
-void Photo::PhotoPrivate::setLibraryPreview(const QImage& image)
-{
-    mLibraryPreview = image;
-    // force regeneration of the display image
-    mLibraryPreviewsRGB = QImage();
-}
-
-void Photo::PhotoPrivate::setLibraryPreviewsRGB(const QImage& image)
-{
-    mLibraryPreviewsRGB = image;
-}
-
-// TODO: think about using the proxy pattern
-const QImage& Photo::PhotoPrivate::libraryPreview()
-{
-    return mLibraryPreview;
-}
-
-const QImage& Photo::PhotoPrivate::libraryPreviewsRGB()
-{
-    return mLibraryPreviewsRGB;
-}
-
-void Photo::PhotoPrivate::setSrcImagePath(const QString& path)
-{
-    mSrcImagePath = path;
-}
-
-const QString& Photo::PhotoPrivate::srcImagePath() const
-{
-    return mSrcImagePath;
-}
-
-void Photo::PhotoPrivate::setExifInfo(const ExifInfo& exifInfo)
-{
-    mExifInfo = exifInfo;
-}
-
-ExifInfo& Photo::PhotoPrivate::exifInfo()
-{
-    return mExifInfo;
-}
-
-const ExifInfo& Photo::PhotoPrivate::exifInfo() const
-{
-    return mExifInfo;
-}
-
-void Photo::PhotoPrivate::setRating(int rating)
-{
-    if (rating < 0 || rating > 5)
-    {
-        qDebug() << "Invalid rating:" << rating;
-        return;
-    }
-    mRating = rating;
-}
-
-int Photo::PhotoPrivate::rating() const
-{
-    return mRating;
-}
-
-void Photo::PhotoPrivate::setColorLabel(Photo::ColorLabel label)
-{
-    mColorLabel = label;
-}
-
-Photo::ColorLabel Photo::PhotoPrivate::colorLabel() const
-{
-    return mColorLabel;
-}
-
-void Photo::PhotoPrivate::setFlag(Photo::Flag flag)
-{
-    mFlag = flag;
-}
-
-Photo::Flag Photo::PhotoPrivate::flag() const
-{
-    return mFlag;
-}
-
-long long Photo::PhotoPrivate::hash() const
-{
-    return mHashCode;
-}
-
-void Photo::PhotoPrivate::setHash(long long code)
-{
-    mHashCode = code;
-}
-
-long long Photo::PhotoPrivate::id() const
-{
-    return mId;
-}
-
-PhotoModel* Photo::PhotoPrivate::owner() const
-{
-    return mOwner;
-}
-
-void Photo::PhotoPrivate::setOwner(PhotoModel* owner)
-{
-    mOwner = owner;
-}
-
-void Photo::PhotoPrivate::setIsDownloading(bool value)
-{
-    mIsDownloading = value;
-}
-
-bool Photo::PhotoPrivate::isDownloading() const
-{
-    return mIsDownloading;
-}
-
-void Photo::PhotoPrivate::setKeywords(const QStringList& list)
-{
-    mKeywords = list;
-}
-
-QStringList Photo::PhotoPrivate::keywords() const
-{
-    return mKeywords;
 }
 }

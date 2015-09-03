@@ -129,14 +129,15 @@ bool Exiv2Lib::openData(const QByteArray& data)
     try
     {
         mImageFile = ImageFactory::open((const byte*)data.constData(), (long)data.length());
+
+        return populateExifInfo();
     }
     catch (BasicError<char> e)
     {
         qDebug() << "Exiv2 error reading data" << e.what();
         return false;
     }
-
-    return populateExifInfo();
+    return false;
 }
 
 bool Exiv2Lib::populateExifInfo()

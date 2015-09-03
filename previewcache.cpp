@@ -67,7 +67,7 @@ void PreviewCache::put(const QString& key, const QImage& image)
     QDir                        d(dir);
 
     d.mkpath(dir);
-    //qDebug() << "Storing image at" << filePath;
+   // qDebug() << "Storing image at" << filePath;
     image.save(filePath, mFormat.toLocal8Bit().data(), 80);
 }
 
@@ -79,8 +79,7 @@ std::pair<QString, QString> PreviewCache::dirFromKey(const QString& key)
     QString f1, f2;
     f1 = hash.mid(0, 2);
     f2 = hash.mid(2, 2);
-    QString dir = mBaseDir + QDir::separator() + f1 + QDir::separator() +
-        f2;
+    QString dir = mBaseDir + QDir::separator() + f1 + QDir::separator() + f2;
     return std::make_pair(dir, hash);
 }
 }

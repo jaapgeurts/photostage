@@ -46,7 +46,7 @@ void PipelineBuilder::createRawProfileConversion()
     mHRawTransform = cmsCreateTransform(hInProfile,
             TYPE_RGB_16_PLANAR,
             hOutProfile,
-            TYPE_BGRA_8,
+            TYPE_BGR_16_PLANAR,
             INTENT_PERCEPTUAL,
             0);
 
@@ -76,7 +76,7 @@ void PipelineBuilder::setColorConversion(float* colorMatrix)
 {
     // convert the colorMatrix array to Halide
 
-    Image<float> im(3, 3);
+    Halide::Image<float> im(3, 3);
 
     for (int y = 0; y < 3; y++)
         for (int x = 0; x < 3; x++)
@@ -86,7 +86,7 @@ void PipelineBuilder::setColorConversion(float* colorMatrix)
     mColorMatrix.set(im);
 }
 
-void PipelineBuilder::setInput(Image<uint16_t> input)
+void PipelineBuilder::setInput(Halide::Image<uint16_t> input)
 {
     mInput.set(input);
 }
@@ -278,17 +278,17 @@ void PipelineBuilder::prepare()
     mPipeline = final;
 }
 
-QImage PipelineBuilder::execute(int width, int height)
+PhotoStage::Image PipelineBuilder::execute(int width, int height)
 {
-    QImage          image;
+    PhotoStage::Image       image;
 
-    Image<uint16_t> out;
+    Halide::Image<uint16_t> realized;
 
-    Var             x, y, c;
+    Var                     x, y, c;
 
     if (mRotation == -1)
     {
-        image = QImage(height, width, QImage::Format_RGB32);
+        image = PhotoStage::Image(height, width);
         Func mrot("mrot");
         mrot(x, y, c) = mPipeline(width - 1 - y,  x, c);
 
@@ -297,11 +297,11 @@ QImage PipelineBuilder::execute(int width, int height)
         .fuse(x_outer, y_outer, tile_index)
         .parallel(tile_index);
 
-        out = mrot.realize(height, width, 3);
+        realized = mrot.realize(height, width, 3);
     }
     else if (mRotation == 1)
     {
-        image = QImage(height, width, QImage::Format_RGB32);
+        image = PhotoStage::Image(height, width);
         Func mrot("mrot");
         mrot(x, y, c) = mPipeline(y, height - 1 - x, c);
 
@@ -310,11 +310,11 @@ QImage PipelineBuilder::execute(int width, int height)
         .fuse(x_outer, y_outer, tile_index)
         .parallel(tile_index);
 
-        out = mrot.realize(height, width, 3);
+        realized = mrot.realize(height, width, 3);
     }
     else
     {
-        image = QImage(width, height, QImage::Format_RGB32);
+        image = PhotoStage::Image(width, height);
 
         Func mrot;
         mrot(x, y, c) = mPipeline(x, y, c);
@@ -323,26 +323,10 @@ QImage PipelineBuilder::execute(int width, int height)
         .fuse(x_outer, y_outer, tile_index)
         .parallel(tile_index);
 
-        out = mrot.realize(width, height, 3);
+        realized = mrot.realize(width, height, 3);
     }
 
-    uint16_t* outdata = (uint16_t*)out.data();
-
-    cmsDoTransform(mHRawTransform, outdata, image.bits(), width * height);
-
-    // images are stored in Halide as planar
-    //        for (int y = 0; y < height; y++)
-    //        {
-    //            uint8_t* dst = image.scanLine(y);
-
-    //            for (int x = 0; x < width; x++)
-    //            {
-    //                for (int c = 0; c < 3; c++)
-    //                    dst[x * 4 + c] =
-    //                        (uint8_t)(outdata[c * width * height + y * width + x] *
-    //                        255.0f);
-    //            }
-    //        }
+    cmsDoTransform(mHRawTransform, realized.data(), image.data(), width * height);
 
     return image;
 }

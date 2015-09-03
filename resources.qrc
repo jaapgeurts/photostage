@@ -14,6 +14,7 @@
     </qresource>
     <qresource prefix="/images">
         <file alias="worldmap.jpg">resources/worldmap.jpg</file>
+        <file alias="loading_failed.jpg">resources/loading_failed.jpg</file>
     </qresource>
     <qresource prefix="/data">
         <file alias="tz_world.txt">resources/tz_world.txt</file>

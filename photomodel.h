@@ -8,7 +8,6 @@
 #include <QMimeData>
 
 #include "photo.h"
-#include "previewcache.h"
 #include "threadqueue.h"
 #include "database/databaseaccess.h"
 
@@ -80,9 +79,10 @@ class PhotoModel : public QAbstractListModel
         void onPhotosDeletedFromCollection(long long collectionid, const QList<Photo>& photos);
         void onPhotosChanged(const QList<Photo>& photos);
 
-        void onPreviewGenerated(Photo photo, const QImage& image);
         void onImageTranslated(Photo photo, const QImage& image);
-        void onPreviewLoaded(Photo photo, const QImage& image);
+        void onImageLoaded(Photo photo, const QImage& image);
+
+        void onExifUpdated(Photo photo);
 
     private:
 

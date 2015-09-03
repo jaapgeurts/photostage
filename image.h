@@ -17,21 +17,37 @@ class Image
 
     public:
 
+        enum Rotation
+        {
+            DontRotate       = 1, // No rotation Needed
+            FlipY            = 2, // flip over y
+            Rotate180        = 3, // rotate 180 (or flip x flip y)
+            FlipX            = 4, // flip over x
+            Rotate90CWFlipY  = 5, // rotate 90 CW & flip over y
+            Rotate90CW       = 6, // rotate 90 CW
+            Rotate90CCWFlipY = 7, // rotate 90 CCW flip over y
+            Rotate90CCW      = 8 // rotate 90 CCW
+        };
+
         Image();
-        Image(int width, int height);
+        // Image will take ownership of the datapointer
+        Image(int width, int height, uint16_t* data = nullptr);
+        Image(int width, int height, int depth, uint8_t* data, Rotation rotate = DontRotate);
         Image(const QSize& size);
+        Image(const QImage& image);
         ~Image();
 
-        // static convenience functions
-        static Image fromFile(const QString& filename);
-        static Image fromQImage(const QImage& image);
-
         QImage toQImage() const;
+
+        // static convenience functions
+        // static Image fromFile(const QString& filename);
+
         bool saveToFile(const QString& filename) const;
 
         // getters
         int width() const;
         int height() const;
+        int depth() const;
         QSize size() const;
 
         uint16_t* data() const;
@@ -50,8 +66,10 @@ class Image
             public:
 
                 ImagePrivate();
-                ImagePrivate(int width, int height);
+                ImagePrivate(int width, int height, uint16_t* data = nullptr);
+                ImagePrivate(int width, int height, int depth, uint8_t* data, Rotation rotate = DontRotate);
                 ImagePrivate(const QSize& size);
+                ImagePrivate(const QImage& image);
                 ~ImagePrivate();
 
             private:
@@ -60,13 +78,13 @@ class Image
                 int       mWidth;
                 int       mHeight;
 
-                static Image fromFilePNG(const QString& filename);
-                bool saveToFilePNG(const QString& filename) const;
+                QImage toQImage() const;
+
+                void copy8bitBufferToPlanar(const uint8_t* src, int depth, Rotation rotate);
         };
 };
 }
 
 Q_DECLARE_METATYPE(PhotoStage::Image)
-//Q_DECLARE_METATYPE(Image*)
 
 #endif // PHOTOSTAGE_IMAGE_H

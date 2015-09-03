@@ -1,41 +1,25 @@
-#ifndef PHOTOSTAGE_PREVIEWGENERATORJOB_H
-#define PHOTOSTAGE_PREVIEWGENERATORJOB_H
+#ifndef PHOTOSTAGE_RAWIO_H
+#define PHOTOSTAGE_RAWIO_H
 
-#include <QObject>
-#include <QModelIndex>
 #include <QString>
+#include <QByteArray>
 
-#include "photo.h"
-#include "runnable.h"
-#include "engine/colortransform.h"
+#include "image.h"
+#include "import/exivfacade.h"
 #include "external/rawspeed/RawSpeed/RawSpeed-API.h"
 
 namespace PhotoStage
 {
-class PreviewGeneratorJob : public QObject, public Runnable
+class RawIO
 {
-    Q_OBJECT
-
     public:
 
-        explicit PreviewGeneratorJob(const Photo& photo);
-        ~PreviewGeneratorJob();
+        RawIO();
 
-    public:
-
-        // Runnable interface
-        QVariant run();
-        void finished(QVariant result);
-        void error(const QString& error);
-        void cancel();
-
-    signals:
-
-        void imageReady(Photo photo, const QImage& image);
+        Image fromFile(const QString& filename);
+        Image fromFile(const QByteArray& memFile, const PhotoStage::ExifInfo& ex_info);
 
     private:
-
-        Photo mPhoto;
 
         /**
          * @brief ImageFileLoader::compute_inverse computes the inverse of a matrix
@@ -50,8 +34,6 @@ class PreviewGeneratorJob : public QObject, public Runnable
 
         //        void vmultm(float* V, float* M, float* out);
         void normalize(float* M);
-        QImage genThumb(const QString& path);
-        QImage rawThumb(const QByteArray &memFile);
         void getMatrix(float* in, float* out);
 };
 
@@ -64,4 +46,4 @@ class Metadata
         static RawSpeed::CameraMetaData* metaData();
 };
 }
-#endif // PHOTOSTAGE_PREVIEWGENERATORJOB_H
+#endif // PHOTOSTAGE_RAWIO_H

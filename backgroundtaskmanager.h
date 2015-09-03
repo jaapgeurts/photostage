@@ -1,6 +1,8 @@
-#ifndef BACKGROUNDTASKMANAGER_H
-#define BACKGROUNDTASKMANAGER_H
+#ifndef PHOTOSTAGE_BACKGROUNDTASKMANAGER_H
+#define PHOTOSTAGE_BACKGROUNDTASKMANAGER_H
+
 #include <QObject>
+
 #include "widgets/backgroundtaskprogress.h"
 #include "backgroundtask.h"
 
@@ -12,8 +14,7 @@ class BackgroundTaskManager : public QObject
 
     public:
 
-        explicit BackgroundTaskManager(QWidget* const container,
-            QObject* parent = 0);
+        explicit BackgroundTaskManager(QWidget* const container, QObject* parent = 0);
         ~BackgroundTaskManager();
         void addRunnable(BackgroundTask* const task);
 
@@ -32,4 +33,4 @@ class BackgroundTaskManager : public QObject
         QHash<BackgroundTask*, BackgroundTaskProgress*> mDict;
 };
 }
-#endif // BACKGROUNDTASKMANAGER_H
+#endif // PHOTOSTAGE_BACKGROUNDTASKMANAGER_H

@@ -1,8 +1,10 @@
 #ifndef PHOTOSTAGE_BASICOPERATION_H
 #define PHOTOSTAGE_BASICOPERATION_H
 
-#include <Halide.h>
 #include <QImage>
+#include <Halide.h>
+
+#include "image.h"
 
 namespace PhotoStage
 {
@@ -12,13 +14,11 @@ class BasicOperation
 
         BasicOperation();
 
-        QImage execute(const QImage& image, float EV);
+        PhotoStage::Image execute(const PhotoStage::Image& image, float EV);
 
     private:
 
         Halide::Var x, y, c;
-
-        Halide::Image<uint16_t> createImage(const QImage& image);
 
         Halide::Func contrast(Halide::Func in);
         Halide::Func brightness(Halide::Func in);

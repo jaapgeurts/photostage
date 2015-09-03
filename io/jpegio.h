@@ -4,13 +4,18 @@
 #include <QString>
 #include <QImage>
 
+#include "image.h"
+#include "import/exivfacade.h"
+
 namespace PhotoStage
 {
 class JpegIO
 {
     public:
 
-        static QImage readFile(const QByteArray &memFile, QByteArray &iccProfile);
+        static Image fromFile(const QByteArray& memFile, const ExifInfo &ex_info);
+        static Image fromFile(const QString& filename, const ExifInfo &ex_info);
+        static bool saveToFile(const Image& image, const QString& filename);
 
         JpegIO();
 };

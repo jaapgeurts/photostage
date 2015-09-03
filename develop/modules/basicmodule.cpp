@@ -23,7 +23,8 @@ void BasicModule::onExposureChanged(int value)
 {
     qDebug() << "exposure value" << value;
 
-    mPhoto.setLibraryPreview(mBasicOperation.execute(mPhoto.original(), value / 9.0));
+    Image img = mBasicOperation.execute(mPhoto.originalImage(), value / 9.0);
+    mPhoto.setLibraryPreview(img.toQImage());
 
     //    Image img = mPhoto->original().clone();
 

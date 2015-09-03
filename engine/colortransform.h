@@ -27,9 +27,10 @@ class ColorTransform
 
         // convenience functions that retain the result for future use
         static ColorTransform getTransform(const QString& iden,
-            const QString& from, const QString& to, Format inFormat =  FORMAT_FLOAT, Format outFormat = FORMAT_FLOAT);
+            const QString& from, const QString& to,
+            Format inFormat =  FORMAT_RGB48_PLANAR, Format outFormat = FORMAT_RGB48_PLANAR);
         static ColorTransform getTransform(const QByteArray& srcProfile,
-            const QString& to, Format inFormat, Format outFormat);
+            const QString& to, Format inFormat = FORMAT_RGB48_PLANAR, Format outFormat = FORMAT_RGB48_PLANAR);
 
         static QString getMonitorProfilePath();
 
