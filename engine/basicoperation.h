@@ -18,11 +18,15 @@ class BasicOperation
 
     private:
 
-        Halide::Var x, y, c;
+        Halide::Var          x, y, c;
+        Halide::Func         mProcess;
+        Halide::ImageParam   mInput;
+        Halide::Param<float> mEV;
 
         Halide::Func contrast(Halide::Func in);
         Halide::Func brightness(Halide::Func in);
-        Halide::Func exposure(Halide::Func in, Halide::Param<float> EV);
+        Halide::Func exposure(Halide::Func in, Halide::Param<float> ev);
+        Halide::Func process(Halide::ImageParam input, Halide::Param<float> ev);
 };
 }
 #endif // PHOTOSTAGE_BASICOPERATION_H

@@ -7,6 +7,8 @@
 #include <QFile>
 #include <QSharedPointer>
 
+#include "engine/engineutils.h"
+
 namespace PhotoStage
 {
 const int IMG_DEPTH = 3;
@@ -38,6 +40,7 @@ class Image
         ~Image();
 
         QImage toQImage() const;
+        QImage toPreviewImage() const;
 
         // static convenience functions
         // static Image fromFile(const QString& filename);

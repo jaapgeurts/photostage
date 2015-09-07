@@ -55,8 +55,10 @@ class Photo
         const Image& originalImage() const;
         void setLibraryPreview(const QImage& image);
         void setLibraryPreviewsRGB(const QImage& image);
+        void setDevelopPreviewsRGB(const QImage& image);
         const QImage& libraryPreview();
         const QImage& libraryPreviewsRGB();
+        const QImage& developPreviewsRGB();
 
         void setSrcImagePath(const QString& path);
         const QString& srcImagePath() const;
@@ -111,6 +113,7 @@ class Photo
                 Photo::Flag       mFlag;
                 QImage            mLibraryPreview;
                 QImage            mLibraryPreviewsRGB;
+                QImage            mDevelopPreviewsRGB;
                 Image             mOriginal;
                 QString           mSrcImagePath;
                 ExifInfo          mExifInfo;

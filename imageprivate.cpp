@@ -1,3 +1,7 @@
+#include <QDebug>
+//#include <tmmintrin.h>
+
+
 #include "image.h"
 #include "utils.h"
 
@@ -53,16 +57,25 @@ Image::ImagePrivate::~ImagePrivate()
 
 QImage Image::ImagePrivate::toQImage() const
 {
-    uint8_t* dst = new uint8_t[mWidth * mHeight * 4];
+  //  uint8_t* dst = new uint8_t[mWidth * mHeight * 4];
 
-    for (int y = 0; y < mHeight; y++)
-        for (int x = 0; x < mWidth; x++)
-            for (int c = 0; c < 3; c++)
-                dst[y * mWidth * 4 + x * 4 + c] = (uint8_t)(mPixels[c * mWidth * mHeight + y * mWidth + x] / 256.0f);
+    /* for (int y = 0; y < mHeight; y++)
+         for (int x = 0; x < mWidth; x++)
+             for (int c = 0; c < 3; c++)
+             {
+                 //                dst[y * mWidth * 4 + x * 4 + c] = (uint8_t)(mPixels[c * mWidth * mHeight + y * mWidth + x] >> 8);
+                 //                dst[y * mWidth * 4 + x * 4 + 3] = 0xff;
+                 dst[((y * mWidth) << 2) + (x << 2) + c] = (uint8_t)(mPixels[c * mWidth * mHeight + y * mWidth + x] >> 8);
+                 dst[((y * mWidth) << 2) + (x << 2) + 3] = 0xff;
+             }
+     */
 
 
     // squeeze the image back into an 8bit QImage
-    return QImage(dst, mWidth, mHeight, QImage::Format_RGB32, (QImageCleanupFunction)deleteArray<uint8_t>, dst);
+    //return QImage(dst, mWidth, mHeight, QImage::Format_RGB32, (QImageCleanupFunction)deleteArray<uint8_t>, dst);
+
+
+    return EngineUtils::instance()->toQImage(mWidth,mHeight,mPixels);
 }
 
 void Image::ImagePrivate::copy8bitBufferToPlanar(const uint8_t* src, int depth, Rotation rotate)
@@ -75,7 +88,7 @@ void Image::ImagePrivate::copy8bitBufferToPlanar(const uint8_t* src, int depth, 
             for (int x = 0; x < mWidth; x++)
                 for (int c = 0; c < 3; c++)
                     mPixels[c * mWidth * mHeight + y * mWidth + x] =
-                        src[mWidth * y * depth + x * depth + c % depth] * 256;
+                        ((uint16_t)src[mWidth * y * depth + x * depth + c % depth]) << 8;
 
     }
     else if (rotate == Rotate90CCW)
@@ -88,7 +101,7 @@ void Image::ImagePrivate::copy8bitBufferToPlanar(const uint8_t* src, int depth, 
             for (int x = 0; x < mWidth; x++)
                 for (int c = 0; c < 3; c++)
                     mPixels[c * mWidth * mHeight + y * mWidth + x] =
-                        src[mWidth * y * 4 + x * 4 + c] * 256;
+                        ((uint16_t)src[mWidth * y * depth + x * depth + c % depth]) << 8;
 
     }
     else if (rotate == Rotate90CW)
@@ -101,7 +114,7 @@ void Image::ImagePrivate::copy8bitBufferToPlanar(const uint8_t* src, int depth, 
             for (int x = 0; x < mWidth; x++)
                 for (int c = 0; c < 3; c++)
                     mPixels[c * mWidth * mHeight + y * mWidth + x] =
-                        src[mWidth * y * 4 + x * 4 + c] * 256;
+                        ((uint16_t)src[mWidth * y * depth + x * depth + c % depth]) << 8;
 
     }
 }

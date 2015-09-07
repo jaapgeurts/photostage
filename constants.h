@@ -31,4 +31,8 @@ const QString SETTINGS_GROUP_LIBRARY          = "library";
 const QString SETTINGS_SPLITTER_LIBRARY_SIZES = "splitter_main";
 const QString SETTINGS_LIBRARY_FILES_PATHITEM = "files/pathitem";
 
+// DEVELOP SETTINGS
+const QString SETTINGS_GROUP_DEVELOP          = "develop";
+const QString SETTINGS_SPLITTER_DEVELOP_SIZES = "splitter_main";
+
 #endif // CONSTANTS

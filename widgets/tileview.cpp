@@ -261,8 +261,7 @@ void TileView::setSelectionModel(QItemSelectionModel* selectionModel)
 {
     mSelectionModel = selectionModel;
     // setup connections
-    connect(selectionModel, &QItemSelectionModel::selectionChanged,
-        this, &TileView::onSelectionChanged);
+    connect(selectionModel, &QItemSelectionModel::selectionChanged, this, &TileView::onSelectionChanged);
 }
 
 QItemSelectionModel* TileView::selectionModel() const
@@ -1078,8 +1077,7 @@ void TileView::updateCellContents(const QModelIndex& /*topleft*/,
     update();
 }
 
-void TileView::onSelectionChanged(const QItemSelection& /*selected*/,
-    const QItemSelection& /*deselected*/)
+void TileView::onSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 {
     int newIndex = mSelectionModel->currentIndex().row();
 

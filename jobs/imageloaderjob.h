@@ -16,7 +16,7 @@ class ImageLoaderJob : public QObject, public Runnable
 
     public:
 
-        explicit ImageLoaderJob(const Photo& photo);
+        explicit ImageLoaderJob(const Photo& photo, bool createPreview = true);
         ~ImageLoaderJob();
 
     public:
@@ -29,15 +29,17 @@ class ImageLoaderJob : public QObject, public Runnable
 
     signals:
 
-        void imageReady(Photo photo, const QImage& image);
+        void previewReady(Photo photo, const QImage& image);
+        void imageReady(Photo photo, const Image& image);
         void exifUpdated(Photo photo);
 
     private:
 
         Photo mPhoto;
-        bool mExifUpdated;
+        bool  mCreatePreview;
+        bool  mExifUpdated;
 
-        QImage startLoading(Photo& photo);
+        QVariant startLoading(Photo& photo);
         QImage preparePreview(const Image& image);
         Image loadImage(const QString& path);
 };

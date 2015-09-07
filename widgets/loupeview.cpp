@@ -17,8 +17,7 @@ LoupeView::LoupeView(QWidget* parent)
     mInfoMode(InfoOff)
 {
     setMinimumSize(200, 200);
-    setSizePolicy(QSizePolicy::MinimumExpanding,
-        QSizePolicy::MinimumExpanding);
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     setCursor(QCursor(Qt::OpenHandCursor));
 
     //    QImage image(40,40,QImage::Format_RGB32);
@@ -67,18 +66,19 @@ void LoupeView::cycleInfoMode()
     update();
 }
 
-void LoupeView::paintEvent(QPaintEvent* /*event*/)
+void LoupeView::paintEvent(QPaintEvent* event)
 {
-    QPainter painter(this);
-
     if (mPhoto.isNull())
         return;
+
+    QPainter painter(this);
 
     //    painter.fillRect(QRect(0,0,width(),height()),mCheckeredBrush);
     painter.fillRect(QRect(0, 0, width(), height()), Qt::darkGray);
 
     // TODO: should convert to the monitor profile here.
-    QImage img = mPhoto.libraryPreviewsRGB();
+
+    QImage img =  mPhoto.libraryPreviewsRGB();
     QRect  rect;
 
     if (!img.isNull())
@@ -87,33 +87,7 @@ void LoupeView::paintEvent(QPaintEvent* /*event*/)
         rect.setWidth((int)(img.width() * mZoomFactors[mZoomMode]));
         rect.setHeight((int)(img.height() * mZoomFactors[mZoomMode]));
 
-        /*
-                // for border drop shadow
-                QPoint topleft = photoFinalDimension.topLeft();
-                topleft.setX(topleft.x() - 5);
-                topleft.setY(topleft.y() - 5);
-                QPoint bottomright = photoFinalDimension.bottomRight();
-                bottomright.setX(bottomright.x() + 10);
-                bottomright.setY(bottomright.y() + 15);
-
-                QLinearGradient gradient(topleft, bottomright);
-                //        gradient.setStart(photoFinalDimension.topLeft());
-                //        gradient.setFinalStop(0,photoFinalDimension.bottom()+15);
-                QColor gray1 = QColor(Qt::darkGray).darker(150);
-                QColor gray2 = QColor(Qt::darkGray).darker(200);
-                gray1.setAlpha(30);
-                gradient.setColorAt((qreal)0, gray2);
-                gradient.setColorAt((qreal)0.1, gray1);
-                gradient.setColorAt((qreal)0.9, gray1);
-                gradient.setColorAt((qreal)1, gray2);
-
-                QBrush brush(gradient);
-                painter.setBrush(brush);
-                QPen   pen;
-                pen.setStyle(Qt::NoPen);
-                painter.setPen(pen);
-
-                painter.drawRoundedRect(QRect(topleft, bottomright), 5, 12); */
+        drawDropShadow();
 
         painter.drawImage(rect, img);
 
@@ -149,6 +123,37 @@ void LoupeView::paintEvent(QPaintEvent* /*event*/)
             painter.drawText(40, 110, ei.formatDimension());
         }
     }
+}
+
+void LoupeView::drawDropShadow()
+{
+    /*
+            // for border drop shadow
+            QPoint topleft = photoFinalDimension.topLeft();
+            topleft.setX(topleft.x() - 5);
+            topleft.setY(topleft.y() - 5);
+            QPoint bottomright = photoFinalDimension.bottomRight();
+            bottomright.setX(bottomright.x() + 10);
+            bottomright.setY(bottomright.y() + 15);
+
+            QLinearGradient gradient(topleft, bottomright);
+            //        gradient.setStart(photoFinalDimension.topLeft());
+            //        gradient.setFinalStop(0,photoFinalDimension.bottom()+15);
+            QColor gray1 = QColor(Qt::darkGray).darker(150);
+            QColor gray2 = QColor(Qt::darkGray).darker(200);
+            gray1.setAlpha(30);
+            gradient.setColorAt((qreal)0, gray2);
+            gradient.setColorAt((qreal)0.1, gray1);
+            gradient.setColorAt((qreal)0.9, gray1);
+            gradient.setColorAt((qreal)1, gray2);
+
+            QBrush brush(gradient);
+            painter.setBrush(brush);
+            QPen   pen;
+            pen.setStyle(Qt::NoPen);
+            painter.setPen(pen);
+
+            painter.drawRoundedRect(QRect(topleft, bottomright), 5, 12); */
 }
 
 void LoupeView::mousePressEvent(QMouseEvent* event)

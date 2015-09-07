@@ -1,5 +1,5 @@
-#ifndef LOUPEVIEW_H
-#define LOUPEVIEW_H
+#ifndef PHOTOSTAGE_LOUPEVIEW_H
+#define PHOTOSTAGE_LOUPEVIEW_H
 
 #include <QWidget>
 #include <QPaintEvent>
@@ -51,7 +51,7 @@ class LoupeView : public QWidget
 
     protected:
 
-        void paintEvent(QPaintEvent*);
+        void paintEvent(QPaintEvent* event);
 
         //    void enterEvent(QEvent *event);
         //    void leaveEvent(QEvent* event);
@@ -76,7 +76,9 @@ class LoupeView : public QWidget
 
         void ensureCorrectPosition();
         void computeZoomToFitScaleFactor();
+
+        void drawDropShadow();
 };
 }
 
-#endif // LOUPEVIEW_H
+#endif // PHOTOSTAGE_LOUPEVIEW_H

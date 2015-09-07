@@ -37,11 +37,17 @@ const Image& Photo::originalImage() const
 void Photo::setLibraryPreview(const QImage& image)
 {
     d->mLibraryPreview = image;
+    d->mLibraryPreviewsRGB = QImage();
 }
 
 void Photo::setLibraryPreviewsRGB(const QImage& image)
 {
     d->mLibraryPreviewsRGB = image;
+}
+
+void Photo::setDevelopPreviewsRGB(const QImage &image)
+{
+    d->mDevelopPreviewsRGB = image;
 }
 
 const QImage& Photo::libraryPreview()
@@ -69,6 +75,11 @@ const QImage& Photo::libraryPreviewsRGB()
     }
 
     return d->mLibraryPreviewsRGB;
+}
+
+const QImage &Photo::developPreviewsRGB()
+{
+    return d->mDevelopPreviewsRGB;
 }
 
 void Photo::setSrcImagePath(const QString& path)

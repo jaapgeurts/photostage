@@ -29,23 +29,35 @@ SOURCES += \
     aboutdialog.cpp \
     backgroundtask.cpp \
     backgroundtaskmanager.cpp \
+    cartography/cartography.cpp \
     cartography/photomarker.cpp \
+    database/collectiondao.cpp \
+    database/collectionitem.cpp \
     database/databaseaccess.cpp \
     database/dbutils.cpp \
     database/importinfo.cpp \
     database/importoptions.cpp \
+    database/keyworddao.cpp \
+    database/keyworditem.cpp \
+    database/pathdao.cpp \
+    database/pathitem.cpp \
+    database/photodao.cpp \
     develop/develop.cpp \
     develop/modules/basicmodule.cpp \
     develop/modules/develophistogrammodule.cpp \
     develop/modules/developmodule.cpp \
     develop/modules/rawmodule.cpp \
+    dragdropinfo.cpp \
+    engine/basicoperation.cpp \
     engine/colortransform.cpp \
+    engine/dimensionoperation.cpp \
     engine/engineutils.cpp \
     engine/operation.cpp \
     engine/pipelinebuilder.cpp \
     engine/platform.cpp \
     filmstriptile.cpp \
     image.cpp \
+    imageprivate.cpp \
     import/exiv2lib.cpp \
     import/exivfacade.cpp \
     import/imagefilesystemmodel.cpp \
@@ -54,32 +66,45 @@ SOURCES += \
     import/importdialog.cpp \
     import/previewfileloader.cpp \
     import/previewinfo.cpp \
+    io/jpegio.cpp \
+    io/pngio.cpp \
+    io/rawio.cpp \
+    jobs/colortransformjob.cpp \
+    jobs/imageloaderjob.cpp \
     library/imagedbtile.cpp \
     library/library.cpp \
+    library/modules/collectionmodel.cpp \
     library/modules/collectionmodule.cpp \
+    library/modules/filesmodule.cpp \
     library/modules/filtermodule.cpp \
+    library/modules/keywordmodel.cpp \
+    library/modules/keywordmodule.cpp \
     library/modules/libraryhistogrammodule.cpp \
     library/modules/librarymodule.cpp \
     library/modules/metadatamodule.cpp \
+    library/modules/pathmodel.cpp \
     library/modules/shortcutmodule.cpp \
     library/modules/taggingmodule.cpp \
     main.cpp \
     mainwindow.cpp \
     photo.cpp \
     photomodel.cpp \
+    photoprivate.cpp \
     photosortfilterproxymodel.cpp \
     preferences.cpp \
     preferencesdialog.cpp \
     previewcache.cpp \
     regenhashestask.cpp \
     runnable.cpp \
-    library/modules/keywordmodel.cpp \
     threadqueue.cpp \
     timeadjustdialog.cpp \
     utils.cpp \
     widgets/abstracttile.cpp \
     widgets/actionstategroup.cpp \
     widgets/backgroundtaskprogress.cpp \
+    widgets/developview.cpp \
+    widgets/fixedlistview.cpp \
+    widgets/fixedtreeview.cpp \
     widgets/histogram.cpp \
     widgets/loupeview.cpp \
     widgets/mapview/abstractmarker.cpp \
@@ -89,55 +114,42 @@ SOURCES += \
     widgets/mapview/layer.cpp \
     widgets/mapview/mapprovider.cpp \
     widgets/mapview/mapview.cpp \
+    widgets/mapview/modelindexlayer.cpp \
     widgets/mapview/openstreetmapmapprovider.cpp \
     widgets/modulepanel.cpp \
     widgets/tileview.cpp \
-    widgets/fixedtreeview.cpp \
-    widgets/translucentwindow.cpp \
-    database/pathdao.cpp \
-    database/photodao.cpp \
-    database/pathitem.cpp \
-    library/modules/filesmodule.cpp \
-    dragdropinfo.cpp \
-    library/modules/collectionmodel.cpp \
-    library/modules/pathmodel.cpp \
-    photoprivate.cpp \
-    database/collectiondao.cpp \
-    database/collectionitem.cpp \
-    widgets/fixedlistview.cpp \
-    library/modules/keywordmodule.cpp \
-    database/keyworddao.cpp \
-    database/keyworditem.cpp \
-    cartography/cartography.cpp \
-    widgets/mapview/modelindexlayer.cpp \
     widgets/timezonepicker.cpp \
-    io/jpegio.cpp \
-    engine/basicoperation.cpp \
-    imageprivate.cpp \
-    io/pngio.cpp \
-    jobs/imageloaderjob.cpp \
-    jobs/colortransformjob.cpp \
-    io/rawio.cpp \
-    engine/dimensionoperation.cpp
+    widgets/translucentwindow.cpp
 
-    #processing/amaze_demosaic_RT.c
+#processing/amaze_demosaic_RT.c
 
 HEADERS  += \
     aboutdialog.h \
     backgroundtask.h \
     backgroundtaskmanager.h \
+    cartography/cartography.h \
     cartography/photomarker.h \
     constants.h \
+    database/collectiondao.h \
+    database/collectionitem.h \
     database/databaseaccess.h \
     database/dbutils.h \
     database/importinfo.h \
     database/importoptions.h \
+    database/keyworddao.h \
+    database/keyworditem.h \
+    database/pathdao.h \
+    database/pathitem.h \
+    database/photodao.h \
     develop/develop.h \
     develop/modules/basicmodule.h \
     develop/modules/develophistogrammodule.h \
     develop/modules/developmodule.h \
     develop/modules/rawmodule.h \
+    dragdropinfo.h \
+    engine/basicoperation.h \
     engine/colortransform.h \
+    engine/dimensionoperation.h \
     engine/engineutils.h \
     engine/operation.h \
     engine/pipelinebuilder.h \
@@ -154,13 +166,23 @@ HEADERS  += \
     import/importdialog.h \
     import/previewfileloader.h \
     import/previewinfo.h \
+    io/jpegio.h \
+    io/pngio.h \
+    io/rawio.h \
+    jobs/colortransformjob.h \
+    jobs/imageloaderjob.h \
     library/imagedbtile.h \
     library/library.h \
+    library/modules/collectionmodel.h \
     library/modules/collectionmodule.h \
+    library/modules/filesmodule.h \
     library/modules/filtermodule.h \
+    library/modules/keywordmodel.h \
+    library/modules/keywordmodule.h \
     library/modules/libraryhistogrammodule.h \
     library/modules/librarymodule.h \
     library/modules/metadatamodule.h \
+    library/modules/pathmodel.h \
     library/modules/shortcutmodule.h \
     library/modules/taggingmodule.h \
     mainwindow.h \
@@ -175,13 +197,14 @@ HEADERS  += \
     previewcache.h \
     regenhashestask.h \
     runnable.h \
-    library/modules/keywordmodel.h \
     threadqueue.h \
     timeadjustdialog.h \
     utils.h \
     widgets/abstracttile.h \
     widgets/actionstategroup.h \
     widgets/backgroundtaskprogress.h \
+    widgets/developview.h \
+    widgets/fixedlistview.h \
     widgets/fixedtreeview.h \
     widgets/histogram.h \
     widgets/loupeview.h \
@@ -192,33 +215,12 @@ HEADERS  += \
     widgets/mapview/layer.h \
     widgets/mapview/mapprovider.h \
     widgets/mapview/mapview.h \
+    widgets/mapview/modelindexlayer.h \
     widgets/mapview/openstreetmapmapprovider.h \
     widgets/modulepanel.h \
     widgets/tileview.h \
-    widgets/translucentwindow.h \
-    database/pathdao.h \
-    database/photodao.h \
-    database/pathitem.h \
-    library/modules/filesmodule.h \
-    dragdropinfo.h \
-    library/modules/collectionmodel.h \
-    library/modules/pathmodel.h \
-    database/collectiondao.h \
-    database/collectionitem.h \
-    widgets/fixedlistview.h \
-    library/modules/keywordmodule.h \
-    database/keyworddao.h \
-    database/keyworditem.h \
-    cartography/cartography.h \
-    widgets/mapview/modelindexlayer.h \
     widgets/timezonepicker.h \
-    io/jpegio.h \
-    engine/basicoperation.h \
-    io/pngio.h \
-    jobs/imageloaderjob.h \
-    jobs/colortransformjob.h \
-    io/rawio.h \
-    engine/dimensionoperation.h
+    widgets/translucentwindow.h
 
 FORMS    += \
     mainwindow.ui \

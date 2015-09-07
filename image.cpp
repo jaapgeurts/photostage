@@ -1,8 +1,7 @@
 #include <QFile>
 #include <QDebug>
 
-#include <engine/colortransform.h>
-
+#include "constants.h"
 #include "image.h"
 #include "utils.h"
 #include "io/pngio.h"
@@ -39,17 +38,6 @@ Image::~Image()
 {
 }
 
-/*Image Image::fromFile(const QString& filename)
-   {
-    if (filename.endsWith("jpg", Qt::CaseInsensitive))
-        return JpegIO::fromFile(filename);
-
-    if (filename.endsWith("png", Qt::CaseInsensitive))
-        return PngIO::fromFile(filename);
-
-    return Image();
-   }*/
-
 bool Image::saveToFile(const QString& filename) const
 {
     if (filename.endsWith("jpg", Qt::CaseInsensitive))
@@ -64,6 +52,15 @@ bool Image::saveToFile(const QString& filename) const
 QImage Image::toQImage() const
 {
     return d->toQImage();
+}
+
+QImage Image::toPreviewImage() const
+{
+    if (d->mWidth > PREVIEW_IMG_WIDTH && d->mHeight > PREVIEW_IMG_HEIGHT)
+        return d->toQImage().scaled(PREVIEW_IMG_WIDTH, PREVIEW_IMG_HEIGHT,
+                   Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    else
+        return d->toQImage();
 }
 
 int Image::width() const

@@ -14,9 +14,10 @@
 
 namespace PhotoStage
 {
-ImageLoaderJob::ImageLoaderJob(const Photo& photo) :
+ImageLoaderJob::ImageLoaderJob(const Photo& photo, bool createPreview) :
     QObject(NULL),
     mPhoto(photo),
+    mCreatePreview(createPreview),
     mExifUpdated(false)
 {
     setName("ImageLoaderJob");
@@ -36,8 +37,16 @@ void ImageLoaderJob::finished(QVariant result)
     if (mExifUpdated)
         emit exifUpdated(mPhoto);
 
-    QImage image = result.value<QImage>();
-    emit   imageReady(mPhoto, image);
+    if (mCreatePreview)
+    {
+        QImage image = result.value<QImage>();
+        emit   previewReady(mPhoto, image);
+    }
+    else
+    {
+        Image image = result.value<Image>();
+        emit  imageReady(mPhoto, image);
+    }
 }
 
 void ImageLoaderJob::error(const QString& error)
@@ -50,17 +59,23 @@ void ImageLoaderJob::cancel()
     mPhoto.setIsDownloading(false);
 }
 
-QImage ImageLoaderJob::startLoading(Photo& photo)
+QVariant ImageLoaderJob::startLoading(Photo& photo)
 {
-    QString key = QString::number(mPhoto.id());
-    QImage  img = PreviewCache::globalCache()->get(key);
-
-    if (img.isNull())
+    if (mCreatePreview)
     {
-        Image image = loadImage(mPhoto.srcImagePath());
-        img = preparePreview(image);
+        QString key = QString::number(mPhoto.id());
+        QImage  img = PreviewCache::globalCache()->get(key);
+
+        if (!img.isNull())
+            return QVariant::fromValue<QImage>(img);
     }
-    return img;
+
+    Image image = loadImage(mPhoto.srcImagePath());
+
+    if (mCreatePreview)
+        return QVariant::fromValue<QImage>(preparePreview(image));
+    else
+        return QVariant::fromValue<Image>(image);
 }
 
 Image ImageLoaderJob::loadImage(const QString& path)
@@ -121,18 +136,7 @@ QImage ImageLoaderJob::preparePreview(const Image& image)
 
     // Scale the image down to correct size.
 
-    QImage loadedImg = image.toQImage();
-    QImage scaled;
-
-    if (image.width() > PREVIEW_IMG_WIDTH && image.height() > PREVIEW_IMG_HEIGHT)
-    { // only scale images down. never scale up.
-        scaled = loadedImg.scaled(PREVIEW_IMG_WIDTH, PREVIEW_IMG_HEIGHT,
-                Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    }
-    else
-    {
-        scaled = loadedImg;
-    }
+    QImage scaled = image.toPreviewImage();
 
     // store the preview in the cache
     QString key = QString::number(mPhoto.id());

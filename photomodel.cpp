@@ -96,8 +96,8 @@ void PhotoModel::loadImage(Photo& photo)
 
     photo.setIsDownloading(true);
 
-    ImageLoaderJob* ilj = new ImageLoaderJob(photo);
-    ilj->connect(ilj, &ImageLoaderJob::imageReady, this, &PhotoModel::onImageLoaded);
+    ImageLoaderJob* ilj = new ImageLoaderJob(photo, true);
+    ilj->connect(ilj, &ImageLoaderJob::previewReady, this, &PhotoModel::onImageLoaded);
     ilj->connect(ilj, &ImageLoaderJob::exifUpdated, this, &PhotoModel::onExifUpdated);
     uint32_t id = mThreadQueue->addJob(ilj);
     mRunningThreads.insert(photo.id(), id);
