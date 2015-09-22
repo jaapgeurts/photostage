@@ -29,6 +29,7 @@ class ThreadQueue : public QObject
         virtual ~ThreadQueue();
 
         uint32_t addJob(Runnable* runnable);
+
         void purgeExcept(const QList<uint32_t>& list);
 
     signals:

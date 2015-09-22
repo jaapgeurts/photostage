@@ -29,14 +29,20 @@ void Photo::setOriginalImage(const Image& image)
     d->mOriginal = image;
 }
 
-const Image& Photo::originalImage() const
+const Image& Photo::originalImage()
 {
-    return d->mOriginal;
+    const Image& img = d->mOriginal;
+
+    if (img.isNull())
+    {
+        d->mOwner->loadOriginal(*this);
+    }
+    return img;
 }
 
 void Photo::setLibraryPreview(const QImage& image)
 {
-    d->mLibraryPreview = image;
+    d->mLibraryPreview     = image;
     d->mLibraryPreviewsRGB = QImage();
 }
 
@@ -45,7 +51,7 @@ void Photo::setLibraryPreviewsRGB(const QImage& image)
     d->mLibraryPreviewsRGB = image;
 }
 
-void Photo::setDevelopPreviewsRGB(const QImage &image)
+void Photo::setDevelopPreviewsRGB(const QImage& image)
 {
     d->mDevelopPreviewsRGB = image;
 }
@@ -56,7 +62,7 @@ const QImage& Photo::libraryPreview()
 
     if (img.isNull())
     {
-        d->mOwner->loadImage(*this);
+        d->mOwner->loadPreview(*this);
     }
     return img;
 }
@@ -77,8 +83,19 @@ const QImage& Photo::libraryPreviewsRGB()
     return d->mLibraryPreviewsRGB;
 }
 
-const QImage &Photo::developPreviewsRGB()
+const QImage& Photo::developPreviewsRGB()
 {
+    // make sure the original is avaialble,
+    // if it is not trigger download
+
+    if (d->mDevelopPreviewsRGB.isNull())
+    {
+        if (d->mOriginal.isNull())
+            originalImage();
+        else
+            d->mOwner->convertOriginal(*this);
+    }
+
     return d->mDevelopPreviewsRGB;
 }
 
@@ -142,6 +159,16 @@ Photo::Flag Photo::flag() const
     return d->mFlag;
 }
 
+bool Photo::isRaw() const
+{
+    return d->mIsRaw;
+}
+
+void Photo::setIsRaw(bool isRaw)
+{
+    d->mIsRaw = isRaw;
+}
+
 long long Photo::hash() const
 {
     return d->mHashCode;
@@ -157,14 +184,25 @@ bool Photo::isNull() const
     return d.isNull();
 }
 
-void Photo::setIsDownloading(bool value)
+void Photo::setIsDownloadingOriginal(bool value)
 {
-    d->mIsDownloading = value;
+    d->mIsDownloadingOriginal = value;
 }
 
-bool Photo::isDownloading() const
+bool Photo::isDownloadingOriginal() const
+
 {
-    return d->mIsDownloading;
+    return d->mIsDownloadingOriginal;
+}
+
+void Photo::setIsDownloadingPreview(bool value)
+{
+    d->mIsDownloadingPreview = value;
+}
+
+bool Photo::isDownloadingPreview() const
+{
+    return d->mIsDownloadingPreview;
 }
 
 void Photo::setKeywords(const QStringList& list)

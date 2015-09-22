@@ -7,7 +7,8 @@
 
 namespace Widgets
 {
-Histogram::Histogram(QWidget* parent) : QWidget(parent)
+Histogram::Histogram(QWidget* parent) :
+    QWidget(parent)
 {
     setMinimumHeight(120);
     setMaximumHeight(120);
@@ -17,9 +18,11 @@ Histogram::Histogram(QWidget* parent) : QWidget(parent)
 }
 
 //void Histogram::setImageData(const PhotoData &image)
-void Histogram::setImageData(const QImage& image)
+void Histogram::setImageData(uint16_t* data, int width, int height)
 {
-    mImage = image;
+    mData   = data;
+    mWidth  = width;
+    mHeight = height;
     recalculate();
 }
 
@@ -40,6 +43,9 @@ void Histogram::clear()
 
 void Histogram::recalculate()
 {
+    if (mData == NULL)
+        return;
+
     // the default BIN_SIZE = 256
     //set all values to 0
     reset();
@@ -50,26 +56,22 @@ void Histogram::recalculate()
     // TODO: do we need to count all or just 1/2 or 1/4 of the pic (skip 2 or 4)
     float factor = 1.0f;
 
-    int   count = mImage.width();
-
-    for (int j = 0; j < mImage.height(); j++)
+    for (int y = 0; y < mHeight; y++)
     {
-        const uint8_t* pixels = mImage.constScanLine(j);
-
-        for (int i = 0; i < count; i++)
+        for (int x = 0; x < mWidth; x++)
         {
-            int red   = pixels[i * 4 + 2];
-            int green = pixels[i * 4 + 1];
-            int blue  = pixels[i * 4 + 0];
+            uint16_t blue   = mData[y * mWidth + x];
+            uint16_t green = mData[1 * mWidth * mHeight + y * mWidth + x];
+            uint16_t red  = mData[2 * mWidth * mHeight + y * mWidth + x];
 
-            mChannelRed[(int)(red * factor)]++;
-            mChannelGreen[(int)(green * factor)]++;
-            mChannelBlue[(int)(blue * factor)]++;
+            mChannelRed[(int)(red >> 8)]++;
+            mChannelGreen[(int)(green >> 8)]++;
+            mChannelBlue[(int)(blue >> 8)]++;
 
             // use green as the average luminance.
             // use this value to scale the y axis of the histogram when painting
 
-            pos = (int)(green * factor);
+            pos = (int)(green >> 8);
 
             // skip blown out or fully black areas
             if (pos > 5 && pos < 250 && mMaxAll < mChannelGreen[pos])
@@ -111,19 +113,16 @@ void Histogram::paintEvent(QPaintEvent* /*event*/)
     for (int x = 0; x < ww; x++)
     {
         painter.setPen(penRed);
-        painter.drawLine(x, wh - 1, x, wh - 1 -
-            (int)((float)getHistValue(mChannelRed,
-            x, ww) / (float)mMaxAll * (float)wh));
+        painter.drawLine(x, wh - 1, x, wh - 1
+            - (int)((float)getHistValue(mChannelRed, x, ww) / (float)mMaxAll * (float)wh));
 
         painter.setPen(penGreen);
-        painter.drawLine(x, wh - 1, x, wh - 1 -
-            (int)((float)getHistValue(mChannelGreen,
-            x, ww) / (float)mMaxAll * (float)wh));
+        painter.drawLine(x, wh - 1, x, wh - 1
+            - (int)((float)getHistValue(mChannelGreen, x, ww) / (float)mMaxAll * (float)wh));
 
         painter.setPen(penBlue);
-        painter.drawLine(x, wh - 1, x, wh - 1 -
-            (int)((float)getHistValue(mChannelBlue,
-            x, ww) / (float)mMaxAll * (float)wh));
+        painter.drawLine(x, wh - 1, x, wh - 1
+            - (int)((float)getHistValue(mChannelBlue, x, ww) / (float)mMaxAll * (float)wh));
     }
 }
 }

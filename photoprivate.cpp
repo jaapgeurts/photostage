@@ -12,13 +12,15 @@ Photo::PhotoPrivate::PhotoPrivate(PhotoModel* owner, const QImage& image, const 
     mLibraryPreview(image),
     mSrcImagePath(filename),
     mOwner(owner),
-    mIsDownloading(false)
+    mIsDownloadingPreview(false),
+    mIsRaw(false)
 {
 }
 
 Photo::PhotoPrivate::PhotoPrivate(QSqlQuery& q) :
     mOwner(nullptr),
-    mIsDownloading(false)
+    mIsDownloadingPreview(false),
+    mIsRaw(false)
 {
     mId = q.value(0).toLongLong();
     QString filename = q.value(1).toString();

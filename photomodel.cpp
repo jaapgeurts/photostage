@@ -18,7 +18,8 @@ namespace PhotoStage
 {
 PhotoModel::PhotoModel(QObject* parent) :
     QAbstractListModel(parent),
-    mThreadQueue(new ThreadQueue()),
+    mPreviewThreadQueue(new ThreadQueue()),
+    mOriginalThreadQueue(new ThreadQueue()),
     mRootId(-1)
 {
     mWorkUnit = DatabaseAccess::photoDao();
@@ -34,7 +35,8 @@ PhotoModel::PhotoModel(QObject* parent) :
 PhotoModel::~PhotoModel()
 {
     mPhotoList.clear();
-    delete mThreadQueue;
+    delete mPreviewThreadQueue;
+    delete mOriginalThreadQueue;
 }
 
 QVariant PhotoModel::data(const QModelIndex& index, int role) const
@@ -68,7 +70,6 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
         case Photo::FilenameRole:
             return QString(mPhotoList.at(index.row()).srcImagePath());
 
-        case Widgets::TileView::ImageRole:
         case Photo::DataRole:
         case MapView::ModelIndexLayer::DataRole:
             photo = mPhotoList.at(index.row());
@@ -89,18 +90,34 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
     }
 }
 
-void PhotoModel::loadImage(Photo& photo)
+void PhotoModel::loadOriginal(Photo& photo)
 {
-    if (photo.isDownloading())
+    if (photo.isDownloadingOriginal())
         return;
 
-    photo.setIsDownloading(true);
+    // cancel existing jobs and only load the last request.
+    mOriginalThreadQueue->cancel();
+
+    photo.setIsDownloadingOriginal(true);
+
+    ImageLoaderJob* ilj = new ImageLoaderJob(photo, false);
+    ilj->connect(ilj, &ImageLoaderJob::imageReady, this, &PhotoModel::onOriginalLoaded);
+    uint32_t        id = mOriginalThreadQueue->addJob(ilj);
+    mOriginalLoadThreads.insert(photo.id(), id);
+}
+
+void PhotoModel::loadPreview(Photo& photo)
+{
+    if (photo.isDownloadingPreview())
+        return;
+
+    photo.setIsDownloadingPreview(true);
 
     ImageLoaderJob* ilj = new ImageLoaderJob(photo, true);
-    ilj->connect(ilj, &ImageLoaderJob::previewReady, this, &PhotoModel::onImageLoaded);
+    ilj->connect(ilj, &ImageLoaderJob::previewReady, this, &PhotoModel::onPreviewLoaded);
     ilj->connect(ilj, &ImageLoaderJob::exifUpdated, this, &PhotoModel::onExifUpdated);
-    uint32_t id = mThreadQueue->addJob(ilj);
-    mRunningThreads.insert(photo.id(), id);
+    uint32_t id = mPreviewThreadQueue->addJob(ilj);
+    mPreviewLoadThreads.insert(photo.id(), id);
 }
 
 void PhotoModel::onExifUpdated(Photo photo)
@@ -109,7 +126,7 @@ void PhotoModel::onExifUpdated(Photo photo)
     DatabaseAccess::photoDao()->updateExifInfo(photo);
 }
 
-void PhotoModel::onImageLoaded(Photo photo, const QImage& image)
+void PhotoModel::onPreviewLoaded(Photo photo, const QImage& image)
 {
     if (!image.isNull())
     {
@@ -121,26 +138,58 @@ void PhotoModel::onImageLoaded(Photo photo, const QImage& image)
         photo.setLibraryPreview(QImage(":/images/loading_failed.jpg"));
     }
     QVector<int> roles;
+    roles << Photo::DataRole << MapView::ModelIndexLayer::DataRole;
     emit         dataChanged(mPhotoIndexMap.value(photo.id()), mPhotoIndexMap.value(photo.id()), roles);
-    mRunningThreads.remove(photo.id());
-    photo.setIsDownloading(false);
+    mPreviewLoadThreads.remove(photo.id());
+    photo.setIsDownloadingPreview(false);
+}
+
+void PhotoModel::onOriginalLoaded(Photo photo, const Image& image)
+{
+    if (!image.isNull())
+    {
+        photo.setOriginalImage(image);
+    }
+    else
+    {
+        qDebug() << "Failed to load original.. Not yet preventing loop";
+    }
+    QVector<int> roles;
+    roles << Photo::DataRole << MapView::ModelIndexLayer::DataRole;
+    emit         dataChanged(mPhotoIndexMap.value(photo.id()), mPhotoIndexMap.value(photo.id()), roles);
+    mOriginalLoadThreads.remove(photo.id());
+    photo.setIsDownloadingOriginal(false);
 }
 
 void PhotoModel::convertImage(Photo& photo)
 {
-    if (photo.isDownloading())
+    if (photo.isDownloadingPreview())
         return;
 
-    photo.setIsDownloading(true);
-    ColorTransformJob* cfj = new ColorTransformJob(photo);
+    photo.setIsDownloadingPreview(true);
+    ColorTransformJob* cfj = new ColorTransformJob(photo, ColorTransformJob::Preview);
 
     // convert the image to sRGB
-    cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::onImageTranslated);
-    uint32_t id = mThreadQueue->addJob(cfj);
-    mRunningThreads.insert(photo.id(), id);
+    cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::onPreviewTranslated);
+    uint32_t id = mPreviewThreadQueue->addJob(cfj);
+    mPreviewLoadThreads.insert(photo.id(), id);
 }
 
-void PhotoModel::onImageTranslated(Photo photo, const QImage& image)
+void PhotoModel::convertOriginal(Photo& photo)
+{
+    if (photo.isDownloadingOriginal())
+        return;
+
+    photo.setIsDownloadingOriginal(true);
+    ColorTransformJob* cfj = new ColorTransformJob(photo, ColorTransformJob::Develop);
+
+    // convert the image to sRGB
+    cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::onOriginalTranslated);
+    uint32_t id = mOriginalThreadQueue->addJob(cfj);
+    mOriginalLoadThreads.insert(photo.id(), id);
+}
+
+void PhotoModel::onPreviewTranslated(Photo photo, const QImage& image)
 {
     if (!image.isNull())
     {
@@ -148,10 +197,26 @@ void PhotoModel::onImageTranslated(Photo photo, const QImage& image)
 
         // find the index for this photo.
         QVector<int> roles;
+        roles << Photo::DataRole << MapView::ModelIndexLayer::DataRole;
         emit         dataChanged(mPhotoIndexMap.value(photo.id()), mPhotoIndexMap.value(photo.id()), roles);
     }
-    mRunningThreads.remove(photo.id());
-    photo.setIsDownloading(false);
+    mPreviewLoadThreads.remove(photo.id());
+    photo.setIsDownloadingPreview(false);
+}
+
+void PhotoModel::onOriginalTranslated(Photo photo, const QImage& image)
+{
+    if (!image.isNull())
+    {
+        photo.setDevelopPreviewsRGB(image);
+
+        // find the index for this photo.
+        QVector<int> roles;
+        roles << Photo::DataRole << MapView::ModelIndexLayer::DataRole;
+        emit         dataChanged(mPhotoIndexMap.value(photo.id()), mPhotoIndexMap.value(photo.id()), roles);
+    }
+    mOriginalLoadThreads.remove(photo.id());
+    photo.setIsDownloadingOriginal(false);
 }
 
 void PhotoModel::setRootSourceId(PhotoModel::SourceType source, long long id)
@@ -162,7 +227,7 @@ void PhotoModel::setRootSourceId(PhotoModel::SourceType source, long long id)
     mPhotoSource = source;
 
     // cancel all running jobs
-    mThreadQueue->cancel();
+    mPreviewThreadQueue->cancel();
 
     if (source == SourceFiles)
     {
@@ -230,7 +295,7 @@ QMimeData* PhotoModel::mimeData(const QModelIndexList& indexes) const
     QList<long long> idlist;
     foreach(QModelIndex index, indexes)
     {
-        Photo p = data(index, Widgets::TileView::ImageRole).value<Photo>();
+        Photo p = data(index, Photo::DataRole).value<Photo>();
 
         idlist << p.id();
     }
@@ -273,7 +338,7 @@ void PhotoModel::onVisibleTilesChanged(const QModelIndex& start, const QModelInd
         Photo p = mPhotoList.at(i);
         // TODO: race condition here. the value could be gone
         // between the check and reading it.
-        uint32_t id = mRunningThreads.value(p.id());
+        uint32_t id = mPreviewLoadThreads.value(p.id());
 
         if (id > 0)     // if it is 0 it has already completed. 0 is not a valid thread id
             idList.append(id);
@@ -282,7 +347,7 @@ void PhotoModel::onVisibleTilesChanged(const QModelIndex& start, const QModelInd
     if (!idList.isEmpty())
     {
         // then purge all jobs but keep the id's in the list.
-        mThreadQueue->purgeExcept(idList);
+        mPreviewThreadQueue->purgeExcept(idList);
     }
 }
 

@@ -25,13 +25,17 @@ void BasicModule::onExposureChanged(int value)
 {
     //   qDebug() << "exposure value" << value;
 
-    Image img = mBasicOperation.execute(mPhoto.originalImage(), value / 9.0);
+    Image          img = mBasicOperation.execute(mPhoto.originalImage(), value / 9.0);
+
+    ColorTransform tr1 = ColorTransform::getTransform("DevToQ", WORKING_COLOR_SPACE, "sRGB",
+            ColorTransform::FORMAT_RGB48_PLANAR, ColorTransform::FORMAT_RGB32);
+    QImage         qimg = tr1.transformToQImage(img);
+
+    //    QImage qimg = img.toQImage();
 
     //    ColorTransform tr1 = ColorTransform::getTransform("DevToQ", WORKING_COLOR_SPACE, "sRGB",
-    //            ColorTransform::FORMAT_RGB48_PLANAR, ColorTransform::FORMAT_RGB32);
-    //    QImage         qimg = tr1.transformToQImage(img);
-
-    QImage qimg = img.toQImage();
+    //            ColorTransform::FORMAT_RGB32, ColorTransform::FORMAT_RGB32);
+    //    QImage         qimg = tr1.transformQImage(qimg2);
 
     mPhoto.setDevelopPreviewsRGB(qimg);
 

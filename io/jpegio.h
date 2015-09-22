@@ -13,11 +13,19 @@ class JpegIO
 {
     public:
 
-        static Image fromFile(const QByteArray& memFile, const ExifInfo &ex_info);
-        static Image fromFile(const QString& filename, const ExifInfo &ex_info);
-        static bool saveToFile(const Image& image, const QString& filename);
+        JpegIO(const QByteArray& memFile, const ExifInfo& ex_info);
+        JpegIO(const QString& filename, const ExifInfo& ex_info);
+
+        const Image&      image() const;
+        const QByteArray& colorProfile() const;
+
+    private:
+
+        Image      mImage;
+        QByteArray mProfile;
 
         JpegIO();
+        void initFromArray(const QByteArray& memFile, const ExifInfo& ex_info);
 };
 }
 #endif // PHOTOSTAGE_JPEGIO_H

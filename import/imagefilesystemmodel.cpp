@@ -45,7 +45,7 @@ QVariant ImageFileSystemModel::data(const QModelIndex& index, int role) const
             return path;
             break;
 
-        case Widgets::TileView::ImageRole:
+        case Widgets::AbstractTile::ImageRole:
 
             if (mPreviewInfoCache->contains(index))
             {
@@ -85,7 +85,7 @@ void ImageFileSystemModel::imageLoaded(const QModelIndex& index, const QImage& p
     info.image       = pixmap;
     mPreviewInfoCache->insert(index, info);
     QVector<int> roles;
-    roles.append(Widgets::TileView::ImageRole);
+    roles.append(Widgets::AbstractTile::ImageRole);
     emit         dataChanged(index, index, roles);
 }
 

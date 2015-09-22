@@ -20,11 +20,6 @@ class TileView : public QWidget
 
     public:
 
-        enum ModelRole
-        {
-            ImageRole = Qt::UserRole + 300
-        };
-
         explicit TileView(QWidget* parent = 0);
         ~TileView();
 
@@ -37,7 +32,7 @@ class TileView : public QWidget
         /*! set the celrenderer for this view
          * the CellFlowView will take ownership of the renderer and delete it upon destruction
          */
-        void setTileFlyweight(AbstractTile* const renderer);
+        void setDelegate(AbstractTile* const renderer);
 
         void setMinimumCellWidth(int minWidth);
         void setMaximumCellWidth(int maxWidth);
@@ -72,6 +67,9 @@ class TileView : public QWidget
 
         void setDragEnabled(bool enabled);
         bool dragEnabled() const;
+
+        void setModelRole(int role);
+        int modelRole() const;
 
     signals:
 
@@ -158,6 +156,8 @@ class TileView : public QWidget
         int    mViewportPosition;      // contains the top x position of the scroll area
 
         QPoint mDragStartPosition;
+
+        int    mModelRole;
 
         void computeScrollBarValues();
         void computeSizes(int w, int h);

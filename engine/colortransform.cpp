@@ -32,7 +32,6 @@ ColorTransform ColorTransform::getTransform(const QByteArray& srcProfile,
 {
     ColorTransform transform(srcProfile, to, inFormat, outFormat);
 
-
     return transform;
 }
 
@@ -54,7 +53,6 @@ static void transform_delete(char* d)
 {
     cmsHTRANSFORM transform = (cmsHTRANSFORM)d;
 
-
     cmsDeleteTransform(transform);
 }
 
@@ -63,7 +61,6 @@ ColorTransform::ColorTransform(const QByteArray& srcProfile, const QString& to, 
     cmsHPROFILE hInProfile, hOutProfile;
 
     QString     toProfile;
-
 
     if (to.at(0) == QDir::separator())
     {
@@ -92,18 +89,23 @@ ColorTransform::ColorTransform(const QByteArray& srcProfile, const QString& to, 
         inputFormat = TYPE_BGRA_8;
     else if (inFormat == FORMAT_GRAYSCALE8)
         inputFormat = (COLORSPACE_SH(PT_RGB) | CHANNELS_SH(1) | BYTES_SH(1));
-    else if (inFormat == FORMAT_RGB48_PLANAR)
+    else if (inFormat == FORMAT_BGR48_PLANAR)
         inputFormat = TYPE_BGR_16_PLANAR;
+    else if (inFormat == FORMAT_RGB48_PLANAR)
+        inputFormat = TYPE_RGB_16_PLANAR;
 
     if (outFormat == FORMAT_RGB32)
         outputFormat = TYPE_BGRA_8;
-    else if (outFormat == FORMAT_RGB48_PLANAR)
+    else if (outFormat == FORMAT_BGR48_PLANAR)
         outputFormat = TYPE_BGR_16_PLANAR;
+    else if (outFormat == FORMAT_RGB48_PLANAR)
+        outputFormat = TYPE_RGB_16_PLANAR;
 
     mHTransform =
         QSharedPointer<char>((char*)cmsCreateTransform(hInProfile, inputFormat,
             hOutProfile, outputFormat, INTENT_PERCEPTUAL,
-            cmsFLAGS_CLUT_POST_LINEARIZATION | cmsFLAGS_CLUT_PRE_LINEARIZATION), transform_delete);
+            cmsFLAGS_CLUT_POST_LINEARIZATION | cmsFLAGS_CLUT_PRE_LINEARIZATION),
+            transform_delete);
 
     cmsCloseProfile(hInProfile);
     cmsCloseProfile(hOutProfile);
@@ -114,7 +116,6 @@ ColorTransform::ColorTransform(const QString& from, const QString& to, Format in
     cmsHPROFILE hInProfile, hOutProfile;
 
     QString     fromProfile = "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + from + ".icc";
-
 
     mProfileName = from;
 
@@ -143,18 +144,23 @@ ColorTransform::ColorTransform(const QString& from, const QString& to, Format in
         inputFormat = TYPE_BGRA_8;
     else if (inFormat == FORMAT_GRAYSCALE8)
         inputFormat = (COLORSPACE_SH(PT_RGB) | CHANNELS_SH(1) | BYTES_SH(1));
-    else if (inFormat == FORMAT_RGB48_PLANAR)
+    else if (inFormat == FORMAT_BGR48_PLANAR)
         inputFormat = TYPE_BGR_16_PLANAR;
+    else if (inFormat == FORMAT_RGB48_PLANAR)
+        inputFormat = TYPE_RGB_16_PLANAR;
 
     if (outFormat == FORMAT_RGB32)
         outputFormat = TYPE_BGRA_8;
-    else if (outFormat == FORMAT_RGB48_PLANAR)
+    else if (outFormat == FORMAT_BGR48_PLANAR)
         outputFormat = TYPE_BGR_16_PLANAR;
+    else if (outFormat == FORMAT_RGB48_PLANAR)
+        outputFormat = TYPE_RGB_16_PLANAR;
 
     mHTransform =
         QSharedPointer<char>((char*)cmsCreateTransform(hInProfile, inputFormat,
             hOutProfile, outputFormat, INTENT_PERCEPTUAL,
-            cmsFLAGS_CLUT_POST_LINEARIZATION | cmsFLAGS_CLUT_PRE_LINEARIZATION), transform_delete);
+            cmsFLAGS_CLUT_POST_LINEARIZATION | cmsFLAGS_CLUT_PRE_LINEARIZATION ),
+            transform_delete);
 
     cmsCloseProfile(hInProfile);
     cmsCloseProfile(hOutProfile);
@@ -180,7 +186,6 @@ Image ColorTransform::transformImage(const Image& inImage) const
     const uint16_t* inbuf  = inImage.data();
     uint16_t*       outbuf = outImage.data();
 
-
     cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), inbuf, outbuf, inImage.width() * inImage.height());
 
     return outImage;
@@ -192,16 +197,15 @@ QImage ColorTransform::transformToQImage(const Image& inImage) const
     int      height = inImage.height();
     uint8_t* buffer = new uint8_t[width * height * 4];
 
-
     cmsDoTransform((cmsHTRANSFORM)mHTransform.data(), (uint8_t*)inImage.data(), buffer, width * height);
 
     for (int y = 0; y < height; y++)
     {
-        uint8_t* outLine = &buffer[(y * width) << 2];
+        uint8_t* outLine = &buffer[y * width * 4];
 
         for (int x = 0; x < width; x++)
             // set alpha value to 0xff (because little CMS does not)
-            outLine[(x << 2) + 3] = 0xff;
+            outLine[x * 4 + 3] = 0xff;
     }
 
     return QImage(buffer, width, height, 4 * width, QImage::Format_RGB32,
@@ -214,7 +218,6 @@ QImage ColorTransform::transformQImage(const QImage& inImage) const
     int      height = inImage.height();
 
     uint8_t* buffer = new uint8_t[width * height * 4];
-
 
     for (int y = 0; y < height; y++)
     {
@@ -239,7 +242,6 @@ Image ColorTransform::transformFromQImage(const QImage& inImage) const
     Image outImage(inImage.size());
     int   height = inImage.height();
     int   width  = inImage.width();
-
 
     for (int y = 0; y < height; y++)
     {

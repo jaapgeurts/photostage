@@ -57,6 +57,7 @@ class Library : public Module
         void onPhotoSelectionChanged(const QItemSelection& selected, const QItemSelection&);
         void onCurrentPhotoChanged(const QModelIndex& current, const QModelIndex&);
         void onTileDoubleClicked(const QModelIndex&);
+        void onDataChanged(const QModelIndex&, const QModelIndex&, const QVector<int>& roles);
 
         void onCycleLoupeInfo();
 

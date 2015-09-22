@@ -9,6 +9,11 @@ FilmstripTile::FilmstripTile(Widgets::TileView* parent) :
 {
 }
 
+int FilmstripTile::modelRole() const
+{
+    return Photo::DataRole;
+}
+
 void FilmstripTile::render(QPainter& painter, const Widgets::TileInfo& tileInfo, const QVariant& data)
 {
     int w = painter.window().width();

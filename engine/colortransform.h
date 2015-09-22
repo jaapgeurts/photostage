@@ -1,5 +1,5 @@
-#ifndef PHOTOSTAGE_COLOR_H
-#define PHOTOSTAGE_COLOR_H
+#ifndef PHOTOSTAGE_COLORTRANSFORM_H
+#define PHOTOSTAGE_COLORTRANSFORM_H
 
 #include <QImage>
 #include <QHash>
@@ -8,9 +8,12 @@
 
 #include "image.h"
 
+#include "constants.h"
+
 namespace PhotoStage
 {
-const QString WORKING_COLOR_SPACE = "MelissaRGB";
+const QString PREVIEW_COLOR_SPACE = "Adobe98";
+const QString WORKING_COLOR_SPACE = "ProPhoto";
 
 class ColorTransform
 {
@@ -22,15 +25,15 @@ class ColorTransform
             FORMAT_RGB32,     // 8bit channels (RGB channel + extra)
             FORMAT_GRAYSCALE8,
             FORMAT_RGB48,    //  16 bit channels RRRR GGGG BBBB
+            FORMAT_BGR48_PLANAR,
             FORMAT_RGB48_PLANAR,
         };
 
         // convenience functions that retain the result for future use
-        static ColorTransform getTransform(const QString& iden,
-            const QString& from, const QString& to,
-            Format inFormat =  FORMAT_RGB48_PLANAR, Format outFormat = FORMAT_RGB48_PLANAR);
+        static ColorTransform getTransform(const QString& iden, const QString& from, const QString& to,
+            Format inFormat =  FORMAT_BGR48_PLANAR, Format outFormat = FORMAT_BGR48_PLANAR);
         static ColorTransform getTransform(const QByteArray& srcProfile,
-            const QString& to, Format inFormat = FORMAT_RGB48_PLANAR, Format outFormat = FORMAT_RGB48_PLANAR);
+            const QString& to, Format inFormat = FORMAT_BGR48_PLANAR, Format outFormat = FORMAT_BGR48_PLANAR);
 
         static QString getMonitorProfilePath();
 
@@ -58,4 +61,4 @@ class ColorTransform
         QString                               mProfileName;
 };
 }
-#endif // PHOTOSTAGE_COLOR_H
+#endif // PHOTOSTAGE_COLORTRANSFORM_H

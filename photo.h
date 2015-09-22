@@ -52,7 +52,7 @@ class Photo
 
         // getters & setters
         void setOriginalImage(const Image& image);
-        const Image& originalImage() const;
+        const Image& originalImage();
         void setLibraryPreview(const QImage& image);
         void setLibraryPreviewsRGB(const QImage& image);
         void setDevelopPreviewsRGB(const QImage& image);
@@ -69,23 +69,26 @@ class Photo
 
         void setRating(int rating);
         int rating() const;
-
         void setColorLabel(ColorLabel label);
         ColorLabel colorLabel() const;
-
         void setFlag(Flag flag);
         Flag flag() const;
+
+        bool isRaw() const;
+        void setIsRaw(bool isRaw);
 
         long long hash() const;
         void setHash(long long code);
 
         bool isNull() const;
 
-        void setIsDownloading(bool value);
-        bool isDownloading() const;
+        void setIsDownloadingPreview(bool value);
+        bool isDownloadingPreview() const;
 
         void setKeywords(const QStringList& list);
         QStringList keywords() const;
+        bool isDownloadingOriginal() const;
+        void setIsDownloadingOriginal(bool value);
 
         void setOwner(PhotoModel* model);
 
@@ -118,9 +121,11 @@ class Photo
                 QString           mSrcImagePath;
                 ExifInfo          mExifInfo;
                 PhotoModel*       mOwner;
-                bool              mIsDownloading;
+                bool              mIsDownloadingPreview;
+                bool              mIsDownloadingOriginal;
                 QStringList       mKeywords;
                 long long         mHashCode;
+                bool              mIsRaw;
         };
 };
 }

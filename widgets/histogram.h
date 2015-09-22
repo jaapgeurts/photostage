@@ -1,8 +1,7 @@
-#ifndef HISTOGRAM_H
-#define HISTOGRAM_H
+#ifndef WIDGETS_HISTOGRAM_H
+#define WIDGETS_HISTOGRAM_H
 
 #include <QWidget>
-#include <QImage>
 
 #define BIN_SIZE (256)
 
@@ -16,7 +15,7 @@ class Histogram : public QWidget
 
         explicit Histogram(QWidget* parent = 0);
 
-        void setImageData(const QImage& image);
+        void setImageData(uint16_t* data, int width, int height);
         void clear();
 
     protected:
@@ -31,16 +30,18 @@ class Histogram : public QWidget
 
     private:
 
-        QImage   mImage;
+        uint16_t* mData;
+        int       mWidth;
+        int       mHeight;
 
-        uint32_t mChannelRed[BIN_SIZE];
-        uint32_t mChannelGreen[BIN_SIZE];
-        uint32_t mChannelBlue[BIN_SIZE];
+        uint32_t  mChannelRed[BIN_SIZE];
+        uint32_t  mChannelGreen[BIN_SIZE];
+        uint32_t  mChannelBlue[BIN_SIZE];
 
-        uint32_t mMaxAll;
+        uint32_t  mMaxAll;
 
         void reset();
 };
 }
 
-#endif // HISTOGRAM_H
+#endif // WIDGETS_HISTOGRAM_H

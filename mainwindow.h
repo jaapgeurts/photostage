@@ -97,7 +97,7 @@ class MainWindow : public QMainWindow
         // called in response to the import thread
         void onImportFinished(BackgroundTask* task);
         void onSelectionChanged(const QItemSelection&, const QItemSelection&);
-        void onCurrentChanged(const QModelIndex& current, const QModelIndex&);
+        void onCurrentChanged(const QModelIndex& current, const QModelIndex& previous);
 
         // model changes
         void onModelReset();

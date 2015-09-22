@@ -15,11 +15,14 @@ class RawIO
     public:
 
         RawIO();
+        RawIO(const QByteArray& memFile, const PhotoStage::ExifInfo& ex_info);
 
-        Image fromFile(const QString& filename);
-        Image fromFile(const QByteArray& memFile, const PhotoStage::ExifInfo& ex_info);
+        const Image& image() const;
+        const QByteArray colorProfile() const;
 
     private:
+
+        Image initFromFile(const QByteArray& memFile, const PhotoStage::ExifInfo& ex_info);
 
         /**
          * @brief ImageFileLoader::compute_inverse computes the inverse of a matrix
@@ -27,14 +30,18 @@ class RawIO
          * @param dst (out parameter) the result
          * @return true, if successful, false if the inverse doesn't exist
          */
-        bool compute_inverse(const float src[], float dst[]);
-        void dump_matrix(const QString& name, float m[]);
-        int compute_cct(float R, float G, float B);
-        void mmultm(float* A, float* B, float* out);
+        bool compute_inverse(const float src[], float dst[]) const;
+        void dump_matrix(const QString& name, float m[]) const;
+        int compute_cct(float R, float G, float B) const;
+        void mmultm(float* A, float* B, float* out) const;
 
         //        void vmultm(float* V, float* M, float* out);
-        void normalize(float* M);
-        void getMatrix(float* in, float* out);
+        void normalize(float* M) const;
+        bool readMatrix(const QString& model, float* mat) const;
+        void prepareMatrix(float* in, float* out) const;
+
+        Image      mImage;
+        QByteArray mProfile;
 };
 
 class Metadata

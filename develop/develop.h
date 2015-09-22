@@ -42,7 +42,6 @@ class Develop : public Module
     private slots:
 
         void onDevelopSettingsChanged();
-        void onImageLoaded(Photo photo, const Image& image);
 
     private:
 
@@ -53,10 +52,8 @@ class Develop : public Module
         Photo                   mPhoto;
         bool                    mLoadPhoto;
         QItemSelectionModel*    mPhotoModel;
-        ThreadQueue*            mThreadQueue;
 
         void doSetPhoto(Photo photo);
-        void loadDevelopPreview();
 };
 }
 

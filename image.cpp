@@ -40,8 +40,8 @@ Image::~Image()
 
 bool Image::saveToFile(const QString& filename) const
 {
-    if (filename.endsWith("jpg", Qt::CaseInsensitive))
-        return JpegIO::saveToFile(*this, filename);
+//    if (filename.endsWith("jpg", Qt::CaseInsensitive))
+//        return JpegIO::saveToFile(*this, filename);
 
     if (filename.endsWith("png", Qt::CaseInsensitive))
         return PngIO::saveToFile(*this, filename);

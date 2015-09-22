@@ -1,3 +1,6 @@
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
 #include <QDebug>
 
 #include "rawio.h"
@@ -52,8 +55,19 @@ RawIO::RawIO()
 {
 }
 
-Image RawIO::fromFile(const QString& filename)
+RawIO::RawIO(const QByteArray& memFile, const ExifInfo& ex_info)
 {
+    initFromFile(memFile, ex_info);
+}
+
+const Image& RawIO::image() const
+{
+    return mImage;
+}
+
+const QByteArray RawIO::colorProfile() const
+{
+    return mProfile;
 }
 
 /**
@@ -62,7 +76,7 @@ Image RawIO::fromFile(const QString& filename)
  * @param dst (out parameter) the result
  * @return true, if successful, false if the inverse doesn't exist
  */
-bool RawIO::compute_inverse(const float src[9], float dst[9])
+bool RawIO::compute_inverse(const float src[9], float dst[9]) const
 {
     bool result = false;
 
@@ -104,7 +118,7 @@ bool RawIO::compute_inverse(const float src[9], float dst[9])
     return result;
 }
 
-void RawIO::dump_matrix(const QString& name, float m[9])
+void RawIO::dump_matrix(const QString& name, float m[9]) const
 {
     QString space = QString(name.length(), ' ');
 
@@ -115,7 +129,7 @@ void RawIO::dump_matrix(const QString& name, float m[9])
     qDebug() << space << "└";
 }
 
-int RawIO::compute_cct(float R, float G, float B)
+int RawIO::compute_cct(float R, float G, float B) const
 {
     // see here for more details
     // http://dsp.stackexchange.com/questions/8949/how-do-i-calculate-the-color-temperature-of-the-light-source-illuminating-an-ima
@@ -134,8 +148,9 @@ int RawIO::compute_cct(float R, float G, float B)
     return CCT;
 }
 
-void RawIO::mmultm(float* A, float* B, float* out)
+void RawIO::mmultm(float* A, float* B, float* out) const
 {
+    // TODO: do this with for loops
     out[0] = A[0] * B[0] + A[1] * B[3] + A[2] * B[6];
     out[1] = A[0] * B[1] + A[1] * B[4] + A[2] * B[7];
     out[2] = A[0] * B[2] + A[1] * B[5] + A[2] * B[8];
@@ -149,7 +164,7 @@ void RawIO::mmultm(float* A, float* B, float* out)
     out[8] = A[6] * B[2] + A[7] * B[5] + A[8] * B[8];
 }
 
-void RawIO::normalize(float* M)
+void RawIO::normalize(float* M) const
 {
     float sum;
 
@@ -165,7 +180,7 @@ void RawIO::normalize(float* M)
     }
 }
 
-void RawIO::getMatrix(float* in, float* out)
+void RawIO::prepareMatrix(float* in, float* out) const
 {
     for (int i = 0; i < 9; i++)
         in[i] /= 10000;
@@ -174,10 +189,48 @@ void RawIO::getMatrix(float* in, float* out)
     compute_inverse(in, out);
 }
 
-Image RawIO::fromFile(const QByteArray& memFile, const ExifInfo& ex_info)
+bool RawIO::readMatrix(const QString& model, float* mat) const
 {
-    Image image;
+    QFile f("/Users/jaapg/Development/PhotoStage/PhotoStage/resources/camera_color_matrix.json");
 
+    f.open(QFile::ReadOnly);
+    QByteArray    a = f.readAll();
+    f.close();
+    QJsonDocument document   = QJsonDocument::fromJson(a);
+    QJsonArray    cameraList = document.array();
+
+    for (int i = 0; i < cameraList.size(); ++i)
+    {
+        QJsonObject camera       = cameraList[i].toObject();
+        QJsonArray  modelAliases = camera.value("model").toArray();
+
+        for (int j = 0; j < modelAliases.size(); j++)
+        {
+            QString modelName = modelAliases.at(j).toString();
+
+            if (modelName == model)
+            {
+                QJsonArray matrix = camera.value("color_matrix").toArray();
+
+                if (matrix.size() != 9)
+                {
+                    qDebug() << "Currently only 3x3 color matrices are supported (= 9 values)";
+                    return false;
+                }
+
+                for (int j = 0; j < matrix.size(); j++)
+                    mat[j] = (float)matrix[j].toDouble();
+
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+Image RawIO::initFromFile(const QByteArray& memFile, const ExifInfo& ex_info)
+{
     //FileReader reader(strdup(path.toLocal8Bit().data()));
     QSharedPointer<FileMap> map;
     try
@@ -189,14 +242,14 @@ Image RawIO::fromFile(const QByteArray& memFile, const ExifInfo& ex_info)
     catch (const FileIOException& e)
     {
         qDebug() << "Error reading raw" << e.what();
-        return image;
+        return mImage;
     }
 
     // remove raw from here
     if (map == NULL)
     {
         qDebug() << "Can't acquire map for raw file";
-        return image;
+        return mImage;
     }
 
     RawDecoder* decoder = NULL;
@@ -208,13 +261,13 @@ Image RawIO::fromFile(const QByteArray& memFile, const ExifInfo& ex_info)
     catch (const RawDecoderException& e)
     {
         qDebug() << "(1) Can't acquire decoder for";
-        return image;
+        return mImage;
     }
 
     if (decoder == NULL)
     {
         qDebug() << "(2) Can't acquire decoder for";
-        return image;
+        return mImage;
     }
     decoder->failOnUnknown = 0;
     decoder->checkSupport(Metadata::metaData());
@@ -228,7 +281,7 @@ Image RawIO::fromFile(const QByteArray& memFile, const ExifInfo& ex_info)
     {
         qDebug() << "Can't decode image";
         qDebug() << "Exception:" << e.what();
-        return image;
+        return mImage;
     }
 
     RawImage     raw = decoder->mRaw;
@@ -241,46 +294,19 @@ Image RawIO::fromFile(const QByteArray& memFile, const ExifInfo& ex_info)
     RawImageType type                 = raw->getDataType();
     bool         is_cfa               = raw->isCFA;
 
-    if (is_cfa && components_per_pixel == 1 && type == TYPE_USHORT16 &&
-        bytes_per_pixel == 2)
+    if (is_cfa && components_per_pixel == 1 && type == TYPE_USHORT16 && bytes_per_pixel == 2)
     {
         ColorFilterArray cfa        = raw->cfa;
         uint32_t         cfa_layout = cfa.getDcrawFilter();
 
-        if (cfa_layout == 0x94949494)
-            qDebug() << "RGGB";
+        uint16_t*        rawdata        = (uint16_t*)raw->getData(0, 0);
+        int              pitch_in_bytes = raw->pitch;
 
-        if (cfa_layout == 0x49494949)
-            qDebug() << "GBRG";
-
-        if (cfa_layout == 0x61616161)
-            qDebug() << "GRBG";
-
-        if (cfa_layout == 0x16161616)
-            qDebug() << "BGGR";
-
-        uint16_t vert, horz;
-
-        if (cfa_layout == 0x94949494)
-            vert = horz = 0;
-        else if (cfa_layout == 0x49494949)
-        {
-            horz = 0;
-            vert = 1;
-        }
-
-        uint16_t* rawdata        = (uint16_t*)raw->getData(0, 0);
-        int       width          = raw->dim.x;
-        int       height         = raw->dim.y;
-        int       pitch_in_bytes = raw->pitch;
-
-        width          -= 2;     // cut of the borders off for simplicity.
-        height         -= 2;
         pitch_in_bytes /= 2;
 
-        Halide::Image<uint16_t> rawh(raw->dim.x, raw->dim.y, "Raw Image");
-        uint16_t*               data = rawh.data();
+        uint16_t* data = new uint16_t[raw->dim.x * raw->dim.y];
 
+        // copy pixels to my buffer
         for (int y = 0; y < raw->dim.y; y++)
         {
             uint16_t* row = &data[y * raw->dim.x];
@@ -289,63 +315,42 @@ Image RawIO::fromFile(const QByteArray& memFile, const ExifInfo& ex_info)
             for (int x = 0; x < raw->dim.x; x++)
                 row[x] = rawdata[y * pitch_in_bytes + x];
         }
+        data = rawdata;
 
         // apply white balance
         float wbr = ex_info.rgbCoeffients[0];
         float wbg = ex_info.rgbCoeffients[1];
         float wbb = ex_info.rgbCoeffients[2];
 
-        float canon300d[9] =
-        { 8197, -2000, -1118, -6714, 14335, 2592, -2536, 3178, 8266 };
-        float canon350d[9] =
-        { 6018, -617, -965, -8645, 15881, 2975, -1530, 1719, 7642 };
-        float powershots30[9] =
-        { 10566, -3652, -1129, -6552, 14662, 2006, -2197, 2581, 7670 };
-        float canon5DMarkII[9] =
-        { 4716, 603, -830, -7798, 15474, 2480, -1496, 1937, 6651 };
-        float eos1100d[9] =
-        { 6444, -904, -893, -4563, 12308, 2535, -903, 2016, 6728 };
-        float nikonD300[9] =
-        { 9030, -1992, -715, -8465, 16302, 2255, -2689, 3217, 8069 };
-        float powershots110[9] =
-        { 8039, -2643, -654, -3783, 11230, 2930, -206, 690, 4194 };
-        float identity[9] =
-        { 10000, 0, 0, 0, 10000, 0, 0, 0, 10000 };
-
+        // get the camera color conversion matrix
         float mat[9];
+        // set the src matrix to the identity matrix
+        float srcMatrix[9];
+        bool  cameraFound;
 
-        if (*ex_info.model == "Canon EOS 350D DIGITAL")
-            getMatrix(canon350d, mat);
-        else if (*ex_info.model == "Canon EOS 300D DIGITAL" ||
-            *ex_info.model == "Canon EOS DIGITAL REBEL")
-            getMatrix(canon300d, mat);
-        else if (*ex_info.model == "Canon PowerShot S30")
-            getMatrix(powershots30, mat);
-        else if (*ex_info.model == "Canon EOS 5D Mark II")
-            getMatrix(canon5DMarkII, mat);
-        else if (*ex_info.model == "Canon EOS REBEL T3")
-            getMatrix(eos1100d, mat);
-        else if (*ex_info.model == "NIKON D300")
-            getMatrix(nikonD300, mat);
-        else if (*ex_info.model == "Canon PowerShot S110")
-            getMatrix(powershots110, mat);
+        cameraFound = readMatrix(*ex_info.model, srcMatrix);
+
+        if (!cameraFound)
+        {
+            qDebug() << "Camera model" << *ex_info.model << "not found. Using identity matrix.";
+            float identity[9] = { 10000, 0, 0, 0, 10000, 0, 0, 0, 10000 };
+            prepareMatrix(identity, mat);
+        }
         else
         {
-            qDebug() << "Color conversion matrix for camera model" <<
-                *ex_info.model << "unavailable.";
-            getMatrix(identity, mat);
+            prepareMatrix(srcMatrix, mat);
         }
 
-        qDebug () << "Using WB factors" << wbr << "," << wbg << "," << wbb;
+        // qDebug () << "Using WB factors" << wbr << "," << wbg << "," << wbb;
 
         PipelineBuilder pb;
-        pb.prepare();
 
         pb.setWhiteBalance(wbr, wbg, wbb);
         pb.setDomain(bl, wp);
         pb.setColorConversion(mat);
-        pb.setInput(rawh);
+        pb.setInput(data, raw->dim.x, raw->dim.y);
         pb.setCFAStart(cfa_layout);
+        pb.setInterpolationAlgorithm(PipelineBuilder::Bilinear);
 
         switch (ex_info.rotation)
         {
@@ -361,8 +366,11 @@ Image RawIO::fromFile(const QByteArray& memFile, const ExifInfo& ex_info)
                 qDebug() << "Unimplemented rotation value";
         }
 
-        image = pb.execute(width, height);
+        pb.prepare();
+
+        mImage = pb.execute();
+        delete data;
     }
-    return image;
+    return mImage;
 }
 }

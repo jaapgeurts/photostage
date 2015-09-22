@@ -22,10 +22,16 @@ class EngineUtils
 
         static EngineUtils* mEngineUtils;
 
+        Halide::Var         x;
+        Halide::Var         y;
+        Halide::Var         c;
+
         Halide::Func        mToQImage;
         Halide::ImageParam  mInput;
 
         Halide::Func process(Halide::ImageParam input);
+        Halide::Func to32Bit(Halide::Func in);
+        Halide::Func tosRGB(Halide::Func in);
 };
 }
 #endif // PHOTOSTAGE_ENGINE_UTILS_H

@@ -18,14 +18,18 @@ void LibraryHistogramModule::setPhoto(Photo& photo)
 {
     LibraryModule::setPhoto(photo);
 
-    if (!photo.isNull() && !photo.libraryPreview().isNull())
-    {
-        //PhotoData image = loadImage(photo->libraryPreview());
-        mHistogram->setImageData(photo.libraryPreview());
-    }
-    else
+    if (photo.isNull())
     {
         mHistogram->clear();
+        return;
+    }
+
+    const Image image = photo.originalImage();
+
+    if (!image.isNull())
+    {
+        //PhotoData image = loadImage(photo->libraryPreview());
+        mHistogram->setImageData(image.data(), image.width(), image.height());
     }
 }
 }

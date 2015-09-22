@@ -21,7 +21,7 @@ ImportDialog::ImportDialog(QWidget* parent) :
 
     setWindowIcon(QIcon());
 
-    ui->mCfvPhotos->setTileFlyweight(new ImageFileTile());
+    ui->mCfvPhotos->setDelegate(new ImageFileTile());
     ui->mCfvPhotos->setMinimumCellWidth(125);
     ui->mCfvPhotos->setMaximumCellWidth(175);
     ui->mCfvPhotos->setCheckBoxMode(true);

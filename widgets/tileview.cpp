@@ -31,7 +31,8 @@ TileView::TileView(QWidget* parent) :
     mListModel(NULL),
     mSelectionModel(NULL),
     mViewportPosition(0),
-    mDragStartPosition()
+    mDragStartPosition(),
+    mModelRole(AbstractTile::ImageRole)
 {
     mScrollBar = new QScrollBar(mOrientation, this);
     mScrollBar->setMinimum(0);
@@ -84,11 +85,9 @@ QSize TileView::minimumSizeHint() const
         colRowCount = 1;
 
     if (mOrientation == Qt::Horizontal)
-        s = QSize(mMinimumCellWidth,
-                mMinimumCellHeight * mFixedColRowCount + mSbSize);
+        s = QSize(mMinimumCellWidth, mMinimumCellHeight * mFixedColRowCount + mSbSize);
     else if (mOrientation == Qt::Vertical)
-        s = QSize(mMinimumCellWidth * mFixedColRowCount + mSbSize,
-                mMinimumCellHeight);
+        s = QSize(mMinimumCellWidth * mFixedColRowCount + mSbSize, mMinimumCellHeight);
     // qDebug() << s;
     return s;
 }
@@ -244,6 +243,16 @@ bool TileView::dragEnabled() const
     return mAllowDrag;
 }
 
+void TileView::setModelRole(int role)
+{
+    mModelRole = role;
+}
+
+int TileView::modelRole() const
+{
+    return mModelRole;
+}
+
 void TileView::setModel(QAbstractItemModel* model)
 {
     mListModel      = model;
@@ -287,9 +296,10 @@ void TileView::setRootIndex(const QModelIndex& index)
     resetView();
 }
 
-void TileView::setTileFlyweight(AbstractTile* const renderer)
+void TileView::setDelegate(AbstractTile* const renderer)
 {
-    mTile = renderer;
+    mTile      = renderer;
+    mModelRole = renderer->modelRole();
 }
 
 void TileView::sliderValueChanged(int newValue)
@@ -339,20 +349,18 @@ void TileView::paintEvent(QPaintEvent*/*event*/)
     if (mOrientation == Qt::Vertical)
     {
         innerLength = width() - mScrollBar->width();
-        start       = mViewportPosition / mComputedCellHeight * mTilesPerColRow;                                               // image to start showing images
+        start       = mViewportPosition / mComputedCellHeight * mTilesPerColRow;        // image to start showing images
         // mViewportPosition is a pixel value
         offset = mViewportPosition %  mComputedCellHeight;    // portion of the row that is outside the view (on top)
-        end    = start + mTilesPerColRow *
-            ((height() + offset) / mComputedCellHeight + 1);
+        end    = start + mTilesPerColRow * ((height() + offset) / mComputedCellHeight + 1);
     }
     else     // Horizontal
     {
         innerLength = height() - mScrollBar->height();
-        start       = mViewportPosition / mComputedCellWidth * mTilesPerColRow;                                                    // image to start showing images
+        start       = mViewportPosition / mComputedCellWidth * mTilesPerColRow;      // image to start showing images
         // mViewportPosition pos is a pixel value
         offset = mViewportPosition %  mComputedCellWidth;    // portion of the row that is outside the view (on top)
-        end    = start + mTilesPerColRow *
-            ((width() + offset) / mComputedCellWidth + 1);
+        end    = start + mTilesPerColRow * ((width() + offset) / mComputedCellWidth + 1);
     }
 
     end--;
@@ -421,32 +429,24 @@ void TileView::paintEvent(QPaintEvent*/*event*/)
         tileInfo.tileState  = TileInfo::TileStateNone;
 
         if (mSelectionModel->isSelected(itemIndex))
-            tileInfo.tileState =
-                (TileInfo::TileState)(tileInfo.tileState |
-                TileInfo::TileStateSelected);
+            tileInfo.tileState = (TileInfo::TileState)(tileInfo.tileState | TileInfo::TileStateSelected);
 
         if (mIsCheckBoxMode)
         {
             if (mCheckedList->contains(itemIndex))
-                tileInfo.tileState =
-                    (TileInfo::TileState)(tileInfo.tileState |
-                    TileInfo::TileStateChecked);
+                tileInfo.tileState = (TileInfo::TileState)(tileInfo.tileState | TileInfo::TileStateChecked);
             else
-                tileInfo.tileState =
-                    (TileInfo::TileState)(tileInfo.tileState |
-                    TileInfo::TileStateUnchecked);
+                tileInfo.tileState = (TileInfo::TileState)(tileInfo.tileState | TileInfo::TileStateUnchecked);
         }
 
         painter.save();
-        painter.setClipRect(xpos, ypos, mComputedCellWidth,
-            mComputedCellHeight);
+        painter.setClipRect(xpos, ypos, mComputedCellWidth, mComputedCellHeight);
         painter.setWindow(0, 0, mComputedCellWidth, mComputedCellHeight);
-        painter.setViewport(xpos, ypos, mComputedCellWidth,
-            mComputedCellHeight);
+        painter.setViewport(xpos, ypos, mComputedCellWidth, mComputedCellHeight);
 
         // qDebug() << "cell:" << i << "("<<xpos<<","<<ypos<<","<<mComputedCellWidth<<","<<mComputedCellHeight<<")";
 
-        QVariant item = mListModel->data(itemIndex, TileView::ImageRole);
+        QVariant item = mListModel->data(itemIndex, mModelRole);
 
         mTile->render(painter, tileInfo, item);
 
@@ -458,11 +458,9 @@ void TileView::paintEvent(QPaintEvent*/*event*/)
 
             option.initFrom(this);
             option.state  = QStyle::State_Enabled;
-            option.state |= mCheckedList->contains(itemIndex) ?
-                QStyle::State_On : QStyle::State_Off;
+            option.state |= mCheckedList->contains(itemIndex) ? QStyle::State_On : QStyle::State_Off;
             option.rect.setRect(5, 5, 25, 25);
-            style()->drawPrimitive(QStyle::PE_IndicatorCheckBox,
-                &option, &painter, this);
+            style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &option, &painter, this);
         }
 
         painter.restore();
@@ -710,7 +708,7 @@ void TileView::mouseMoveEvent(QMouseEvent* event)
         QPixmap  image(tileInfo.width, tileInfo.height);
         image.fill(Qt::transparent);
         QPainter p(&image);
-        QVariant item = mListModel->data(tileInfo.modelIndex, TileView::ImageRole);
+        QVariant item = mListModel->data(tileInfo.modelIndex, mModelRole);
         mTile->render(p, tileInfo, item);
 
         drag->setPixmap(image);
@@ -822,8 +820,7 @@ void TileView::keyPressEvent(QKeyEvent* event)
             if (mOrientation == Qt::Horizontal && mTilesPerColRow == 1)
                 break;
 
-            if (oldIndex <
-                mListModel->rowCount(mRootIndex) - mTilesPerColRow)
+            if (oldIndex < mListModel->rowCount(mRootIndex) - mTilesPerColRow)
                 newIndex = oldIndex + mTilesPerColRow;
             break;
 
@@ -892,8 +889,7 @@ void TileView::ensureTileVisible(int index)
         // mHScrollBar->setValue(newValue);
         //qDebug() << "Cur" << currentValue << "New" << newValue;
 
-        QPropertyAnimation* animation =
-            new QPropertyAnimation(mScrollBar, "value");
+        QPropertyAnimation* animation = new QPropertyAnimation(mScrollBar, "value");
         animation->setDuration(ANIMATION_DURATION);
         animation->setStartValue(currentValue);
         animation->setEndValue(newValue);
@@ -1069,12 +1065,13 @@ void TileView::onRowsRemoved(const QModelIndex& /*parent*/, int /*first*/, int /
 
 void TileView::updateCellContents(const QModelIndex& /*topleft*/,
     const QModelIndex& /*bottomright*/,
-    const QVector<int>& /*roles*/)
+    const QVector<int>& roles)
 {
     // TODO: don't just just update all, only update the affected tile
     // check if the index is in view, then update those.
     // the paint function only draws and requests those items in view.
-    update();
+    if (roles.contains(mModelRole))
+        update();
 }
 
 void TileView::onSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)

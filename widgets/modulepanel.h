@@ -27,6 +27,7 @@ class ModulePanel : public QWidget
         ~ModulePanel();
 
         void addPanel(const QString& title, QWidget* panel, QMenu* menu = 0);
+        bool containsPanel(const QString& title) const;
         void removePanel(const QString& title);
 
     signals:

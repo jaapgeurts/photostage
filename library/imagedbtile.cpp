@@ -15,6 +15,11 @@ ImageDbTile::ImageDbTile(Widgets::TileView* parent) :
 {
 }
 
+int ImageDbTile::modelRole() const
+{
+    return Photo::DataRole;
+}
+
 void ImageDbTile::render(QPainter& painter, const Widgets::TileInfo& tileInfo, const QVariant& data)
 {
     int w = painter.window().width();
@@ -28,13 +33,11 @@ void ImageDbTile::render(QPainter& painter, const Widgets::TileInfo& tileInfo, c
 
     if (!data.isNull())
     {
-        if ((tileInfo.tileState & Widgets::TileInfo::TileStateSelected) ==
-            Widgets::TileInfo::TileStateSelected)
-            painter.setBrush(QBrush(QColor(Qt::darkGray).lighter(180),
-                Qt::SolidPattern));
+        if ((tileInfo.tileState & Widgets::TileInfo::TileStateSelected) == Widgets::TileInfo::TileStateSelected)
+            painter.setBrush(QBrush(QColor(Qt::darkGray).lighter(180), Qt::SolidPattern));
         else
-            painter.setBrush(QBrush(QColor(Qt::darkGray),
-                Qt::SolidPattern));
+            painter.setBrush(QBrush(QColor(Qt::darkGray), Qt::SolidPattern));
+
         // draw the tile
         painter.setPen(QColor(Qt::darkGray));
         painter.drawRect(0, 0, w - 2, h - 2);

@@ -46,47 +46,26 @@ class AbstractTile : public QObject
 
     public:
 
+        enum ModelRole
+        {
+            ImageRole = Qt::UserRole + 300
+        };
+
         AbstractTile(TileView* parent = 0);
-        virtual ~AbstractTile()
-        {
-        }
+        virtual ~AbstractTile();
 
-        void setSize(const QSize& size)
-        {
-            mSize = size;
-        }
+        void setSize(const QSize& size);
+        QSize size() const;
 
-        QSize size()
-        {
-            return mSize;
-        }
+        virtual int modelRole() const;
 
-        virtual void render(QPainter& painter,
-            const TileInfo& info,
-            const QVariant& data) = 0;
+        virtual void render(QPainter& painter, const TileInfo& info, const QVariant& data) = 0;
 
-        virtual void mouseMoveEvent(QMouseEvent* e, const TileInfo&)
-        {
-            e->ignore();
-        }
-
-        virtual void mousePressEvent(QMouseEvent* e, const TileInfo&)
-        {
-            e->ignore();
-        }
-
-        virtual void mouseReleaseEvent(QMouseEvent* e, const TileInfo&)
-        {
-            e->ignore();
-        }
-
-        virtual void mouseEnterEvent(const TileInfo&)
-        {
-        }
-
-        virtual void mouseLeaveEvent(const TileInfo&)
-        {
-        }
+        virtual void mouseMoveEvent(QMouseEvent* e, const TileInfo&);
+        virtual void mousePressEvent(QMouseEvent* e, const TileInfo&);
+        virtual void mouseReleaseEvent(QMouseEvent* e, const TileInfo&);
+        virtual void mouseEnterEvent(const TileInfo&);
+        virtual void mouseLeaveEvent(const TileInfo&);
 
     protected:
 

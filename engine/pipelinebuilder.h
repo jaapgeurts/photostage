@@ -2,7 +2,6 @@
 #define PHOTOSTAGE_PIPELINEBUILDER_H
 
 #include <Halide.h>
-#include <lcms2.h>
 
 #include "image.h"
 
@@ -12,38 +11,46 @@ class PipelineBuilder
 {
     public:
 
-        enum OutputIntent
+        enum InterpolationAlgorithm
         {
-            LibraryPreview = 1,
-            DevelopPreview,
-            FinalOutput
+            NearestNeighbour = 1,
+            Bilinear,
+            Bicubic,
+            VariableNumberGradients,
+            PatternedPixelGrouping,
+            AdaptiveHomogeneityDirected
         };
 
         PipelineBuilder();
         ~PipelineBuilder();
 
-        void setIntent(OutputIntent intent);
-
         void setWhiteBalance(float wbr, float wbg, float wbb);
         void setDomain(int bl, int wp);
         void setColorConversion(float* colorMatrix);
-        void setInput(Halide::Image<uint16_t> input);
+        void setInput(uint16_t* data, int width, int height);
         void setCFAStart(uint32_t dcraw_filter_id);
         void setRotation(int dir);
+        void setInterpolationAlgorithm(InterpolationAlgorithm algorithm);
 
         void prepare();
 
-        PhotoStage::Image execute(int width, int height);
+        PhotoStage::Image execute();
 
     private:
 
-        OutputIntent mIntent;
+        // Variables for construction of the pipeline.
+        InterpolationAlgorithm mAlgorithm;
+        int                    mRotation;
+        int                    mWidth;
+        int                    mHeight;
+
+        // Halide execution variables
+        Halide::Var x;
+        Halide::Var y;
+        Halide::Var c;
 
         // Halide pipeline input parameters
-        Halide::ImageParam  mInput;
-
-        Halide::Param<bool> mIsSRaw;
-        int                 mRotation;
+        Halide::ImageParam mInput;
 
         // White balance params
         Halide::Param<float>   mWBRed;
@@ -59,13 +66,12 @@ class PipelineBuilder
 
         Halide::Func           mPipeline;
 
-        //        int                    mWidth;
-        //        int                    mHeight;
-
-        // Little CMS variable
-        cmsHTRANSFORM mHRawTransform;
-
-        void createRawProfileConversion();
+        Halide::Func bilinear(Halide::Func input);
+        Halide::Func normalizeToFloat(Halide::Func input);
+        Halide::Func channelMultipliers(Halide::Func input);
+        Halide::Func transformToXYZ(Halide::Func input);
+        Halide::Func applyContrast(Halide::Func input);
+        Halide::Func rotate(Halide::Func input, Halide::Expr angle, Halide::Expr centerX, Halide::Expr centerY);
 };
 }
 

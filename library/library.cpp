@@ -40,7 +40,7 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     // connect(tile,&ImageDbTile::rotateRightClicked, this, &Library::rotateRightClicked);
     // connect(tile,&ImageDbTile::ratingClicked,this,&Library::ratingClicked);
 
-    ui->mPhotoGrid->setTileFlyweight(tile);
+    ui->mPhotoGrid->setDelegate(tile);
     ui->mPhotoGrid->setMinimumCellWidth(150);
     ui->mPhotoGrid->setMaximumCellWidth(200);
     ui->mPhotoGrid->setCheckBoxMode(false);
@@ -59,6 +59,8 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
 
     // These models are auto deleted by the QObject hierarchy
     ui->mPhotoGrid->setModel(mPhotoModel);
+
+    connect(mPhotoModel, &PhotoSortFilterProxyModel::dataChanged, this, &Library::onDataChanged);
 
     ui->scrollArea->setWidgetResizable(true);
     ui->scrollArea_2->setWidgetResizable(true);
@@ -258,20 +260,19 @@ void Library::onPhotoSelectionChanged(const QItemSelection& selected, const QIte
 {
     QList<Photo> photos;
     foreach (QModelIndex index, selected.indexes())
-    photos.append(mPhotoModel->data(index, Widgets::TileView::ImageRole).value<Photo>());
-
+    {
+        photos.append(mPhotoModel->data(index, Photo::DataRole).value<Photo>());
+    }
     mTagging->setPhotos(photos);
 }
 
 void Library::onCurrentPhotoChanged(const QModelIndex& current, const QModelIndex& /*previous*/)
 {
-    if (!current.isValid())
-    {
-        Photo p;
-        mHistogramModule->setPhoto(p);
-        mMetaDataModule->setPhoto(p);
-    }
-    Photo photo = mPhotoModel->data(current, Widgets::TileView::ImageRole).value<Photo>();
+    QVariant data = mPhotoModel->data(current, Photo::DataRole);
+    Photo    photo;
+
+    if (data.isValid())
+        photo = data.value<Photo>();
 
     mCurrentPhoto = photo;
     mHistogramModule->setPhoto(photo);
@@ -284,6 +285,15 @@ void Library::onCurrentPhotoChanged(const QModelIndex& current, const QModelInde
 void Library::onTileDoubleClicked(const QModelIndex& /*index*/)
 {
     onShowLoupe();
+}
+
+void Library::onDataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/, const QVector<int>& roles)
+{
+    if (roles.contains(Photo::DataRole))
+    {
+        mHistogramModule->setPhoto(mCurrentPhoto);
+        mMetaDataModule->setPhoto(mCurrentPhoto);
+    }
 }
 
 void Library::onCycleLoupeInfo()

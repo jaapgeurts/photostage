@@ -1,7 +1,5 @@
 #include <QDebug>
-#include <setjmp.h>
 
-#include "engine/colortransform.h"
 #include "jpeglib.h"
 #include "jpegio.h"
 #include "image.h"
@@ -10,7 +8,7 @@
 
 namespace PhotoStage
 {
-void my_error_exit (j_common_ptr cinfo)
+static void my_error_exit (j_common_ptr cinfo)
 {
     qDebug() << "jpeg decode error";
 
@@ -22,25 +20,31 @@ void my_error_exit (j_common_ptr cinfo)
     throw std::runtime_error( jpegLastErrorMsg );
 }
 
-Image JpegIO::fromFile(const QString& filename, const ExifInfo& ex_info)
+JpegIO::JpegIO()
+{
+}
+
+JpegIO::JpegIO(const QString& filename, const ExifInfo& ex_info)
 {
     QFile f(filename);
 
     if (!f.open(QFile::ReadOnly))
     {
         qDebug() << "Can't open file" << filename;
-        return Image();
     }
 
     QByteArray a = f.readAll();
-    return fromFile(a, ex_info);
+
+    initFromArray(a, ex_info);
 }
 
-Image JpegIO::fromFile(const QByteArray& memFile, const ExifInfo& ex_info)
+JpegIO::JpegIO(const QByteArray& memFile, const ExifInfo& ex_info)
 {
-    QByteArray                    iccProfile;
-    Image                         outImage;
+    initFromArray(memFile, ex_info);
+}
 
+void JpegIO::initFromArray(const QByteArray& memFile, const ExifInfo& ex_info)
+{
     struct jpeg_decompress_struct cinfo;
     struct jpeg_error_mgr         jerr;
 
@@ -90,7 +94,7 @@ Image JpegIO::fromFile(const QByteArray& memFile, const ExifInfo& ex_info)
                 r = Image::Rotate90CCW;
                 break;
         }
-        outImage = Image(width, height, pixel_size, buffer, r);
+        mImage = Image(width, height, pixel_size, buffer, r);
 
         // now read the ICC profile if there is any.
         uint8_t* icc_profile_buf;
@@ -100,7 +104,7 @@ Image JpegIO::fromFile(const QByteArray& memFile, const ExifInfo& ex_info)
         {
             qDebug() << "Found profile in JPEG";
             // There was a profile. read it into a buffer and pass it to QByteArray
-            iccProfile = QByteArray((const char*)icc_profile_buf, buflen);
+            mProfile = QByteArray((const char*)icc_profile_buf, buflen);
             free(icc_profile_buf);
         }
         jpeg_destroy_decompress(&cinfo);
@@ -110,37 +114,16 @@ Image JpegIO::fromFile(const QByteArray& memFile, const ExifInfo& ex_info)
         qDebug() << "JPEG decode error" << e.what();
 
         jpeg_destroy_decompress(&cinfo);
-        return outImage;
     }
-
-    // Change the picture's color profile to Melissa32
-    ColorTransform toWorking;
-
-    if (!iccProfile.isEmpty())
-    {
-        // use the embedded JPeg profile
-        toWorking = ColorTransform::getTransform(iccProfile, WORKING_COLOR_SPACE,
-                ColorTransform::FORMAT_RGB48_PLANAR, ColorTransform::FORMAT_RGB48_PLANAR);
-        //  mPhoto.exifInfo().profileName = toWorking.profileName();
-    }
-    else
-    {
-        // Assume default JPEG images are in sRGB format.
-        toWorking = ColorTransform::getTransform("sRGB-Melissa-RGB32",
-                "sRGB", WORKING_COLOR_SPACE, ColorTransform::FORMAT_RGB48_PLANAR, ColorTransform::FORMAT_RGB48_PLANAR);
-        //  mPhoto.exifInfo().profileName = "sRGB (Assumed)";
-    }
-
-    return toWorking.transformImage(outImage);
 }
 
-bool JpegIO::saveToFile(const Image& image, const QString& filename)
+const Image& JpegIO::image() const
 {
-    qDebug() << "bool JpegIO::saveToFile(const Image& image, const QString& filename) NOT IMPLEMENTED";
-    return false;
+    return mImage;
 }
 
-JpegIO::JpegIO()
+const QByteArray& JpegIO::colorProfile() const
 {
+    return mProfile;
 }
 }

@@ -2,8 +2,7 @@
 #include <QFileInfo>
 #include <QThread>
 
-#include <lcms2.h>
-
+#include "engine/colortransform.h"
 #include "constants.h"
 #include "imageloaderjob.h"
 #include "import/exivfacade.h"
@@ -56,7 +55,7 @@ void ImageLoaderJob::error(const QString& error)
 
 void ImageLoaderJob::cancel()
 {
-    mPhoto.setIsDownloading(false);
+    mPhoto.setIsDownloadingPreview(false);
 }
 
 QVariant ImageLoaderJob::startLoading(Photo& photo)
@@ -105,26 +104,61 @@ Image ImageLoaderJob::loadImage(const QString& path)
     ExifInfo ex_info = ex->data();
     delete(ex);
 
-    QString suffix = QFileInfo(path).suffix().toUpper();
+    QString        suffix = QFileInfo(path).suffix().toUpper();
+
+    ColorTransform toWorking;
+    QString        dstColorSpace;
+
+    if (mCreatePreview)
+        dstColorSpace = PREVIEW_COLOR_SPACE;
+    else
+        dstColorSpace = WORKING_COLOR_SPACE;
 
     // TODO
     if (suffix == "NEF" || suffix == "CR2" || suffix == "CRW")
     {
         qDebug() << "Load raw" << path;
 
-        RawIO rawIO;
-        image = rawIO.fromFile(memFile, ex_info);
+        RawIO rawIO(memFile, ex_info);
+        image = rawIO.image();
+        // the raw file is always presented in XYZ
+        // too assign profiles to the raw file.
+        QString srcProfile = "D65_XYZ";
+        toWorking = ColorTransform::getTransform(srcProfile + dstColorSpace, srcProfile, dstColorSpace,
+                ColorTransform::FORMAT_RGB48_PLANAR, ColorTransform::FORMAT_BGR48_PLANAR);
+        mPhoto.setIsRaw(true);
     }
     else
     {
         // Read using JPEG library
         //qDebug() << "Load jpg" << path;
-        QByteArray iccProfile;
 
-        image = JpegIO::fromFile(memFile, ex_info);
+        JpegIO     jpegIO(memFile, ex_info);
+        image = jpegIO.image();
+        QByteArray iccProfile = jpegIO.colorProfile();
+
+        // jpeg files are presented as is.
+        // if a profile is present use that, otherwise assume sRGB
+        if (!iccProfile.isEmpty())
+        {
+            // use the embedded JPeg profile
+
+            toWorking = ColorTransform::getTransform(iccProfile, dstColorSpace,
+                    ColorTransform::FORMAT_BGR48_PLANAR, ColorTransform::FORMAT_BGR48_PLANAR);
+            //  mPhoto.exifInfo().profileName = toWorking.profileName();
+        }
+        else
+        {
+            QString srcProfile = "sRGB";
+            // Assume default JPEG images are in sRGB format.
+            toWorking = ColorTransform::getTransform(srcProfile + dstColorSpace, srcProfile, dstColorSpace,
+                    ColorTransform::FORMAT_BGR48_PLANAR, ColorTransform::FORMAT_BGR48_PLANAR);
+            //  mPhoto.exifInfo().profileName = "sRGB (Assumed)";
+        }
+        mPhoto.setIsRaw(false);
     }
 
-    return image;
+    return toWorking.transformImage(image);
 }
 
 QImage ImageLoaderJob::preparePreview(const Image& image)
@@ -135,7 +169,6 @@ QImage ImageLoaderJob::preparePreview(const Image& image)
     mExifUpdated = true;
 
     // Scale the image down to correct size.
-
     QImage scaled = image.toPreviewImage();
 
     // store the preview in the cache

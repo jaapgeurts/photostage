@@ -18,6 +18,8 @@ class ImageDbTile : public Widgets::AbstractTile
 
         ImageDbTile(Widgets::TileView* parent = 0);
 
+        int modelRole() const;
+
         // AbstractCellRenderer interface
         void render(QPainter& painter, const Widgets::TileInfo& tileInfo, const QVariant& data);
 

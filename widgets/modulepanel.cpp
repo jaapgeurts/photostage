@@ -73,8 +73,16 @@ void ModulePanel::addPanel(const QString& title, QWidget* panel, QMenu* menu)
     layout()->addWidget(info.panel);
 }
 
+bool ModulePanel::containsPanel(const QString& title) const
+{
+    return mPanels.contains(title);
+}
+
 void ModulePanel::removePanel(const QString& title)
 {
+    if (!mPanels.contains(title))
+        return;
+
     PanelInfo info = mPanels.value(title);
 
     layout()->removeWidget(info.header);

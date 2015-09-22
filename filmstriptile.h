@@ -1,5 +1,5 @@
-#ifndef FILMSTRIPTILE_H
-#define FILMSTRIPTILE_H
+#ifndef PHOTOSTAGE_FILMSTRIPTILE_H
+#define PHOTOSTAGE_FILMSTRIPTILE_H
 
 #include "widgets/abstracttile.h"
 
@@ -13,7 +13,9 @@ class FilmstripTile : public Widgets::AbstractTile
         // AbstractCellRenderer interface
         void render(QPainter& painter, const Widgets::TileInfo& tileInfo, const QVariant& data);
 
+        int modelRole() const;
+
     private:
 };
 }
-#endif // FILMSTRIPTILE_H
+#endif // PHOTOSTAGE_FILMSTRIPTILE_H

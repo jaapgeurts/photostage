@@ -79,24 +79,31 @@ class PhotoModel : public QAbstractListModel
         void onPhotosDeletedFromCollection(long long collectionid, const QList<Photo>& photos);
         void onPhotosChanged(const QList<Photo>& photos);
 
-        void onImageTranslated(Photo photo, const QImage& image);
-        void onImageLoaded(Photo photo, const QImage& image);
+        void onPreviewTranslated(Photo photo, const QImage& image);
+        void onOriginalTranslated(Photo photo, const QImage& image);
+
+        void onPreviewLoaded(Photo photo, const QImage& image);
+        void onOriginalLoaded(Photo photo, const Image& image);
 
         void onExifUpdated(Photo photo);
 
     private:
 
         PhotoDAO*                     mWorkUnit;
-        ThreadQueue*                  mThreadQueue;
+        ThreadQueue*                  mPreviewThreadQueue;
+        ThreadQueue*                  mOriginalThreadQueue;
         // The mPhotoInfoList is the main container for the Photo Objects.
         QList<Photo>                  mPhotoList;
         QHash<long long, QModelIndex> mPhotoIndexMap;
-        QHash<long long, uint32_t>    mRunningThreads;
+        QHash<long long, uint32_t>    mPreviewLoadThreads;
+        QHash<long long, uint32_t>    mOriginalLoadThreads;
         long long                     mRootId;
         SourceType                    mPhotoSource;
 
-        void loadImage(Photo& photo);
+        void loadPreview(Photo& photo);
+        void loadOriginal(Photo& photo);
         void convertImage(Photo& photo);
+        void convertOriginal(Photo& photo);
 };
 }
 

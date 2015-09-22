@@ -15,7 +15,13 @@ class ColorTransformJob  : public QObject, public Runnable
 
     public:
 
-        ColorTransformJob(const Photo& photo);
+        enum ConversionType
+        {
+            Preview = 1,
+            Develop = 2,
+        };
+
+        ColorTransformJob(const Photo& photo, ConversionType type);
 
         QVariant run();
         void finished(QVariant result);
@@ -28,7 +34,8 @@ class ColorTransformJob  : public QObject, public Runnable
 
     private:
 
-        Photo mPhoto;
+        Photo          mPhoto;
+        ConversionType mType;
 };
 }
 #endif // PHOTOSTAGE_COLORTRANSFORMJOB_H
