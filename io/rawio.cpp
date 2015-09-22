@@ -315,7 +315,6 @@ Image RawIO::initFromFile(const QByteArray& memFile, const ExifInfo& ex_info)
             for (int x = 0; x < raw->dim.x; x++)
                 row[x] = rawdata[y * pitch_in_bytes + x];
         }
-        data = rawdata;
 
         // apply white balance
         float wbr = ex_info.rgbCoeffients[0];

@@ -10,12 +10,15 @@ namespace PhotoStage
 {
 PipelineBuilder::PipelineBuilder() :
     mAlgorithm(Bilinear),
+    mRotation(0),
+    mWidth(0),
+    mHeight(0),
     x("x"),
     y("y"),
     c("c"),
     mInput(type_of<uint16_t>(), 2),
-    mRotation(0),
-    mColorMatrix(type_of<float>(), 2)
+    mColorMatrix(type_of<float>(), 2),
+    mPipeline("Stage1Raw")
 {
     prepare();
 }
@@ -171,11 +174,6 @@ Func PipelineBuilder::bilinear(Func input)
             select(c == 2, red(x, y),
             green(x, y)));
 
-    //    Var x_outer, y_outer, x_inner, y_inner, tile_index;
-    //    bilinear.tile(x, y, x_outer, y_outer, x_inner, y_inner, 256, 256)
-    //    .fuse(x_outer, y_outer, tile_index)
-    //    .parallel(tile_index);
-
     return bilinear;
 }
 
@@ -281,28 +279,25 @@ void PipelineBuilder::prepare()
     final (x, y, c) = cast<uint16_t>(contrast(x, y, c) * 65535.0f);
     //    final (x, y, c) = cast<uint16_t>(toXYZcolor(x, y, c) * 65535.0f);
 
-    Func mrot("Rotation");
-
     if (mRotation == -1)
     {
+        Func mrot("Rotation");
         mrot(x, y, c) = final (mWidth - 1 - y,  x, c);
         mPipeline     = mrot;
     }
     else if (mRotation == 1)
     {
+        Func mrot("Rotation");
         mrot(x, y, c) = final (y, mHeight - 1 - x, c);
         mPipeline     = mrot;
     }
     else
     {
-        mPipeline     = final;
-        mrot(x, y, c) = final (x, y, c);
+        mPipeline = final;
     }
 
-    Var x_outer, y_outer, x_inner, y_inner, tile_index;
-    mPipeline.tile(x, y, x_outer, y_outer, x_inner, y_inner, 128, 128)
-    .fuse(x_outer, y_outer, tile_index)
-    .parallel(tile_index);
+    mPipeline.tile(x, y, x_outer, y_outer, 32, 32)
+    .parallel(y);
 }
 
 PhotoStage::Image PipelineBuilder::execute()

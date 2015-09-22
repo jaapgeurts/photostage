@@ -49,6 +49,8 @@ class PipelineBuilder
         Halide::Var y;
         Halide::Var c;
 
+        Halide::Var x_outer, y_outer;
+
         // Halide pipeline input parameters
         Halide::ImageParam mInput;
 
