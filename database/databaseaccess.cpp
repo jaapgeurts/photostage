@@ -1,16 +1,18 @@
-#include "databaseaccess.h"
-
+#include <QTextStream>
 #include <QtSql>
 #include <QDebug>
 
+#include "databaseaccess.h"
+
 namespace PhotoStage
 {
-DatabaseAccess* DatabaseAccess::mInstance = NULL;
+DatabaseAccess*    DatabaseAccess::mInstance = nullptr;
 
-PhotoDAO*       DatabaseAccess::mPhotoDAO      = NULL;
-PathDAO*        DatabaseAccess::mPathDAO       = NULL;
-CollectionDAO*  DatabaseAccess::mCollectionDAO = NULL;
-KeywordDAO*     DatabaseAccess::mKeywordDAO    = NULL;
+PhotoDAO*          DatabaseAccess::mPhotoDAO           = nullptr;
+PathDAO*           DatabaseAccess::mPathDAO            = nullptr;
+CollectionDAO*     DatabaseAccess::mCollectionDAO      = nullptr;
+KeywordDAO*        DatabaseAccess::mKeywordDAO         = nullptr;
+DevelopSettingDao* DatabaseAccess::mDevelopSettingsDAO = nullptr;
 
 DatabaseAccess* DatabaseAccess::instance(QObject* parent)
 {
@@ -20,10 +22,11 @@ DatabaseAccess* DatabaseAccess::instance(QObject* parent)
         mInstance = new DatabaseAccess(parent);
 
         // create all DAOs
-        mPhotoDAO      = new PhotoDAO(mInstance);
-        mPathDAO       = new PathDAO(mInstance);
-        mCollectionDAO = new CollectionDAO(mInstance);
-        mKeywordDAO    = new KeywordDAO(mInstance);
+        mPhotoDAO           = new PhotoDAO(mInstance);
+        mPathDAO            = new PathDAO(mInstance);
+        mCollectionDAO      = new CollectionDAO(mInstance);
+        mKeywordDAO         = new KeywordDAO(mInstance);
+        mDevelopSettingsDAO = new DevelopSettingDao(mInstance);
 
         // keyword dao connections
         connect(mKeywordDAO, &KeywordDAO::keywordsAdded, mInstance, &DatabaseAccess::keywordsAdded);
@@ -62,12 +65,12 @@ DatabaseAccess::DatabaseAccess(QObject* parent) :
 
     QStringList tables = mDB.tables();
 
-    if (tables.contains("photo", Qt::CaseInsensitive)
-        && tables.contains("path", Qt::CaseInsensitive)
-        && tables.contains("keyword", Qt::CaseInsensitive)
-        && tables.contains("collection", Qt::CaseInsensitive))
-        qDebug() << "Tables already exist.";
-    else
+    //    if (tables.contains("photo", Qt::CaseInsensitive)
+    //        && tables.contains("path", Qt::CaseInsensitive)
+    //        && tables.contains("keyword", Qt::CaseInsensitive)
+    //        && tables.contains("collection", Qt::CaseInsensitive))
+    //        qDebug() << "Tables already exist.";
+    //    else
     {
         initDb();
     }
@@ -107,6 +110,11 @@ KeywordDAO* DatabaseAccess::keywordDao()
     return mKeywordDAO;
 }
 
+DevelopSettingDao* DatabaseAccess::developSettingDao()
+{
+    return mDevelopSettingsDAO;
+}
+
 void DatabaseAccess::onPhotosDeleted(const QList<Photo>& photos)
 {
     emit photosDeleted(photos);
@@ -130,41 +138,49 @@ PhotoDAO* DatabaseAccess::photoDao()
 
 void DatabaseAccess::initDb()
 {
-    QStringList list;
+#ifdef Q_OS_MAC
+    QFile f(QCoreApplication::applicationDirPath() + "/../Resources/database_schema.sql");
+#endif
+    f.open(QFile::ReadOnly);
+    QTextStream ts(&f);
 
-    list <<
-        "CREATE TABLE if not exists path (id integer PRIMARY KEY AUTOINCREMENT, directory varchar, parent_id integer REFERENCES path (id), lft INTEGER NOT NULL DEFAULT (0), rgt INTEGER NOT NULL DEFAULT (0));";
-    list <<
-        "CREATE TABLE if not exists photo (id integer PRIMARY KEY AUTOINCREMENT, path_id integer REFERENCES path (id), filename TEXT NOT NULL, iso integer, exposure_time float, focal_length float, datetime_original TEXT, photo_hash TEXT, rating integer, color integer, flag integer, rotation INTEGER, longitude float, latitude float, datetime_digitized TEXT, copyright TEXT, artist TEXT, aperture float, flash BOOLEAN, lens_name TEXT, make TEXT, model TEXT, width integer, height integer);";
-    list <<
-        "CREATE TABLE if not exists keyword (id integer PRIMARY KEY AUTOINCREMENT, keyword varchar NOT NULL, parent_id integer REFERENCES keyword (id), lft INTEGER NOT NULL DEFAULT (0), rgt INTEGER NOT NULL DEFAULT (0));";
-    list <<
-        "create unique index if not exists idx_keyword on keyword (keyword, parent_id)";
-    list <<
-        "CREATE TABLE if not exists photo_keyword (photo_id integer REFERENCES photo (id), keyword_id integer REFERENCES keyword (id));";
-    list <<
-        "create unique index if not exists idx_photo_keyword on photo_keyword (photo_id, keyword_id)";
-    list <<
-        "create table if not exists collection (id integer primary key AUTOINCREMENT, name varchar, parent_id integer, lft integer, rgt integer)";
+    QSqlQuery   q;
+    QString     query = readQuery(ts);
 
-    list <<
-        "create table if not exists work (id integer primary key AUTOINCREMENT, parent_id integer)";
-    list <<
-        "create table if not exists work_photo (work_id integer, photo_id integer)";
-    list <<
-        "create table if not exists collection_photo ( collection_id integer REFERENCES collection(id), photo_id integer REFERENCES photo (id));";
-
-    QSqlQuery q;
-    foreach(QString query, list)
+    while (!query.isNull() && !query.isEmpty())
     {
+        // qDebug() << "Running query:" << query;
+
         if (!q.exec(query))
         {
-            qDebug() << "Query failed\n" << q.lastError() << "\n" <<
-                q.lastQuery() << "Stopping.";
+            qDebug() << "Query failed\n" << q.lastError();
+            qDebug() << q.lastQuery() << "Stopping.";
             break;
         }
+        query = readQuery(ts);
     }
 
-    // create a
+    f.close();
+}
+
+QString DatabaseAccess::readQuery(QTextStream& ts)
+{
+    QString query;
+    QString line;
+
+    line = ts.readLine();
+
+    while (!line.isNull())
+    {
+        if (!line.isEmpty() && line.length() > 1 && line.at(0) != '-' && line.at(1) != '-')
+        {
+            query += " " + line.trimmed();
+
+            if (query.at(query.length() - 1) == ';')
+                return query;
+        }
+        line = ts.readLine();
+    }
+    return query;
 }
 }

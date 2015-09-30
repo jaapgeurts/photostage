@@ -19,23 +19,23 @@ int ImportBackgroundTask::progressMinimum()
 
 int ImportBackgroundTask::progressMaximum()
 {
-    return mInfo.files().size() - 1;
+    return mInfo.sourceFiles.size() - 1;
 }
 
 void ImportBackgroundTask::run()
 {
     int                      i = 0;
 
-    QListIterator<QFileInfo> it(mInfo.files());
+    QListIterator<QFileInfo> it(mInfo.sourceFiles);
     DatabaseAccess::photoDao()->beginImport();
 
     // create the new Import Collection
-    long long importcollectionid = DatabaseAccess::collectionDao()->addImportCollection(mInfo.files().size());
+    long long importcollectionid = DatabaseAccess::collectionDao()->addImportCollection(mInfo.sourceFiles.size());
 
     while (it.hasNext() && mRunning)
     {
         QFileInfo info = it.next();
-        DatabaseAccess::photoDao()->importPhoto(importcollectionid, info, mInfo.options());
+        DatabaseAccess::photoDao()->importPhoto(importcollectionid, info, mInfo.options);
         i++;
         emit progressUpdated(i);
     }

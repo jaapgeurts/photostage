@@ -7,7 +7,6 @@
 #include <QFile>
 #include <QSharedPointer>
 
-#include "engine/engineutils.h"
 
 namespace PhotoStage
 {

@@ -75,7 +75,9 @@ void ThreadQueue::cancel()
     // cancel all running jobs
     mMutexJobs.lock();
     foreach(Runnable * r, mJobs)
-    r->cancel();
+    {
+        r->cancel();
+    }
     qDeleteAll(mJobs);
     mJobs.clear();
     mMutexJobs.unlock();

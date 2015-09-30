@@ -7,7 +7,7 @@
 
 namespace PhotoStage
 {
-class PathItem
+struct PathItem
 {
     public:
 

@@ -5,7 +5,7 @@
 #include <QByteArray>
 
 #include "image.h"
-#include "import/exivfacade.h"
+#include "engine/developrawparameters.h"
 #include "external/rawspeed/RawSpeed/RawSpeed-API.h"
 
 namespace PhotoStage
@@ -15,14 +15,14 @@ class RawIO
     public:
 
         RawIO();
-        RawIO(const QByteArray& memFile, const PhotoStage::ExifInfo& ex_info);
+        RawIO(const QByteArray &memFile, const DevelopRawParameters &params, const QString &cameraModel);
 
         const Image& image() const;
         const QByteArray colorProfile() const;
 
     private:
 
-        Image initFromFile(const QByteArray& memFile, const PhotoStage::ExifInfo& ex_info);
+        Image initFromFile(const QByteArray& memFile, const DevelopRawParameters &params, const QString &cameraModel);
 
         /**
          * @brief ImageFileLoader::compute_inverse computes the inverse of a matrix

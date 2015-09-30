@@ -12,6 +12,8 @@ MetaDataModule::MetaDataModule(QWidget* parent) :
 
 void MetaDataModule::setPhoto(Photo& photo)
 {
+    LibraryModule::setPhoto(photo);
+
     clearAll();
 
     if (!photo.isNull())

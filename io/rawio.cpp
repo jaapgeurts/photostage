@@ -1,3 +1,4 @@
+#include <QCoreApplication>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -39,8 +40,8 @@ CameraMetaData* Metadata::metaData()
     {
         try
         {
-            mMetaData = new CameraMetaData(
-                "/Users/jaapg/Development/PhotoStage/PhotoStage/external/rawspeed/data/cameras.xml");
+            QString filePath = QCoreApplication::applicationDirPath() + "/../Resources/cameras.xml";
+            mMetaData = new CameraMetaData(filePath.toLocal8Bit().data());
         }
         catch (CameraMetadataException& e)
         {
@@ -55,9 +56,9 @@ RawIO::RawIO()
 {
 }
 
-RawIO::RawIO(const QByteArray& memFile, const ExifInfo& ex_info)
+RawIO::RawIO(const QByteArray& memFile, const DevelopRawParameters& params, const QString& cameraModel)
 {
-    initFromFile(memFile, ex_info);
+    initFromFile(memFile, params, cameraModel);
 }
 
 const Image& RawIO::image() const
@@ -150,18 +151,12 @@ int RawIO::compute_cct(float R, float G, float B) const
 
 void RawIO::mmultm(float* A, float* B, float* out) const
 {
-    // TODO: do this with for loops
-    out[0] = A[0] * B[0] + A[1] * B[3] + A[2] * B[6];
-    out[1] = A[0] * B[1] + A[1] * B[4] + A[2] * B[7];
-    out[2] = A[0] * B[2] + A[1] * B[5] + A[2] * B[8];
+    memset(out, 0, 9 * sizeof(float));
 
-    out[3] = A[3] * B[0] + A[4] * B[3] + A[5] * B[6];
-    out[4] = A[3] * B[1] + A[4] * B[4] + A[5] * B[7];
-    out[5] = A[3] * B[2] + A[4] * B[5] + A[5] * B[8];
+    for (int r = 0; r < 3; r++)
+        for (int c = 0; c < 3; c++)
+            out[r * 3 + c] += A[r * 3] * B[c + 3 * c];
 
-    out[6] = A[6] * B[0] + A[7] * B[3] + A[8] * B[6];
-    out[7] = A[6] * B[1] + A[7] * B[4] + A[8] * B[7];
-    out[8] = A[6] * B[2] + A[7] * B[5] + A[8] * B[8];
 }
 
 void RawIO::normalize(float* M) const
@@ -191,7 +186,7 @@ void RawIO::prepareMatrix(float* in, float* out) const
 
 bool RawIO::readMatrix(const QString& model, float* mat) const
 {
-    QFile f("/Users/jaapg/Development/PhotoStage/PhotoStage/resources/camera_color_matrix.json");
+    QFile f(QCoreApplication::applicationDirPath() + "/../Resources/camera_color_matrix.json");
 
     f.open(QFile::ReadOnly);
     QByteArray    a = f.readAll();
@@ -229,7 +224,7 @@ bool RawIO::readMatrix(const QString& model, float* mat) const
     return false;
 }
 
-Image RawIO::initFromFile(const QByteArray& memFile, const ExifInfo& ex_info)
+Image RawIO::initFromFile(const QByteArray& memFile, const DevelopRawParameters& params, const QString& cameraModel)
 {
     //FileReader reader(strdup(path.toLocal8Bit().data()));
     QSharedPointer<FileMap> map;
@@ -316,22 +311,17 @@ Image RawIO::initFromFile(const QByteArray& memFile, const ExifInfo& ex_info)
                 row[x] = rawdata[y * pitch_in_bytes + x];
         }
 
-        // apply white balance
-        float wbr = ex_info.rgbCoeffients[0];
-        float wbg = ex_info.rgbCoeffients[1];
-        float wbb = ex_info.rgbCoeffients[2];
-
         // get the camera color conversion matrix
         float mat[9];
         // set the src matrix to the identity matrix
         float srcMatrix[9];
         bool  cameraFound;
 
-        cameraFound = readMatrix(*ex_info.model, srcMatrix);
+        cameraFound = readMatrix(cameraModel, srcMatrix);
 
         if (!cameraFound)
         {
-            qDebug() << "Camera model" << *ex_info.model << "not found. Using identity matrix.";
+            qDebug() << "Camera model" << cameraModel << "not found. Using identity matrix.";
             float identity[9] = { 10000, 0, 0, 0, 10000, 0, 0, 0, 10000 };
             prepareMatrix(identity, mat);
         }
@@ -343,27 +333,15 @@ Image RawIO::initFromFile(const QByteArray& memFile, const ExifInfo& ex_info)
         // qDebug () << "Using WB factors" << wbr << "," << wbg << "," << wbb;
 
         PipelineBuilder pb;
+        // pass the develop settings here.
 
-        pb.setWhiteBalance(wbr, wbg, wbb);
+        pb.setDevelopParams(params);
+
         pb.setDomain(bl, wp);
         pb.setColorConversion(mat);
         pb.setInput(data, raw->dim.x, raw->dim.y);
         pb.setCFAStart(cfa_layout);
-        pb.setInterpolationAlgorithm(PipelineBuilder::Bilinear);
-
-        switch (ex_info.rotation)
-        {
-            case ExifInfo::Rotate90CCW:
-                pb.setRotation(-1);
-                break;
-
-            case ExifInfo::Rotate90CW:
-                pb.setRotation(1);
-                break;
-
-            default:
-                qDebug() << "Unimplemented rotation value";
-        }
+        //  pb.setInterpolationAlgorithm(PipelineBuilder::Bilinear);
 
         pb.prepare();
 

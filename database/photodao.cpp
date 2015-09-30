@@ -115,13 +115,13 @@ void PhotoDAO::importPhoto(long long collectionid, const QFileInfo& file, const 
     qDebug() << "Importing file" << file.canonicalFilePath();
     QString fileName = file.fileName();
     QString srcpath  = file.canonicalFilePath();
-    QString dstdir   = options.destinationDir().canonicalFilePath();
+    QString dstdir   = options.destinationDir.canonicalFilePath();
     QString dstpath  = dstdir + QDir::separator() + fileName;
 
     bool    copySuccess = false;
 
     //take action on the file(in case of copy & move)
-    switch (options.importMode())
+    switch (options.importMode)
     {
         case ImportOptions::ImportAdd:
             // do nothing. just import the filepaths into the DB

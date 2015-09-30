@@ -9,6 +9,8 @@
 
 namespace PhotoStage
 {
+// All three collections (WORK = temporary collection, USER = user defined collection, IMPORT = import collections
+// Each tree root node uses these respective names
 static const QString SOURCE_NAME_USER   = "__USER";
 static const QString SOURCE_NAME_WORK   = "__WORK";
 static const QString SOURCE_NAME_IMPORT = "__IMPORT";
@@ -115,7 +117,7 @@ long long CollectionDAO::addCollectionInternal(const Nullable<long long>& parent
         else
         {
             // insert root because there is none.
-            q.clear();
+            q.finish();
             q.prepare("insert into collection (name,parent_id) values(:name,NULL) ");
             q.bindValue(":name", rootname);
             q.exec();
@@ -128,7 +130,7 @@ long long CollectionDAO::addCollectionInternal(const Nullable<long long>& parent
     }
 
     // insert the collection.
-    q.clear();
+    q.finish();
     q.prepare("insert into collection (name,parent_id) values ( :name , :parent )");
     q.bindValue(":parent", parent);
     q.bindValue(":name", name);
@@ -137,6 +139,8 @@ long long CollectionDAO::addCollectionInternal(const Nullable<long long>& parent
         qDebug() << q.lastError();
 
     long long newid = q.lastInsertId().toLongLong();
+
+    q.finish();
 
     // TODO: improve performance and don't rebuild tree on each insert.
     rebuildCollectionTree(parent, 1);

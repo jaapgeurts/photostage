@@ -73,6 +73,8 @@ int main(int argc, char* argv[])
 
     cmsSetLogErrorHandler(lcms2ErrorFunc);
 
+    qDebug() << "Main App ThreadId:" << QThread::currentThreadId();
+
     PhotoStage::MainWindow w;
     w.show();
 

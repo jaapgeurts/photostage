@@ -35,4 +35,7 @@ const QString SETTINGS_LIBRARY_FILES_PATHITEM = "files/pathitem";
 const QString SETTINGS_GROUP_DEVELOP          = "develop";
 const QString SETTINGS_SPLITTER_DEVELOP_SIZES = "splitter_main";
 
+// REGISTERED MODULE  NUMBERS
+const int DEVELOP_SETTINGS_RAW = 1;
+
 #endif // CONSTANTS

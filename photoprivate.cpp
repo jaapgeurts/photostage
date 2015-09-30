@@ -7,7 +7,7 @@
 
 namespace PhotoStage
 {
-Photo::PhotoPrivate::PhotoPrivate(PhotoModel* owner, const QImage& image, const QString& filename, long long id) :
+Photo::PhotoPrivate::PhotoPrivate(PhotoOwner* owner, const QImage& image, const QString& filename, long long id) :
     mId(id),
     mLibraryPreview(image),
     mSrcImagePath(filename),

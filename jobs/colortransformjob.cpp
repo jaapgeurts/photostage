@@ -33,7 +33,7 @@ QVariant ColorTransformJob::run()
         dstProfile = ColorTransform::getMonitorProfilePath();
         QString        iden      = srcProfile + dstProfile;
         ColorTransform transform = ColorTransform::getTransform(iden, srcProfile, dstProfile,
-                ColorTransform::FORMAT_RGB48_PLANAR, ColorTransform::FORMAT_RGB32);
+                ColorTransform::FORMAT_BGR48_PLANAR, ColorTransform::FORMAT_RGB32);
         translated = transform.transformToQImage(mPhoto.originalImage());
     }
 

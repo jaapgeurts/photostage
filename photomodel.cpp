@@ -95,6 +95,8 @@ void PhotoModel::loadOriginal(Photo& photo)
     if (photo.isDownloadingOriginal())
         return;
 
+    qDebug() << "PHOTOMODEL: load original";
+
     // cancel existing jobs and only load the last request.
     mOriginalThreadQueue->cancel();
 
@@ -102,7 +104,9 @@ void PhotoModel::loadOriginal(Photo& photo)
 
     ImageLoaderJob* ilj = new ImageLoaderJob(photo, false);
     ilj->connect(ilj, &ImageLoaderJob::imageReady, this, &PhotoModel::onOriginalLoaded);
-    uint32_t        id = mOriginalThreadQueue->addJob(ilj);
+    ilj->connect(ilj, &ImageLoaderJob::exifUpdated, this, &PhotoModel::onExifUpdated);
+    ilj->connect(ilj, &ImageLoaderJob::saveParams, this, &PhotoModel::onSaveParams);
+    uint32_t id = mOriginalThreadQueue->addJob(ilj);
     mOriginalLoadThreads.insert(photo.id(), id);
 }
 
@@ -111,11 +115,14 @@ void PhotoModel::loadPreview(Photo& photo)
     if (photo.isDownloadingPreview())
         return;
 
+    qDebug() << "PHOTOMODEL: load preview";
+
     photo.setIsDownloadingPreview(true);
 
     ImageLoaderJob* ilj = new ImageLoaderJob(photo, true);
     ilj->connect(ilj, &ImageLoaderJob::previewReady, this, &PhotoModel::onPreviewLoaded);
     ilj->connect(ilj, &ImageLoaderJob::exifUpdated, this, &PhotoModel::onExifUpdated);
+    ilj->connect(ilj, &ImageLoaderJob::saveParams, this, &PhotoModel::onSaveParams);
     uint32_t id = mPreviewThreadQueue->addJob(ilj);
     mPreviewLoadThreads.insert(photo.id(), id);
 }
@@ -124,6 +131,12 @@ void PhotoModel::onExifUpdated(Photo photo)
 {
     // get actual width x height & store in db.
     DatabaseAccess::photoDao()->updateExifInfo(photo);
+}
+
+void PhotoModel::onSaveParams(Photo photo, const DevelopRawParameters& params)
+{
+    // save to DB
+    DatabaseAccess::developSettingDao()->insertDefaultRawSettings(photo.id(), params);
 }
 
 void PhotoModel::onPreviewLoaded(Photo photo, const QImage& image)
@@ -137,11 +150,11 @@ void PhotoModel::onPreviewLoaded(Photo photo, const QImage& image)
         qDebug() << "Failed to load preview.. Prevent loop";
         photo.setLibraryPreview(QImage(":/images/loading_failed.jpg"));
     }
+    mPreviewLoadThreads.remove(photo.id());
+    photo.setIsDownloadingPreview(false);
     QVector<int> roles;
     roles << Photo::DataRole << MapView::ModelIndexLayer::DataRole;
     emit         dataChanged(mPhotoIndexMap.value(photo.id()), mPhotoIndexMap.value(photo.id()), roles);
-    mPreviewLoadThreads.remove(photo.id());
-    photo.setIsDownloadingPreview(false);
 }
 
 void PhotoModel::onOriginalLoaded(Photo photo, const Image& image)
@@ -154,11 +167,11 @@ void PhotoModel::onOriginalLoaded(Photo photo, const Image& image)
     {
         qDebug() << "Failed to load original.. Not yet preventing loop";
     }
+    photo.setIsDownloadingOriginal(false);
+    mOriginalLoadThreads.remove(photo.id());
     QVector<int> roles;
     roles << Photo::DataRole << MapView::ModelIndexLayer::DataRole;
     emit         dataChanged(mPhotoIndexMap.value(photo.id()), mPhotoIndexMap.value(photo.id()), roles);
-    mOriginalLoadThreads.remove(photo.id());
-    photo.setIsDownloadingOriginal(false);
 }
 
 void PhotoModel::convertImage(Photo& photo)
@@ -179,6 +192,8 @@ void PhotoModel::convertOriginal(Photo& photo)
 {
     if (photo.isDownloadingOriginal())
         return;
+
+    qDebug() << "PHOTOMODEL: converting original";
 
     photo.setIsDownloadingOriginal(true);
     ColorTransformJob* cfj = new ColorTransformJob(photo, ColorTransformJob::Develop);

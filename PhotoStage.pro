@@ -119,7 +119,10 @@ SOURCES += \
     widgets/modulepanel.cpp \
     widgets/tileview.cpp \
     widgets/timezonepicker.cpp \
-    widgets/translucentwindow.cpp
+    widgets/translucentwindow.cpp \
+    database/developsettingdao.cpp \
+    database/developitems.cpp \
+    engine/developrawparameters.cpp
 
 #processing/amaze_demosaic_RT.c
 
@@ -220,7 +223,11 @@ HEADERS  += \
     widgets/modulepanel.h \
     widgets/tileview.h \
     widgets/timezonepicker.h \
-    widgets/translucentwindow.h
+    widgets/translucentwindow.h \
+    database/developsettingdao.h \
+    database/developitems.h \
+    engine/developrawparameters.h \
+    photoowner.h
 
 FORMS    += \
     mainwindow.ui \
@@ -270,6 +277,12 @@ macx {
 #            $$PWD/external/exiv2/lib/libexiv2.13.dylib \
             -L/opt/local/lib \
             -framework AppKit
+
+    Resources.files = resources/camera_color_matrix.json resources/database_schema.sql external/rawspeed/data/cameras.xml
+    Resources.path = Contents/Resources
+    Profiles.files = resources/Profiles
+    Profiles.path = Contents/Resources
+    QMAKE_BUNDLE_DATA += Resources Profiles
 }
 
 win32 {

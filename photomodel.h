@@ -8,12 +8,13 @@
 #include <QMimeData>
 
 #include "photo.h"
+#include "photoowner.h"
 #include "threadqueue.h"
 #include "database/databaseaccess.h"
 
 namespace PhotoStage
 {
-class PhotoModel : public QAbstractListModel
+class PhotoModel : public QAbstractListModel, public PhotoOwner
 {
     Q_OBJECT
 
@@ -86,6 +87,7 @@ class PhotoModel : public QAbstractListModel
         void onOriginalLoaded(Photo photo, const Image& image);
 
         void onExifUpdated(Photo photo);
+        void onSaveParams(Photo photo, const DevelopRawParameters& params);
 
     private:
 

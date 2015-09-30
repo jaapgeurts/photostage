@@ -32,14 +32,17 @@ class ImageLoaderJob : public QObject, public Runnable
         void previewReady(Photo photo, const QImage& image);
         void imageReady(Photo photo, const Image& image);
         void exifUpdated(Photo photo);
+        void saveParams(Photo photo, const DevelopRawParameters& params);
 
     private:
 
-        Photo mPhoto;
-        bool  mCreatePreview;
-        bool  mExifUpdated;
+        Photo                mPhoto;
+        bool                 mCreatePreview;
+        bool                 mExifUpdated;
+        DevelopRawParameters mRawParams;
+        bool                 mMustSaveParams;
 
-        QVariant startLoading(Photo& photo);
+        QVariant startLoading();
         QImage preparePreview(const Image& image);
         Image loadImage(const QString& path);
 };

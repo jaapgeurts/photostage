@@ -1,5 +1,5 @@
-#ifndef DEVELOP_H
-#define DEVELOP_H
+#ifndef PHOTOSTAGE_DEVELOP_H
+#define PHOTOSTAGE_DEVELOP_H
 
 #include <QItemSelectionModel>
 #include <QModelIndex>
@@ -51,10 +51,10 @@ class Develop : public Module
         BasicModule*            mBasicModule;
         Photo                   mPhoto;
         bool                    mLoadPhoto;
-        QItemSelectionModel*    mPhotoModel;
+        DevelopHistory          mDevelopHistory;
 
         void doSetPhoto(Photo photo);
 };
 }
 
-#endif // DEVELOP_H
+#endif // PHOTOSTAGE_DEVELOP_H

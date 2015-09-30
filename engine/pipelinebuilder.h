@@ -5,32 +5,23 @@
 
 #include "image.h"
 
+#include "developrawparameters.h"
+
 namespace PhotoStage
 {
 class PipelineBuilder
 {
     public:
 
-        enum InterpolationAlgorithm
-        {
-            NearestNeighbour = 1,
-            Bilinear,
-            Bicubic,
-            VariableNumberGradients,
-            PatternedPixelGrouping,
-            AdaptiveHomogeneityDirected
-        };
-
         PipelineBuilder();
         ~PipelineBuilder();
 
-        void setWhiteBalance(float wbr, float wbg, float wbb);
+        void setDevelopParams(const DevelopRawParameters& params);
+
         void setDomain(int bl, int wp);
         void setColorConversion(float* colorMatrix);
         void setInput(uint16_t* data, int width, int height);
         void setCFAStart(uint32_t dcraw_filter_id);
-        void setRotation(int dir);
-        void setInterpolationAlgorithm(InterpolationAlgorithm algorithm);
 
         void prepare();
 
@@ -39,10 +30,10 @@ class PipelineBuilder
     private:
 
         // Variables for construction of the pipeline.
-        InterpolationAlgorithm mAlgorithm;
-        int                    mRotation;
-        int                    mWidth;
-        int                    mHeight;
+        DevelopRawParameters mDevelopParameters;
+        int                  mWidth;
+        int                  mHeight;
+        int                  mRotation;
 
         // Halide execution variables
         Halide::Var x;

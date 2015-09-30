@@ -9,8 +9,6 @@ using namespace Halide;
 namespace PhotoStage
 {
 PipelineBuilder::PipelineBuilder() :
-    mAlgorithm(Bilinear),
-    mRotation(0),
     mWidth(0),
     mHeight(0),
     x("x"),
@@ -27,11 +25,26 @@ PipelineBuilder::~PipelineBuilder()
 {
 }
 
-void PipelineBuilder::setWhiteBalance(float wbr, float wbg, float wbb)
+void PipelineBuilder::setDevelopParams(const DevelopRawParameters& params)
 {
-    mWBRed.set(wbr);
-    mWBGreen.set(wbg);
-    mWBBlue.set(wbb);
+    mWBRed.set(params.redMultiplier());
+    mWBGreen.set(params.greenMultiplier());
+    mWBBlue.set(params.blueMultiplier());
+    mRotation = 0;
+
+    switch (params.rotation())
+    {
+        case DevelopRawParameters::Rotate90CCW:
+            mRotation = -1;
+            break;
+
+        case DevelopRawParameters::Rotate90CW:
+            mRotation = 1;
+            break;
+
+        default:
+            qDebug() << "Unimplemented rotation value";
+    }
 }
 
 void PipelineBuilder::setDomain(int bl, int wp)
@@ -93,16 +106,6 @@ void PipelineBuilder::setCFAStart(uint32_t dcraw_filter_id)
         mCol.set(0);
         mRow.set(0);
     }
-}
-
-void PipelineBuilder::setRotation(int dir)
-{
-    mRotation = dir;
-}
-
-void PipelineBuilder::setInterpolationAlgorithm(PipelineBuilder::InterpolationAlgorithm algorithm)
-{
-    mAlgorithm = algorithm;
 }
 
 //bicubic interpolation

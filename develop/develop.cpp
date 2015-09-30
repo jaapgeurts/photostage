@@ -1,6 +1,7 @@
 #include <QSettings>
 #include <QDebug>
 
+#include "database/databaseaccess.h"
 #include "engine/colortransform.h"
 #include "jobs/imageloaderjob.h"
 #include "constants.h"
@@ -9,11 +10,10 @@
 
 namespace PhotoStage
 {
-Develop::Develop(QWidget* parent) :
+Develop::Develop( QWidget* parent) :
     Module(parent),
     ui(new Ui::Develop),
-    mLoadPhoto(false),
-    mPhotoModel(NULL)
+    mLoadPhoto(false)
 {
     ui->setupUi(this);
 
@@ -73,7 +73,11 @@ QRect Develop::lightGap()
 
 void Develop::setPhoto(Photo photo)
 {
+    qDebug () <<"DEVELOP: setting photo";
     mPhoto = photo;
+
+    // load develop history
+    mDevelopHistory = DatabaseAccess::developSettingDao()->getDevelopHistory(photo);
 
     // if visible, load immediately
     if (isVisible())
@@ -85,7 +89,11 @@ void Develop::setPhoto(Photo photo)
 
 void Develop::onPhotoUpdated()
 {
-    ui->developView->update();
+    if (!mPhoto.isNull())
+    {
+        qDebug() << "DEVELOP: Setting photo in view";
+        ui->developView->setPhoto(mPhoto.developPreviewsRGB());
+    }
 }
 
 void Develop::onDevelopSettingsChanged()
@@ -117,7 +125,7 @@ void Develop::doSetPhoto(Photo photo)
     {
         if (!ui->DevelopPanel->containsPanel("RAW"))
         {
-            // Raw
+            // Raw module
             mRawModule = new RawModule(ui->DevelopPanel);
             ui->DevelopPanel->addPanel("RAW", mRawModule);
         }
@@ -125,12 +133,16 @@ void Develop::doSetPhoto(Photo photo)
     else
     {
         ui->DevelopPanel->removePanel("RAW");
+        delete mRawModule;
+        mRawModule = nullptr;
     }
 
     ui->developView->setPhoto(photo.developPreviewsRGB());
 
     mHistogramModule->setPhoto(photo);
-    mRawModule->setPhoto(photo);
+
+    if (mRawModule != nullptr)
+        mRawModule->setPhoto(photo);
     mBasicModule->setPhoto(photo);
 }
 }

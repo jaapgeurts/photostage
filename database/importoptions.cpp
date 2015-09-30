@@ -7,18 +7,8 @@ ImportOptions::ImportOptions()
 }
 
 ImportOptions::ImportOptions(const QFileInfo& destDir, const ImportMode& mode) :
-    mDestinationDir(destDir),
-    mImportMode(mode)
+    destinationDir(destDir),
+    importMode(mode)
 {
-}
-
-const QFileInfo& ImportOptions::destinationDir() const
-{
-    return mDestinationDir;
-}
-
-const ImportOptions::ImportMode& ImportOptions::importMode() const
-{
-    return mImportMode;
 }
 }

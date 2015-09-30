@@ -9,7 +9,7 @@
 namespace PhotoStage
 {
 class DatabaseAccess;
-class CollectionItem;
+struct CollectionItem;
 
 class CollectionDAO : public QObject
 {

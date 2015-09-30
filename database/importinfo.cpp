@@ -3,26 +3,16 @@
 namespace PhotoStage
 {
 ImportInfo::ImportInfo(const ImportInfo& src) :
-    mSourceFiles(src.mSourceFiles),
-    mOptions(src.mOptions)
+    sourceFiles(src.sourceFiles),
+    options(src.options)
 {
 }
 
 ImportInfo::ImportInfo(const QList<QFileInfo>& sourceFiles,
     const QFileInfo& destinationDir,
     ImportOptions::ImportMode mode) :
-    mSourceFiles(sourceFiles)
+    sourceFiles(sourceFiles)
 {
-    mOptions = ImportOptions(destinationDir, mode);
-}
-
-const QList<QFileInfo>& ImportInfo::files() const
-{
-    return mSourceFiles;
-}
-
-const ImportOptions ImportInfo::options() const
-{
-    return mOptions;
+    options = ImportOptions(destinationDir, mode);
 }
 }

@@ -9,7 +9,7 @@ Photo::Photo()
 {
 }
 
-Photo::Photo(PhotoModel* owner, const QImage& image, const QString& filename, long long id)
+Photo::Photo(PhotoOwner *owner, const QImage& image, const QString& filename, long long id)
 {
     d = QSharedPointer<PhotoPrivate>(new PhotoPrivate(owner, image, filename, id));
 }
@@ -215,8 +215,8 @@ QStringList Photo::keywords() const
     return d->mKeywords;
 }
 
-void Photo::setOwner(PhotoModel* model)
+void Photo::setOwner(PhotoOwner* owner)
 {
-    d->mOwner = model;
+    d->mOwner = owner;
 }
 }

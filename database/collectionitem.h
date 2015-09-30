@@ -9,7 +9,7 @@
 
 namespace PhotoStage
 {
-class CollectionItem
+struct CollectionItem
 {
     public:
 

@@ -9,7 +9,7 @@
 
 namespace PhotoStage
 {
-class ImportInfo
+struct ImportInfo
 {
     public:
 
@@ -20,13 +20,8 @@ class ImportInfo
             const QFileInfo& destinationPath,
             ImportOptions::ImportMode mode);
 
-        const QList<QFileInfo>& files() const;
-        const ImportOptions options() const;
-
-    private:
-
-        QList<QFileInfo> mSourceFiles;
-        ImportOptions    mOptions;
+        QList<QFileInfo> sourceFiles;
+        ImportOptions    options;
 };
 }
 #endif // PHOTOSTAGE_IMPORTINFO_H

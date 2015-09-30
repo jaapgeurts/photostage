@@ -2,6 +2,7 @@
 #include <QFileInfo>
 #include <QThread>
 
+#include "database/databaseaccess.h"
 #include "engine/colortransform.h"
 #include "constants.h"
 #include "imageloaderjob.h"
@@ -17,7 +18,8 @@ ImageLoaderJob::ImageLoaderJob(const Photo& photo, bool createPreview) :
     QObject(NULL),
     mPhoto(photo),
     mCreatePreview(createPreview),
-    mExifUpdated(false)
+    mExifUpdated(false),
+    mMustSaveParams(false)
 {
     setName("ImageLoaderJob");
 }
@@ -28,13 +30,16 @@ ImageLoaderJob::~ImageLoaderJob()
 
 QVariant ImageLoaderJob::run()
 {
-    return startLoading(mPhoto);
+    return startLoading();
 }
 
 void ImageLoaderJob::finished(QVariant result)
 {
     if (mExifUpdated)
         emit exifUpdated(mPhoto);
+
+    if (mMustSaveParams)
+        emit saveParams(mPhoto, mRawParams);
 
     if (mCreatePreview)
     {
@@ -56,9 +61,10 @@ void ImageLoaderJob::error(const QString& error)
 void ImageLoaderJob::cancel()
 {
     mPhoto.setIsDownloadingPreview(false);
+    // TODO: check if we can cancel early
 }
 
-QVariant ImageLoaderJob::startLoading(Photo& photo)
+QVariant ImageLoaderJob::startLoading()
 {
     if (mCreatePreview)
     {
@@ -70,6 +76,12 @@ QVariant ImageLoaderJob::startLoading(Photo& photo)
     }
 
     Image image = loadImage(mPhoto.srcImagePath());
+
+    // TODO: check if updating exif is needed
+    mPhoto.exifInfo().width  = image.width();
+    mPhoto.exifInfo().height = image.height();
+
+    mExifUpdated = true;
 
     if (mCreatePreview)
         return QVariant::fromValue<QImage>(preparePreview(image));
@@ -119,10 +131,22 @@ Image ImageLoaderJob::loadImage(const QString& path)
     {
         qDebug() << "Load raw" << path;
 
-        RawIO rawIO(memFile, ex_info);
+        // passs the develop settings here to the rawIO
+        // TODO: move db access back to the main thread.
+        mRawParams = DatabaseAccess::developSettingDao()->getRawSettings(mPhoto.id());
+
+        if (mRawParams.isNull())
+        {
+            mRawParams =  DevelopRawParameters(ex_info);
+            // TODO: get this value from settings
+            mRawParams.setInterpolationAlgorithm(DevelopRawParameters::Bilinear);
+            mMustSaveParams = true;
+        }
+
+        RawIO rawIO(memFile, mRawParams, *ex_info.model);
         image = rawIO.image();
         // the raw file is always presented in XYZ
-        // too assign profiles to the raw file.
+        // tdo assign profiles to the raw file.
         QString srcProfile = "D65_XYZ";
         toWorking = ColorTransform::getTransform(srcProfile + dstColorSpace, srcProfile, dstColorSpace,
                 ColorTransform::FORMAT_RGB48_PLANAR, ColorTransform::FORMAT_BGR48_PLANAR);
@@ -163,11 +187,6 @@ Image ImageLoaderJob::loadImage(const QString& path)
 
 QImage ImageLoaderJob::preparePreview(const Image& image)
 {
-    mPhoto.exifInfo().width  = image.width();
-    mPhoto.exifInfo().height = image.height();
-
-    mExifUpdated = true;
-
     // Scale the image down to correct size.
     QImage scaled = image.toPreviewImage();
 

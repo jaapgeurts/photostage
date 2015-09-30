@@ -1,6 +1,6 @@
 #include <QDebug>
-//#include <tmmintrin.h>
 
+#include "engine/engineutils.h"
 #include "image.h"
 #include "utils.h"
 

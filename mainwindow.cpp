@@ -377,6 +377,7 @@ void MainWindow::onCurrentChanged(const QModelIndex& current, const QModelIndex&
         }
     }
 
+
     mDevelop->setPhoto(currentPhoto());
 
     updateInformationBar();

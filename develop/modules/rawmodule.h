@@ -1,28 +1,31 @@
-#ifndef RAWMODULE_H
-#define RAWMODULE_H
+#ifndef PHOTOSTAGE_RAWMODULE_H
+#define PHOTOSTAGE_RAWMODULE_H
 
 #include <QWidget>
 #include "developmodule.h"
 
 namespace Ui
 {
-    class RawModule;
+class RawModule;
 }
 
 namespace PhotoStage
 {
-    class RawModule : public DevelopModule
-    {
-        Q_OBJECT
+class RawModule : public DevelopModule
+{
+    Q_OBJECT
 
-        public:
+    public:
 
-            RawModule(QWidget* parent = 0);
+        RawModule(QWidget* parent = 0);
 
-        private:
+        void setPhoto(Photo& photo);
 
-            Ui::RawModule* ui;
-    };
+    private:
+
+        Ui::RawModule* ui;
+        void setValues();
+};
 }
 
-#endif // RAWMODULE_H
+#endif // PHOTOSTAGE_RAWMODULE_H

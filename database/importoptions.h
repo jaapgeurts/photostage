@@ -5,7 +5,7 @@
 
 namespace PhotoStage
 {
-class ImportOptions
+struct ImportOptions
 {
     public:
 
@@ -22,16 +22,12 @@ class ImportOptions
         ImportOptions();
         ImportOptions(const QFileInfo& destDir, const ImportMode& importMode);
 
-        const QFileInfo&  destinationDir() const;
-        const ImportMode& importMode() const;
 
-    private:
-
-        QFileInfo  mDestinationDir;
-        ImportMode mImportMode;
+        QFileInfo  destinationDir;
+        ImportMode importMode;
         // Preserve the structure when importing and moving/copying of the source
         // folder or copy all files into the selected target folder
-        bool mPreserveDirectoryStructure;
+        bool preserveDirectoryStructure;
 };
 }
 #endif // PHOTOSTAGE_IMPORTOPTIONS_H

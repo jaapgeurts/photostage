@@ -6,8 +6,10 @@
 #include <QSqlQuery>
 #include <QSharedPointer>
 
+#include "photoowner.h"
 #include "import/exivfacade.h"
 #include "image.h"
+#include "engine/developrawparameters.h"
 
 namespace PhotoStage
 {
@@ -15,7 +17,7 @@ class PhotoModel;
 
 class Photo
 {
-    class PhotoPrivate;
+    //  class PhotoPrivate;
 
     public:
 
@@ -45,7 +47,7 @@ class Photo
         };
 
         Photo();
-        Photo(PhotoModel* owner, const QImage& image, const QString& filename, long long id);
+        Photo(PhotoOwner* owner, const QImage& image, const QString& filename, long long id);
         Photo(QSqlQuery& query);
 
         long long id() const;
@@ -90,11 +92,9 @@ class Photo
         bool isDownloadingOriginal() const;
         void setIsDownloadingOriginal(bool value);
 
-        void setOwner(PhotoModel* model);
+        void setOwner(PhotoOwner* owner);
 
     private:
-
-        QSharedPointer<PhotoPrivate> d;
 
         class PhotoPrivate
         {
@@ -103,7 +103,7 @@ class Photo
             public:
 
                 // Constructors
-                PhotoPrivate(PhotoModel* owner, const QImage& image, const QString& filename, long long mId);
+                PhotoPrivate(PhotoOwner* owner, const QImage& image, const QString& filename, long long mId);
                 PhotoPrivate(QSqlQuery& query);
                 virtual ~PhotoPrivate();
 
@@ -120,13 +120,15 @@ class Photo
                 Image             mOriginal;
                 QString           mSrcImagePath;
                 ExifInfo          mExifInfo;
-                PhotoModel*       mOwner;
+                PhotoOwner*       mOwner;
                 bool              mIsDownloadingPreview;
                 bool              mIsDownloadingOriginal;
                 QStringList       mKeywords;
                 long long         mHashCode;
                 bool              mIsRaw;
         };
+
+        QSharedPointer<PhotoPrivate> d;
 };
 }
 Q_DECLARE_METATYPE(PhotoStage::Photo)

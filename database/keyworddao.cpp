@@ -98,7 +98,7 @@ void KeywordDAO::insertKeywords(const QStringList& words)
         return;
 
     // get the root id ( a single root is needed )
-    q.clear();
+    q.finish();
     q.prepare("select id from keyword where parent_id is NULL");
     q.exec();
     long long parent;
@@ -108,14 +108,14 @@ void KeywordDAO::insertKeywords(const QStringList& words)
     else
     {
         // insert root because there is none.
-        q.clear();
+        q.finish();
         q.exec("insert into keyword (keyword,parent_id) values('',NULL) ");
         parent = q.lastInsertId().toLongLong();
     }
 
     // insert all the keywords.
     DatabaseAccess::instance()->beginTransaction();
-    q.clear();
+    q.finish();
     q.prepare("insert into keyword (keyword,parent_id) values ( :keyword , :parent )");
     q.bindValue(":parent", parent);
     QString word;
@@ -128,6 +128,7 @@ void KeywordDAO::insertKeywords(const QStringList& words)
     }
     // TODO: improve performance and don't rebuild tree on each insert.
     DatabaseAccess::instance()->endTransaction();
+    q.finish();
     rebuildKeywordTree(parent, 1);
     emit keywordsAdded();
 }

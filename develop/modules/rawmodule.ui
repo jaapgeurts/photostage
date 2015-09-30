@@ -14,6 +14,9 @@
    <string>Form</string>
   </property>
   <layout class="QFormLayout" name="formLayout_2">
+   <property name="fieldGrowthPolicy">
+    <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+   </property>
    <item row="0" column="0">
     <widget class="QLabel" name="cmbDemosaic">
      <property name="text">
@@ -22,7 +25,7 @@
     </widget>
    </item>
    <item row="0" column="1">
-    <widget class="QComboBox" name="comboBox">
+    <widget class="QComboBox" name="cbAlgorithm">
      <item>
       <property name="text">
        <string>AHD</string>
@@ -45,12 +48,15 @@
      </item>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="1" column="0" colspan="2">
     <widget class="QGroupBox" name="groupBox">
      <property name="title">
       <string>Multipliers (WB)</string>
      </property>
      <layout class="QFormLayout" name="formLayout">
+      <property name="fieldGrowthPolicy">
+       <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+      </property>
       <item row="0" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
@@ -59,7 +65,11 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QSpinBox" name="spinBox"/>
+       <widget class="QSpinBox" name="sbRed">
+        <property name="maximum">
+         <number>1000</number>
+        </property>
+       </widget>
       </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label_2">
@@ -69,7 +79,11 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QSpinBox" name="spinBox_2"/>
+       <widget class="QSpinBox" name="sbGreen1">
+        <property name="maximum">
+         <number>1000</number>
+        </property>
+       </widget>
       </item>
       <item row="2" column="0">
        <widget class="QLabel" name="label_3">
@@ -79,7 +93,11 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QSpinBox" name="spinBox_3"/>
+       <widget class="QSpinBox" name="sbGreen2">
+        <property name="maximum">
+         <number>1000</number>
+        </property>
+       </widget>
       </item>
       <item row="3" column="0">
        <widget class="QLabel" name="label_4">
@@ -89,7 +107,11 @@
        </widget>
       </item>
       <item row="3" column="1">
-       <widget class="QSpinBox" name="spinBox_4"/>
+       <widget class="QSpinBox" name="sbBlue">
+        <property name="maximum">
+         <number>1000</number>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

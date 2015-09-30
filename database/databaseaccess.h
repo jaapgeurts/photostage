@@ -7,6 +7,7 @@
 #include "pathdao.h"
 #include "photodao.h"
 #include "keyworddao.h"
+#include "developsettingdao.h"
 
 namespace PhotoStage
 {
@@ -26,6 +27,7 @@ class DatabaseAccess : public QObject
         static PathDAO* pathDao();
         static CollectionDAO* collectionDao();
         static KeywordDAO* keywordDao();
+        static DevelopSettingDao* developSettingDao();
 
         void beginTransaction();
         void endTransaction();
@@ -52,18 +54,20 @@ class DatabaseAccess : public QObject
 
     private:
 
-        static DatabaseAccess* mInstance;
+        static DatabaseAccess*    mInstance;
 
-        QSqlDatabase           mDB;
+        QSqlDatabase              mDB;
 
-        static PhotoDAO*       mPhotoDAO;
-        static PathDAO*        mPathDAO;
-        static CollectionDAO*  mCollectionDAO;
-        static KeywordDAO*     mKeywordDAO;
+        static PhotoDAO*          mPhotoDAO;
+        static PathDAO*           mPathDAO;
+        static CollectionDAO*     mCollectionDAO;
+        static KeywordDAO*        mKeywordDAO;
+        static DevelopSettingDao* mDevelopSettingsDAO;
 
         explicit DatabaseAccess(QObject* parent = 0);
 
         void initDb();
+        QString readQuery(QTextStream& ts);
 };
 }
 #endif // DATABASEACCESS_H

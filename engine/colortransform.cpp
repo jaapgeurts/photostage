@@ -1,5 +1,6 @@
 #include <QDir>
 #include <QDebug>
+#include <QCoreApplication>
 
 #include "colortransform.h"
 
@@ -68,7 +69,7 @@ ColorTransform::ColorTransform(const QByteArray& srcProfile, const QString& to, 
         qDebug() << "Loading monitor profile";
     }
     else
-        toProfile = "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + to + ".icc";
+        toProfile = QCoreApplication::applicationDirPath() + "/../Resources/Profiles/" + to + ".icc";
 
     hInProfile = cmsOpenProfileFromMem(srcProfile.constData(), srcProfile.length());
 
@@ -115,7 +116,7 @@ ColorTransform::ColorTransform(const QString& from, const QString& to, Format in
 {
     cmsHPROFILE hInProfile, hOutProfile;
 
-    QString     fromProfile = "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + from + ".icc";
+    QString     fromProfile = QCoreApplication::applicationDirPath() + "/../Resources/Profiles/" + from + ".icc";
 
     mProfileName = from;
 
@@ -128,8 +129,7 @@ ColorTransform::ColorTransform(const QString& from, const QString& to, Format in
     }
     else
         toProfile =
-            "/Users/jaapg/Development/PhotoStage/PhotoStage/ICCProfiles/" + to +
-            ".icc";
+            QCoreApplication::applicationDirPath() + "/../Resources/Profiles/" + to + ".icc";
 
     hInProfile  = cmsOpenProfileFromFile(fromProfile.toLocal8Bit().data(), "r");
     hOutProfile = cmsOpenProfileFromFile(toProfile.toLocal8Bit().data(), "r");
