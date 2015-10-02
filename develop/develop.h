@@ -9,6 +9,7 @@
 #include "modules/develophistogrammodule.h"
 #include "modules/rawmodule.h"
 #include "modules/basicmodule.h"
+#include "modules/historymodule.h"
 #include "photo.h"
 
 namespace Ui
@@ -49,9 +50,10 @@ class Develop : public Module
         DevelopHistogramModule* mHistogramModule;
         RawModule*              mRawModule;
         BasicModule*            mBasicModule;
+        HistoryModule*          mHistoryModule;
         Photo                   mPhoto;
         bool                    mLoadPhoto;
-        DevelopHistory          mDevelopHistory;
+        // DevelopHistory          mDevelopHistory;
 
         void doSetPhoto(Photo photo);
 };

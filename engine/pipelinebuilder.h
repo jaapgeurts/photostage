@@ -16,7 +16,7 @@ class PipelineBuilder
         PipelineBuilder();
         ~PipelineBuilder();
 
-        void setDevelopParams(const DevelopRawParameters& params);
+        void setDevelopParams(const QSharedPointer<DevelopRawParameters>& params);
 
         void setDomain(int bl, int wp);
         void setColorConversion(float* colorMatrix);

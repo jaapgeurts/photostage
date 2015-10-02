@@ -46,6 +46,14 @@ class Photo
             FlagReject = 2
         };
 
+        enum FileContainer
+        {
+            ContainerInvalid = 0,
+            ContainerRAW     = 1,
+            ContainerJPG     = 2,
+            ContainerPNG     = 3
+        };
+
         Photo();
         Photo(PhotoOwner* owner, const QImage& image, const QString& filename, long long id);
         Photo(QSqlQuery& query);
@@ -77,7 +85,8 @@ class Photo
         Flag flag() const;
 
         bool isRaw() const;
-        void setIsRaw(bool isRaw);
+        FileContainer photoType() const;
+        void setPhotoType(FileContainer type);
 
         long long hash() const;
         void setHash(long long code);
@@ -94,6 +103,9 @@ class Photo
 
         void setOwner(PhotoOwner* owner);
 
+        Nullable<long long> developHistoryId() const;
+        void setDevelopHistoryId(Nullable<long long> id);
+
     private:
 
         class PhotoPrivate
@@ -109,23 +121,24 @@ class Photo
 
             private:
 
-                long long         mId;
+                long long           mId;
 
-                int               mRating;
-                Photo::ColorLabel mColorLabel;
-                Photo::Flag       mFlag;
-                QImage            mLibraryPreview;
-                QImage            mLibraryPreviewsRGB;
-                QImage            mDevelopPreviewsRGB;
-                Image             mOriginal;
-                QString           mSrcImagePath;
-                ExifInfo          mExifInfo;
-                PhotoOwner*       mOwner;
-                bool              mIsDownloadingPreview;
-                bool              mIsDownloadingOriginal;
-                QStringList       mKeywords;
-                long long         mHashCode;
-                bool              mIsRaw;
+                int                 mRating;
+                Photo::ColorLabel   mColorLabel;
+                Photo::Flag         mFlag;
+                QImage              mLibraryPreview;
+                QImage              mLibraryPreviewsRGB;
+                QImage              mDevelopPreviewsRGB;
+                Image               mOriginal;
+                QString             mSrcImagePath;
+                ExifInfo            mExifInfo;
+                PhotoOwner*         mOwner;
+                bool                mIsDownloadingPreview;
+                bool                mIsDownloadingOriginal;
+                QStringList         mKeywords;
+                long long           mHashCode;
+                FileContainer       mPhotoType;
+                Nullable<long long> mDevelopHistoryId;
         };
 
         QSharedPointer<PhotoPrivate> d;

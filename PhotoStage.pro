@@ -122,6 +122,8 @@ SOURCES += \
     widgets/translucentwindow.cpp \
     database/developsettingdao.cpp \
     database/developitems.cpp \
+    develop/modules/historymodule.cpp \
+    develop/modules/historymodel.cpp \
     engine/developrawparameters.cpp
 
 #processing/amaze_demosaic_RT.c
@@ -227,7 +229,9 @@ HEADERS  += \
     database/developsettingdao.h \
     database/developitems.h \
     engine/developrawparameters.h \
-    photoowner.h
+    photoowner.h \
+    develop/modules/historymodule.h \
+    develop/modules/historymodel.h
 
 FORMS    += \
     mainwindow.ui \

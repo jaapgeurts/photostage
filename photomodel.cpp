@@ -133,7 +133,7 @@ void PhotoModel::onExifUpdated(Photo photo)
     DatabaseAccess::photoDao()->updateExifInfo(photo);
 }
 
-void PhotoModel::onSaveParams(Photo photo, const DevelopRawParameters& params)
+void PhotoModel::onSaveParams(Photo photo, const QSharedPointer<DevelopRawParameters>& params)
 {
     // save to DB
     DatabaseAccess::developSettingDao()->insertDefaultRawSettings(photo.id(), params);

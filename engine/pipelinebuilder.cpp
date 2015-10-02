@@ -25,14 +25,14 @@ PipelineBuilder::~PipelineBuilder()
 {
 }
 
-void PipelineBuilder::setDevelopParams(const DevelopRawParameters& params)
+void PipelineBuilder::setDevelopParams(const QSharedPointer<DevelopRawParameters>& params)
 {
-    mWBRed.set(params.redMultiplier());
-    mWBGreen.set(params.greenMultiplier());
-    mWBBlue.set(params.blueMultiplier());
+    mWBRed.set(params->redMultiplier);
+    mWBGreen.set(params->greenMultiplier);
+    mWBBlue.set(params->blueMultiplier);
     mRotation = 0;
 
-    switch (params.rotation())
+    switch (params->rotation)
     {
         case DevelopRawParameters::Rotate90CCW:
             mRotation = -1;

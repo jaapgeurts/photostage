@@ -45,6 +45,10 @@ Develop::Develop( QWidget* parent) :
     mBasicModule = new BasicModule(ui->DevelopPanel);
     ui->DevelopPanel->addPanel("Basic", mBasicModule);
     connect(mBasicModule, &BasicModule::parametersAdjusted, this, &Develop::onDevelopSettingsChanged);
+
+    // HistoryModule
+    mHistoryModule = new HistoryModule(ui->HistoryPanel);
+    ui->HistoryPanel->addPanel("History", mHistoryModule);
 }
 
 Develop::~Develop()
@@ -73,11 +77,14 @@ QRect Develop::lightGap()
 
 void Develop::setPhoto(Photo photo)
 {
-    qDebug () <<"DEVELOP: setting photo";
+    qDebug () << "DEVELOP: setting photo";
     mPhoto = photo;
 
+    if (mPhoto.isNull())
+        return;
+
     // load develop history
-    mDevelopHistory = DatabaseAccess::developSettingDao()->getDevelopHistory(photo);
+    //   mDevelopHistory = DatabaseAccess::developSettingDao()->getDevelopHistory(photo);
 
     // if visible, load immediately
     if (isVisible())
@@ -127,6 +134,8 @@ void Develop::doSetPhoto(Photo photo)
         {
             // Raw module
             mRawModule = new RawModule(ui->DevelopPanel);
+            connect(mRawModule, &BasicModule::parametersAdjusted, this, &Develop::onDevelopSettingsChanged);
+
             ui->DevelopPanel->addPanel("RAW", mRawModule);
         }
     }
@@ -144,5 +153,6 @@ void Develop::doSetPhoto(Photo photo)
     if (mRawModule != nullptr)
         mRawModule->setPhoto(photo);
     mBasicModule->setPhoto(photo);
+    mHistoryModule->setPhoto(photo);
 }
 }

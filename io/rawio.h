@@ -15,14 +15,16 @@ class RawIO
     public:
 
         RawIO();
-        RawIO(const QByteArray &memFile, const DevelopRawParameters &params, const QString &cameraModel);
+        RawIO(const QByteArray& memFile, const QSharedPointer<DevelopRawParameters>& params,
+            const QString& cameraModel);
 
         const Image& image() const;
         const QByteArray colorProfile() const;
 
     private:
 
-        Image initFromFile(const QByteArray& memFile, const DevelopRawParameters &params, const QString &cameraModel);
+        Image initFromFile(const QByteArray& memFile,
+            const QSharedPointer<DevelopRawParameters>& params, const QString& cameraModel);
 
         /**
          * @brief ImageFileLoader::compute_inverse computes the inverse of a matrix

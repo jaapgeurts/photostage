@@ -261,7 +261,7 @@ bool MainWindow::selectNext()
         if (index.row()  < mPhotoModelProxy->rowCount(QModelIndex()) - 1)
         {
             newIndex = oldIndex + 1;
-            mPhotoSelection->setCurrentIndex(mPhotoModelProxy->index(newIndex,0),
+            mPhotoSelection->setCurrentIndex(mPhotoModelProxy->index(newIndex, 0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -284,7 +284,7 @@ bool MainWindow::selectPrevious()
         if (oldIndex > 0)
         {
             newIndex = oldIndex - 1;
-            mPhotoSelection->setCurrentIndex(mPhotoModelProxy->index(newIndex,0),
+            mPhotoSelection->setCurrentIndex(mPhotoModelProxy->index(newIndex, 0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -310,7 +310,7 @@ bool MainWindow::selectUp()
         {
             newIndex = oldIndex - tilesPerColRow;
 
-            mPhotoSelection->setCurrentIndex(mPhotoModelProxy->index(newIndex,0),
+            mPhotoSelection->setCurrentIndex(mPhotoModelProxy->index(newIndex, 0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -336,7 +336,7 @@ bool MainWindow::selectDown()
         {
             newIndex = oldIndex + tilesPerColRow;
 
-            mPhotoSelection->setCurrentIndex(mPhotoModelProxy->index(newIndex,0),
+            mPhotoSelection->setCurrentIndex(mPhotoModelProxy->index(newIndex, 0),
                 QItemSelectionModel::ClearAndSelect);
             return true;
         }
@@ -365,6 +365,7 @@ void MainWindow::onCurrentChanged(const QModelIndex& current, const QModelIndex&
 {
     setPhotoActionsAvailability(current.isValid());
 
+    // Remove the Orginal image from the previous current photo to release memory.
     QVariant data = mPhotoModelProxy->data(previous, Photo::DataRole);
 
     if (!data.isNull())
@@ -374,9 +375,9 @@ void MainWindow::onCurrentChanged(const QModelIndex& current, const QModelIndex&
         if (!p.isNull())
         {
             p.setOriginalImage(Image());
+            p.setDevelopPreviewsRGB(QImage());
         }
     }
-
 
     mDevelop->setPhoto(currentPhoto());
 

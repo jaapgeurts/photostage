@@ -21,6 +21,12 @@ class RawModule : public DevelopModule
 
         void setPhoto(Photo& photo);
 
+    private slots:
+
+        void onRedChanged();
+        void onGreenChanged();
+        void onBlueChanged();
+
     private:
 
         Ui::RawModule* ui;

@@ -7,30 +7,33 @@ create table if not exists path (
 );
 
 create table if not exists photo (
-  id                 integer primary key autoincrement,
-  path_id            integer references path (id),
-  filename           text    not null,
-  iso                integer,
-  exposure_time      float,
-  focal_length       float,
-  datetime_original  text,
-  photo_hash         text,
-  rating             integer,
-  color              integer,
-  flag               integer,
-  rotation           integer,
-  longitude          float,
-  latitude           float,
-  datetime_digitized text,
-  copyright          text,
-  artist             text,
-  aperture           float,
-  flash              boolean,
-  lens_name          text,
-  make               text,
-  model              text,
-  width              integer,
-  height             integer
+  id                  integer primary key autoincrement,
+  path_id             integer references path (id),
+  filename            text    not null,
+  iso                 integer,
+  exposure_time       float,
+  focal_length        float,
+  datetime_original   text,
+  photo_hash          text,
+  rating              integer,
+  color               integer,
+  flag                integer,
+  rotation            integer,
+  longitude           float,
+  latitude            float,
+  datetime_digitized  text,
+  copyright           text,
+  artist              text,
+  aperture            float,
+  flash               boolean,
+  lens_name           text,
+  make                text,
+  model               text,
+  width               integer,
+  height              integer,
+  color_profile_name  varchar,
+  photo_type          varchar default(0),
+  develop_history_id  integer references develop_history (id) default (NULL)
 );
 
 create table if not exists keyword (
@@ -81,11 +84,11 @@ create unique index if not exists idx_develop_module on develop_module (
 );
 
 create table if not exists develop_history (
-  id                integer      primary key autoincrement,
-  photo_id          integer      references photo (id),
-  develop_module_id integer      references develop_module (id),
-  friendlytext      varchar      not null,
-  is_mutable        integer      not null default(1)
+  id                integer primary key autoincrement,
+  photo_id          integer references photo (id),
+  develop_module_id integer references develop_module (id),
+  friendlytext      varchar not null,
+  is_mutable        integer not null default (1)
 );
 
 create table if not exists develop_setting_raw (

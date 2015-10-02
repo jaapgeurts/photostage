@@ -28,7 +28,7 @@ void BasicModule::onExposureChanged(int value)
     Image          img = mBasicOperation.execute(mPhoto.originalImage(), value / 9.0);
 
     ColorTransform tr1 = ColorTransform::getTransform("DevToQ", WORKING_COLOR_SPACE, "sRGB",
-            ColorTransform::FORMAT_RGB48_PLANAR, ColorTransform::FORMAT_RGB32);
+            ColorTransform::FORMAT_BGR48_PLANAR, ColorTransform::FORMAT_RGB32);
     QImage         qimg = tr1.transformToQImage(img);
 
     //    QImage qimg = img.toQImage();

@@ -9,7 +9,7 @@ Photo::Photo()
 {
 }
 
-Photo::Photo(PhotoOwner *owner, const QImage& image, const QString& filename, long long id)
+Photo::Photo(PhotoOwner* owner, const QImage& image, const QString& filename, long long id)
 {
     d = QSharedPointer<PhotoPrivate>(new PhotoPrivate(owner, image, filename, id));
 }
@@ -161,12 +161,17 @@ Photo::Flag Photo::flag() const
 
 bool Photo::isRaw() const
 {
-    return d->mIsRaw;
+    return d->mPhotoType == ContainerRAW;
 }
 
-void Photo::setIsRaw(bool isRaw)
+Photo::FileContainer Photo::photoType() const
 {
-    d->mIsRaw = isRaw;
+    return d->mPhotoType;
+}
+
+void Photo::setPhotoType(FileContainer type)
+{
+    d->mPhotoType = type;
 }
 
 long long Photo::hash() const
@@ -218,5 +223,15 @@ QStringList Photo::keywords() const
 void Photo::setOwner(PhotoOwner* owner)
 {
     d->mOwner = owner;
+}
+
+Nullable<long long> Photo::developHistoryId() const
+{
+    return d->mDevelopHistoryId;
+}
+
+void Photo::setDevelopHistoryId(Nullable<long long> id)
+{
+    d->mDevelopHistoryId = id;
 }
 }

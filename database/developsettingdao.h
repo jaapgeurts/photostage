@@ -22,18 +22,20 @@ class DevelopSettingDao : public QObject
 
     public:
 
-        DevelopHistory getDevelopHistory(const Photo& photo) const;
+        QSharedPointer<DevelopHistory> getDevelopHistory(const Photo& photo) const;
 
-        long long insertDefaultRawSettings(long long photoId, const DevelopRawParameters& params);
+        long long insertRawSettings(long long photoId, const QSharedPointer<DevelopRawParameters>& params,
+            const QString& description);
+        long long insertDefaultRawSettings(long long photoId, const QSharedPointer<DevelopRawParameters>& params);
         long long insertHistory(long long moduleId, long long photoId, const QString& text, bool isMutable);
 
-        DevelopRawParameters getRawSettings(long long photoId);
+        QSharedPointer<DevelopRawParameters> getRawSettings(long long photoId);
 
     private:
 
         DevelopSettingDao(QObject* parent = 0);
 
-        QHash<long long, DevelopRawParameters> getRawHistoryForPhoto(long long id) const;
+        QHash<long long, QSharedPointer<DevelopRawParameters> > getRawHistoryForPhoto(long long id) const;
 };
 }
 #endif // PHOTOSTAGE_DEVELOPSETTINGDAO_H

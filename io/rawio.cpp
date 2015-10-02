@@ -56,7 +56,7 @@ RawIO::RawIO()
 {
 }
 
-RawIO::RawIO(const QByteArray& memFile, const DevelopRawParameters& params, const QString& cameraModel)
+RawIO::RawIO(const QByteArray& memFile, const QSharedPointer<DevelopRawParameters>& params, const QString& cameraModel)
 {
     initFromFile(memFile, params, cameraModel);
 }
@@ -203,7 +203,7 @@ bool RawIO::readMatrix(const QString& model, float* mat) const
         {
             QString modelName = modelAliases.at(j).toString();
 
-            if (modelName == model)
+            if (modelName.compare(model, Qt::CaseInsensitive))
             {
                 QJsonArray matrix = camera.value("color_matrix").toArray();
 
@@ -224,7 +224,8 @@ bool RawIO::readMatrix(const QString& model, float* mat) const
     return false;
 }
 
-Image RawIO::initFromFile(const QByteArray& memFile, const DevelopRawParameters& params, const QString& cameraModel)
+Image RawIO::initFromFile(const QByteArray& memFile,
+    const QSharedPointer<DevelopRawParameters>& params, const QString& cameraModel)
 {
     //FileReader reader(strdup(path.toLocal8Bit().data()));
     QSharedPointer<FileMap> map;

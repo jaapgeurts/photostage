@@ -119,5 +119,59 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>sbRed</sender>
+   <signal>editingFinished()</signal>
+   <receiver>RawModule</receiver>
+   <slot>onRedChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>137</x>
+     <y>77</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>300</x>
+     <y>42</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbGreen1</sender>
+   <signal>editingFinished()</signal>
+   <receiver>RawModule</receiver>
+   <slot>onGreenChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>202</x>
+     <y>114</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>297</x>
+     <y>106</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>sbBlue</sender>
+   <signal>editingFinished()</signal>
+   <receiver>RawModule</receiver>
+   <slot>onBlueChanged()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>191</x>
+     <y>181</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>299</x>
+     <y>184</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>onRedChanged()</slot>
+  <slot>onGreenChanged()</slot>
+  <slot>onBlueChanged()</slot>
+ </slots>
 </ui>

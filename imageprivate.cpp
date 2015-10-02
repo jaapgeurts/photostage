@@ -7,7 +7,7 @@
 namespace PhotoStage
 {
 Image::ImagePrivate::ImagePrivate() :
-    mPixels(NULL),
+    mPixels(nullptr),
     mWidth(0),
     mHeight(0)
 {

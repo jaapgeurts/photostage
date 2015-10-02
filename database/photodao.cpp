@@ -250,7 +250,7 @@ QList<Photo> PhotoDAO::getPhotosById(const QList<long long> idList) const
                 p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
                 p.datetime_digitized, p.rotation, p.latitude,p.longitude, \
                 p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
-                p.width, p.height  \
+                p.width, p.height, p.photo_type, p.color_profile_name, p.develop_history_id \
               from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
               child.* from path child join path ancestor \
               on child.lft >= ancestor.lft \
@@ -401,7 +401,7 @@ QList<Photo> PhotoDAO::getPhotosByPath(long long path_id, bool includeSubDirs) c
               p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
               p.datetime_digitized, p.rotation, p.latitude,p.longitude, \
               p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
-                p.width, p.height  \
+                p.width, p.height, p.photo_type, p.color_profile_name, p.develop_history_id  \
             from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
             child.* from path child join path ancestor \
             on child.lft >= ancestor.lft \
@@ -419,7 +419,7 @@ QList<Photo> PhotoDAO::getPhotosByPath(long long path_id, bool includeSubDirs) c
               p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
               p.datetime_digitized, p.rotation, p.latitude,p.longitude, \
               p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
-                p.width, p.height  \
+                p.width, p.height, p.photo_type, p.color_profile_name, p.develop_history_id \
             from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
             child.* from path child join path ancestor \
             on child.lft >= ancestor.lft \
@@ -465,7 +465,7 @@ QList<Photo> PhotoDAO::getPhotosByCollectionId(long long collection_id, bool inc
               p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
               p.datetime_digitized, p.rotation, p.latitude,p.longitude, \
               p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
-                p.width, p.height  \
+                p.width, p.height, p.photo_type, p.color_profile_name, p.develop_history_id  \
             from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
             child.* from path child join path ancestor \
             on child.lft >= ancestor.lft \
@@ -485,7 +485,7 @@ QList<Photo> PhotoDAO::getPhotosByCollectionId(long long collection_id, bool inc
               p.iso, p.aperture,p.exposure_time, p.focal_length, p.datetime_original, \
               p.datetime_digitized, p.rotation, p.latitude,p.longitude, \
               p.copyright, p.artist, p.flash, p.lens_name, p.make,  p.model, \
-                p.width, p.height  \
+                p.width, p.height, p.photo_type, p.color_profile_name, p.develop_history_id  \
             from photo p join (select group_concat(ancestor.directory ,:separator) as path, \
             child.* from path child join path ancestor \
             on child.lft >= ancestor.lft \
@@ -520,10 +520,12 @@ void PhotoDAO::updateExifInfo(Photo& photo)
 
     const ExifInfo& ei = photo.exifInfo();
 
-    q.prepare(
-        "update photo set width=:width, height=:height where id = :photoid");
+    q.prepare("update photo set width=:width, height=:height, photo_type=:photo_type,"
+        " color_profile_name=:profile_name where id = :photoid");
     q.bindValue(":width", ei.width);
     q.bindValue(":height", ei.height);
+    q.bindValue(":photo_type", (int)photo.photoType());
+    q.bindValue(":profile_name", ei.profileName);
     q.bindValue(":photoid", photo.id());
 
     if (!q.exec())

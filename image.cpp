@@ -95,6 +95,6 @@ uint16_t* Image::scanLine(int l) const
 
 bool Image::isNull() const
 {
-    return d->mPixels == NULL;
+    return d->mPixels == nullptr;
 }
 }

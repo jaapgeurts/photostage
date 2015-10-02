@@ -21,26 +21,30 @@ DevelopHistory::DevelopHistory()
 {
 }
 
-DevelopHistory::DevelopHistory(const QList<DevelopHistoryItem>& list)
-    : mList(list)
+DevelopHistory::DevelopHistory(const QList<QSharedPointer<DevelopHistoryItem> >& list)
+    : list(list)
 {
 }
 
-DevelopParameterItem DevelopHistory::rawSettings() const
+QSharedPointer<DevelopParameterItem> DevelopHistory::rawSettings() const
 {
-    for (int i = 0; i < mList.size(); i++)
+    for (int i = 0; i < list.size(); i++)
     {
-        const DevelopHistoryItem& item = mList.at(i);
+        const QSharedPointer<DevelopHistoryItem> item = list.at(i);
 
-        if (item.moduleType == DEVELOP_SETTINGS_RAW)
-            return item.developItem;
+        if (item->moduleType == DEVELOP_SETTINGS_RAW)
+            return item->developItem;
     }
 
-    return DevelopParameterItem();
+    return QSharedPointer<DevelopParameterItem>();
 }
 
 bool DevelopParameterItem::isNull() const
 {
     return true;
+}
+
+DevelopParameterItem::~DevelopParameterItem()
+{
 }
 }

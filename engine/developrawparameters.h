@@ -35,43 +35,17 @@ class DevelopRawParameters : public DevelopParameterItem
         };
 
         DevelopRawParameters();
-        DevelopRawParameters(const ExifInfo& ex_info);
-        DevelopRawParameters(long long id, float red, float green, float blue );
+        DevelopRawParameters(const ExifInfo& ex_info,long long id = -1);
+        DevelopRawParameters(long long id, float red, float green, float blue);
 
-        long long id() const;
+        long long              id;
+        float                  redMultiplier;
+        float                  greenMultiplier;
+        float                  blueMultiplier;
 
-        float redMultiplier() const;
-        float greenMultiplier() const;
-        float blueMultiplier() const;
+        Rotation               rotation;
 
-        void setRotation(Rotation rotation);
-        Rotation rotation() const;
-
-        void setInterpolationAlgorithm(InterpolationAlgorithm algorithm);
-        InterpolationAlgorithm interpolationAlgorithm() const;
-
-        bool isNull() const override;
-
-    private:
-
-        class DevelopRawParametersPrivate
-        {
-            friend class DevelopRawParameters;
-
-            DevelopRawParametersPrivate(long long id, float red, float green, float blue);
-            DevelopRawParametersPrivate(long long id, const ExifInfo& ex_info);
-
-            long long              mId;
-            float                  mRedMultiplier;
-            float                  mGreenMultiplier;
-            float                  mBlueMultiplier;
-
-            Rotation               mRotation;
-
-            InterpolationAlgorithm mAlgorithm;
-        };
-
-        QSharedPointer<DevelopRawParametersPrivate> d;
+        InterpolationAlgorithm algorithm;
 };
 }
 #endif // PHOTOSTAGE_DEVELOPRAWPARAMETERS

@@ -8,10 +8,11 @@
 
 namespace PhotoStage
 {
-DevelopHistory DevelopSettingDao::getDevelopHistory(const Photo& photo) const
+QSharedPointer<DevelopHistory> DevelopSettingDao::getDevelopHistory(const Photo& photo) const
 {
     QSqlQuery q;
-    QString   query = "select id,develop_module_id, friendlytext, is_mutable from develop_history where photo_id = :photoid;";
+    QString   query =
+        "select id,develop_module_id, friendlytext, is_mutable from develop_history where photo_id = :photoid;";
 
     q.prepare(query);
     q.bindValue(":photoid", photo.id());
@@ -21,31 +22,33 @@ DevelopHistory DevelopSettingDao::getDevelopHistory(const Photo& photo) const
         qDebug() << q.lastError();
     }
 
-    QList<DevelopHistoryItem> list;
+    QList<QSharedPointer<DevelopHistoryItem> > list;
 
     // get all RawHistory for this photo
-    QHash<long long, DevelopRawParameters> rawsettings = getRawHistoryForPhoto(photo.id());
+    QHash<long long, QSharedPointer<DevelopRawParameters> > rawsettings = getRawHistoryForPhoto(photo.id());
 
     while (q.next())
     {
-        DevelopHistoryItem item(q.value(0).toLongLong(), q.value(1).toLongLong(), q.value(2).toString(), q.value(3).toBool());
+        QSharedPointer<DevelopHistoryItem> item = QSharedPointer<DevelopHistoryItem>(
+            new DevelopHistoryItem(q.value(0).toLongLong(), q.value(1).toLongLong(),
+            q.value(2).toString(), q.value(3).toBool()));
 
-        switch (item.moduleType)
+        switch (item->moduleType)
         {
             case DEVELOP_SETTINGS_RAW:
 
-                if (rawsettings.contains(item.id))
-                    item.developItem = rawsettings.value(item.id);
+                if (rawsettings.contains(item->id))
+                    item->developItem = rawsettings.value(item->id);
                 break;
         }
 
         list.append(item);
     }
 
-    return DevelopHistory(list);
+    return QSharedPointer<DevelopHistory>( new DevelopHistory(list));
 }
 
-DevelopRawParameters DevelopSettingDao::getRawSettings(long long photoId)
+QSharedPointer<DevelopRawParameters> DevelopSettingDao::getRawSettings(long long photoId)
 {
     QSqlQuery q;
     QString   query = "select dh.id, develop_history_id, red_multiplier, green_multiplier, blue_multiplier, "
@@ -55,23 +58,24 @@ DevelopRawParameters DevelopSettingDao::getRawSettings(long long photoId)
 
     q.prepare(query);
     q.bindValue(":photoid", photoId);
-    q.bindValue(":moduleid",DEVELOP_SETTINGS_RAW);
+    q.bindValue(":moduleid", DEVELOP_SETTINGS_RAW);
 
     if (!q.exec())
     {
         qDebug() << q.lastError();
-        return DevelopRawParameters();
+        return QSharedPointer<DevelopRawParameters>();
     }
 
     if (q.next())
     {
-        DevelopRawParameters param(q.value(0).toLongLong(), q.value(2).toFloat(),
-            q.value(3).toFloat(), q.value(4).toFloat());
-        param.setRotation((DevelopRawParameters::Rotation)q.value(5).toInt());
-        param.setInterpolationAlgorithm((DevelopRawParameters::InterpolationAlgorithm)q.value(5).toInt());
+        QSharedPointer<DevelopRawParameters> param = QSharedPointer<DevelopRawParameters>(
+            new DevelopRawParameters(q.value(0).toLongLong(), q.value(2).toFloat(),
+            q.value(3).toFloat(), q.value(4).toFloat()));
+        param->rotation  = (DevelopRawParameters::Rotation)q.value(5).toInt();
+        param->algorithm = (DevelopRawParameters::InterpolationAlgorithm)q.value(5).toInt();
         return param;
     }
-    return DevelopRawParameters();
+    return QSharedPointer<DevelopRawParameters>();
 }
 
 long long DevelopSettingDao::insertHistory(long long moduleId, long long photoId, const QString& text, bool isMutable)
@@ -96,7 +100,8 @@ long long DevelopSettingDao::insertHistory(long long moduleId, long long photoId
     return q.lastInsertId().toLongLong();
 }
 
-long long DevelopSettingDao::insertDefaultRawSettings(long long photoId, const DevelopRawParameters& params)
+long long DevelopSettingDao::insertDefaultRawSettings(long long photoId,
+    const QSharedPointer<DevelopRawParameters>& params)
 {
     long long id = insertHistory(DEVELOP_SETTINGS_RAW, photoId, "Basic RAW Settings", false);
 
@@ -107,11 +112,11 @@ long long DevelopSettingDao::insertDefaultRawSettings(long long photoId, const D
 
     q.prepare(query);
     q.bindValue(":historyid", id);
-    q.bindValue(":red", params.redMultiplier());
-    q.bindValue(":green", params.greenMultiplier());
-    q.bindValue(":blue", params.blueMultiplier());
-    q.bindValue(":rotation", (int)params.rotation());
-    q.bindValue(":algorithm", (int)params.interpolationAlgorithm());
+    q.bindValue(":red", params->redMultiplier);
+    q.bindValue(":green", params->greenMultiplier);
+    q.bindValue(":blue", params->blueMultiplier);
+    q.bindValue(":rotation", (int)params->rotation);
+    q.bindValue(":algorithm", (int)params->algorithm);
 
     if (!q.exec())
     {
@@ -122,9 +127,37 @@ long long DevelopSettingDao::insertDefaultRawSettings(long long photoId, const D
     return q.lastInsertId().toLongLong();
 }
 
-QHash<long long, DevelopRawParameters> DevelopSettingDao::getRawHistoryForPhoto(long long id) const
+long long DevelopSettingDao::insertRawSettings(long long photoId,
+    const QSharedPointer<DevelopRawParameters>& params,
+    const QString& description)
 {
-    QHash<long long, DevelopRawParameters> hash;
+    long long id = insertHistory(DEVELOP_SETTINGS_RAW, photoId, description, true);
+
+    QSqlQuery q;
+    QString   query =
+        "insert into  develop_setting_raw ( develop_history_id, red_multiplier, green_multiplier, blue_multiplier, "
+        " rotation, demosaic_algorithm ) values ( :historyid, :red, :green, :blue, :rotation, :algorithm)";
+
+    q.prepare(query);
+    q.bindValue(":historyid", id);
+    q.bindValue(":red", params->redMultiplier);
+    q.bindValue(":green", params->greenMultiplier);
+    q.bindValue(":blue", params->blueMultiplier);
+    q.bindValue(":rotation", (int)params->rotation);
+    q.bindValue(":algorithm", (int)params->algorithm);
+
+    if (!q.exec())
+    {
+        qDebug() << q.lastError();
+        return -1;
+    }
+
+    return q.lastInsertId().toLongLong();
+}
+
+QHash<long long, QSharedPointer<DevelopRawParameters> > DevelopSettingDao::getRawHistoryForPhoto(long long id) const
+{
+    QHash<long long, QSharedPointer<DevelopRawParameters> > hash;
 
     // other
     QSqlQuery q;
@@ -144,11 +177,11 @@ QHash<long long, DevelopRawParameters> DevelopSettingDao::getRawHistoryForPhoto(
 
     while (q.next())
     {
-        DevelopRawParameters param(q.value(0).toLongLong(), q.value(2).toFloat(),
-            q.value(3).toFloat(),
-            q.value(4).toFloat());
-        param.setRotation((DevelopRawParameters::Rotation)q.value(5).toInt());
-        param.setInterpolationAlgorithm((DevelopRawParameters::InterpolationAlgorithm)q.value(5).toInt());
+        QSharedPointer<DevelopRawParameters> param = QSharedPointer<DevelopRawParameters>(
+            new DevelopRawParameters(q.value(0).toLongLong(), q.value(2).toFloat(),
+            q.value(3).toFloat(), q.value(4).toFloat()));
+        param->rotation  = (DevelopRawParameters::Rotation)q.value(5).toInt();
+        param->algorithm = (DevelopRawParameters::InterpolationAlgorithm)q.value(5).toInt();
         hash.insert(q.value(1).toLongLong(), param);
     }
 

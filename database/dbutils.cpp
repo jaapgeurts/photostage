@@ -44,29 +44,34 @@ QVariant setDbValue(const Nullable<bool>& n)
     return QVariant(*n);
 }
 
-void getDbValue(QSqlQuery& q, int col, Nullable<uint8_t>& out )
+void getNullableValue(QSqlQuery& q, int col, Nullable<uint8_t>& out )
 {
     out = q.value(col).isNull() ? nullptr : Nullable<uint8_t>(q.value(col).toInt());
 }
 
-void getDbValue(QSqlQuery& q, int col, Nullable<float>& out)
+void getNullableValue(QSqlQuery& q, int col, Nullable<float>& out)
 {
     out = q.value(col).isNull() ? nullptr : Nullable<float>(q.value(col).toFloat());
 }
 
-void getDbValue(QSqlQuery& q, int col, Nullable<QDateTime>& out)
+void getNullableValue(QSqlQuery& q, int col, Nullable<QDateTime>& out)
 {
     out = q.value(col).isNull() ? nullptr : Nullable<QDateTime>(q.value(col).toDateTime());
 }
 
-void getDbValue(QSqlQuery& q, int col, Nullable<QString>& out)
+void getNullableValue(QSqlQuery& q, int col, Nullable<QString>& out)
 {
     out = q.value(col).isNull() ? nullptr : Nullable<QString>(q.value(col).toString());
 }
 
-void getDbValue(QSqlQuery& q, int col, Nullable<bool>& out)
+void getNullableValue(QSqlQuery& q, int col, Nullable<bool>& out)
 {
     out = q.value(col).isNull() ? nullptr : Nullable<bool>(q.value(col).toBool());
+}
+
+void getNullableValue(QSqlQuery& q, int col, Nullable<long long>& out)
+{
+    out = q.value(col).isNull() ? nullptr : Nullable<long long>(q.value(col).toLongLong());
 }
 
 QString joinIds(const QList<long long>& idList)

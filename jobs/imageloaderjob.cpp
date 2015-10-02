@@ -131,16 +131,18 @@ Image ImageLoaderJob::loadImage(const QString& path)
     {
         qDebug() << "Load raw" << path;
 
+        // TODO: This field should be loaded from DB.
+        mPhoto.setPhotoType(Photo::ContainerRAW);
         // passs the develop settings here to the rawIO
         // TODO: move db access back to the main thread.
         mRawParams = DatabaseAccess::developSettingDao()->getRawSettings(mPhoto.id());
 
         if (mRawParams.isNull())
         {
-            mRawParams =  DevelopRawParameters(ex_info);
+            mRawParams =  QSharedPointer<DevelopRawParameters>(new DevelopRawParameters(ex_info));
             // TODO: get this value from settings
-            mRawParams.setInterpolationAlgorithm(DevelopRawParameters::Bilinear);
-            mMustSaveParams = true;
+            mRawParams->algorithm = DevelopRawParameters::Bilinear;
+            mMustSaveParams       = true;
         }
 
         RawIO rawIO(memFile, mRawParams, *ex_info.model);
@@ -150,12 +152,13 @@ Image ImageLoaderJob::loadImage(const QString& path)
         QString srcProfile = "D65_XYZ";
         toWorking = ColorTransform::getTransform(srcProfile + dstColorSpace, srcProfile, dstColorSpace,
                 ColorTransform::FORMAT_RGB48_PLANAR, ColorTransform::FORMAT_BGR48_PLANAR);
-        mPhoto.setIsRaw(true);
+        mPhoto.exifInfo().profileName = "Camera Default";
     }
     else
     {
         // Read using JPEG library
         //qDebug() << "Load jpg" << path;
+        mPhoto.setPhotoType(Photo::ContainerJPG);
 
         JpegIO     jpegIO(memFile, ex_info);
         image = jpegIO.image();
@@ -169,7 +172,7 @@ Image ImageLoaderJob::loadImage(const QString& path)
 
             toWorking = ColorTransform::getTransform(iccProfile, dstColorSpace,
                     ColorTransform::FORMAT_BGR48_PLANAR, ColorTransform::FORMAT_BGR48_PLANAR);
-            //  mPhoto.exifInfo().profileName = toWorking.profileName();
+            mPhoto.exifInfo().profileName = toWorking.profileName();
         }
         else
         {
@@ -177,9 +180,8 @@ Image ImageLoaderJob::loadImage(const QString& path)
             // Assume default JPEG images are in sRGB format.
             toWorking = ColorTransform::getTransform(srcProfile + dstColorSpace, srcProfile, dstColorSpace,
                     ColorTransform::FORMAT_BGR48_PLANAR, ColorTransform::FORMAT_BGR48_PLANAR);
-            //  mPhoto.exifInfo().profileName = "sRGB (Assumed)";
+            mPhoto.exifInfo().profileName = "sRGB (Assumed)";
         }
-        mPhoto.setIsRaw(false);
     }
 
     return toWorking.transformImage(image);

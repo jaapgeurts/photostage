@@ -87,7 +87,7 @@ class PhotoModel : public QAbstractListModel, public PhotoOwner
         void onOriginalLoaded(Photo photo, const Image& image);
 
         void onExifUpdated(Photo photo);
-        void onSaveParams(Photo photo, const DevelopRawParameters& params);
+        void onSaveParams(Photo photo, const QSharedPointer<DevelopRawParameters> &params);
 
     private:
 
