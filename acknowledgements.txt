@@ -1,0 +1,12 @@
+dcraw code: https://www.cybercom.net/~dcoffin/dcraw/
+http://lclevy.free.fr/cr2/
+http://www.odelama.com/photo/Developing-a-RAW-Photo-by-hand/#index3h2
+https://users.soe.ucsc.edu/~rcsumner/rawguide/RAWguide.pdf
+http://sylvana.net/jpegcrop/exif_orientation.html
+Phil Harvey - exiftool
+http://www.magiclantern.fm/forum/index.php?topic=10265.40;wap2
+Adobe DNG 1.4 spec: http://www.adobe.com/content/dam/Adobe/en/products/photoshop/pdfs/dng_spec_1.4.0.0.pdf#page19
+Halide: http://halide-lang.org
+libjpeg
+iccjpeg
+ 

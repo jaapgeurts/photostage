@@ -1,0 +1,14 @@
+* Mapview should be using a matrix(square array) instead of list for the tiles. easier to handle
+* sort + filtering
+* regen all previews
+* parallize reading jpg
+* cleanup reading of matrix data (the camera specific XYZ translation matrices)
+* move files related to DB to DataAccess dir instead of Workunits
+* add logging to regen hash/regen previews so that we can tell which images are missing
+* improve speed by loading image in memory once and then passing ByteArray instead of files (Import Previews, Generating Thumbs)
+* clicking on empty space in tileview should deselect all selections.
+* clicking inside a selection should not clear the selection but just change the current index within the selection
+* decouple LoupeView from PhotoStage (= remove dependency on Photo)
+* fixedlistview fixedtreeview, recalculate after remove+add rows
+* redo reading Color Profile name and assigning it to the ExifInfo + store in DB
+* Any place where QImages are used. bits() or scanline(). avoid unnecessary buffer duplication
