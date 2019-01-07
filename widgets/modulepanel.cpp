@@ -23,7 +23,7 @@ ModulePanel::~ModulePanel()
 {
 }
 
-void ModulePanel::addPanel(const QString& title, QWidget* panel, QMenu* menu)
+void ModulePanel::addPanel(const QString& title, QWidget* panel, const QString& before, QMenu* menu)
 {
     if (mPanels.contains(title))
     {
@@ -49,10 +49,7 @@ void ModulePanel::addPanel(const QString& title, QWidget* panel, QMenu* menu)
         QHBoxLayout* hbLayout = new QHBoxLayout(frame);
         QPushButton* pbExpose = new QPushButton("≡", this);
         pbExpose->setProperty("title", info.title);
-        connect(pbExpose,
-            &QPushButton::clicked,
-            this,
-            &ModulePanel::onMenuClicked);
+        connect(pbExpose, &QPushButton::clicked, this, &ModulePanel::onMenuClicked);
         //pbExpose->setCheckable(true);
         hbLayout->addWidget(pbHeader, 1);
         hbLayout->addWidget(pbExpose, 0);
@@ -69,8 +66,21 @@ void ModulePanel::addPanel(const QString& title, QWidget* panel, QMenu* menu)
     info.panel = panel;
     mPanels.insert(title, info);
 
-    layout()->addWidget(info.header);
-    layout()->addWidget(info.panel);
+    QVBoxLayout* hbLayout = dynamic_cast<QVBoxLayout*>(layout());
+    // find the index to insert.
+
+    if (!before.isNull() && mPanels.contains(before))
+    {
+        int index;
+        index = hbLayout->indexOf(mPanels.value(before).header);
+        hbLayout->insertWidget(index, info.header);
+        hbLayout->insertWidget(index + 1, info.panel);
+    }
+    else
+    {
+        hbLayout->addWidget(info.header);
+        hbLayout->addWidget(info.panel);
+    }
 }
 
 bool ModulePanel::containsPanel(const QString& title) const
@@ -121,7 +131,6 @@ void ModulePanel::onMenuClicked(bool /*checked*/)
     QString   title = sender()->property("title").toString();
     PanelInfo info  = mPanels.value(title);
 
-    info.menu->popup(info.header->mapToGlobal(info.btnMenu->frameGeometry().
-        bottomLeft()));
+    info.menu->popup(info.header->mapToGlobal(info.btnMenu->frameGeometry().bottomLeft()));
 }
 }

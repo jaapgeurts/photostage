@@ -524,7 +524,26 @@ void PhotoDAO::updateExifInfo(Photo& photo)
         " color_profile_name=:profile_name where id = :photoid");
     q.bindValue(":width", ei.width);
     q.bindValue(":height", ei.height);
-    q.bindValue(":photo_type", (int)photo.photoType());
+
+    switch (photo.photoType())
+    {
+        case Photo::ContainerRAW:
+            q.bindValue(":photo_type", "RAW");
+            break;
+
+        case Photo::ContainerJPG:
+            q.bindValue(":photo_type", "JPG");
+            break;
+
+        case Photo::ContainerPNG:
+            q.bindValue(":photo_type", "PNG");
+            break;
+
+        default:
+            q.bindValue(":photo_type", QVariant(QVariant::String));
+            break;
+    }
+
     q.bindValue(":profile_name", ei.profileName);
     q.bindValue(":photoid", photo.id());
 

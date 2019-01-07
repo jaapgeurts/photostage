@@ -11,6 +11,13 @@
     </qresource>
     <qresource prefix="/icons">
         <file alias="map-pin.png">resources/icons/map-pin.png</file>
+        <file alias="crop.png">resources/icons/crop.png</file>
+        <file alias="rotate-bottomleft.png">resources/icons/rotate-bottomleft.png</file>
+        <file alias="rotate-bottomright.png">resources/icons/rotate-bottomright.png</file>
+        <file alias="rotate-topleft.png">resources/icons/rotate-topleft.png</file>
+        <file alias="rotate-topright.png">resources/icons/rotate-topright.png</file>
+        <file alias="lock-closed.png">resources/icons/lock-closed.png</file>
+        <file alias="lock-open.png">resources/icons/lock-open.png</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="worldmap.jpg">resources/worldmap.jpg</file>

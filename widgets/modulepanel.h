@@ -26,7 +26,14 @@ class ModulePanel : public QWidget
         explicit ModulePanel(QWidget* parent = 0);
         ~ModulePanel();
 
-        void addPanel(const QString& title, QWidget* panel, QMenu* menu = 0);
+        /**
+         * @brief addPanel Adds a panel to this module list.
+         * @param title The title to use for the header
+         * @param panel The panel to add (must derive from QWidget)
+         * @param before Insert before the panel with this title
+         * @param menu An optional Menu to show to the right side of the menu
+         */
+        void addPanel(const QString& title, QWidget* panel, const QString& before =  QString(), QMenu* menu = 0);
         bool containsPanel(const QString& title) const;
         void removePanel(const QString& title);
 

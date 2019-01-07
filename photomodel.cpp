@@ -95,7 +95,7 @@ void PhotoModel::loadOriginal(Photo& photo)
     if (photo.isDownloadingOriginal())
         return;
 
-    qDebug() << "PHOTOMODEL: load original";
+//    qDebug() << "PHOTOMODEL: load original";
 
     // cancel existing jobs and only load the last request.
     mOriginalThreadQueue->cancel();
@@ -115,7 +115,7 @@ void PhotoModel::loadPreview(Photo& photo)
     if (photo.isDownloadingPreview())
         return;
 
-    qDebug() << "PHOTOMODEL: load preview";
+//    qDebug() << "PHOTOMODEL: load preview";
 
     photo.setIsDownloadingPreview(true);
 
@@ -193,7 +193,7 @@ void PhotoModel::convertOriginal(Photo& photo)
     if (photo.isDownloadingOriginal())
         return;
 
-    qDebug() << "PHOTOMODEL: converting original";
+//    qDebug() << "PHOTOMODEL: converting original";
 
     photo.setIsDownloadingOriginal(true);
     ColorTransformJob* cfj = new ColorTransformJob(photo, ColorTransformJob::Develop);

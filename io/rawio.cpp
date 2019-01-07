@@ -7,7 +7,7 @@
 #include "rawio.h"
 
 #include "import/exivfacade.h"
-#include "engine/pipelinebuilder.h"
+#include "engine/stage0raw.h"
 
 template<typename T>
 static inline long max(T x, T y)
@@ -280,10 +280,10 @@ Image RawIO::initFromFile(const QByteArray& memFile,
         return mImage;
     }
 
-    RawImage     raw = decoder->mRaw;
-    //raw->scaleBlackWhite();
-    int          bl = raw->blackLevel;
-    int          wp = raw->whitePoint;
+    RawImage raw = decoder->mRaw;
+   // raw->scaleBlackWhite();
+    int      bl = raw->blackLevel;
+    int      wp = raw->whitePoint;
 
     int          components_per_pixel = raw->getCpp();
     int          bytes_per_pixel      = raw->getBpp();
@@ -333,7 +333,7 @@ Image RawIO::initFromFile(const QByteArray& memFile,
 
         // qDebug () << "Using WB factors" << wbr << "," << wbg << "," << wbb;
 
-        PipelineBuilder pb;
+        Stage0Raw pb;
         // pass the develop settings here.
 
         pb.setDevelopParams(params);

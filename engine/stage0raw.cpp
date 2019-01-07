@@ -2,13 +2,13 @@
 
 #include <math.h>
 
-#include "pipelinebuilder.h"
+#include "stage0raw.h"
 
 using namespace Halide;
 
 namespace PhotoStage
 {
-PipelineBuilder::PipelineBuilder() :
+Stage0Raw::Stage0Raw() :
     mWidth(0),
     mHeight(0),
     x("x"),
@@ -21,11 +21,11 @@ PipelineBuilder::PipelineBuilder() :
     prepare();
 }
 
-PipelineBuilder::~PipelineBuilder()
+Stage0Raw::~Stage0Raw()
 {
 }
 
-void PipelineBuilder::setDevelopParams(const QSharedPointer<DevelopRawParameters>& params)
+void Stage0Raw::setDevelopParams(const QSharedPointer<DevelopRawParameters>& params)
 {
     mWBRed.set(params->redMultiplier);
     mWBGreen.set(params->greenMultiplier);
@@ -47,13 +47,13 @@ void PipelineBuilder::setDevelopParams(const QSharedPointer<DevelopRawParameters
     }
 }
 
-void PipelineBuilder::setDomain(int bl, int wp)
+void Stage0Raw::setDomain(int bl, int wp)
 {
     mBlacklevel.set(bl);
     mWhitePoint.set(wp);
 }
 
-void PipelineBuilder::setColorConversion(float* colorMatrix)
+void Stage0Raw::setColorConversion(float* colorMatrix)
 {
     // convert the colorMatrix array to Halide
 
@@ -67,7 +67,7 @@ void PipelineBuilder::setColorConversion(float* colorMatrix)
     mColorMatrix.set(im);
 }
 
-void PipelineBuilder::setInput(uint16_t* data, int width, int height)
+void Stage0Raw::setInput(uint16_t* data, int width, int height)
 {
     Buffer                  buf(UInt(16), width, height, 1, 0, (uint8_t*)data, "Input Image");
     Halide::Image<uint16_t> input(buf);
@@ -79,7 +79,7 @@ void PipelineBuilder::setInput(uint16_t* data, int width, int height)
     mInput.set(input);
 }
 
-void PipelineBuilder::setCFAStart(uint32_t dcraw_filter_id)
+void Stage0Raw::setCFAStart(uint32_t dcraw_filter_id)
 {
     // enter the start position or R
     if (dcraw_filter_id == 0x16161616)
@@ -144,7 +144,7 @@ Expr bicubic(Func f, Expr x, Expr y)
     return getValue(a1, a2, a3, a4, two);
 }
 
-Func PipelineBuilder::bilinear(Func input)
+Func Stage0Raw::bilinear(Func input)
 {
     Func green("green");
 
@@ -180,7 +180,7 @@ Func PipelineBuilder::bilinear(Func input)
     return bilinear;
 }
 
-Func PipelineBuilder::normalizeToFloat(Func input)
+Func Stage0Raw::normalizeToFloat(Func input)
 {
     Func asFloat("asFloat");
 
@@ -190,7 +190,7 @@ Func PipelineBuilder::normalizeToFloat(Func input)
     return asFloat;
 }
 
-Func PipelineBuilder::channelMultipliers(Func input)
+Func Stage0Raw::channelMultipliers(Func input)
 {
     Func multipliers("ChannelMultipliers");
 
@@ -202,13 +202,13 @@ Func PipelineBuilder::channelMultipliers(Func input)
     return multipliers;
 }
 
-Func PipelineBuilder::transformToXYZ(Func input)
+Func Stage0Raw::transformToXYZ(Func input)
 {
     Func toXYZmatrix("toXYZmatrix");
 
     RDom k(0, 3);
 
-    // matrix multiply
+    // matrix multiply. multiply each color vector with the XYZ matrix
     toXYZmatrix(x, y, c) = sum(input(x, y, 2 - k) * mColorMatrix(k, c));
 
     return toXYZmatrix;
@@ -224,7 +224,7 @@ Expr lowerHalf(Expr x, Expr E)
     return 0.5f * pow(2.0f * x, E);
 }
 
-Func PipelineBuilder::applyContrast(Func input)
+Func Stage0Raw::applyContrast(Func input)
 {
     Expr v("v");
 
@@ -249,7 +249,7 @@ Func PipelineBuilder::applyContrast(Func input)
  * @param centerY
  * @return
  */
-Func PipelineBuilder::rotate(Func input, Expr angle, Expr centerX, Expr centerY)
+Func Stage0Raw::rotate(Func input, Expr angle, Expr centerX, Expr centerY)
 {
     Func out;
 
@@ -257,7 +257,7 @@ Func PipelineBuilder::rotate(Func input, Expr angle, Expr centerX, Expr centerY)
     return out;
 }
 
-void PipelineBuilder::prepare()
+void Stage0Raw::prepare()
 {
     // shift the input by 1 so we don't have to do any border checking
     Func shifted("shifted");
@@ -303,7 +303,7 @@ void PipelineBuilder::prepare()
     .parallel(y);
 }
 
-PhotoStage::Image PipelineBuilder::execute()
+PhotoStage::Image Stage0Raw::execute()
 {
     uint16_t* outdata = new uint16_t[mWidth * mHeight * 3];
 

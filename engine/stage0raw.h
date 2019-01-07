@@ -1,5 +1,5 @@
-#ifndef PHOTOSTAGE_PIPELINEBUILDER_H
-#define PHOTOSTAGE_PIPELINEBUILDER_H
+#ifndef PHOTOSTAGE_STAGE0RAW_H
+#define PHOTOSTAGE_STAGE0RAW_H
 
 #include <Halide.h>
 
@@ -9,12 +9,12 @@
 
 namespace PhotoStage
 {
-class PipelineBuilder
+class Stage0Raw
 {
     public:
 
-        PipelineBuilder();
-        ~PipelineBuilder();
+        Stage0Raw();
+        ~Stage0Raw();
 
         void setDevelopParams(const QSharedPointer<DevelopRawParameters>& params);
 

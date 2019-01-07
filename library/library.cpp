@@ -80,7 +80,7 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
     menu->addAction("New Collection", this, SLOT(onNewCollection()));
     menu->addAction("New Work Collection", this, SLOT(onNewWorkCollection()));
     mShortcutModule = new ShortcutModule(ui->ModulePanel_1);
-    ui->ModulePanel_1->addPanel(tr("Ad-hoc Collections"), mShortcutModule, menu);
+    ui->ModulePanel_1->addPanel(tr("Ad-hoc Collections"), mShortcutModule, QString(), menu);
     connect(mShortcutModule, &ShortcutModule::workCollectionSelected, this, &Library::onWorkCollectionSelected);
     connect(mShortcutModule, &ShortcutModule::importCollectionSelected, this, &Library::onImportCollectionSelected);
 
@@ -94,7 +94,7 @@ Library::Library(PhotoSortFilterProxyModel* const model, QWidget* parent) :
 
     menu = new QMenu(this);
     menu->addAction(tr("New Collection"), this, SLOT(onNewCollection()));
-    ui->ModulePanel_1->addPanel(tr("Collections"), mCollectionModule, menu);
+    ui->ModulePanel_1->addPanel(tr("Collections"), mCollectionModule, QString(), menu);
     connect(mCollectionModule, &CollectionModule::collectionSelected, this, &Library::onCollectionSelected);
 
     // **** MODULES RIGHT
@@ -123,6 +123,7 @@ Library::~Library()
 {
     QSettings settings;
 
+
     settings.beginGroup(SETTINGS_GROUP_LIBRARY);
     QVariantList list;
 
@@ -140,6 +141,7 @@ QRect Library::lightGap()
 {
     QPoint pos = ui->mPhotoGrid->mapToGlobal(QPoint(0, 0));
     QRect  gap = QRect(pos, ui->mPhotoGrid->size());
+
 
     return gap;
 }
@@ -181,6 +183,7 @@ void Library::onZoomLevelChanged(int zoomLevel)
         Widgets::LoupeView::Zoom300, Widgets::LoupeView::Zoom400, Widgets::LoupeView::Zomm800
     };
 
+
     ui->mLoupeView->setZoomMode(zoom[zoomLevel]);
 }
 
@@ -217,6 +220,7 @@ void Library::onImportCollectionSelected(long long id)
 void Library::onThumbSizeChanged(int newValue)
 {
     int w = ui->mPhotoGrid->width();
+
 
     qDebug() << "Newvalue=" << newValue;
 
@@ -271,6 +275,7 @@ void Library::onCurrentPhotoChanged(const QModelIndex& current, const QModelInde
     QVariant data = mPhotoModel->data(current, Photo::DataRole);
     Photo    photo;
 
+
     if (data.isValid())
         photo = data.value<Photo>();
 
@@ -287,7 +292,9 @@ void Library::onTileDoubleClicked(const QModelIndex& /*index*/)
     onShowLoupe();
 }
 
-void Library::onDataChanged(const QModelIndex& /*topLeft*/, const QModelIndex& /*bottomRight*/, const QVector<int>& roles)
+void Library::onDataChanged(const QModelIndex& /*topLeft*/,
+    const QModelIndex& /*bottomRight*/,
+    const QVector<int>& roles)
 {
     if (roles.contains(Photo::DataRole))
     {
@@ -310,6 +317,7 @@ void Library::onNewWorkCollection()
 {
     bool    ok;
     QString name = QInputDialog::getText(this, "New Work Collection", "Name", QLineEdit::Normal, QString(), &ok);
+
 
     if (ok && !name.isEmpty())
     {
@@ -348,6 +356,7 @@ void Library::onSortKeyChanged(int key)
 void Library::onSortOrderChanged()
 {
     Qt::SortOrder order = mPhotoModel->sortOrder();
+
 
     if (order == Qt::AscendingOrder)
     {

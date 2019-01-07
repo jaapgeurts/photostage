@@ -53,7 +53,6 @@ SOURCES += \
     engine/dimensionoperation.cpp \
     engine/engineutils.cpp \
     engine/operation.cpp \
-    engine/pipelinebuilder.cpp \
     engine/platform.cpp \
     filmstriptile.cpp \
     image.cpp \
@@ -124,7 +123,9 @@ SOURCES += \
     database/developitems.cpp \
     develop/modules/historymodule.cpp \
     develop/modules/historymodel.cpp \
-    engine/developrawparameters.cpp
+    engine/developrawparameters.cpp \
+    engine/stage0raw.cpp \
+    develop/modules/geometrymodule.cpp
 
 #processing/amaze_demosaic_RT.c
 
@@ -157,7 +158,6 @@ HEADERS  += \
     engine/dimensionoperation.h \
     engine/engineutils.h \
     engine/operation.h \
-    engine/pipelinebuilder.h \
     engine/platform.h \
     engine/platform_mac.h \
     filmstriptile.h \
@@ -231,7 +231,9 @@ HEADERS  += \
     engine/developrawparameters.h \
     photoowner.h \
     develop/modules/historymodule.h \
-    develop/modules/historymodel.h
+    develop/modules/historymodel.h \
+    engine/stage0raw.h \
+    develop/modules/geometrymodule.h
 
 FORMS    += \
     mainwindow.ui \
@@ -246,7 +248,8 @@ FORMS    += \
     timeadjustdialog.ui \
     widgets/backgroundtaskprogress.ui \
     library/modules/metadatamodule.ui \
-    library/modules/filtermodule.ui
+    library/modules/filtermodule.ui \
+    develop/modules/geometrymodule.ui
 
 DISTFILES += \
     Info.plist

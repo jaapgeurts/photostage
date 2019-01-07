@@ -13,7 +13,8 @@ namespace PhotoStage
 Develop::Develop( QWidget* parent) :
     Module(parent),
     ui(new Ui::Develop),
-    mLoadPhoto(false)
+    mLoadPhoto(false),
+    mRawModule(nullptr)
 {
     ui->setupUi(this);
 
@@ -40,6 +41,12 @@ Develop::Develop( QWidget* parent) :
     // Histogram
     mHistogramModule = new DevelopHistogramModule(ui->DevelopPanel);
     ui->DevelopPanel->addPanel("Histogram", mHistogramModule);
+
+    // Geometry Tools
+    mGeometryModule = new GeometryModule(ui->DevelopPanel);
+    ui->DevelopPanel->addPanel("Geometry", mGeometryModule);
+    connect(mGeometryModule, &GeometryModule::cropRotateClicked, this, &Develop::onCropRotateClicked);
+    connect(mGeometryModule, &GeometryModule::lockAspectRatioClicked, this, &Develop::onLockAspectRatioClicked);
 
     // Basic
     mBasicModule = new BasicModule(ui->DevelopPanel);
@@ -77,7 +84,7 @@ QRect Develop::lightGap()
 
 void Develop::setPhoto(Photo photo)
 {
-    qDebug () << "DEVELOP: setting photo";
+    //    qDebug () << "DEVELOP: setting photo";
     mPhoto = photo;
 
     if (mPhoto.isNull())
@@ -98,7 +105,7 @@ void Develop::onPhotoUpdated()
 {
     if (!mPhoto.isNull())
     {
-        qDebug() << "DEVELOP: Setting photo in view";
+        //        qDebug() << "DEVELOP: Setting photo in view";
         ui->developView->setPhoto(mPhoto.developPreviewsRGB());
     }
 }
@@ -111,6 +118,22 @@ void Develop::onDevelopSettingsChanged()
     ui->developView->setPhoto(mPhoto.developPreviewsRGB());
     //  ui->developView->update();
     mHistogramModule->setPhoto(mPhoto);
+}
+
+void Develop::onCropRotateClicked()
+{
+    qDebug() << "Develop::onCropRotateClicked()";
+
+    if (ui->developView->workingMode() == Widgets::DevelopView::ModeZoom)
+        ui->developView->setWorkingMode(Widgets::DevelopView::ModeCropRotate);
+    else
+        ui->developView->setWorkingMode(Widgets::DevelopView::ModeZoom);
+}
+
+void Develop::onLockAspectRatioClicked(bool enabled)
+{
+    qDebug() << "Lock aspect ratio";
+    ui->developView->setLockAspectRatio(enabled);
 }
 
 void Develop::showEvent(QShowEvent*)
@@ -134,15 +157,16 @@ void Develop::doSetPhoto(Photo photo)
         {
             // Raw module
             mRawModule = new RawModule(ui->DevelopPanel);
+            ui->DevelopPanel->addPanel("RAW", mRawModule, "Basic");
             connect(mRawModule, &BasicModule::parametersAdjusted, this, &Develop::onDevelopSettingsChanged);
-
-            ui->DevelopPanel->addPanel("RAW", mRawModule);
         }
     }
     else
     {
         ui->DevelopPanel->removePanel("RAW");
-        delete mRawModule;
+
+        if (mRawModule != nullptr)
+            delete mRawModule;
         mRawModule = nullptr;
     }
 

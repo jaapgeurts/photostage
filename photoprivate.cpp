@@ -13,6 +13,7 @@ Photo::PhotoPrivate::PhotoPrivate(PhotoOwner* owner, const QImage& image, const 
     mSrcImagePath(filename),
     mOwner(owner),
     mIsDownloadingPreview(false),
+    mIsDownloadingOriginal(false),
     mPhotoType(ContainerInvalid),
     mDevelopHistoryId(-1)
 {
@@ -21,6 +22,7 @@ Photo::PhotoPrivate::PhotoPrivate(PhotoOwner* owner, const QImage& image, const 
 Photo::PhotoPrivate::PhotoPrivate(QSqlQuery& q) :
     mOwner(nullptr),
     mIsDownloadingPreview(false),
+    mIsDownloadingOriginal(false),
     mPhotoType(ContainerInvalid),
     mDevelopHistoryId(-1)
 {

@@ -10,6 +10,7 @@
 #include "modules/rawmodule.h"
 #include "modules/basicmodule.h"
 #include "modules/historymodule.h"
+#include "modules/geometrymodule.h"
 #include "photo.h"
 
 namespace Ui
@@ -43,6 +44,8 @@ class Develop : public Module
     private slots:
 
         void onDevelopSettingsChanged();
+        void onCropRotateClicked();
+        void onLockAspectRatioClicked(bool enabled);
 
     private:
 
@@ -51,6 +54,7 @@ class Develop : public Module
         RawModule*              mRawModule;
         BasicModule*            mBasicModule;
         HistoryModule*          mHistoryModule;
+        GeometryModule*         mGeometryModule;
         Photo                   mPhoto;
         bool                    mLoadPhoto;
         // DevelopHistory          mDevelopHistory;

@@ -20,13 +20,13 @@ void LibraryHistogramModule::setPhoto(Photo& photo)
 
     if (photo.isNull())
     {
-        qDebug() << "HISTOGRAM: Library is null";
+        //        qDebug() << "HISTOGRAM: Library is null";
 
         return;
     }
     else if (photo.originalImage().isNull())
     {
-        qDebug() << "HISTOGRAM: Original image is null";
+        //        qDebug() << "HISTOGRAM: Original image is null";
         mHistogram->clear();
         return;
     }
