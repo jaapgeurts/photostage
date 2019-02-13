@@ -72,7 +72,7 @@
       <item>
        <widget class="QRadioButton" name="rbCopy">
         <property name="text">
-         <string>Copy</string>
+         <string>Cop&amp;y</string>
         </property>
         <property name="checked">
          <bool>true</bool>
@@ -82,7 +82,7 @@
       <item>
        <widget class="QRadioButton" name="rbMove">
         <property name="text">
-         <string>Move</string>
+         <string>&amp;Move</string>
         </property>
        </widget>
       </item>
@@ -137,7 +137,7 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="QSplitter" name="splitter">
+       <widget class="QSplitter" name="splitter1">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
@@ -150,7 +150,7 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_2">
           <property name="spacing">
-           <number>-1</number>
+           <number>0</number>
           </property>
           <property name="leftMargin">
            <number>0</number>
@@ -181,7 +181,26 @@
            </widget>
           </item>
           <item>
-           <widget class="QTreeView" name="trvwSource"/>
+           <widget class="QSplitter" name="splitter2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <widget class="QListView" name="lvwSourceDevices"/>
+            <widget class="QTreeView" name="trvwSourceFiles">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+            </widget>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -348,11 +367,6 @@
        </widget>
       </item>
      </layout>
-     <zorder>frmSource</zorder>
-     <zorder>frmDestination</zorder>
-     <zorder>trvwDestination</zorder>
-     <zorder>trvwSource</zorder>
-     <zorder>frmTileView</zorder>
     </widget>
    </item>
    <item>
@@ -486,7 +500,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>trvwSource</sender>
+   <sender>trvwSourceFiles</sender>
    <signal>clicked(QModelIndex)</signal>
    <receiver>ImportDialog</receiver>
    <slot>onSourceDirClicked(QModelIndex)</slot>

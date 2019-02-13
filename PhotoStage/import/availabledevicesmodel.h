@@ -22,7 +22,6 @@ public:
 
 private:
   QList<QStorageInfo> mVolumes;
-  QList<QFileSystemModel*> mFileModels;
 };
 
 #endif // AVAILABLEDEVICESMODEL_H

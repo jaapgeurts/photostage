@@ -31,8 +31,9 @@ ImportDialog::ImportDialog(QWidget* parent) :
      * Source devices model
      */
     mSourceDevicesModel = new AvailableDevicesModel(this);
+    ui->lvwSourceDevices->setModel(mSourceDevicesModel);
 
-    ui->trvwSource->setModel(mSourceDevicesModel);
+//    ui->trvwSourceDevices->setModel(mSourceDevicesModel);
 
     // READ Settings
     QSettings settings;
@@ -117,7 +118,7 @@ ImportDialog::~ImportDialog()
     {
         QSettings   settings;
         settings.beginGroup(SETTINGS_GROUP_IMPORTDIALOG);
-        QModelIndex index = ui->trvwSource->currentIndex();
+        QModelIndex index = ui->trvwSourceFiles->currentIndex();
 
         if (index.isValid())
         {
