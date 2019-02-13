@@ -138,8 +138,10 @@ PhotoDAO* DatabaseAccess::photoDao()
 
 void DatabaseAccess::initDb()
 {
-#ifdef Q_OS_MAC
-    QFile f(QCoreApplication::applicationDirPath() + "/../Resources/database_schema.sql");
+#if defined(Q_OS_MAC)
+  QFile f(":/db/database_schema.sql");
+#elif defined(Q_OS_UNIX)
+  QFile f(":/db/database_schema.sql");
 #endif
     f.open(QFile::ReadOnly);
     QTextStream ts(&f);

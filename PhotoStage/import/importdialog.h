@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QFileSystemModel>
 
+#include "availabledevicesmodel.h"
 #include "imagefilesystemmodel.h"
 #include "widgets/tileview.h"
 #include "database/importinfo.h"
@@ -41,7 +42,7 @@ class ImportDialog : public QDialog
     private:
 
         Ui::ImportDialog*         ui;
-        QFileSystemModel*         mSourceDrivesModel;
+        AvailableDevicesModel*    mSourceDevicesModel;
         QFileSystemModel*         mDestinationDrivesModel;
         QModelIndex               mDestinationModelIndex;
         ImageFileSystemModel*     mFilesModel;

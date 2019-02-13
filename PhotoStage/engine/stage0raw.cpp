@@ -57,7 +57,7 @@ void Stage0Raw::setColorConversion(float* colorMatrix)
 {
     // convert the colorMatrix array to Halide
 
-    Halide::Image<float> im(3, 3);
+    Halide::Buffer<float> im(3, 3);
 
     for (int y = 0; y < 3; y++)
         for (int x = 0; x < 3; x++)
@@ -69,14 +69,14 @@ void Stage0Raw::setColorConversion(float* colorMatrix)
 
 void Stage0Raw::setInput(uint16_t* data, int width, int height)
 {
-    Buffer                  buf(UInt(16), width, height, 1, 0, (uint8_t*)data, "Input Image");
-    Halide::Image<uint16_t> input(buf);
+//    Buffer                  buf(UInt(16), width, height, 1, 0, (uint8_t*)data, "Input Image");
+    Buffer<uint16_t> buf(data,{width,height},"Input Image");
 
     // Take of the outer edges to make interpolation easier
     mWidth  = width - 2;
     mHeight = height - 2;
 
-    mInput.set(input);
+    mInput.set(buf);
 }
 
 void Stage0Raw::setCFAStart(uint32_t dcraw_filter_id)
@@ -309,13 +309,14 @@ PhotoStage::Image Stage0Raw::execute()
 
     if (mRotation == -1 || mRotation == 1)
     {
-        Buffer outBuf(UInt(16), mHeight, mWidth, 3, 0, (uint8_t*)outdata, "DstImage");
+        //Buffer outBuf(UInt(16), mHeight, mWidth, 3, 0, (uint8_t*)outdata, "DstImage");
+      Buffer<uint16_t> outBuf(outdata, { mHeight, mWidth, 3 },"DstImage");
         mPipeline.realize(outBuf);
         return PhotoStage::Image(mHeight, mWidth, outdata);
     }
     else
     {
-        Buffer outBuf(UInt(16), mWidth, mHeight, 3, 0, (uint8_t*)outdata, "DstImage");
+        Buffer<uint16_t> outBuf(outdata, { mWidth, mHeight, 3 },"DstImage");
         mPipeline.realize(outBuf);
         return PhotoStage::Image(mWidth, mHeight, outdata);
     }

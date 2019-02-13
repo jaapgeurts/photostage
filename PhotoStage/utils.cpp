@@ -1,7 +1,10 @@
 #include "utils.h"
 #include "constants.h"
+#if defined(Q_OS_UNIX)
+#include <xxhash.h>
+#elif defined(Q_OS_MAC)
 #include "external/xxHash/xxhash.h"
-
+#endif
 namespace PhotoStage
 {
 /* fits the source frame into the destination frame and
@@ -58,8 +61,13 @@ long long computeImageFileHash(const QString& path)
 
 }
 // this code is needed for RawSpeed
-
+#ifdef __cplusplus
+extern "C" {
+#endif
 int rawspeed_get_number_of_processor_cores()
 {
     return 1;
 }
+#ifdef __cplusplus
+}
+#endif

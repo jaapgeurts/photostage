@@ -26,4 +26,7 @@
     <qresource prefix="/data">
         <file alias="tz_world.txt">resources/tz_world.txt</file>
     </qresource>
+    <qresource prefix="/db">
+        <file alias="database_schema.sql">resources/database_schema.sql</file>
+    </qresource>
 </RCC>

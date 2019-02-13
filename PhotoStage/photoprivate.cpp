@@ -36,9 +36,9 @@ Photo::PhotoPrivate::PhotoPrivate(QSqlQuery& q) :
     mColorLabel = q.value(4).isNull() ? Photo::LabelNoColor : (Photo::ColorLabel)q.value(4).toInt();
     mFlag       = q.value(5).isNull() ? Photo::FlagNone : (Photo::Flag)q.value(5).toInt();
 
-    // p.id, p.filename, c.directory,p.rating,p.color,p.flag, \
-    // p.iso, p.aperture, p.exposure_time, p.focal_length, p.datetime_original,\
-    // p.datetime_digitized, p.rotatation, p.latitude, p.longitude, \
+    // p.id, p.filename, c.directory,p.rating,p.color,p.flag,
+    // p.iso, p.aperture, p.exposure_time, p.focal_length, p.datetime_original,
+    // p.datetime_digitized, p.rotatation, p.latitude, p.longitude,
     // p.copyright, p.artist, p.flash, p.lens_name, p.make, p.model
     getNullableValue(q, 6, mExifInfo.isoSpeed);
     getNullableValue(q, 7, mExifInfo.aperture);

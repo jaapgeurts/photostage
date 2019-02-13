@@ -16,7 +16,7 @@ class EngineUtils
 
         void histogram();
 
-        QImage toQImage(int width, int height, const uint16_t* data);
+        QImage toQImage(int width, int height, uint16_t* data);
 
     private:
 

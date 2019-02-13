@@ -94,7 +94,7 @@ struct __attribute__((packed)) Canon_ColorData
             struct WhiteBalanceEntry WhiteBalanceTable[10];
         }
         V7;
-    };
+    } ColorData;
 };
 
 Exiv2Lib::Exiv2Lib()
@@ -368,11 +368,11 @@ void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
             //                                    wb[0] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[2];
             //                                    wb[1] = ((colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[1]+colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[3])/2);
             //                                    wb[2] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[0];
-            wb[0] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[0];
+            wb[0] = colorData->ColorData.V1.WhiteBalanceTable[WB_AsShot].RGGB[0];
             wb[1] =
-                ((colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[1] +
-                colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[2]) / 2);
-            wb[2] = colorData->V1.WhiteBalanceTable[WB_AsShot].RGGB[3];
+                ((colorData->ColorData.V1.WhiteBalanceTable[WB_AsShot].RGGB[1] +
+                colorData->ColorData.V1.WhiteBalanceTable[WB_AsShot].RGGB[2]) / 2);
+            wb[2] = colorData->ColorData.V1.WhiteBalanceTable[WB_AsShot].RGGB[3];
 
             qDebug() << "WB EOS 350D DIGITAL RGGB" << wb[0] << "," << wb[1] <<
                 "," << wb[2];
@@ -387,30 +387,30 @@ void Exiv2Lib::setWhiteBalanceCoeffsCanon(ExifData& data, float wb[3])
         }
         else if (*mExifInfo.model == "Canon PowerShot S30")
         {
-            wb[0] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[1];
+            wb[0] = colorData->ColorData.V5.WhiteBalanceTable[WB_AsShot].GRBG[1];
             wb[1] =
-                (colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[0] +
-                colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[3]) / 2;
-            wb[2] = colorData->V5.WhiteBalanceTable[WB_AsShot].GRBG[2];
+                (colorData->ColorData.V5.WhiteBalanceTable[WB_AsShot].GRBG[0] +
+                colorData->ColorData.V5.WhiteBalanceTable[WB_AsShot].GRBG[3]) / 2;
+            wb[2] = colorData->ColorData.V5.WhiteBalanceTable[WB_AsShot].GRBG[2];
         }
         else if (*mExifInfo.model == "Canon PowerShot S110")
         {
-            wb[0] =  colorData->V3.WhiteBalanceTable[WB_AsShot].RGGB[0];
-            wb[1] = (colorData->V3.WhiteBalanceTable[WB_AsShot].RGGB[1] +
-                colorData->V3.WhiteBalanceTable[WB_AsShot].RGGB[2]) / 2;
-            wb[2] =  colorData->V3.WhiteBalanceTable[WB_AsShot].RGGB[3];
+            wb[0] =  colorData->ColorData.V3.WhiteBalanceTable[WB_AsShot].RGGB[0];
+            wb[1] = (colorData->ColorData.V3.WhiteBalanceTable[WB_AsShot].RGGB[1] +
+                colorData->ColorData.V3.WhiteBalanceTable[WB_AsShot].RGGB[2]) / 2;
+            wb[2] =  colorData->ColorData.V3.WhiteBalanceTable[WB_AsShot].RGGB[3];
         }
         else     // attempt to read at the default position at V4
         {
             qDebug() <<
                 "Model unknown, Parsing whitebalance using canon default format";
-            qDebug() << "Color data version: " << colorData->V7.version;
+            qDebug() << "Color data version: " << colorData->ColorData.V7.version;
             // optimize with bitshifs later
-            wb[0] = colorData->V7.WhiteBalanceTable[WB_AsShot].RGGB[0];
+            wb[0] = colorData->ColorData.V7.WhiteBalanceTable[WB_AsShot].RGGB[0];
             wb[1] =
-                (colorData->V7.WhiteBalanceTable[WB_AsShot].RGGB[1] +
-                colorData->V7.WhiteBalanceTable[WB_AsShot].RGGB[2]) / 2;
-            wb[2] = colorData->V7.WhiteBalanceTable[WB_AsShot].RGGB[3];
+                (colorData->ColorData.V7.WhiteBalanceTable[WB_AsShot].RGGB[1] +
+                colorData->ColorData.V7.WhiteBalanceTable[WB_AsShot].RGGB[2]) / 2;
+            wb[2] = colorData->ColorData.V7.WhiteBalanceTable[WB_AsShot].RGGB[3];
         }
 
         float mx = max3(wb[0], wb[1], wb[2]);

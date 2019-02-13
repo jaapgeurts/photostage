@@ -5,7 +5,7 @@
 #include "constants.h"
 #include "engine/colortransform.h"
 #include "basicmodule.h"
-#include "ui_BasicModule.h"
+#include "ui_basicmodule.h"
 
 namespace PhotoStage
 {

@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QtGlobal>
 #include <QSettings>
+#include <QStandardPaths>
 
 #include "importdialog.h"
 #include "ui_importdialog.h"
@@ -27,20 +28,11 @@ ImportDialog::ImportDialog(QWidget* parent) :
     ui->mCfvPhotos->setCheckBoxMode(true);
 
     /***
-     * Source file model
+     * Source devices model
      */
-    mSourceDrivesModel = new QFileSystemModel(this);
-    mSourceDrivesModel->setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    ui->trvwSource->setModel(mSourceDrivesModel);
+    mSourceDevicesModel = new AvailableDevicesModel(this);
 
-#ifdef Q_OS_MAC
-    QModelIndex srcindex = mSourceDrivesModel->setRootPath("/Volumes");
-    ui->trvwSource->setRootIndex(srcindex);
-#endif
-    ui->trvwSource->hideColumn(1);
-    ui->trvwSource->hideColumn(2);
-    ui->trvwSource->hideColumn(3);
-    ui->trvwSource->expand(srcindex);
+    ui->trvwSource->setModel(mSourceDevicesModel);
 
     // READ Settings
     QSettings settings;
@@ -66,7 +58,9 @@ ImportDialog::ImportDialog(QWidget* parent) :
             break;
     }
 
-    QString     str = settings.value(SETTINGS_IMPORT_SOURCEPATH).toString();
+    // TODO: settings default import path
+    /*
+     QString     str = settings.value(SETTINGS_IMPORT_SOURCEPATH).toString();
     qDebug() << "Setting path:" << str;
     QModelIndex index    = mSourceDrivesModel->index(str);
     QModelIndex dirIndex = index;
@@ -75,26 +69,28 @@ ImportDialog::ImportDialog(QWidget* parent) :
         ui->trvwSource->expand(index);
         index = index.parent();
     }
-    while (index.isValid());
+    while (index.isValid())
+      ;
     ui->trvwSource->selectionModel()->setCurrentIndex(dirIndex, QItemSelectionModel::ClearAndSelect);
-
+*/
     /***
      * Destination File Model
      */
     mDestinationDrivesModel =  new QFileSystemModel(this);
     mDestinationDrivesModel->setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    /* QModelIndex destIndex = */ mDestinationDrivesModel->setRootPath("/Volumes");
     ui->trvwDestination->setModel(mDestinationDrivesModel);
 
-#ifdef Q_OS_MAC
-    QModelIndex dstindex = mDestinationDrivesModel->setRootPath("/Volumes");
+    // TODO: get last used path
+#if (defined(Q_OS_MACOS) || defined(Q_OS_UNIX))
+    QModelIndex dstindex = mDestinationDrivesModel->setRootPath(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
     ui->trvwDestination->setRootIndex(dstindex);
 #endif
+    // TODO: also do windows and linux
 
-    ui->trvwDestination->hideColumn(1);
+  /*  ui->trvwDestination->hideColumn(1);
     ui->trvwDestination->hideColumn(2);
     ui->trvwDestination->hideColumn(3);
-
+*/
     /***
      * ImageFileSystemModel
      * Model for PhotoView
@@ -105,7 +101,7 @@ ImportDialog::ImportDialog(QWidget* parent) :
     //    mFilesSelectionModel = new QItemSelectionModel(mFilesModel,this);
     //    mCfvPhotos->setSelectionModel(mFilesSelectionModel);
 
-    ui->mCfvPhotos->setRootIndex(mFilesModel->setRootPath(str));
+ //   ui->mCfvPhotos->setRootIndex(mFilesModel->setRootPath(str));
     ui->btnImport->setEnabled(false);
     ui->btnImport->setToolTip(tr("You must select images before you can import."));
 
@@ -126,7 +122,7 @@ ImportDialog::~ImportDialog()
         if (index.isValid())
         {
             QString path =
-                mSourceDrivesModel->fileInfo(index).absoluteFilePath();
+                mSourceDevicesModel->fileInfo(index).absoluteFilePath();
             settings.setValue(SETTINGS_IMPORT_SOURCEPATH, path);
             qDebug() << "Saving last path" << path;
         }
@@ -138,7 +134,7 @@ ImportDialog::~ImportDialog()
 
 void ImportDialog::onSourceDirClicked(const QModelIndex& index)
 {
-    QString path = mSourceDrivesModel->fileInfo(index).absoluteFilePath();
+    QString path = mSourceDevicesModel->fileInfo(index).absoluteFilePath();
 
     mFilesModel->clearCache();
     ui->mCfvPhotos->setRootIndex(mFilesModel->setRootPath(path));

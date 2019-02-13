@@ -6,7 +6,7 @@ namespace PhotoStage
 KeywordModel::KeywordModel(QObject* parent) :
     QAbstractItemModel(parent)
 {
-    // Construct the file tree
+    // Construct the keyword tree
     mRootItem = DatabaseAccess::keywordDao()->getKeywordItems();
 
     DatabaseAccess* dbAccess = DatabaseAccess::instance();

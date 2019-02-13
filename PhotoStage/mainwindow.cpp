@@ -597,8 +597,10 @@ void MainWindow::onShowInFileBrowser()
                << QLatin1String("tell application \"Finder\" to activate");
     QProcess::execute("/usr/bin/osascript", scriptArgs);
 #else
+// TODO: reveal file in system browser
     // we cannot select a file here, because no file browser really supports it...
-    const QFileInfo fileInfo(pathIn);
+
+  /*  const QFileInfo fileInfo(pathIn);
     const QString   folder = fileInfo.absoluteFilePath();
     const QString   app    = Utils::UnixUtils::fileBrowser(Core::ICore::instance()->settings());
     QProcess        browserProc;
@@ -609,9 +611,10 @@ void MainWindow::onShowInFileBrowser()
     bool          success = browserProc.startDetached(browserArgs);
     const QString error   = QString::fromLocal8Bit(browserProc.readAllStandardError());
     success = success && error.isEmpty();
-
-    if (!success)
-        showGraphicalShellError(this, app, error);
+*/
+//    if (!success)
+      //  showGraphicalShellError(this, app, error);
+   throw new std::runtime_error("NOT IMPLEMENTED");
 #endif
 }
 

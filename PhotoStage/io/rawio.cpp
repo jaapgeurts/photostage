@@ -6,6 +6,8 @@
 
 #include "rawio.h"
 
+#include "external/rawspeed/src/librawspeed/metadata/CameraMetadataException.h"
+#include "external/rawspeed/src/librawspeed/decoders/RawDecoderException.h"
 #include "import/exivfacade.h"
 #include "engine/stage0raw.h"
 
@@ -29,7 +31,7 @@ static inline long clip(T v, T x, T y)
 
 #define SRC(x, y) (src[x] * src[y])
 
-using namespace RawSpeed;
+using namespace rawspeed;
 
 namespace PhotoStage
 {
@@ -227,31 +229,13 @@ bool RawIO::readMatrix(const QString& model, float* mat) const
 Image RawIO::initFromFile(const QByteArray& memFile,
     const QSharedPointer<DevelopRawParameters>& params, const QString& cameraModel)
 {
-    //FileReader reader(strdup(path.toLocal8Bit().data()));
-    QSharedPointer<FileMap> map;
+    // TODO: check memory leak here.
+    std::unique_ptr<const Buffer> map(new Buffer((const uchar8*)memFile.constData(), memFile.length()));
+
+    std::unique_ptr<RawDecoder> decoder;
     try
     {
-        // qDebug() << "loadRaw() opening" << reader.Filename();
-        //        map = reader.readFile();
-        map = QSharedPointer<FileMap>(new FileMap((uchar8*)memFile.constData(), (uint32)memFile.length()));
-    }
-    catch (const FileIOException& e)
-    {
-        qDebug() << "Error reading raw" << e.what();
-        return mImage;
-    }
-
-    // remove raw from here
-    if (map == NULL)
-    {
-        qDebug() << "Can't acquire map for raw file";
-        return mImage;
-    }
-
-    RawDecoder* decoder = NULL;
-    try
-    {
-        RawParser parser(map.data());
+        RawParser parser(map.get());
         decoder = parser.getDecoder();
     }
     catch (const RawDecoderException& e)

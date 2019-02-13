@@ -6,7 +6,7 @@
 
 #include "image.h"
 #include "engine/developrawparameters.h"
-#include "external/rawspeed/RawSpeed/RawSpeed-API.h"
+#include "external/rawspeed/src/librawspeed/RawSpeed-API.h"
 
 namespace PhotoStage
 {
@@ -48,11 +48,11 @@ class RawIO
 
 class Metadata
 {
-    static RawSpeed::CameraMetaData* mMetaData;
+    static rawspeed::CameraMetaData* mMetaData;
 
     public:
 
-        static RawSpeed::CameraMetaData* metaData();
+        static rawspeed::CameraMetaData* metaData();
 };
 }
 #endif // PHOTOSTAGE_RAWIO_H

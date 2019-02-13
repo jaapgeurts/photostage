@@ -1,3 +1,4 @@
+#include <QRegularExpression>
 #include <QDebug>
 
 #include "ui_filtermodule.h"

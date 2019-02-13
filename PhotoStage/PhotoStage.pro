@@ -4,21 +4,36 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql positioning network
+lessThan(QT_MAJOR_VERSION, 5): error("requires Qt 5")
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += core gui widgets sql positioning network
+
+#greaterThan(QT_MAJOR_VERSION, 4): QT += 
+
+# sub project dependency targets
+rawspeed.target = rawspeed
+rawspeed.commands = \
+            cd $$PWD/external/rawspeed && \
+            mkdir -p build && cd build && \
+            cmake .. -DBUILD_TESTING=OFF && \
+            make
+
+        
+#QMAKE_EXTRA_TARGETS += rawspeed
+#PRE_TARGETDEPS += rawspeed
 
 TARGET = PhotoStage
 TEMPLATE =
 
 DEPENDPATH += .
 INCLUDEPATH += . \
-               $$PWD/external/exiv2/include \
-               $$PWD/external/halide/include \
-               $$PWD/external/libjpeg-turbo
+    $$PWD/external/halide/include \
+    $$PWD/external/rawspeed/build/src \
+    $$PWD/external/rawspeed/src/external \
+    $$PWD/external/rawspeed/src/librawspeed
 
-# Qt uses libstdc++
-CONFIG += c++11
+include($$PWD/external/iccjpeg/iccjpeg.pri)
+
 
 QMAKE_CXXFLAGS_RELEASE -= -O2
 QMAKE_CXXFLAGS_RELEASE += -O3
@@ -125,7 +140,8 @@ SOURCES += \
     develop/modules/historymodel.cpp \
     engine/developrawparameters.cpp \
     engine/stage0raw.cpp \
-    develop/modules/geometrymodule.cpp
+    develop/modules/geometrymodule.cpp \
+    import/availabledevicesmodel.cpp
 
 #processing/amaze_demosaic_RT.c
 
@@ -159,7 +175,6 @@ HEADERS  += \
     engine/engineutils.h \
     engine/operation.h \
     engine/platform.h \
-    engine/platform_mac.h \
     filmstriptile.h \
     image.h \
     import/exiv2lib.h \
@@ -233,83 +248,103 @@ HEADERS  += \
     develop/modules/historymodule.h \
     develop/modules/historymodel.h \
     engine/stage0raw.h \
-    develop/modules/geometrymodule.h
+    develop/modules/geometrymodule.h \
+    import/availabledevicesmodel.h
 
 FORMS    += \
     mainwindow.ui \
     aboutdialog.ui \
+    preferencesdialog.ui \
+    timeadjustdialog.ui \
+    cartography/map.ui \
     develop/develop.ui \
     develop/modules/basicmodule.ui \
     develop/modules/rawmodule.ui \
+    develop/modules/geometrymodule.ui \
     import/importdialog.ui \
-    library/library.ui \
-    cartography/map.ui \
-    preferencesdialog.ui \
-    timeadjustdialog.ui \
     widgets/backgroundtaskprogress.ui \
+    library/library.ui \
     library/modules/metadatamodule.ui \
-    library/modules/filtermodule.ui \
-    develop/modules/geometrymodule.ui
+    library/modules/filtermodule.ui
 
 DISTFILES += \
     Info.plist
 
-include($$PWD/external/rawspeed/rawspeed.pri)
-include($$PWD/external/xxHash/xxhash.pri)
-include($$PWD/external/iccjpeg/iccjpeg.pri)
-
-
-unix:!macx {
+# Common files
 LIBS += \
-     -liconv
+            $$PWD/external/rawspeed/build/librawspeed.a \
+            -lexpat \
+            -lz \
+            -lpng \
+            -llcms2
+
+# common resources
+RESOURCES += \
+    qdarkstyle/style.qrc \
+    resources.qrc
+
+
+# linux specific project settings
+linux {
+  CONFIG += -fopenmp
+  SOURCES += \
+    engine/platform_x11.c
+  HEADERS += \
+    engine/platform_x11.h
+  LIBS += \
+    -L$$PWD/external/halide/bin \
+    -ldl \
+    -lxxhash \
+    -lexiv2 \
+    -ljpeg \
+    -lpugixml \
+    -lgomp \
+    -lHalide
 }
 
+# mac os specific settings
 macx {
-    #QMAKE_INFO_PLIST = Info.plist
+
+    include($$PWD/external/xxHash/xxhash.pri)
+
+    CONFIG += c++11
+
+#    QMAKE_INFO_PLIST = Info.plist
 #    QMAKE_CXXFLAGS -= -std=c++0x
     QMAKE_CXXFLAGS += \
                     -std=c++11 \
                     -stdlib=libc++ \
                     -fms-extensions \
                     -Wignored-attributes
+    ICON = resources/appicon.icns
+
     SOURCES += \
         engine/platform_mac.c
-    ICON = resources/appicon.icns
-    INCLUDEPATH += /opt/local/include
+    HEADERS += \
+      engine/platform_mac.h
+
+    INCLUDEPATH += $$PWD/external/exiv2/include \
+               $$PWD/external/libjpeg-turbo \
+
+                /opt/local/include
     OBJECTIVE_SOURCES +=
     LIBS += \
             -stdlib=libc++ \
             /usr/lib/libiconv.dylib \
-# for release link to the dynamic lib
-#            $$PWD/external/exiv2/lib/libexiv2.13.dylib \
             -L/opt/local/lib \
-            -framework AppKit
+            -framework AppKit \
+            $$PWD/external/exiv2/lib/libexiv2.a \
+            $$PWD/external/libjpeg-turbo/libjpeg.a \
+            $$PWD/external/libjpeg-turbo/libturbojpeg.a
 
-    Resources.files = resources/camera_color_matrix.json resources/database_schema.sql external/rawspeed/data/cameras.xml
+    Resources.files = resources/camera_color_matrix.json resources/database_schema.sql external/rawspeed/build/data/cameras.xml
     Resources.path = Contents/Resources
     Profiles.files = resources/Profiles
     Profiles.path = Contents/Resources
     QMAKE_BUNDLE_DATA += Resources Profiles
 }
 
+# windows specific settings
 win32 {
 # LIBS +=
 }
-
-LIBS += \
-            $$PWD/external/exiv2/lib/libexiv2.a \
-            $$PWD/external/halide/lib/libHalide.a \
-            $$PWD/external/libjpeg-turbo/libjpeg.a \
-            $$PWD/external/libjpeg-turbo/libturbojpeg.a \
-# for libexiv2
-            -lexpat \
-            -lz \
-# end libexiv2
-         #   -ljpeg \
-            -lpng \
-            -llcms2
-
-RESOURCES += \
-    qdarkstyle/style.qrc \
-    resources.qrc
-

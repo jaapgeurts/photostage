@@ -62,10 +62,12 @@ PhotoStage::Image BasicOperation::execute(const PhotoStage::Image& image, float 
     //    qDebug() << "Exposure Comp settings" << EV << "Avg val" <<  32768 * pow(2, EV);
 
     // construct the input and output buffers.
-    Buffer    inBuf(UInt(16), width, height, 3, 0, (uint8_t*)image.data(), "SrcImage");
+    //Buffer<UInt(16)>    inBuf(UInt(16), width, height, 3, 0, (uint8_t*)image.data(), "SrcImage");
+    Buffer<uint16_t>    inBuf(image.data(), width, height, 3);
 
     uint16_t* outdata = new uint16_t[width * height * 3];
-    Buffer    outBuf(UInt(16), width, height, 3, 0, (uint8_t*)outdata, "DstImage");
+//    Buffer<UInt(16)>    outBuf(UInt(16), width, height, 3, 0, (uint8_t*)outdata, "DstImage");
+    Buffer<uint16_t>    outBuf(outdata, width, height, 3);
 
     mInput.set(inBuf);
     mEV.set(EV);

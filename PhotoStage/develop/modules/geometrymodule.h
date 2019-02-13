@@ -24,6 +24,7 @@ class GeometryModule : public DevelopModule
 
         void cropRotateClicked();
         void lockAspectRatioClicked(bool enabled);
+        void aspectRatioChanged();
 
     private slots:
 
@@ -32,8 +33,6 @@ class GeometryModule : public DevelopModule
         void onAspectRatioChanged(int aspect);
 
     private:
-
-
 
         Ui::GeometryModule* ui;
 };

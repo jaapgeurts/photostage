@@ -5,25 +5,25 @@
 namespace PhotoStage
 {
 GeometryModule::GeometryModule(QWidget* parent) :
-    DevelopModule(parent),
-    ui(new Ui::GeometryModule)
+  DevelopModule(parent),
+  ui(new Ui::GeometryModule)
 {
-    ui->setupUi(this);
+  ui->setupUi(this);
 }
 
 void GeometryModule::onCropRotateClicked()
 {
-    emit cropRotateClicked();
+  emit cropRotateClicked();
 }
 
 void GeometryModule::onLockAspectClicked(bool enabled)
 {
-    emit lockAspectRatioClicked(enabled);
+  emit lockAspectRatioClicked(enabled);
 }
 
 void GeometryModule::onAspectRatioChanged(int aspect)
 {
 
-    emit aspectRatioChanged();
+  emit aspectRatioChanged();
 }
 }
