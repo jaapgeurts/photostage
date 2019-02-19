@@ -12,6 +12,8 @@ Qt 5
 - libjpeg
 - libgomp
 - libpugixml
+- libudev
+
 iconv
 
 ### projects

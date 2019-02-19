@@ -14,6 +14,7 @@
 
 #include "tileview.h"
 
+
 namespace Widgets
 {
 TileView::TileView(QWidget* parent) :
@@ -495,7 +496,7 @@ void TileView::wheelEvent(QWheelEvent* event)
 {
     // TODO: forward event to scrollbar
 
-    //  qDebug() << "wheelEvent()";
+     qDebug() << "wheelEvent()";
     QPoint deltaP = event->pixelDelta();
     int    delta  = -deltaP.y();
 
@@ -1081,6 +1082,15 @@ void TileView::onSelectionChanged(const QItemSelection& /*selected*/, const QIte
     ensureTileVisible(newIndex);
 
     update();
+}
+
+void TileView::selectAll()
+{
+  QModelIndex parent = QModelIndex();
+  QModelIndex first = mListModel->index(0,0,parent);
+  QModelIndex last = mListModel->index(mListModel->rowCount(parent)-1,mListModel->columnCount(parent)-1,parent);
+  QItemSelection selection(first,last);
+  mSelectionModel->select(selection, QItemSelectionModel::Select);
 }
 
 const QList<QModelIndex>& TileView::checkedItems() const

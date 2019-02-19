@@ -141,6 +141,9 @@
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
+        <property name="handleWidth">
+         <number>5</number>
+        </property>
         <widget class="QFrame" name="frmSource">
          <property name="frameShadow">
           <enum>QFrame::Raised</enum>
@@ -190,6 +193,9 @@
             </property>
             <property name="orientation">
              <enum>Qt::Vertical</enum>
+            </property>
+            <property name="handleWidth">
+             <number>5</number>
             </property>
             <widget class="QListView" name="lvwSourceDevices"/>
             <widget class="QTreeView" name="trvwSourceFiles">
@@ -452,6 +458,39 @@
     </widget>
    </item>
   </layout>
+  <action name="actionSelectAll">
+   <property name="text">
+    <string>Select All</string>
+   </property>
+   <property name="toolTip">
+    <string>Selct All</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionSelectNone">
+   <property name="text">
+    <string>Select None</string>
+   </property>
+   <property name="toolTip">
+    <string>Select None</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionInvertSelection">
+   <property name="text">
+    <string>Invert Selection</string>
+   </property>
+   <property name="toolTip">
+    <string>Invert the selection</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -474,8 +513,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>946</x>
-     <y>759</y>
+     <x>907</x>
+     <y>753</y>
     </hint>
     <hint type="destinationlabel">
      <x>626</x>
@@ -490,8 +529,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>1031</x>
-     <y>759</y>
+     <x>997</x>
+     <y>753</y>
     </hint>
     <hint type="destinationlabel">
      <x>623</x>
@@ -506,8 +545,8 @@
    <slot>onSourceDirClicked(QModelIndex)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>143</x>
-     <y>224</y>
+     <x>145</x>
+     <y>607</y>
     </hint>
     <hint type="destinationlabel">
      <x>7</x>
@@ -522,8 +561,8 @@
    <slot>onDestinationDirClicked(QModelIndex)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>776</x>
-     <y>297</y>
+     <x>1035</x>
+     <y>331</y>
     </hint>
     <hint type="destinationlabel">
      <x>1048</x>
@@ -538,8 +577,8 @@
    <slot>onImportModeCopy()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>465</x>
-     <y>39</y>
+     <x>484</x>
+     <y>29</y>
     </hint>
     <hint type="destinationlabel">
      <x>573</x>
@@ -554,8 +593,8 @@
    <slot>onImportModeMove()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>532</x>
-     <y>39</y>
+     <x>552</x>
+     <y>29</y>
     </hint>
     <hint type="destinationlabel">
      <x>746</x>
@@ -570,8 +609,8 @@
    <slot>onImportModeAdd()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>596</x>
-     <y>40</y>
+     <x>611</x>
+     <y>29</y>
     </hint>
     <hint type="destinationlabel">
      <x>411</x>
@@ -586,12 +625,28 @@
    <slot>onIncludeSubdirs()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>107</x>
-     <y>110</y>
+     <x>109</x>
+     <y>55</y>
     </hint>
     <hint type="destinationlabel">
      <x>6</x>
      <y>110</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>lvwSourceDevices</sender>
+   <signal>clicked(QModelIndex)</signal>
+   <receiver>ImportDialog</receiver>
+   <slot>onSourceDeviceClicked(QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>129</x>
+     <y>218</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>518</x>
+     <y>382</y>
     </hint>
    </hints>
   </connection>
@@ -603,5 +658,9 @@
   <slot>onImportModeMove()</slot>
   <slot>onImportModeAdd()</slot>
   <slot>onIncludeSubdirs()</slot>
+  <slot>onSourceDeviceClicked(QModelIndex)</slot>
+  <slot>onSelectAllFired()</slot>
+  <slot>onSelectNoneFired()</slot>
+  <slot>onInvertSelectionFired()</slot>
  </slots>
 </ui>

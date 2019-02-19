@@ -12,3 +12,4 @@
 * fixedlistview fixedtreeview, recalculate after remove+add rows
 * redo reading Color Profile name and assigning it to the ExifInfo + store in DB
 * Any place where QImages are used. bits() or scanline(). avoid unnecessary buffer duplication
+* engine/platform functions should not be C files but CPP files

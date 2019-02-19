@@ -8,6 +8,7 @@
 #include <QFileInfo>
 #include <QFile>
 
+
 namespace PhotoStage
 {
 /**
@@ -28,6 +29,9 @@ void deleteArray(T buf[])
 {
     delete [] buf;
 }
+
+bool is_block_device(const std::string& path);
+
 }
 
 #endif // PHOTOSTAGE_UTILS_H

@@ -2,6 +2,7 @@
 #include <QDir>
 #include <QDebug>
 #include <QtGlobal>
+#include <QShortcut>
 #include <QSettings>
 #include <QStandardPaths>
 
@@ -28,11 +29,16 @@ ImportDialog::ImportDialog(QWidget* parent) :
     ui->mCfvPhotos->setCheckBoxMode(true);
 
     /***
-     * Source devices model
+     * Source devices model & filesystemmodel
      */
-    mSourceDevicesModel = new AvailableDevicesModel(this);
+    mSourceDevicesModel = new AvailableLocationsModel(this);
     ui->lvwSourceDevices->setModel(mSourceDevicesModel);
 
+    mSourceFilesModel = new QFileSystemModel(this);
+    ui->trvwSourceFiles->setModel(mSourceFilesModel);
+    ui->trvwSourceFiles->hideColumn(1);
+    ui->trvwSourceFiles->hideColumn(2);
+    ui->trvwSourceFiles->hideColumn(3);
 //    ui->trvwSourceDevices->setModel(mSourceDevicesModel);
 
     // READ Settings
@@ -74,6 +80,10 @@ ImportDialog::ImportDialog(QWidget* parent) :
       ;
     ui->trvwSource->selectionModel()->setCurrentIndex(dirIndex, QItemSelectionModel::ClearAndSelect);
 */
+
+
+
+
     /***
      * Destination File Model
      */
@@ -86,12 +96,12 @@ ImportDialog::ImportDialog(QWidget* parent) :
     QModelIndex dstindex = mDestinationDrivesModel->setRootPath(QStandardPaths::writableLocation(QStandardPaths::PicturesLocation));
     ui->trvwDestination->setRootIndex(dstindex);
 #endif
-    // TODO: also do windows and linux
+    // TODO: also write for windows and linux
 
-  /*  ui->trvwDestination->hideColumn(1);
+    ui->trvwDestination->hideColumn(1);
     ui->trvwDestination->hideColumn(2);
     ui->trvwDestination->hideColumn(3);
-*/
+
     /***
      * ImageFileSystemModel
      * Model for PhotoView
@@ -99,12 +109,17 @@ ImportDialog::ImportDialog(QWidget* parent) :
 
     mFilesModel = new ImageFileSystemModel(this);
     ui->mCfvPhotos->setModel(mFilesModel);
-    //    mFilesSelectionModel = new QItemSelectionModel(mFilesModel,this);
-    //    mCfvPhotos->setSelectionModel(mFilesSelectionModel);
+    mFilesSelectionModel = new QItemSelectionModel(mFilesModel,this);
+    ui->mCfvPhotos->setSelectionModel(mFilesSelectionModel);
 
- //   ui->mCfvPhotos->setRootIndex(mFilesModel->setRootPath(str));
+//    ui->mCfvPhotos->setRootIndex(mFilesModel->setRootPath(str));
     ui->btnImport->setEnabled(false);
     ui->btnImport->setToolTip(tr("You must select images before you can import."));
+
+    // install shortcuts
+    QShortcut* scSelectAll = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_A),this);
+    connect(scSelectAll,&QShortcut::activated, this,&ImportDialog::onSelectAllFired);
+
 
     // TODO: change to selection model
     connect(ui->mCfvPhotos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ImportDialog::onFilesSelected);
@@ -123,7 +138,7 @@ ImportDialog::~ImportDialog()
         if (index.isValid())
         {
             QString path =
-                mSourceDevicesModel->fileInfo(index).absoluteFilePath();
+                mSourceFilesModel->fileInfo(index).absoluteFilePath();
             settings.setValue(SETTINGS_IMPORT_SOURCEPATH, path);
             qDebug() << "Saving last path" << path;
         }
@@ -135,11 +150,18 @@ ImportDialog::~ImportDialog()
 
 void ImportDialog::onSourceDirClicked(const QModelIndex& index)
 {
-    QString path = mSourceDevicesModel->fileInfo(index).absoluteFilePath();
+    QString path = mSourceFilesModel->fileInfo(index).absoluteFilePath();
 
+    qDebug() << "Clicked on: " << path;
     mFilesModel->clearCache();
     ui->mCfvPhotos->setRootIndex(mFilesModel->setRootPath(path));
     validateForm();
+}
+
+void ImportDialog::onSourceDeviceClicked(const QModelIndex& index)
+{
+  const QModelIndex idx = mSourceFilesModel->setRootPath(index.data().toString());
+  ui->trvwSourceFiles->setRootIndex(idx);
 }
 
 void ImportDialog::onFilesSelected(const QItemSelection& /*selected*/,
@@ -220,4 +242,21 @@ void ImportDialog::onImportModeAdd()
     mImportMode = ImportOptions::ImportAdd;
     validateForm();
 }
+
+void ImportDialog::onSelectAllFired()
+{
+  qDebug() << "Select all";
+  ui->mCfvPhotos->selectAll();
+}
+
+void ImportDialog::onSelectNoneFired()
+{
+
+}
+
+void ImportDialog::onInvertSelectionFired()
+{
+
+}
+
 }

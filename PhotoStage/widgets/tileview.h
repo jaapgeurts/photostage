@@ -85,6 +85,8 @@ class TileView : public QWidget
         void updateCellContents(const QModelIndex& topleft, const QModelIndex& bottomright, const QVector<int>& roles);
         void onSelectionChanged(const QItemSelection&, const QItemSelection&);
 
+        void selectAll();
+
     private slots:
 
         // slots for slider events

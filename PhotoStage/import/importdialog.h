@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QFileSystemModel>
 
-#include "availabledevicesmodel.h"
+#include "availablelocationsmodel.h"
 #include "imagefilesystemmodel.h"
 #include "widgets/tileview.h"
 #include "database/importinfo.h"
@@ -30,6 +30,7 @@ class ImportDialog : public QDialog
     private slots:
 
         void onSourceDirClicked(const QModelIndex& index);
+        void onSourceDeviceClicked(const QModelIndex& index);
         void onDestinationDirClicked(const QModelIndex& index);
         void onImportModeCopy();
 
@@ -39,10 +40,16 @@ class ImportDialog : public QDialog
         void onCheckedItemsChanged();
         void onIncludeSubdirs();
 
+        // actions
+        void onSelectAllFired();
+        void onSelectNoneFired();
+        void onInvertSelectionFired();
+
     private:
 
         Ui::ImportDialog*         ui;
-        AvailableDevicesModel*    mSourceDevicesModel;
+        AvailableLocationsModel*  mSourceDevicesModel;
+        QFileSystemModel*         mSourceFilesModel;
         QFileSystemModel*         mDestinationDrivesModel;
         QModelIndex               mDestinationModelIndex;
         ImageFileSystemModel*     mFilesModel;

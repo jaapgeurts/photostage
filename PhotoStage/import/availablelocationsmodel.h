@@ -6,11 +6,12 @@
 #include <QStorageInfo>
 
 #include <QObject>
-
-class AvailableDevicesModel : public QAbstractItemModel
+namespace PhotoStage
+{
+class AvailableLocationsModel : public QAbstractItemModel
 {
 public:
-  AvailableDevicesModel(QObject* parent = nullptr);
+  AvailableLocationsModel(QObject* parent = nullptr);
 
   QModelIndex index(int row, int column, const QModelIndex& parent) const;
   QModelIndex parent(const QModelIndex& index) const;
@@ -18,10 +19,9 @@ public:
   int columnCount(const QModelIndex&) const;
   QVariant data(const QModelIndex& index, int role) const;
 
-  QFileInfo fileInfo(const QModelIndex& index) const;
 
 private:
-  QList<QStorageInfo> mVolumes;
+  QList<QDir> mSourceLocations;
 };
-
+}
 #endif // AVAILABLEDEVICESMODEL_H

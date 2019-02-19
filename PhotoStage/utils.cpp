@@ -1,10 +1,12 @@
-#include "utils.h"
 #include "constants.h"
+#include "utils.h"
+
 #if defined(Q_OS_UNIX)
 #include <xxhash.h>
 #elif defined(Q_OS_MAC)
 #include "external/xxHash/xxhash.h"
 #endif
+
 namespace PhotoStage
 {
 /* fits the source frame into the destination frame and

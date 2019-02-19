@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     QCoreApplication::setApplicationName("PhotoStage");
 
     // Load the dark style
-#define STYLE_SHEET 1
+//#define STYLE_SHEET 0
 #if defined(STYLE_SHEET)
     QFile f (":qdarkstyle/style.qss");
 

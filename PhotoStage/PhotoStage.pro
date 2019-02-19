@@ -8,6 +8,7 @@ lessThan(QT_MAJOR_VERSION, 5): error("requires Qt 5")
 
 QT       += core gui widgets sql positioning network
 
+
 #greaterThan(QT_MAJOR_VERSION, 4): QT += 
 
 # sub project dependency targets
@@ -50,6 +51,8 @@ SOURCES += \
     database/collectionitem.cpp \
     database/databaseaccess.cpp \
     database/dbutils.cpp \
+    database/developitems.cpp \
+    database/developsettingdao.cpp \
     database/importinfo.cpp \
     database/importoptions.cpp \
     database/keyworddao.cpp \
@@ -61,17 +64,23 @@ SOURCES += \
     develop/modules/basicmodule.cpp \
     develop/modules/develophistogrammodule.cpp \
     develop/modules/developmodule.cpp \
+    develop/modules/geometrymodule.cpp \
+    develop/modules/historymodel.cpp \
+    develop/modules/historymodule.cpp \
     develop/modules/rawmodule.cpp \
     dragdropinfo.cpp \
     engine/basicoperation.cpp \
     engine/colortransform.cpp \
+    engine/developrawparameters.cpp \
     engine/dimensionoperation.cpp \
     engine/engineutils.cpp \
     engine/operation.cpp \
     engine/platform.cpp \
+    engine/stage0raw.cpp \
     filmstriptile.cpp \
     image.cpp \
     imageprivate.cpp \
+    import/availablelocationsmodel.cpp \
     import/exiv2lib.cpp \
     import/exivfacade.cpp \
     import/imagefilesystemmodel.cpp \
@@ -134,14 +143,7 @@ SOURCES += \
     widgets/tileview.cpp \
     widgets/timezonepicker.cpp \
     widgets/translucentwindow.cpp \
-    database/developsettingdao.cpp \
-    database/developitems.cpp \
-    develop/modules/historymodule.cpp \
-    develop/modules/historymodel.cpp \
-    engine/developrawparameters.cpp \
-    engine/stage0raw.cpp \
-    develop/modules/geometrymodule.cpp \
-    import/availabledevicesmodel.cpp
+    support/qudev.cpp
 
 #processing/amaze_demosaic_RT.c
 
@@ -156,6 +158,8 @@ HEADERS  += \
     database/collectionitem.h \
     database/databaseaccess.h \
     database/dbutils.h \
+    database/developitems.h \
+    database/developsettingdao.h \
     database/importinfo.h \
     database/importoptions.h \
     database/keyworddao.h \
@@ -167,16 +171,22 @@ HEADERS  += \
     develop/modules/basicmodule.h \
     develop/modules/develophistogrammodule.h \
     develop/modules/developmodule.h \
+    develop/modules/geometrymodule.h \
+    develop/modules/historymodel.h \
+    develop/modules/historymodule.h \
     develop/modules/rawmodule.h \
     dragdropinfo.h \
     engine/basicoperation.h \
     engine/colortransform.h \
+    engine/developrawparameters.h \
     engine/dimensionoperation.h \
     engine/engineutils.h \
     engine/operation.h \
     engine/platform.h \
+    engine/stage0raw.h \
     filmstriptile.h \
     image.h \
+    import/availablelocationsmodel.h \
     import/exiv2lib.h \
     import/exivfacade.h \
     import/exivutils.h \
@@ -211,6 +221,7 @@ HEADERS  += \
     photo.h \
     photofilterinfo.h \
     photomodel.h \
+    photoowner.h \
     photosortfilterproxymodel.h \
     preferences.h \
     preferencesdialog.h \
@@ -241,15 +252,7 @@ HEADERS  += \
     widgets/tileview.h \
     widgets/timezonepicker.h \
     widgets/translucentwindow.h \
-    database/developsettingdao.h \
-    database/developitems.h \
-    engine/developrawparameters.h \
-    photoowner.h \
-    develop/modules/historymodule.h \
-    develop/modules/historymodel.h \
-    engine/stage0raw.h \
-    develop/modules/geometrymodule.h \
-    import/availabledevicesmodel.h
+    support/qudev.h
 
 FORMS    += \
     mainwindow.ui \
@@ -287,8 +290,10 @@ RESOURCES += \
 # linux specific project settings
 linux {
   CONFIG += -fopenmp
+
   SOURCES += \
-    engine/platform_x11.c
+    engine/platform_x11.c \
+    utils_unix.cpp
   HEADERS += \
     engine/platform_x11.h
   LIBS += \
@@ -299,15 +304,17 @@ linux {
     -ljpeg \
     -lpugixml \
     -lgomp \
+    -ludev \
     -lHalide
 }
 
 # mac os specific settings
 macx {
 
+    CONFIG += c++11
+
     include($$PWD/external/xxHash/xxhash.pri)
 
-    CONFIG += c++11
 
 #    QMAKE_INFO_PLIST = Info.plist
 #    QMAKE_CXXFLAGS -= -std=c++0x
