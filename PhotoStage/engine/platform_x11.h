@@ -13,5 +13,4 @@ bool get_display_profile_path_x11(char* pathBuffer, size_t maxPathSize);
 }
 #endif
 
-
 #endif // PLATFORM_X11_H

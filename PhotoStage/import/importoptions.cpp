@@ -1,14 +1,12 @@
 #include "importoptions.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 ImportOptions::ImportOptions()
 {
 }
 
-ImportOptions::ImportOptions(const QFileInfo& destDir, const ImportMode& mode) :
-    destinationDir(destDir),
-    importMode(mode)
+ImportOptions::ImportOptions(const QFileInfo& destDir, const ImportMode& mode)
+    : destinationDir(destDir), importMode(mode)
 {
 }
-}
+} // namespace PhotoStage

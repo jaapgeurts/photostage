@@ -1,8 +1,7 @@
 #include "operation.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 Operation::Operation()
 {
 }
-}
+} // namespace PhotoStage

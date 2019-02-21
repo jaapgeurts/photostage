@@ -3,8 +3,8 @@
 
 #include <QAbstractItemModel>
 #include <QItemSelectionModel>
-#include <QSettings>
 #include <QMenu>
+#include <QSettings>
 
 #include "module.h"
 #include "photo.h"
@@ -12,57 +12,52 @@
 #include "widgets/mapview/mapprovider.h"
 #include "widgets/mapview/modelindexlayer.h"
 
-namespace Ui
-{
+namespace Ui {
 class Map;
 }
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class Cartography : public Module
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  explicit Cartography(QAbstractItemModel* model, QWidget* parent = 0);
+  ~Cartography();
 
-        explicit Cartography(QAbstractItemModel* model, QWidget* parent = 0);
-        ~Cartography();
+  QRect lightGap();
 
-        QRect lightGap();
+  void setSelectionModel(QItemSelectionModel* selectionModel);
+  void setModel(QAbstractItemModel* model);
 
-        void setSelectionModel(QItemSelectionModel* selectionModel);
-        void setModel(QAbstractItemModel* model);
+protected:
+  void showEvent(QShowEvent*);
 
-    protected:
+private slots:
 
-        void showEvent(QShowEvent*);
+  void onCurrentPhotoChanged(const QModelIndex& current, const QModelIndex&);
+  void onSelectionChanged(const QItemSelection&, const QItemSelection&);
+  void onZoomLevelChanged(int level);
+  void onCenterChanged(const QGeoCoordinate& coord);
+  void onContextMenuRequested(const QGeoCoordinate& coord, const QPoint& pos);
 
-    private slots:
+  void onAssignPhotos();
 
-        void onCurrentPhotoChanged(const QModelIndex& current, const QModelIndex&);
-        void onSelectionChanged(const QItemSelection&, const QItemSelection&);
-        void onZoomLevelChanged(int level);
-        void onCenterChanged(const QGeoCoordinate& coord);
-        void onContextMenuRequested(const QGeoCoordinate& coord, const QPoint& pos);
+private:
+  Ui::Map* ui;
 
-        void onAssignPhotos();
+  QAbstractItemModel*       mPhotoModel;
+  MapView::MapProvider*     mMapProvider;
+  MapView::ModelIndexLayer* mLayer;
+  bool                      mLoadPhoto;
+  Photo                     mPhoto;
+  QItemSelectionModel*      mSelectionModel;
+  QGeoCoordinate            mSavedCoordinate;
+  int                       mZoomLevel;
+  QMenu*                    mContextMenu;
+  QGeoCoordinate            mSelectedCoordinate;
 
-    private:
-
-        Ui::Map*                  ui;
-
-        QAbstractItemModel*       mPhotoModel;
-        MapView::MapProvider*     mMapProvider;
-        MapView::ModelIndexLayer* mLayer;
-        bool                      mLoadPhoto;
-        Photo                     mPhoto;
-        QItemSelectionModel*      mSelectionModel;
-        QGeoCoordinate            mSavedCoordinate;
-        int                       mZoomLevel;
-        QMenu*                    mContextMenu;
-        QGeoCoordinate            mSelectedCoordinate;
-
-        void setPhoto(Photo photo);
+  void setPhoto(Photo photo);
 };
-}
+} // namespace PhotoStage
 #endif // MAP_H

@@ -1,31 +1,28 @@
 #ifndef PHOTOSTAGE_JPEGIO_H
 #define PHOTOSTAGE_JPEGIO_H
 
-#include <QString>
 #include <QImage>
+#include <QString>
 
 #include "image.h"
 #include "import/exivfacade.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class JpegIO
 {
-    public:
+public:
+  JpegIO(const QByteArray& memFile, const ExifInfo& ex_info);
+  JpegIO(const QString& filename, const ExifInfo& ex_info);
 
-        JpegIO(const QByteArray& memFile, const ExifInfo& ex_info);
-        JpegIO(const QString& filename, const ExifInfo& ex_info);
+  const Image&      image() const;
+  const QByteArray& colorProfile() const;
 
-        const Image&      image() const;
-        const QByteArray& colorProfile() const;
+private:
+  Image      mImage;
+  QByteArray mProfile;
 
-    private:
-
-        Image      mImage;
-        QByteArray mProfile;
-
-        JpegIO();
-        void initFromArray(const QByteArray& memFile, const ExifInfo& ex_info);
+  JpegIO();
+  void initFromArray(const QByteArray& memFile, const ExifInfo& ex_info);
 };
-}
+} // namespace PhotoStage
 #endif // PHOTOSTAGE_JPEGIO_H

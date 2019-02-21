@@ -48,9 +48,10 @@ void ImportBackgroundTask::run()
 
       // TODO :run this section on the main thread
       QMetaObject::invokeMethod(qApp, [=] {
-        qDebug() << "ThreadId in lambda: " <<  QThread::currentThreadId();
-        DatabaseAccess::photoDao()->importPhoto(
-            importcollectionid, mLastPathId, fileInfo.fileName(), hash, exifInfo);
+        qDebug() << "ThreadId in lambda: " << QThread::currentThreadId();
+        DatabaseAccess::photoDao()->importPhoto(importcollectionid, mLastPathId,
+                                                fileInfo.fileName(), hash,
+                                                exifInfo);
       });
       // TODO :run this section on the main thread
     }

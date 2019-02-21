@@ -1,48 +1,46 @@
 #ifndef PHOTOSTAGE_KEYWORDDAO_H
 #define PHOTOSTAGE_KEYWORDDAO_H
 
-#include <QStringList>
 #include <QMap>
+#include <QStringList>
 
-#include "photo.h"
 #include "keyworditem.h"
+#include "photo.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class DatabaseAccess;
 
 class KeywordDAO : public QObject
 {
-    friend class DatabaseAccess;
+  friend class DatabaseAccess;
 
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  KeywordItem* getKeywordItems();
+  void         deleteKeywordItems(KeywordItem* root);
 
-        KeywordItem* getKeywordItems();
-        void deleteKeywordItems(KeywordItem* root);
+  void insertKeywords(const QStringList& words);
+  void assignKeywords(const QStringList& words, const QList<Photo>& list);
+  void unAssignKeywordsExcept(const QStringList&  words,
+                              const QList<Photo>& list);
 
-        void insertKeywords(const QStringList& words);
-        void assignKeywords(const QStringList& words, const QList<Photo>& list);
-        void unAssignKeywordsExcept(const QStringList& words, const QList<Photo>& list);
+  QMap<QString, int> getPhotoKeywordsCount(const QList<Photo>& list) const;
+  QStringList        getPhotoKeywords(const Photo& photo) const;
 
-        QMap<QString, int> getPhotoKeywordsCount(const QList<Photo>& list) const;
-        QStringList getPhotoKeywords(const Photo& photo) const;
+signals:
 
-    signals:
+  void keywordsAdded();
+  void keywordsDeleted();
+  void keywordsAssignmentChanged(const QList<Photo>& photos);
 
-        void keywordsAdded();
-        void keywordsDeleted();
-        void keywordsAssignmentChanged(const QList<Photo>& photos);
+public slots:
 
-    public slots:
+private:
+  explicit KeywordDAO(QObject* parent = 0);
 
-    private:
-
-        explicit KeywordDAO(QObject* parent = 0);
-
-        void getKeywordItemsRec(KeywordItem* root);
-        long long rebuildKeywordTree(long long parent_id, long long left);
+  void      getKeywordItemsRec(KeywordItem* root);
+  long long rebuildKeywordTree(long long parent_id, long long left);
 };
-}
+} // namespace PhotoStage
 #endif // PHOTOSTAGE_KEYWORDDAO_H

@@ -29,7 +29,7 @@ QUDevDevice::~QUDevDevice()
 QUDevDevice& QUDevDevice::operator=(const QUDevDevice& rhs)
 {
   t++;
-  qDebug() <<"assigned " << t;
+  qDebug() << "assigned " << t;
   if (this == &rhs)
     return *this;
 
@@ -38,7 +38,7 @@ QUDevDevice& QUDevDevice::operator=(const QUDevDevice& rhs)
   udev_device_ref(mDevice);
 }
 
-QUDev::QUDev(QObject *parent) : QObject(parent)
+QUDev::QUDev(QObject* parent) : QObject(parent)
 {
   mContext = udev_new();
   if (mContext == nullptr)
@@ -63,21 +63,22 @@ QList<QUDevDevice> QUDev::getDevices(const QString& filter)
     udev_enumerate_add_match_subsystem(enumerate, filter.toUtf8().data());
 
   int result = udev_enumerate_scan_devices(enumerate);
-  if(result != 0)
+  if (result != 0)
   {
     std::cerr << "Error scanning udev devices" << std::endl;
     return list;
   }
   qDebug() << "Scan complete";
 
-  struct udev_list_entry *devices,*dev_list_entry;
+  struct udev_list_entry *devices, *dev_list_entry;
   devices = udev_enumerate_get_list_entry(enumerate);
   qDebug() << " reading each item";
-  udev_list_entry_foreach(dev_list_entry, devices) {
-    const char *path;
+  udev_list_entry_foreach(dev_list_entry, devices)
+  {
+    const char* path;
 
-    path = udev_list_entry_get_name(dev_list_entry);
-    struct udev_device *dev = udev_device_new_from_syspath(mContext, path);
+    path                    = udev_list_entry_get_name(dev_list_entry);
+    struct udev_device* dev = udev_device_new_from_syspath(mContext, path);
     qDebug() << "path: " << udev_device_get_devnode(dev);
     list << QUDevDevice(dev);
   }

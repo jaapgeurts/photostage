@@ -6,59 +6,58 @@
 #include "nullable.h"
 #include "photo.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class DatabaseAccess;
 struct CollectionItem;
 
 class CollectionDAO : public QObject
 {
-    friend class DatabaseAccess;
+  friend class DatabaseAccess;
 
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  enum CollectionSource {
+    UserSource   = 0x01,
+    WorkSource   = 0x02,
+    ImportSource = 0x04
+  };
+  Q_DECLARE_FLAGS(CollectionSources, CollectionSource)
 
-        enum CollectionSource
-        {
-            UserSource   = 0x01,
-            WorkSource   = 0x02,
-            ImportSource = 0x04
-        };
-        Q_DECLARE_FLAGS(CollectionSources, CollectionSource)
+  CollectionItem* getCollectionItems(CollectionSources source);
 
-        CollectionItem * getCollectionItems(CollectionSources source);
+  void deleteCollectionItems(CollectionItem* root);
+  void addPhotosToCollection(long long               collectionId,
+                             const QList<long long>& photoIds);
 
-        void deleteCollectionItems(CollectionItem* root);
-        void addPhotosToCollection(long long collectionId, const QList<long long>& photoIds);
+  long long addCollection(const Nullable<long long>& parentid,
+                          const QString&             name);
+  long long addImportCollection(int);
+  long long addWorkCollection(const QString& name);
 
-        long long addCollection(const Nullable<long long>& parentid, const QString& name);
-        long long addImportCollection(int);
-        long long addWorkCollection(const QString& name);
+  //    Nullable<long long> collectionIdForPhoto(const Photo& photo) const;
+  void removePhotosFromCollection(long long           collectionid,
+                                  const QList<Photo>& list);
 
-        //    Nullable<long long> collectionIdForPhoto(const Photo& photo) const;
-        void removePhotosFromCollection(long long collectionid, const QList<Photo>& list);
+signals:
 
-    signals:
+  void collectionAdded(long long id);
+  void collectionsChanged();
+  void photosRemoved(long long collectionid, const QList<Photo>& list);
 
-        void collectionAdded(long long id);
-        void collectionsChanged();
-        void photosRemoved(long long collectionid, const QList<Photo>& list);
+  //        void collectionDeleted();
 
-        //        void collectionDeleted();
+private:
+  CollectionDAO(QObject* parent = 0);
 
-    private:
+  void      getCollectionItemsRec(CollectionItem* root, long long id,
+                                  CollectionSource source);
+  long long rebuildCollectionTree(long long parent_id, long long left);
 
-        CollectionDAO(QObject* parent = 0);
-
-        void getCollectionItemsRec(CollectionItem* root, long long id, CollectionSource source);
-        long long rebuildCollectionTree(long long parent_id, long long left);
-
-        long long addCollectionInternal(const Nullable<long long>& parentid,
-            const QString& rootname,
-            const QString& name);
+  long long addCollectionInternal(const Nullable<long long>& parentid,
+                                  const QString& rootname, const QString& name);
 };
-}
+} // namespace PhotoStage
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(PhotoStage::CollectionDAO::CollectionSources)
 

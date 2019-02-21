@@ -3,8 +3,7 @@
 
 #include <QString>
 
-namespace Platform
-{
+namespace Platform {
 
 QString getMonitorProfilePath();
 

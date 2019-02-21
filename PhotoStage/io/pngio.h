@@ -5,16 +5,14 @@
 
 #include "image.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class PngIO
 {
-    public:
+public:
+  static Image fromFile(const QString& filename);
+  static bool  saveToFile(const Image& image, const QString& filename);
 
-        static Image fromFile(const QString& filename);
-        static bool saveToFile(const Image& image, const QString& filename);
-
-        PngIO();
+  PngIO();
 };
-}
+} // namespace PhotoStage
 #endif // PHOTOSTAGE_PNGIO_H

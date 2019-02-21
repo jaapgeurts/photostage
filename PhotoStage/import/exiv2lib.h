@@ -8,32 +8,29 @@
 
 #include "nullable.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class Exiv2Lib : public ExivFacade
 {
-    public:
+public:
+  Exiv2Lib();
 
-        Exiv2Lib();
+  bool     openFile(const QString& path);
+  bool     openData(const QByteArray& data);
+  QImage   getPreview();
+  ExifInfo data();
 
-        bool openFile(const QString& path);
-        bool openData(const QByteArray& data);
-        QImage getPreview();
-        ExifInfo data();
+private:
+  ExifInfo mExifInfo;
 
-    private:
+  Exiv2::Image::AutoPtr mImageFile;
 
-        ExifInfo              mExifInfo;
+  void setWhiteBalanceCoeffsCanon(Exiv2::ExifData& data, float wb[]);
+  void setWhiteBalanceCoeffsNikon(Exiv2::ExifData& data, float wb[]);
+  void readCanonNotes(Exiv2::ExifData& data);
+  void readNikonNotes(Exiv2::ExifData& data);
 
-        Exiv2::Image::AutoPtr mImageFile;
-
-        void setWhiteBalanceCoeffsCanon(Exiv2::ExifData& data, float wb[]);
-        void setWhiteBalanceCoeffsNikon(Exiv2::ExifData& data, float wb[]);
-        void readCanonNotes(Exiv2::ExifData& data);
-        void readNikonNotes(Exiv2::ExifData& data);
-
-        bool populateExifInfo();
+  bool populateExifInfo();
 };
-}
+} // namespace PhotoStage
 
 #endif // PHOTOSTAGE_EXIV2_H

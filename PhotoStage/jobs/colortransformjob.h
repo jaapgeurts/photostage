@@ -1,41 +1,37 @@
 #ifndef PHOTOSTAGE_COLORTRANSFORMJOB_H
 #define PHOTOSTAGE_COLORTRANSFORMJOB_H
 
-#include <QObject>
 #include <QImage>
+#include <QObject>
 
-#include "runnable.h"
 #include "photo.h"
+#include "runnable.h"
 
-namespace PhotoStage
+namespace PhotoStage {
+class ColorTransformJob : public QObject, public Runnable
 {
-class ColorTransformJob  : public QObject, public Runnable
-{
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  enum ConversionType {
+    Preview = 1,
+    Develop = 2,
+  };
 
-        enum ConversionType
-        {
-            Preview = 1,
-            Develop = 2,
-        };
+  ColorTransformJob(const Photo& photo, ConversionType type);
 
-        ColorTransformJob(const Photo& photo, ConversionType type);
+  QVariant run();
+  void     finished(QVariant result);
+  void     error(const QString&);
+  void     cancel();
 
-        QVariant run();
-        void finished(QVariant result);
-        void error(const QString&);
-        void cancel();
+signals:
 
-    signals:
+  void imageReady(Photo photo, const QImage& image);
 
-        void imageReady(Photo photo, const QImage& image);
-
-    private:
-
-        Photo          mPhoto;
-        ConversionType mType;
+private:
+  Photo          mPhoto;
+  ConversionType mType;
 };
-}
+} // namespace PhotoStage
 #endif // PHOTOSTAGE_COLORTRANSFORMJOB_H

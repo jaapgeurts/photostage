@@ -6,60 +6,56 @@
 
 #include "availablelocationsmodel.h"
 #include "imagefilesystemmodel.h"
-#include "widgets/tileview.h"
 #include "importinfo.h"
+#include "widgets/tileview.h"
 
-namespace Ui
-{
+namespace Ui {
 class ImportDialog;
 }
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class ImportDialog : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  explicit ImportDialog(QWidget* parent = 0);
+  ~ImportDialog();
 
-        explicit ImportDialog(QWidget* parent = 0);
-        ~ImportDialog();
+  ImportInfo importInfo();
 
-        ImportInfo importInfo();
+private slots:
 
-    private slots:
+  void onSourceDirClicked(const QModelIndex& index);
+  void onSourceDeviceClicked(const QModelIndex& index);
+  void onDestinationDirClicked(const QModelIndex& index);
+  void onImportModeCopy();
 
-        void onSourceDirClicked(const QModelIndex& index);
-        void onSourceDeviceClicked(const QModelIndex& index);
-        void onDestinationDirClicked(const QModelIndex& index);
-        void onImportModeCopy();
+  void onImportModeMove();
+  void onImportModeAdd();
+  void onFilesSelected(const QItemSelection&, const QItemSelection&);
+  void onCheckedItemsChanged();
+  void onIncludeSubdirs();
 
-        void onImportModeMove();
-        void onImportModeAdd();
-        void onFilesSelected(const QItemSelection&, const QItemSelection&);
-        void onCheckedItemsChanged();
-        void onIncludeSubdirs();
+  // actions
+  void onSelectAllFired();
+  void onSelectNoneFired();
+  void onInvertSelectionFired();
 
-        // actions
-        void onSelectAllFired();
-        void onSelectNoneFired();
-        void onInvertSelectionFired();
+private:
+  Ui::ImportDialog*         ui;
+  AvailableLocationsModel*  mSourceDevicesModel;
+  QFileSystemModel*         mSourceFilesModel;
+  QFileSystemModel*         mDestinationDrivesModel;
+  QModelIndex               mDestinationModelIndex;
+  ImageFileSystemModel*     mFilesModel;
+  ImportOptions::ImportMode mImportMode;
+  QItemSelectionModel*      mFilesSelectionModel;
 
-    private:
+  void expandTreeRec(const QModelIndex& index);
 
-        Ui::ImportDialog*         ui;
-        AvailableLocationsModel*  mSourceDevicesModel;
-        QFileSystemModel*         mSourceFilesModel;
-        QFileSystemModel*         mDestinationDrivesModel;
-        QModelIndex               mDestinationModelIndex;
-        ImageFileSystemModel*     mFilesModel;
-        ImportOptions::ImportMode mImportMode;
-        QItemSelectionModel*      mFilesSelectionModel;
-
-        void expandTreeRec(const QModelIndex& index);
-
-        void validateForm();
+  void validateForm();
 };
-}
+} // namespace PhotoStage
 
 #endif // IMPORTDIALOG_H

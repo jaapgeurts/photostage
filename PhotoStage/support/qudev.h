@@ -17,19 +17,18 @@ public:
   QUDevDevice& operator=(const QUDevDevice& rhs);
 
 private:
-  udev_device *mDevice;
+  udev_device* mDevice;
 };
 
 class QUDev : public QObject
 {
   Q_OBJECT
 public:
-  explicit QUDev(QObject *parent = nullptr);
+  explicit QUDev(QObject* parent = nullptr);
   ~QUDev();
 
   QList<QUDevDevice> getDevices();
   QList<QUDevDevice> getDevices(const QString& filter);
-
 
 signals:
 

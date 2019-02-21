@@ -6,359 +6,365 @@
 
 #include "timezonepicker.h"
 
-namespace Widgets
+namespace Widgets {
+TimezonePicker::TimezonePicker(QWidget* parent)
+    : QWidget(parent), mBackground(":/images/worldmap.jpg"),
+      mFontGeneralFoundIcons(QFont("General Foundicons", 22))
 {
-TimezonePicker::TimezonePicker(QWidget* parent) :
-    QWidget(parent),
-    mBackground(":/images/worldmap.jpg"),
-    mFontGeneralFoundIcons(QFont("General Foundicons", 22))
-{
-    parseCountries();
+  parseCountries();
 
-    setMouseTracking(true);
+  setMouseTracking(true);
 
-    mCountryMap = createMap();
-    mMenu       = new QMenu(this);
-    mMenu->addAction(tr("Home"), this, SLOT(plantHomeFlag()));
-    mMenu->addAction(tr("Destination"), this, SLOT(plantDestinationFlag()));
+  mCountryMap = createMap();
+  mMenu       = new QMenu(this);
+  mMenu->addAction(tr("Home"), this, SLOT(plantHomeFlag()));
+  mMenu->addAction(tr("Destination"), this, SLOT(plantDestinationFlag()));
 }
 
 TimezonePicker::~TimezonePicker()
 {
-    qDeleteAll(mTimezoneAreas);
-    mTimezoneAreas.clear();
+  qDeleteAll(mTimezoneAreas);
+  mTimezoneAreas.clear();
 
-    qDeleteAll(mCountryMap.values());
-    mCountryMap.clear();
+  qDeleteAll(mCountryMap.values());
+  mCountryMap.clear();
 }
 
 void TimezonePicker::parseCountries()
 {
-    QFile data(":/data/tz_world.txt");
+  QFile data(":/data/tz_world.txt");
 
-    if (!data.open(QFile::ReadOnly | QFile::Text))
-        throw std::runtime_error("Can't open worldmap timezone data");
-    QTextStream in(&data);
+  if (!data.open(QFile::ReadOnly | QFile::Text))
+    throw std::runtime_error("Can't open worldmap timezone data");
+  QTextStream in(&data);
 
-    while (!in.atEnd())
+  while (!in.atEnd())
+  {
+    TimezoneArea* tzArea = new TimezoneArea();
+    QString       line   = in.readLine();
+    QStringList   list   = line.split('|');
+    tzArea->timezonename = list.at(0);
+    line                 = list.at(1);
+    line                 = line.mid(12);
+
+    QList<QGeoCoordinate> polygon;
+    enum {
+      MULTIPOLYGON = 1,
+      POLYGONGROUP,
+      COORDINATELIST,
+      LONGITUDE,
+      LATITUDE,
+      FAIL,
+    } state        = MULTIPOLYGON;
+    int     i      = 0;
+    int     length = line.length();
+    QString tmp;
+    double  longitude = 0;
+
+    while (i < length)
     {
-        TimezoneArea* tzArea = new TimezoneArea();
-        QString       line   = in.readLine();
-        QStringList   list   = line.split('|');
-        tzArea->timezonename = list.at(0);
-        line                 = list.at(1);
-        line                 = line.mid(12);
+      QChar l = line.at(i);
 
-        QList<QGeoCoordinate> polygon;
-        enum
-        {
-            MULTIPOLYGON = 1,
-            POLYGONGROUP,
-            COORDINATELIST,
-            LONGITUDE,
-            LATITUDE,
-            FAIL,
-        }
-        state          = MULTIPOLYGON;
-        int     i      = 0;
-        int     length = line.length();
-        QString tmp;
-        double  longitude = 0;
+      switch (state)
+      {
+        case MULTIPOLYGON:
 
-        while (i < length)
-        {
-            QChar l = line.at(i);
+          if (l == '(')
+            state = POLYGONGROUP;
+          else
+          {
+            qDebug() << tzArea->timezonename << "1. expected '(' or ')' found "
+                     << l;
+            state = FAIL;
+          }
+          break;
 
-            switch (state)
-            {
-                case MULTIPOLYGON:
+        case POLYGONGROUP:
 
-                    if (l == '(')
-                        state = POLYGONGROUP;
-                    else
-                    {
-                        qDebug() << tzArea->timezonename << "1. expected '(' or ')' found " << l;
-                        state = FAIL;
-                    }
-                    break;
+          if (l == '(')
+            state = COORDINATELIST;
+          else if (l == ')')
+          {
+            // qDebug() << "Adding country/timezone" << tzArea->timezonename;
+            mTimezoneAreas.append(tzArea);
+          }
+          else
+          {
+            qDebug() << tzArea->timezonename << "2. expected '(' or ')' found "
+                     << l;
+            state = FAIL;
+          }
+          break;
 
-                case POLYGONGROUP:
+        case COORDINATELIST:
 
-                    if (l == '(')
-                        state = COORDINATELIST;
-                    else if (l == ')')
-                    {
-                        // qDebug() << "Adding country/timezone" << tzArea->timezonename;
-                        mTimezoneAreas.append(tzArea);
-                    }
-                    else
-                    {
-                        qDebug() << tzArea->timezonename << "2. expected '(' or ')' found " << l;
-                        state = FAIL;
-                    }
-                    break;
+          if (l == '(')
+          {
+            polygon = QList<QGeoCoordinate>();
+            state   = LONGITUDE;
+          }
+          else if (l == ',')
+          {
+            tzArea->polygons.append(polygon);
+          }
+          else if (l == ')')
+          {
+            tzArea->polygons.append(polygon);
+            state = POLYGONGROUP;
+          }
+          else
+          {
+            qDebug() << tzArea->timezonename
+                     << "4. expected '(' or ')' or ',' found " << l;
+            state = FAIL;
+          }
+          break;
 
-                case COORDINATELIST:
+        case LONGITUDE:
 
-                    if (l == '(')
-                    {
-                        polygon = QList<QGeoCoordinate>();
-                        state   = LONGITUDE;
-                    }
-                    else if (l == ',')
-                    {
-                        tzArea->polygons.append(polygon);
-                    }
-                    else if (l == ')')
-                    {
-                        tzArea->polygons.append(polygon);
-                        state = POLYGONGROUP;
-                    }
-                    else
-                    {
-                        qDebug() << tzArea->timezonename << "4. expected '(' or ')' or ',' found " << l;
-                        state = FAIL;
-                    }
-                    break;
+          if (l == '-' || l == '.' || (l >= '0' && l <= '9'))
+          {
+            tmp += l;
+          }
+          else if (l == ' ')
+          {
+            // read longitude
+            longitude = tmp.toDouble();
+            tmp.clear();
+            state = LATITUDE;
+          }
+          else
+          {
+            qDebug() << tzArea->timezonename
+                     << "5. expected '[0-9.-]' or ' ' found " << l;
+            state = FAIL;
+          }
+          break;
 
-                case LONGITUDE:
+        case LATITUDE:
 
-                    if (l == '-' || l == '.' || (l >= '0' && l <= '9'))
-                    {
-                        tmp += l;
-                    }
-                    else if (l == ' ')
-                    {
-                        // read longitude
-                        longitude = tmp.toDouble();
-                        tmp.clear();
-                        state = LATITUDE;
-                    }
-                    else
-                    {
-                        qDebug() << tzArea->timezonename << "5. expected '[0-9.-]' or ' ' found " << l;
-                        state = FAIL;
-                    }
-                    break;
+          if (l == '-' || l == '.' || (l >= '0' && l <= '9'))
+          {
+            tmp += l;
+          }
+          else if (l == ',')
+          {
+            // read latitude
+            polygon.append(QGeoCoordinate(tmp.toDouble(), longitude));
+            tmp.clear();
+            state = LONGITUDE;
+          }
+          else if (l == ')')
+          {
+            // read latitude
+            polygon.append(QGeoCoordinate(tmp.toDouble(), longitude));
+            tmp.clear();
+            state = COORDINATELIST;
+          }
+          else
+          {
+            qDebug() << tzArea->timezonename
+                     << "6. expected '[0-9.-]' or ',' or ')' found " << l;
+            state = FAIL;
+          }
+          break;
 
-                case LATITUDE:
-
-                    if (l == '-' || l == '.' || (l >= '0' && l <= '9'))
-                    {
-                        tmp += l;
-                    }
-                    else if (l == ',')
-                    {
-                        // read latitude
-                        polygon.append(QGeoCoordinate(tmp.toDouble(), longitude));
-                        tmp.clear();
-                        state = LONGITUDE;
-                    }
-                    else if (l == ')')
-                    {
-                        // read latitude
-                        polygon.append(QGeoCoordinate(tmp.toDouble(), longitude));
-                        tmp.clear();
-                        state = COORDINATELIST;
-                    }
-                    else
-                    {
-                        qDebug() << tzArea->timezonename << "6. expected '[0-9.-]' or ',' or ')' found " << l;
-                        state = FAIL;
-                    }
-                    break;
-
-                case FAIL:
-                    qDebug() << "Skipping line" << tzArea->timezonename;
-                    break;
-            }
-            i++;
-        }
+        case FAIL:
+          qDebug() << "Skipping line" << tzArea->timezonename;
+          break;
+      }
+      i++;
     }
+  }
 
-    data.close();
+  data.close();
 }
 
 void TimezonePicker::mouseMoveEvent(QMouseEvent* event)
 {
-    TimezoneArea* tzArea = contains(event->pos());
+  TimezoneArea* tzArea = contains(event->pos());
 
-    if (tzArea != NULL)
+  if (tzArea != NULL)
+  {
+    // now we know the country.
+    // get the timezone for this country
+    QTimeZone tz(tzArea->timezonename.toLocal8Bit());
+
+    // now get all countries for this timezone
+    QStringList* countries =
+        mCountryMap.value(tz.standardTimeOffset(QDateTime::currentDateTime()));
+
+    foreach (TimezoneArea* a, mTimezoneAreas)
     {
-        // now we know the country.
-        // get the timezone for this country
-        QTimeZone tz(tzArea->timezonename.toLocal8Bit());
+      a->isHighlighted = false;
 
-        // now get all countries for this timezone
-        QStringList* countries =  mCountryMap.value(tz.standardTimeOffset(QDateTime::currentDateTime()));
-
-        foreach(TimezoneArea * a, mTimezoneAreas)
-        {
-            a->isHighlighted = false;
-
-            foreach(QString ba, *countries)
-            {
-                if (a->timezonename == ba)
-                    a->isHighlighted = true;
-            }
-        }
+      foreach (QString ba, *countries)
+      {
+        if (a->timezonename == ba)
+          a->isHighlighted = true;
+      }
     }
+  }
 
-    update();
+  update();
 }
 
 void TimezonePicker::mouseReleaseEvent(QMouseEvent* event)
 {
-    if (event->button() | Qt::LeftButton)
-    {
-        mLastClickLocation = event->pos();
-        mMenu->popup(mapToGlobal(event->pos()));
-    }
+  if (event->button() | Qt::LeftButton)
+  {
+    mLastClickLocation = event->pos();
+    mMenu->popup(mapToGlobal(event->pos()));
+  }
 }
 
 void TimezonePicker::plantHomeFlag()
 {
-    TimezoneArea* a = contains(mLastClickLocation);
+  TimezoneArea* a = contains(mLastClickLocation);
 
-    if (a != NULL)
-    {
-        mHomeFlagLocation = pointToGeo(mLastClickLocation);
-        emit homeTimezoneSelected(a->timezonename);
-    }
-    update();
+  if (a != NULL)
+  {
+    mHomeFlagLocation = pointToGeo(mLastClickLocation);
+    emit homeTimezoneSelected(a->timezonename);
+  }
+  update();
 }
 
 void TimezonePicker::plantDestinationFlag()
 {
-    TimezoneArea* a = contains(mLastClickLocation);
+  TimezoneArea* a = contains(mLastClickLocation);
 
-    if (a != NULL)
-    {
-        mDestinationFlagLocation = pointToGeo(mLastClickLocation);
-        emit destinationTimezoneSelected(a->timezonename);
-    }
-    update();
+  if (a != NULL)
+  {
+    mDestinationFlagLocation = pointToGeo(mLastClickLocation);
+    emit destinationTimezoneSelected(a->timezonename);
+  }
+  update();
 }
 
 QHash<int, QStringList*> TimezonePicker::createMap() const
 {
-    QHash<int, QStringList*> map;
+  QHash<int, QStringList*> map;
 
-    QList<QByteArray>        ianaList = QTimeZone::availableTimeZoneIds();
-    foreach(QByteArray a, ianaList)
-    {
-        QTimeZone z(a);
+  QList<QByteArray> ianaList = QTimeZone::availableTimeZoneIds();
+  foreach (QByteArray a, ianaList)
+  {
+    QTimeZone z(a);
 
-        int       offset = z.standardTimeOffset(QDateTime::currentDateTime());
+    int offset = z.standardTimeOffset(QDateTime::currentDateTime());
 
-        if (!map.contains(offset))
-            map.insert(offset, new QStringList());
+    if (!map.contains(offset))
+      map.insert(offset, new QStringList());
 
-        map.value(offset)->append(QString(a));
-    }
+    map.value(offset)->append(QString(a));
+  }
 
-    return map;
+  return map;
 }
 
 TimezoneArea* TimezonePicker::contains(const QPoint& pos) const
 {
-    foreach(TimezoneArea * a, mTimezoneAreas)
-    {
-        QPainterPath path;
+  foreach (TimezoneArea* a, mTimezoneAreas)
+  {
+    QPainterPath path;
 
-        makePath(path, a);
+    makePath(path, a);
 
-        if (path.contains(pos))
-            return a;
-    }
-    return NULL;
+    if (path.contains(pos))
+      return a;
+  }
+  return NULL;
 }
 
 void TimezonePicker::makePath(QPainterPath& path, const TimezoneArea* a) const
 {
-    //        if (!a.timezonename.startsWith("Europe"))
-    //            continue;
-    // only draw main polygon. (ignore the cutout polygons
-    const QList<QGeoCoordinate> list = a->polygons.at(0);
-    const QGeoCoordinate        c1   = list.at(0);
-    const QPoint                p1   = geoToPoint(c1);
-    int                         x1   = p1.x();
-    int                         y1   = p1.y();
+  //        if (!a.timezonename.startsWith("Europe"))
+  //            continue;
+  // only draw main polygon. (ignore the cutout polygons
+  const QList<QGeoCoordinate> list = a->polygons.at(0);
+  const QGeoCoordinate        c1   = list.at(0);
+  const QPoint                p1   = geoToPoint(c1);
+  int                         x1   = p1.x();
+  int                         y1   = p1.y();
 
-    path.moveTo(x1, y1);
+  path.moveTo(x1, y1);
 
-    int i    = 1;
-    int size = list.size();
+  int i    = 1;
+  int size = list.size();
 
-    while (i < size)
-    {
-        const QGeoCoordinate c2 = list.at(i);
-        const QPoint         p2 = geoToPoint(c2);
-        int                  x2 = p2.x();
-        int                  y2 = p2.y();
+  while (i < size)
+  {
+    const QGeoCoordinate c2 = list.at(i);
+    const QPoint         p2 = geoToPoint(c2);
+    int                  x2 = p2.x();
+    int                  y2 = p2.y();
 
-        if (x1 != x2 || y1 != y2) // don't draw what we can't see
-            path.lineTo(x2, y2);
+    if (x1 != x2 || y1 != y2) // don't draw what we can't see
+      path.lineTo(x2, y2);
 
-        i++;
-    }
-    path.closeSubpath();
+    i++;
+  }
+  path.closeSubpath();
 }
 
 void TimezonePicker::paintEvent(QPaintEvent* /*event*/)
 {
-    QPainter painter(this);
+  QPainter painter(this);
 
-    painter.drawPixmap(0, 0, mBackgroundScaled);
-    painter.setPen(Qt::black);
+  painter.drawPixmap(0, 0, mBackgroundScaled);
+  painter.setPen(Qt::black);
 
-    foreach(TimezoneArea * a, mTimezoneAreas)
-    {
-        QPainterPath path;
+  foreach (TimezoneArea* a, mTimezoneAreas)
+  {
+    QPainterPath path;
 
-        makePath(path, a);
+    makePath(path, a);
 
-        if (a->isHighlighted)
-            painter.fillPath(path, QBrush(Qt::blue));
-        else
-            painter.drawPath(path);
-    }
+    if (a->isHighlighted)
+      painter.fillPath(path, QBrush(Qt::blue));
+    else
+      painter.drawPath(path);
+  }
 
-    QString icon = "";
-    painter.setFont(mFontGeneralFoundIcons);
+  QString icon = "";
+  painter.setFont(mFontGeneralFoundIcons);
 
-    if (mHomeFlagLocation.isValid())
-    {
-        QPen   pen(Qt::yellow);
-        painter.setPen(pen);
-        QPoint p = geoToPoint(mHomeFlagLocation);
-        painter.drawText(p, icon);
-    }
+  if (mHomeFlagLocation.isValid())
+  {
+    QPen pen(Qt::yellow);
+    painter.setPen(pen);
+    QPoint p = geoToPoint(mHomeFlagLocation);
+    painter.drawText(p, icon);
+  }
 
-    if (mDestinationFlagLocation.isValid())
-    {
-        QPen   pen(Qt::cyan);
-        painter.setPen(pen);
-        QPoint p = geoToPoint(mDestinationFlagLocation);
-        painter.drawText(p, icon);
-    }
+  if (mDestinationFlagLocation.isValid())
+  {
+    QPen pen(Qt::cyan);
+    painter.setPen(pen);
+    QPoint p = geoToPoint(mDestinationFlagLocation);
+    painter.drawText(p, icon);
+  }
 }
 
 QPoint TimezonePicker::geoToPoint(const QGeoCoordinate& coord) const
 {
-    return QPoint((coord.longitude() + 180) / 360 * mBackgroundScaled.width(),
-               mBackgroundScaled.height() - (coord.latitude() + 90) / 180 * mBackgroundScaled.height());
+  return QPoint((coord.longitude() + 180) / 360 * mBackgroundScaled.width(),
+                mBackgroundScaled.height() -
+                    (coord.latitude() + 90) / 180 * mBackgroundScaled.height());
 }
 
 QGeoCoordinate TimezonePicker::pointToGeo(const QPoint& point) const
 {
-    return QGeoCoordinate((double)(mBackgroundScaled.height() - point.y()) / mBackgroundScaled.height() * 180 - 90,
-               (double)point.x() / mBackgroundScaled.width() * 360 - 180);
+  return QGeoCoordinate((double)(mBackgroundScaled.height() - point.y()) /
+                                mBackgroundScaled.height() * 180 -
+                            90,
+                        (double)point.x() / mBackgroundScaled.width() * 360 -
+                            180);
 }
 
 void TimezonePicker::resizeEvent(QResizeEvent* event)
 {
-    mBackgroundScaled = mBackground.scaled(event->size(), Qt::KeepAspectRatio);
-    update();
+  mBackgroundScaled = mBackground.scaled(event->size(), Qt::KeepAspectRatio);
+  update();
 }
-}
+} // namespace Widgets

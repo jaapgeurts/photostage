@@ -1,36 +1,32 @@
 #ifndef PREVIEWFILELOADER_H
 #define PREVIEWFILELOADER_H
 
-#include <QObject>
-#include <QModelIndex>
-#include <QString>
 #include <QImage>
+#include <QModelIndex>
+#include <QObject>
 #include <QRunnable>
+#include <QString>
 
-namespace PhotoStage
+namespace PhotoStage {
+class PreviewFileLoader : public QObject, public QRunnable
 {
-    class PreviewFileLoader : public QObject, public QRunnable
-    {
-        Q_OBJECT
+  Q_OBJECT
 
-        public:
+public:
+  explicit PreviewFileLoader(const QString& path, const QModelIndex& index);
+  ~PreviewFileLoader();
 
-            explicit PreviewFileLoader(const QString& path,
-                const QModelIndex& index);
-            ~PreviewFileLoader();
+  void run();
 
-            void run();
+signals:
 
-        signals:
+  void dataReady(const QModelIndex& index, const QImage& pixmap);
+  void error(QString error);
 
-            void dataReady(const QModelIndex& index, const QImage& pixmap);
-            void error(QString error);
-
-        private:
-
-            QModelIndex mModelIndex;
-            QString     mPath;
-    };
-}
+private:
+  QModelIndex mModelIndex;
+  QString     mPath;
+};
+} // namespace PhotoStage
 
 #endif // PREVIEWFILELOADER_H

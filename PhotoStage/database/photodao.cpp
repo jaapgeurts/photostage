@@ -103,8 +103,8 @@ void PhotoDAO::assignGeoCoordinate(const QGeoCoordinate& coord,
 }
 
 void PhotoDAO::importPhoto(long long collectionid, int pathId,
-                        const QString& fileName, long long hash,
-                        const ExifInfo& exifInfo)
+                           const QString& fileName, long long hash,
+                           const ExifInfo& exifInfo)
 {
 
   // send this to the DAO

@@ -8,8 +8,7 @@
 #include "platform_x11.h"
 #endif
 
-namespace Platform
-{
+namespace Platform {
 QString getMonitorProfilePath()
 {
 #define BUFFER_SIZE 512
@@ -20,11 +19,11 @@ QString getMonitorProfilePath()
   if (get_screen_profile(buffer, BUFFER_SIZE))
     return QString::fromLocal8Bit(buffer);
 #elif defined(Q_OS_UNIX)
-  if (get_display_profile_path_x11(buffer,BUFFER_SIZE))
+  if (get_display_profile_path_x11(buffer, BUFFER_SIZE))
     return QString::fromLocal8Bit(buffer);
 #else
 #warning "Monitor profiles not supported on this system."
 #endif
   return QString();
 }
-}
+} // namespace Platform

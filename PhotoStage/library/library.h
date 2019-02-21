@@ -3,101 +3,98 @@
 
 #include "module.h"
 
-#include "photomodel.h"
 #include "database/databaseaccess.h"
 #include "imagedbtile.h"
-#include "modules/taggingmodule.h"
-#include "modules/filtermodule.h"
-#include "modules/filesmodule.h"
 #include "modules/collectionmodule.h"
-#include "modules/shortcutmodule.h"
+#include "modules/filesmodule.h"
+#include "modules/filtermodule.h"
+#include "modules/keywordmodule.h"
 #include "modules/libraryhistogrammodule.h"
 #include "modules/metadatamodule.h"
-#include "modules/keywordmodule.h"
+#include "modules/shortcutmodule.h"
+#include "modules/taggingmodule.h"
+#include "photomodel.h"
 #include "photosortfilterproxymodel.h"
 
-namespace Ui
-{
+namespace Ui {
 class Library;
 }
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class Library : public Module
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  explicit Library(PhotoSortFilterProxyModel* const model, QWidget* parent = 0);
+  ~Library();
 
-        explicit Library(PhotoSortFilterProxyModel* const model, QWidget* parent = 0);
-        ~Library();
+  QRect lightGap();
 
-        QRect lightGap();
+  void setSelectionModel(QItemSelectionModel* selectionModel);
 
-        void setSelectionModel(QItemSelectionModel* selectionModel);
+  bool canSelectionChange();
+  bool canSelectUpDown();
+  int  tilesPerRowOrCol();
 
-        bool canSelectionChange();
-        bool canSelectUpDown();
-        int tilesPerRowOrCol();
+signals:
 
-    signals:
+  void photoSourceChanged(PhotoModel::SourceType type, long long id);
+  void modelFilterApplied(const PhotoFilterInfo& info);
 
-        void photoSourceChanged(PhotoModel::SourceType type, long long id);
-        void modelFilterApplied(const PhotoFilterInfo& info);
+public slots:
 
-    public slots:
+  // Library options bar
+  void onShowLoupe();
+  void onShowGrid();
 
-        // Library options bar
-        void onShowLoupe();
-        void onShowGrid();
+  void onSortKeyChanged(int key);
+  void onSortOrderChanged();
 
-        void onSortKeyChanged(int key);
-        void onSortOrderChanged();
+  void onPhotoSelectionChanged(const QItemSelection& selected,
+                               const QItemSelection&);
+  void onCurrentPhotoChanged(const QModelIndex& current, const QModelIndex&);
+  void onTileDoubleClicked(const QModelIndex&);
+  void onDataChanged(const QModelIndex&, const QModelIndex&,
+                     const QVector<int>& roles);
 
-        void onPhotoSelectionChanged(const QItemSelection& selected, const QItemSelection&);
-        void onCurrentPhotoChanged(const QModelIndex& current, const QModelIndex&);
-        void onTileDoubleClicked(const QModelIndex&);
-        void onDataChanged(const QModelIndex&, const QModelIndex&, const QVector<int>& roles);
+  void onCycleLoupeInfo();
 
-        void onCycleLoupeInfo();
+  void onNewCollection();
+  void onNewWorkCollection();
 
-        void onNewCollection();
-        void onNewWorkCollection();
+  // For clicks on the tile
+  //    void rotateLeftClicked(const QModelIndex& index);
+  //    void rotateRightClicked(const QModelIndex& index);
+  //    void ratingClicked(const QModelIndex& index, int rating);
 
-        // For clicks on the tile
-        //    void rotateLeftClicked(const QModelIndex& index);
-        //    void rotateRightClicked(const QModelIndex& index);
-        //    void ratingClicked(const QModelIndex& index, int rating);
+protected:
+private slots:
 
-    protected:
+  void onCustomContextMenu(const QPoint& pos);
+  void onThumbSizeChanged(int);
+  void onZoomLevelChanged(int zoomLevel);
 
-    private slots:
+  void onPathSelected(long long pathid);
+  void onCollectionSelected(long long collectionid);
+  void onWorkCollectionSelected(long long id);
+  void onImportCollectionSelected(long long id);
 
-        void onCustomContextMenu(const QPoint& pos);
-        void onThumbSizeChanged(int);
-        void onZoomLevelChanged(int zoomLevel);
-
-        void onPathSelected(long long pathid);
-        void onCollectionSelected(long long collectionid);
-        void onWorkCollectionSelected(long long id);
-        void onImportCollectionSelected(long long id);
-
-    private:
-
-        Ui::Library*               ui;
-        PhotoSortFilterProxyModel* mPhotoModel;
-        PhotoDAO*                  mPhotoWorkUnit;
-        TaggingModule*             mTagging;
-        LibraryHistogramModule*    mHistogramModule;
-        MetaDataModule*            mMetaDataModule;
-        QFont                      mFontAccessFoundIcons;
-        Photo                      mCurrentPhoto;
-        QItemSelectionModel*       mSelectionModel;
-        FilesModule*               mFilesModule;
-        CollectionModule*          mCollectionModule;
-        ShortcutModule*            mShortcutModule;
-        KeywordModule*             mKeywordModule;
+private:
+  Ui::Library*               ui;
+  PhotoSortFilterProxyModel* mPhotoModel;
+  PhotoDAO*                  mPhotoWorkUnit;
+  TaggingModule*             mTagging;
+  LibraryHistogramModule*    mHistogramModule;
+  MetaDataModule*            mMetaDataModule;
+  QFont                      mFontAccessFoundIcons;
+  Photo                      mCurrentPhoto;
+  QItemSelectionModel*       mSelectionModel;
+  FilesModule*               mFilesModule;
+  CollectionModule*          mCollectionModule;
+  ShortcutModule*            mShortcutModule;
+  KeywordModule*             mKeywordModule;
 };
-}
+} // namespace PhotoStage
 
 #endif // PHOTOSTAGE_LIBRARY_H

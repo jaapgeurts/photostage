@@ -5,129 +5,124 @@
 
 using namespace Halide;
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 EngineUtils* EngineUtils::mEngineUtils = nullptr;
 
 EngineUtils* EngineUtils::instance()
 {
-    if (mEngineUtils == nullptr)
-        mEngineUtils = new EngineUtils();
-    return mEngineUtils;
+  if (mEngineUtils == nullptr)
+    mEngineUtils = new EngineUtils();
+  return mEngineUtils;
 }
 
-EngineUtils::EngineUtils() :
-    x("x"),
-    y("y"),
-    c("c"),
-    mInput(UInt(16), 3, "InputImage")
+EngineUtils::EngineUtils()
+    : x("x"), y("y"), c("c"), mInput(UInt(16), 3, "InputImage")
 {
-    qDebug() << "Setting up engine utils";
-    mToQImage = process(mInput);
+  qDebug() << "Setting up engine utils";
+  mToQImage = process(mInput);
 }
 
 void EngineUtils::histogram()
 {
-    /* ImageParam input(UInt(8), 2);
-       Func histogram;
-       Var x;
-       RDom r(input); // Iterate over all pixels in the input
-       histogram(x) = 0;
-       histogram(input(r.x, r.y)) = histogram(input(r.x, r.y)) + 1;
-     */
+  /* ImageParam input(UInt(8), 2);
+     Func histogram;
+     Var x;
+     RDom r(input); // Iterate over all pixels in the input
+     histogram(x) = 0;
+     histogram(input(r.x, r.y)) = histogram(input(r.x, r.y)) + 1;
+   */
 }
 
 Func EngineUtils::to32Bit(Func in)
 {
-    Func convert("convert");
+  Func convert("convert");
 
-    Expr red   = cast<uint32_t>(in(x, y, 0) >> 8);
-    Expr green = cast<uint32_t>(in(x, y, 1) >> 8);
-    Expr blue  = cast<uint32_t>(in(x, y, 2) >> 8);
+  Expr red   = cast<uint32_t>(in(x, y, 0) >> 8);
+  Expr green = cast<uint32_t>(in(x, y, 1) >> 8);
+  Expr blue  = cast<uint32_t>(in(x, y, 2) >> 8);
 
-    convert(x, y) = cast<uint32_t>(0xff << 24 | blue << 16 | green << 8 | red  );
+  convert(x, y) = cast<uint32_t>(0xff << 24 | blue << 16 | green << 8 | red);
 
-    convert.vectorize(x, 8);
+  convert.vectorize(x, 8);
 
-    return convert;
+  return convert;
 }
 
 Func EngineUtils::tosRGB(Func in)
 {
-    Func transform("transform");
+  Func transform("transform");
 
-    // XYZ -> ProPhoto
-    //    float rawmatrix[][3] = {
-    //        {  2.818, -0.536, -0.106 },
-    //        { -1.151,  1.627,  0.043},
-    //        {  0.000,  0.000,  1.212}
-    //    };
+  // XYZ -> ProPhoto
+  //    float rawmatrix[][3] = {
+  //        {  2.818, -0.536, -0.106 },
+  //        { -1.151,  1.627,  0.043},
+  //        {  0.000,  0.000,  1.212}
+  //    };
 
-    // sRGB -> ProPhoto
-    //    float rawmatrix[][3] = {
-    //        {0.410, 0.135, 0.031},
-    //        {0.290, 0.710, 0.000},
-    //        {0.000, 0.000, 0.825}
-    //    };
+  // sRGB -> ProPhoto
+  //    float rawmatrix[][3] = {
+  //        {0.410, 0.135, 0.031},
+  //        {0.290, 0.710, 0.000},
+  //        {0.000, 0.000, 0.825}
+  //    };
 
-    //ProPhoto->sRGB
-    float rawmatrix[][3] = {
-        { 2.142, -0.656, -0.310 },
-        {  -0.233,  1.204,  0.004},
-        {  -0.014, -0.138,  0.874}
-    };
+  // ProPhoto->sRGB
+  float rawmatrix[][3] = {
+      {2.142, -0.656, -0.310}, {-0.233, 1.204, 0.004}, {-0.014, -0.138, 0.874}};
 
-    /*float sum;
+  /*float sum;
 
-       for (int i = 0; i < 3; i++)
-       {
-        sum = 0;
+     for (int i = 0; i < 3; i++)
+     {
+      sum = 0;
 
-        for (int j = 0; j < 3; j++)
-            sum += rawmatrix[i][j];
+      for (int j = 0; j < 3; j++)
+          sum += rawmatrix[i][j];
 
-        for (int j = 0; j < 3; j++)
-            rawmatrix[i][j] /= sum;
-       }*/
+      for (int j = 0; j < 3; j++)
+          rawmatrix[i][j] /= sum;
+     }*/
 
-    Halide::Buffer<float> matrix(3, 3);
+  Halide::Buffer<float> matrix(3, 3);
 
-    for (int y = 0; y < 3; y++)
-        for (int x = 0; x < 3; x++)
-            matrix(x, y) = rawmatrix[x][y];
+  for (int y = 0; y < 3; y++)
+    for (int x = 0; x < 3; x++)
+      matrix(x, y) = rawmatrix[x][y];
 
+  transform(x, y, c) = clamp(cast<uint16_t>(in(x, y, 0) * matrix(0, c) +
+                                            in(x, y, 1) * matrix(1, c) +
+                                            in(x, y, 2) * matrix(2, c)),
+                             0, 65535);
 
-    transform(x, y, c) = clamp(cast<uint16_t>(in(x, y, 0 ) * matrix(0, c) +
-            in(x, y, 1 ) * matrix(1, c) +
-            in(x, y, 2 ) * matrix(2, c)), 0, 65535);
-
-    return transform;
+  return transform;
 }
 
 Func EngineUtils::process(ImageParam input)
 {
-    Func src;
+  Func src;
 
-    src(x, y, c) = input(x, y, c);
-    return to32Bit(src);
+  src(x, y, c) = input(x, y, c);
+  return to32Bit(src);
 }
 
 QImage EngineUtils::toQImage(int width, int height, uint16_t* data)
 {
-    // Buffer   inBuf(UInt(16), width, height, 3, 0, (uint8_t*)data, "SrcImage");
-    //void* p = new Buffer<uint16_t,3>()
+  // Buffer   inBuf(UInt(16), width, height, 3, 0, (uint8_t*)data, "SrcImage");
+  // void* p = new Buffer<uint16_t,3>()
   // TODO: make sure this works correctly
-    Buffer<uint16_t>   inBuf(data,{width,height,3},"SrcImage");
+  Buffer<uint16_t> inBuf(data, {width, height, 3}, "SrcImage");
 
-    uint32_t* outdata = new uint32_t[width * height];
-    // Buffer   outBuf(UInt(32), width, height, 0, 0, (uint8_t*)outdata, "DstImage");
-    // TODO: make sure this works correctly
-    Buffer<uint32_t>   outBuf(outdata,{width,height},"DstImage");
+  uint32_t* outdata = new uint32_t[width * height];
+  // Buffer   outBuf(UInt(32), width, height, 0, 0, (uint8_t*)outdata,
+  // "DstImage");
+  // TODO: make sure this works correctly
+  Buffer<uint32_t> outBuf(outdata, {width, height}, "DstImage");
 
-    mInput.set(inBuf);
-    mToQImage.realize(outBuf);
+  mInput.set(inBuf);
+  mToQImage.realize(outBuf);
 
-    return QImage((const uchar*)outdata, width, height, 4 * width, QImage::Format_RGB32,
-               (QImageCleanupFunction)deleteArray<uint32_t>, outdata);
+  return QImage((const uchar*)outdata, width, height, 4 * width,
+                QImage::Format_RGB32,
+                (QImageCleanupFunction)deleteArray<uint32_t>, outdata);
 }
-}
+} // namespace PhotoStage

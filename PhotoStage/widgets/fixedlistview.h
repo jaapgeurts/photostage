@@ -3,24 +3,21 @@
 
 #include <QListView>
 
-namespace Widgets
-{
+namespace Widgets {
 class FixedListView : public QListView
 {
-    public:
+public:
+  FixedListView(QWidget* parent = 0);
+  void  setModel(QAbstractItemModel* model);
+  QSize sizeHint() const;
 
-        FixedListView(QWidget* parent = 0);
-        void setModel(QAbstractItemModel* model);
-        QSize sizeHint() const;
+private slots:
 
-    private slots:
+  void onModelReset();
+  void onRowsAddedDeleted(const QModelIndex&, int, int);
 
-        void onModelReset();
-        void onRowsAddedDeleted(const QModelIndex&, int, int);
-
-    private:
-
-        int CalculateHeight() const;
+private:
+  int CalculateHeight() const;
 };
-}
+} // namespace Widgets
 #endif // FIXEDLISTVIEW_H

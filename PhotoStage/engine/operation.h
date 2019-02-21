@@ -3,22 +3,16 @@
 
 #include <QObject>
 
-namespace PhotoStage
+namespace PhotoStage {
+class Operation
 {
-    class Operation
-    {
-        public:
+public:
+  Operation();
+  virtual ~Operation(){};
 
-            Operation();
-            virtual ~Operation()
-            {
-            };
-
-            // this operation operates on the whole array
-            // change the contents of the array
-            virtual void opArray(float*, int /*width*/, int /*height*/)
-            {
-            };
-    };
-}
+  // this operation operates on the whole array
+  // change the contents of the array
+  virtual void opArray(float*, int /*width*/, int /*height*/){};
+};
+} // namespace PhotoStage
 #endif // PHOTOSTAGE_OPERATION_H

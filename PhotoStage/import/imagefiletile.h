@@ -3,20 +3,19 @@
 
 #include "widgets/abstracttile.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class ImageFileTile : public Widgets::AbstractTile
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  ImageFileTile(Widgets::TileView* parent = 0);
 
-        ImageFileTile(Widgets::TileView* parent = 0);
+  void render(QPainter& painter, const Widgets::TileInfo& tileInfo,
+              const QVariant& data);
 
-        void render(QPainter& painter, const Widgets::TileInfo& tileInfo, const QVariant& data);
-
-    private:
+private:
 };
-}
+} // namespace PhotoStage
 
 #endif // IMAGEFILECELLRENDERER_H

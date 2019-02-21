@@ -5,20 +5,18 @@
 
 #include "widgets/mapview/abstractmarker.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class PhotoMarker : public MapView::AbstractMarker
 {
-    public:
+public:
+  PhotoMarker(QObject* parent = 0);
 
-        PhotoMarker(QObject* parent = 0);
+  QSize size() const;
+  void  paint(QPainter& painter, const MapView::MarkerInfo& info,
+              const QVariant&);
 
-        QSize size() const;
-        void paint(QPainter& painter, const MapView::MarkerInfo& info, const QVariant&);
-
-    private:
-
-        QPainterPath pp;
+private:
+  QPainterPath pp;
 };
-}
+} // namespace PhotoStage
 #endif // PHOTOSTAGE_PHOTOMARKER_H

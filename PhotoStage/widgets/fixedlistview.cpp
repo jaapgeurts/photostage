@@ -1,53 +1,55 @@
 #include "fixedlistview.h"
 
-namespace Widgets
+namespace Widgets {
+FixedListView::FixedListView(QWidget* parent) : QListView(parent)
 {
-FixedListView::FixedListView(QWidget* parent) :
-    QListView(parent)
-{
-    //    header()->close();
-    // setViewport(NULL);
-    //    viewport()->setFocusProxy(NULL);
+  //    header()->close();
+  // setViewport(NULL);
+  //    viewport()->setFocusProxy(NULL);
 }
 
 void FixedListView::setModel(QAbstractItemModel* model)
 {
-    QListView::setModel(model);
+  QListView::setModel(model);
 
-    setMinimumHeight(CalculateHeight());
+  setMinimumHeight(CalculateHeight());
 
-    connect(model, &QAbstractItemModel::modelReset, this, &FixedListView::onModelReset);
-    connect(model, &QAbstractItemModel::rowsInserted, this, &FixedListView::onRowsAddedDeleted);
-    connect(model, &QAbstractItemModel::rowsRemoved, this, &FixedListView::onRowsAddedDeleted);
+  connect(model, &QAbstractItemModel::modelReset, this,
+          &FixedListView::onModelReset);
+  connect(model, &QAbstractItemModel::rowsInserted, this,
+          &FixedListView::onRowsAddedDeleted);
+  connect(model, &QAbstractItemModel::rowsRemoved, this,
+          &FixedListView::onRowsAddedDeleted);
 }
 
 QSize FixedListView::sizeHint() const
 {
-    return QSize(width(), CalculateHeight());
+  return QSize(width(), CalculateHeight());
 }
 
 int FixedListView::CalculateHeight() const
 {
-    int h = 0;
+  int h = 0;
 
-    int topLevelCount = model()->rowCount(rootIndex());
+  int topLevelCount = model()->rowCount(rootIndex());
 
-    for (int i = 0; i < topLevelCount; i++)
-    {
-        QModelIndex index = model()->index(i, 0, rootIndex());
-        h += sizeHintForIndex(index).height() + 2;
-    }
+  for (int i = 0; i < topLevelCount; i++)
+  {
+    QModelIndex index = model()->index(i, 0, rootIndex());
+    h += sizeHintForIndex(index).height() + 2;
+  }
 
-    return h;
+  return h;
 }
 
-void FixedListView::onRowsAddedDeleted(const QModelIndex& /*index*/, int /*first*/, int /*last*/)
+void FixedListView::onRowsAddedDeleted(const QModelIndex& /*index*/,
+                                       int /*first*/, int /*last*/)
 {
-    setMinimumHeight(CalculateHeight());
+  setMinimumHeight(CalculateHeight());
 }
 
 void FixedListView::onModelReset()
 {
-    setMinimumHeight(CalculateHeight());
+  setMinimumHeight(CalculateHeight());
 }
-}
+} // namespace Widgets

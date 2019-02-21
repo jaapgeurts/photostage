@@ -2,11 +2,10 @@
 
 #include "exiv2lib.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 ExivFacade* ExivFacade::createExivReader()
 {
-    return new Exiv2Lib();
+  return new Exiv2Lib();
 }
 
 ExivFacade::ExivFacade()
@@ -15,19 +14,19 @@ ExivFacade::ExivFacade()
 
 QString ExifInfo::formatExposure() const
 {
-    QString s;
+  QString s;
 
-    if (exposureTime != nullptr)
-        s += "⅟ " + QString::number((int)(1.0f / *exposureTime)) + "s";
+  if (exposureTime != nullptr)
+    s += "⅟ " + QString::number((int)(1.0f / *exposureTime)) + "s";
 
-    if (aperture != nullptr)
-        s += " at ƒ / " + QString::number(*aperture);
+  if (aperture != nullptr)
+    s += " at ƒ / " + QString::number(*aperture);
 
-    return s;
+  return s;
 }
 
 QString ExifInfo::formatDimension() const
 {
-    return QString::number(width) + "x" + QString::number(height);
+  return QString::number(width) + "x" + QString::number(height);
 }
-}
+} // namespace PhotoStage

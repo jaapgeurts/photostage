@@ -1,32 +1,29 @@
 #ifndef ACTIONSTATEGROUP_H
 #define ACTIONSTATEGROUP_H
 
-#include <QList>
 #include <QAction>
+#include <QList>
 #include <QObject>
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class ActionStateGroup : QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  ActionStateGroup(QObject* parent = 0);
 
-        ActionStateGroup(QObject* parent = 0);
+  void addAction(QAction* action);
 
-        void addAction(QAction* action);
+public slots:
 
-    public slots:
+  void enableAll(bool enabled);
+  void disableAll(bool disabled);
+  void enableAll();
+  void disableAll();
 
-        void enableAll(bool enabled);
-        void disableAll(bool disabled);
-        void enableAll();
-        void disableAll();
-
-    private:
-
-        QList<QAction*> mListActions;
+private:
+  QList<QAction*> mListActions;
 };
-}
+} // namespace PhotoStage
 #endif // ACTIONSTATEGROUP_H

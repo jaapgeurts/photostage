@@ -4,70 +4,67 @@
 #include <QtSql>
 
 #include "collectiondao.h"
+#include "developsettingdao.h"
+#include "keyworddao.h"
 #include "pathdao.h"
 #include "photodao.h"
-#include "keyworddao.h"
-#include "developsettingdao.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class DatabaseAccess : public QObject
 {
 
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  static DatabaseAccess* instance(QObject* parent = 0);
 
-        static DatabaseAccess* instance(QObject* parent = 0);
+  ~DatabaseAccess();
 
-        ~DatabaseAccess();
+  static PhotoDAO*          photoDao();
+  static PathDAO*           pathDao();
+  static CollectionDAO*     collectionDao();
+  static KeywordDAO*        keywordDao();
+  static DevelopSettingDao* developSettingDao();
 
+  void beginTransaction();
+  void endTransaction();
 
-        static PhotoDAO* photoDao();
-        static PathDAO* pathDao();
-        static CollectionDAO* collectionDao();
-        static KeywordDAO* keywordDao();
-        static DevelopSettingDao* developSettingDao();
+signals:
 
-        void beginTransaction();
-        void endTransaction();
+  void keywordsAdded();
+  void keywordsDeleted();
+  void keywordsAssignmentChanged(const QList<Photo>& photos);
 
-    signals:
+  void photosChanged(const QList<Photo>& photos);
+  void photosAdded(long long pathid, const QList<long long>& list);
+  void photosDeleted(const QList<Photo>& photos);
 
-        void keywordsAdded();
-        void keywordsDeleted();
-        void keywordsAssignmentChanged(const QList<Photo>& photos);
+  void pathsChanged();
 
-        void photosChanged(const QList<Photo>& photos);
-        void photosAdded(long long pathid, const QList<long long>& list);
-        void photosDeleted(const QList<Photo>& photos);
+  void collectionAdded(long long id);
+  void collectionsChanged();
+  void collectionPhotosRemoved(long long           collectionid,
+                               const QList<Photo>& list);
 
-        void pathsChanged();
+public slots:
 
-        void collectionAdded(long long id);
-        void collectionsChanged();
-        void collectionPhotosRemoved(long long collectionid, const QList<Photo>& list);
+  void onPhotosDeleted(const QList<Photo>& photos);
 
-    public slots:
+private:
+  static DatabaseAccess* mInstance;
 
-        void onPhotosDeleted(const QList<Photo>& photos);
+  static PhotoDAO*          mPhotoDAO;
+  static PathDAO*           mPathDAO;
+  static CollectionDAO*     mCollectionDAO;
+  static KeywordDAO*        mKeywordDAO;
+  static DevelopSettingDao* mDevelopSettingsDAO;
 
-    private:
+  explicit DatabaseAccess(QObject* parent = 0);
 
-        static DatabaseAccess*    mInstance;
+  void    initDb();
+  QString readQuery(QTextStream& ts);
 
-        static PhotoDAO*          mPhotoDAO;
-        static PathDAO*           mPathDAO;
-        static CollectionDAO*     mCollectionDAO;
-        static KeywordDAO*        mKeywordDAO;
-        static DevelopSettingDao* mDevelopSettingsDAO;
-
-        explicit DatabaseAccess(QObject* parent = 0);
-
-        void initDb();
-        QString readQuery(QTextStream& ts);
-
-        bool onMainThread();
+  bool onMainThread();
 };
-}
+} // namespace PhotoStage
 #endif // DATABASEACCESS_H

@@ -5,43 +5,39 @@
 
 #define BIN_SIZE (256)
 
-namespace Widgets
-{
+namespace Widgets {
 class Histogram : public QWidget
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  explicit Histogram(QWidget* parent = 0);
 
-        explicit Histogram(QWidget* parent = 0);
+  void setImageData(uint16_t* data, int width, int height);
+  void clear();
 
-        void setImageData(uint16_t* data, int width, int height);
-        void clear();
+protected:
+  void paintEvent(QPaintEvent*);
 
-    protected:
+signals:
 
-        void paintEvent(QPaintEvent*);
+public slots:
 
-    signals:
+  void recalculate();
 
-    public slots:
+private:
+  uint16_t* mData;
+  int       mWidth;
+  int       mHeight;
 
-        void recalculate();
+  uint32_t mChannelRed[BIN_SIZE];
+  uint32_t mChannelGreen[BIN_SIZE];
+  uint32_t mChannelBlue[BIN_SIZE];
 
-    private:
+  uint32_t mMaxAll;
 
-        uint16_t* mData;
-        int       mWidth;
-        int       mHeight;
-
-        uint32_t  mChannelRed[BIN_SIZE];
-        uint32_t  mChannelGreen[BIN_SIZE];
-        uint32_t  mChannelBlue[BIN_SIZE];
-
-        uint32_t  mMaxAll;
-
-        void reset();
+  void reset();
 };
-}
+} // namespace Widgets
 
 #endif // WIDGETS_HISTOGRAM_H

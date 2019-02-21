@@ -1,44 +1,40 @@
 #ifndef PHOTOSTAGE_DEVELOPHISTORYITEMS_H
 #define PHOTOSTAGE_DEVELOPHISTORYITEMS_H
 
-#include <QString>
 #include <QList>
 #include <QSharedPointer>
+#include <QString>
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class DevelopParameterItem
 {
-    public:
+public:
+  virtual bool isNull() const;
 
-        virtual bool isNull() const;
-
-        virtual ~DevelopParameterItem();
+  virtual ~DevelopParameterItem();
 };
 
-struct DevelopHistoryItem
-{
-    public:
+struct DevelopHistoryItem {
+public:
+  DevelopHistoryItem();
+  DevelopHistoryItem(long long id, long long moduleType, const QString& text,
+                     bool isMutable);
 
-        DevelopHistoryItem();
-        DevelopHistoryItem(long long id, long long moduleType, const QString& text, bool isMutable);
-
-        long long                            id;
-        QString                              friendlyText;
-        long long                            moduleType;
-        bool                                 isMutable;
-        QSharedPointer<DevelopParameterItem> developItem;
+  long long                            id;
+  QString                              friendlyText;
+  long long                            moduleType;
+  bool                                 isMutable;
+  QSharedPointer<DevelopParameterItem> developItem;
 };
 
 class DevelopHistory
 {
-    public:
+public:
+  DevelopHistory();
+  DevelopHistory(const QList<QSharedPointer<DevelopHistoryItem>>& list);
+  QSharedPointer<DevelopParameterItem> rawSettings() const;
 
-        DevelopHistory();
-        DevelopHistory(const QList<QSharedPointer<DevelopHistoryItem> >& list);
-        QSharedPointer<DevelopParameterItem> rawSettings() const;
-
-        QList<QSharedPointer<DevelopHistoryItem> > list;
+  QList<QSharedPointer<DevelopHistoryItem>> list;
 };
-}
+} // namespace PhotoStage
 #endif // PHOTOSTAGE_DEVELOPHISTORYITEMS_H

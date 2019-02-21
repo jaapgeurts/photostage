@@ -1,72 +1,67 @@
 #ifndef WIDGETS_TIMEZONEPICKER_H
 #define WIDGETS_TIMEZONEPICKER_H
 
-#include <QStringList>
-#include <QWidget>
+#include <QGeoCoordinate>
+#include <QHash>
+#include <QList>
+#include <QMenu>
 #include <QPaintEvent>
 #include <QPixmap>
 #include <QResizeEvent>
-#include <QList>
-#include <QGeoCoordinate>
-#include <QHash>
-#include <QMenu>
+#include <QStringList>
+#include <QWidget>
 
-namespace Widgets
-{
-struct TimezoneArea
-{
-    QString                       timezonename;
-    QList<QList<QGeoCoordinate> > polygons;
-    bool                          isHighlighted;
+namespace Widgets {
+struct TimezoneArea {
+  QString                      timezonename;
+  QList<QList<QGeoCoordinate>> polygons;
+  bool                         isHighlighted;
 };
 
 class TimezonePicker : public QWidget
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  TimezonePicker(QWidget* parent = 0);
+  ~TimezonePicker();
 
-        TimezonePicker(QWidget* parent = 0);
-        ~TimezonePicker();
+signals:
 
-    signals:
+  void homeTimezoneSelected(const QString& tzName);
+  void destinationTimezoneSelected(const QString& tzName);
 
-        void homeTimezoneSelected(const QString& tzName);
-        void destinationTimezoneSelected(const QString& tzName);
+protected:
+  void paintEvent(QPaintEvent*);
+  void resizeEvent(QResizeEvent* event);
 
-    protected:
+  void mouseMoveEvent(QMouseEvent* event);
+  void mouseReleaseEvent(QMouseEvent* event);
 
-        void paintEvent(QPaintEvent*);
-        void resizeEvent(QResizeEvent* event);
+private slots:
 
-        void mouseMoveEvent(QMouseEvent* event);
-        void mouseReleaseEvent(QMouseEvent* event);
+  void plantHomeFlag();
+  void plantDestinationFlag();
 
-    private slots:
+private:
+  QPixmap                  mBackground;
+  QPixmap                  mBackgroundScaled;
+  QList<TimezoneArea*>     mTimezoneAreas;
+  QHash<int, QStringList*> mCountryMap;
+  QMenu*                   mMenu;
+  QGeoCoordinate           mHomeFlagLocation;
+  QGeoCoordinate           mDestinationFlagLocation;
+  QPoint                   mLastClickLocation;
+  QFont                    mFontGeneralFoundIcons;
 
-        void plantHomeFlag();
-        void plantDestinationFlag();
+  void          parseCountries();
+  void          makePath(QPainterPath& path, const TimezoneArea* a) const;
+  TimezoneArea* contains(const QPoint& pos) const;
 
-    private:
+  QHash<int, QStringList*> createMap() const;
 
-        QPixmap                  mBackground;
-        QPixmap                  mBackgroundScaled;
-        QList<TimezoneArea*>     mTimezoneAreas;
-        QHash<int, QStringList*> mCountryMap;
-        QMenu*                   mMenu;
-        QGeoCoordinate           mHomeFlagLocation;
-        QGeoCoordinate           mDestinationFlagLocation;
-        QPoint                   mLastClickLocation;
-        QFont                    mFontGeneralFoundIcons;
-
-        void parseCountries();
-        void makePath(QPainterPath& path, const TimezoneArea* a) const;
-        TimezoneArea* contains(const QPoint& pos) const;
-
-        QHash<int, QStringList*> createMap() const;
-
-        QGeoCoordinate pointToGeo(const QPoint& point) const;
-        QPoint geoToPoint(const QGeoCoordinate& coord) const;
+  QGeoCoordinate pointToGeo(const QPoint& point) const;
+  QPoint         geoToPoint(const QGeoCoordinate& coord) const;
 };
-}
+} // namespace Widgets
 #endif // TIMEZONEPICKER_H

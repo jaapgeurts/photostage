@@ -4,63 +4,58 @@
 #include <QItemSelectionModel>
 #include <QModelIndex>
 
-#include "threadqueue.h"
 #include "module.h"
-#include "modules/develophistogrammodule.h"
-#include "modules/rawmodule.h"
 #include "modules/basicmodule.h"
-#include "modules/historymodule.h"
+#include "modules/develophistogrammodule.h"
 #include "modules/geometrymodule.h"
+#include "modules/historymodule.h"
+#include "modules/rawmodule.h"
 #include "photo.h"
+#include "threadqueue.h"
 
-namespace Ui
-{
+namespace Ui {
 class Develop;
 }
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class Develop : public Module
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  explicit Develop(QWidget* parent = 0);
+  ~Develop();
 
-        explicit Develop(QWidget* parent = 0);
-        ~Develop();
+  QRect lightGap();
 
-        QRect lightGap();
+  void setPhoto(Photo photo);
 
-        void setPhoto(Photo photo);
+public slots:
 
-    public slots:
+  void onPhotoUpdated();
 
-        void onPhotoUpdated();
+protected:
+  void showEvent(QShowEvent*);
 
-    protected:
+private slots:
 
-        void showEvent(QShowEvent*);
+  void onDevelopSettingsChanged();
+  void onCropRotateClicked();
+  void onLockAspectRatioClicked(bool enabled);
 
-    private slots:
+private:
+  Ui::Develop*            ui;
+  DevelopHistogramModule* mHistogramModule;
+  RawModule*              mRawModule;
+  BasicModule*            mBasicModule;
+  HistoryModule*          mHistoryModule;
+  GeometryModule*         mGeometryModule;
+  Photo                   mPhoto;
+  bool                    mLoadPhoto;
+  // DevelopHistory          mDevelopHistory;
 
-        void onDevelopSettingsChanged();
-        void onCropRotateClicked();
-        void onLockAspectRatioClicked(bool enabled);
-
-    private:
-
-        Ui::Develop*            ui;
-        DevelopHistogramModule* mHistogramModule;
-        RawModule*              mRawModule;
-        BasicModule*            mBasicModule;
-        HistoryModule*          mHistoryModule;
-        GeometryModule*         mGeometryModule;
-        Photo                   mPhoto;
-        bool                    mLoadPhoto;
-        // DevelopHistory          mDevelopHistory;
-
-        void doSetPhoto(Photo photo);
+  void doSetPhoto(Photo photo);
 };
-}
+} // namespace PhotoStage
 
 #endif // PHOTOSTAGE_DEVELOP_H
