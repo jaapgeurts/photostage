@@ -3,37 +3,33 @@
 
 #include <QList>
 
-#include "database/databaseaccess.h"
 #include "backgroundtask.h"
+#include "database/databaseaccess.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class RegenHashesTask : public BackgroundTask, public QRunnable
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  RegenHashesTask(const QList<Photo>& list);
 
-        RegenHashesTask(const QList<Photo>& list);
+  // BackgroundTask interface
 
-        // BackgroundTask interface
+public:
+  int  progressMinimum();
+  int  progressMaximum();
+  void run();
 
-    public:
+public slots:
 
-        int progressMinimum();
-        int progressMaximum();
-        void run();
+  void start();
+  void cancel();
 
-    public slots:
-
-        void start();
-        void cancel();
-
-    private:
-
-        std::atomic<bool> mRunning;
-        PhotoDAO*         mPhotoWorkUnit;
-        QList<Photo>      mPhotoList;
+private:
+  std::atomic<bool> mRunning;
+  PhotoDAO*         mPhotoWorkUnit;
+  QList<Photo>      mPhotoList;
 };
-}
+} // namespace PhotoStage
 #endif // PHOTOSTAGE_REGENHASHESTASK_H

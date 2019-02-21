@@ -1,59 +1,56 @@
+#include <QDebug>
 #include <QFile>
 #include <QThreadPool>
-#include <QDebug>
 
 #include "regenhashestask.h"
 
-namespace PhotoStage
+namespace PhotoStage {
+RegenHashesTask::RegenHashesTask(const QList<Photo>& list)
+    : BackgroundTask("Import Task"), mRunning(false), mPhotoList(list)
 {
-RegenHashesTask::RegenHashesTask(const QList<Photo>& list) :
-    BackgroundTask("Import Task"),
-    mRunning(false),
-    mPhotoList(list)
-{
-    mPhotoWorkUnit = DatabaseAccess::photoDao();
-    setDescription(QString("Calculating hashes..."));
-    setAutoDelete(true);
+  mPhotoWorkUnit = DatabaseAccess::photoDao();
+  setDescription(QString("Calculating hashes..."));
+  setAutoDelete(true);
 }
 
 int RegenHashesTask::progressMinimum()
 {
-    return 0;
+  return 0;
 }
 
 int RegenHashesTask::progressMaximum()
 {
-    return mPhotoList.size() - 1;
+  return mPhotoList.size() - 1;
 }
 
 void RegenHashesTask::run()
 {
-    int                  i = 0;
+  int i = 0;
 
-    QListIterator<Photo> it(mPhotoList);
+  QListIterator<Photo> it(mPhotoList);
 
-    DatabaseAccess::instance()->beginTransaction();
+  DatabaseAccess::instance()->beginTransaction();
 
-    while (it.hasNext() && mRunning)
-    {
-        Photo p = it.next();
-        mPhotoWorkUnit->regenerateHash(p);
-        i++;
-        emit progressUpdated(i);
-    }
-    DatabaseAccess::instance()->endTransaction();
-    emit taskFinished(this);
+  while (it.hasNext() && mRunning)
+  {
+    Photo p = it.next();
+    mPhotoWorkUnit->regenerateHash(p);
+    i++;
+    emit progressUpdated(i);
+  }
+  DatabaseAccess::instance()->endTransaction();
+  emit taskFinished(this);
 }
 
 void RegenHashesTask::start()
 {
-    // TODO: consider importing files in parallel, not in sequence
-    mRunning = true;
-    QThreadPool::globalInstance()->start(this);
+  // TODO: consider importing files in parallel, not in sequence
+  mRunning = true;
+  QThreadPool::globalInstance()->start(this);
 }
 
 void RegenHashesTask::cancel()
 {
-    mRunning = false;
+  mRunning = false;
 }
-}
+} // namespace PhotoStage

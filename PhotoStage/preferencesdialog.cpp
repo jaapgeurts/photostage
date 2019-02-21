@@ -1,31 +1,28 @@
 #include "preferencesdialog.h"
 #include "ui_preferencesdialog.h"
 
-namespace PhotoStage
+namespace PhotoStage {
+PreferencesDialog::PreferencesDialog(QWidget* parent)
+    : QDialog(parent), ui(new Ui::PreferencesDialog)
 {
-PreferencesDialog::PreferencesDialog(QWidget* parent) :
-    QDialog(parent),
-    ui(new Ui::PreferencesDialog)
-{
-    ui->setupUi(this);
+  ui->setupUi(this);
 
-    setWindowIcon(QIcon());
+  setWindowIcon(QIcon());
 
-    mPreferences = Preferences::instance();
+  mPreferences = Preferences::instance();
 
-    ui->cbIncludeSubdirs->setChecked(
-        mPreferences->library_include_subfolders);
+  ui->cbIncludeSubdirs->setChecked(mPreferences->library_include_subfolders);
 }
 
 PreferencesDialog::~PreferencesDialog()
 {
-    mPreferences->save();
+  mPreferences->save();
 
-    delete ui;
+  delete ui;
 }
 
 void PreferencesDialog::onLibraryShowSubdirsClicked(bool state)
 {
-    mPreferences->library_include_subfolders = state;
+  mPreferences->library_include_subfolders = state;
 }
-}
+} // namespace PhotoStage

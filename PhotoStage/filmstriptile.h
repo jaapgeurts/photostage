@@ -3,19 +3,18 @@
 
 #include "widgets/abstracttile.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class FilmstripTile : public Widgets::AbstractTile
 {
-    public:
+public:
+  FilmstripTile(Widgets::TileView* parent = 0);
+  // AbstractCellRenderer interface
+  void render(QPainter& painter, const Widgets::TileInfo& tileInfo,
+              const QVariant& data);
 
-        FilmstripTile(Widgets::TileView* parent = 0);
-        // AbstractCellRenderer interface
-        void render(QPainter& painter, const Widgets::TileInfo& tileInfo, const QVariant& data);
+  int modelRole() const;
 
-        int modelRole() const;
-
-    private:
+private:
 };
-}
+} // namespace PhotoStage
 #endif // PHOTOSTAGE_FILMSTRIPTILE_H

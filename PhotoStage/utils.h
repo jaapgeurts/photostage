@@ -1,16 +1,14 @@
 #ifndef PHOTOSTAGE_UTILS_H
 #define PHOTOSTAGE_UTILS_H
 
+#include <QByteArray>
+#include <QFile>
+#include <QFileInfo>
 #include <QRect>
 #include <QSize>
-#include <QByteArray>
 #include <QString>
-#include <QFileInfo>
-#include <QFile>
 
-
-namespace PhotoStage
-{
+namespace PhotoStage {
 /**
  * @brief Fits the source frame into the destination frame.
  *        Keeps aspect ratio and centers the frame
@@ -24,14 +22,13 @@ long long computeImageFileHash(QFile& file);
 long long computeImageFileHash(const QFileInfo& info);
 long long computeImageFileHash(const QString& path);
 
-template <typename T>
-void deleteArray(T buf[])
+template <typename T> void deleteArray(T buf[])
 {
-    delete [] buf;
+  delete[] buf;
 }
 
 bool is_block_device(const std::string& path);
 
-}
+} // namespace PhotoStage
 
 #endif // PHOTOSTAGE_UTILS_H

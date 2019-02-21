@@ -1,10 +1,7 @@
 #include "runnable.h"
 
-namespace PhotoStage
-{
-Runnable::Runnable() :
-    mAutoDelete(true),
-    mName("Unnamed runnable")
+namespace PhotoStage {
+Runnable::Runnable() : mAutoDelete(true), mName("Unnamed runnable")
 {
 }
 
@@ -18,31 +15,31 @@ void Runnable::cancel()
 
 bool Runnable::autoDelete() const
 {
-    return mAutoDelete;
+  return mAutoDelete;
 }
 
 void Runnable::setAutoDelete(bool enable)
 {
-    mAutoDelete = enable;
+  mAutoDelete = enable;
 }
 
 void Runnable::setName(const QString& name)
 {
-    mName = name;
+  mName = name;
 }
 
 const QString& Runnable::name() const
 {
-    return mName;
+  return mName;
 }
 
 void Runnable::setId(uint32_t id)
 {
-    mId = id;
+  mId = id;
 }
 
 uint32_t Runnable::id() const
 {
-    return mId;
+  return mId;
 }
-}
+} // namespace PhotoStage

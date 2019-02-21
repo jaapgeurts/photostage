@@ -4,38 +4,36 @@
 
 #define LIBRARY_INCLUDE_SUBFOLDERS "library/include_subfolders"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 Preferences* Preferences::mPreferences = NULL;
 
 Preferences* Preferences::instance()
 {
-    if (mPreferences == NULL)
-        mPreferences = new Preferences(NULL);
-    return mPreferences;
+  if (mPreferences == NULL)
+    mPreferences = new Preferences(NULL);
+  return mPreferences;
 }
 
-Preferences::Preferences(QObject* parent) :
-    QObject(parent),
-    library_include_subfolders(true)
+Preferences::Preferences(QObject* parent)
+    : QObject(parent), library_include_subfolders(true)
 {
-    // set defaults;
+  // set defaults;
 
-    load();
+  load();
 }
 
 void Preferences::load()
 {
-    QSettings settings;
+  QSettings settings;
 
-    library_include_subfolders =
-        settings.value(LIBRARY_INCLUDE_SUBFOLDERS).toBool();
+  library_include_subfolders =
+      settings.value(LIBRARY_INCLUDE_SUBFOLDERS).toBool();
 }
 
 void Preferences::save()
 {
-    QSettings settings;
+  QSettings settings;
 
-    settings.setValue(LIBRARY_INCLUDE_SUBFOLDERS, library_include_subfolders);
+  settings.setValue(LIBRARY_INCLUDE_SUBFOLDERS, library_include_subfolders);
 }
-}
+} // namespace PhotoStage

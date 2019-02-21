@@ -3,34 +3,31 @@
 
 #include <QObject>
 
-#include "widgets/backgroundtaskprogress.h"
 #include "backgroundtask.h"
+#include "widgets/backgroundtaskprogress.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class BackgroundTaskManager : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  explicit BackgroundTaskManager(QWidget* const container, QObject* parent = 0);
+  ~BackgroundTaskManager();
+  void addRunnable(BackgroundTask* const task);
 
-        explicit BackgroundTaskManager(QWidget* const container, QObject* parent = 0);
-        ~BackgroundTaskManager();
-        void addRunnable(BackgroundTask* const task);
+  bool isWorking();
 
-        bool isWorking();
+signals:
 
-    signals:
+public slots:
 
-    public slots:
+  void taskFinished(BackgroundTask* task);
+  void cancelAll();
 
-        void taskFinished(BackgroundTask* task);
-        void cancelAll();
-
-    private:
-
-        QWidget*                                        mContainer;
-        QHash<BackgroundTask*, BackgroundTaskProgress*> mDict;
+private:
+  QWidget*                                        mContainer;
+  QHash<BackgroundTask*, BackgroundTaskProgress*> mDict;
 };
-}
+} // namespace PhotoStage
 #endif // PHOTOSTAGE_BACKGROUNDTASKMANAGER_H

@@ -3,12 +3,13 @@
 
 #include <QString>
 
-const int     PREVIEW_IMG_WIDTH  = 1024;
-const int     PREVIEW_IMG_HEIGHT = 1024;
+const int PREVIEW_IMG_WIDTH  = 1024;
+const int PREVIEW_IMG_HEIGHT = 1024;
 
-const int     HASH_INPUT_LEN = 1L << 20;
+const int HASH_INPUT_LEN = 1L << 20;
 
-const QString MIMETYPE_TILEVIEW_SELECTION = "application/x-photostage-tileview-selection";
+const QString MIMETYPE_TILEVIEW_SELECTION =
+    "application/x-photostage-tileview-selection";
 
 // CARTOGRAPHY SETTINGS
 const QString SETTINGS_GROUP_CARTOGRAPHY = "cartography";

@@ -1,26 +1,24 @@
 #ifndef PHOTOSTAGE_MODULE_H
 #define PHOTOSTAGE_MODULE_H
 
-#include <QWidget>
 #include <QRect>
+#include <QWidget>
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class Module : public QWidget
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  Module(QWidget* parent = 0) : QWidget(parent)
+  {
+  }
 
-        Module(QWidget* parent = 0) : QWidget(parent)
-        {
-        }
+  virtual ~Module()
+  {
+  }
 
-        virtual ~Module()
-        {
-        }
-
-        virtual QRect lightGap() = 0;
+  virtual QRect lightGap() = 0;
 };
-}
+} // namespace PhotoStage
 #endif // MODULE_H

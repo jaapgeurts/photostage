@@ -3,31 +3,23 @@
 
 #include <QList>
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class DragDropInfo
 {
-    public:
+public:
+  enum DragSourceModel { PathModel = 1, PhotoModel = 2, CollectionModel = 3 };
 
-        enum DragSourceModel
-        {
-            PathModel       = 1,
-            PhotoModel      = 2,
-            CollectionModel = 3
-        };
+  DragDropInfo(DragSourceModel source, const QList<long long>& idList);
+  DragDropInfo(const QByteArray& data);
 
-        DragDropInfo(DragSourceModel source, const QList<long long>& idList);
-        DragDropInfo(const QByteArray& data);
+  QByteArray toByteArray();
 
-        QByteArray toByteArray();
+  DragSourceModel         sourceModel();
+  const QList<long long>& idList();
 
-        DragSourceModel sourceModel();
-        const QList<long long>& idList();
-
-    private:
-
-        DragSourceModel  mSourceModel;
-        QList<long long> mIdList;
+private:
+  DragSourceModel  mSourceModel;
+  QList<long long> mIdList;
 };
-}
+} // namespace PhotoStage
 #endif // PHOTOSTAGE_DRAGDROPINFO_H

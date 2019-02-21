@@ -1,37 +1,34 @@
 #ifndef PREVIEWCACHE_H
 #define PREVIEWCACHE_H
 
-#include <QObject>
-#include <QImage>
 #include <QCryptographicHash>
+#include <QImage>
+#include <QObject>
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class PreviewCache : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  static PreviewCache* globalCache();
 
-        static PreviewCache* globalCache();
+  explicit PreviewCache(const QString& location, QObject* parent = 0);
 
-        explicit PreviewCache(const QString& location, QObject* parent = 0);
+  QImage get(const QString& key);
+  void   put(const QString& key, const QImage& image);
+  void   remove(const QString& key);
+  void   setImageFormat(QString format);
 
-        QImage get(const QString& key);
-        void put(const QString& key, const QImage& image);
-        void remove(const QString& key);
-        void setImageFormat(QString format);
+public slots:
 
-    public slots:
+private:
+  static PreviewCache* mGlobalCache;
 
-    private:
-
-        static PreviewCache* mGlobalCache;
-
-        QString              mBaseDir;
-        QCryptographicHash   mHash;
-        QString              mFormat;
-        std::pair<QString, QString> dirFromKey(const QString& key);
+  QString                     mBaseDir;
+  QCryptographicHash          mHash;
+  QString                     mFormat;
+  std::pair<QString, QString> dirFromKey(const QString& key);
 };
-}
+} // namespace PhotoStage
 #endif // PREVIEWCACHE_H

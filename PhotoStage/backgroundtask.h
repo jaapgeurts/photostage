@@ -4,48 +4,44 @@
 #include <QObject>
 #include <QRunnable>
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class BackgroundTask : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  BackgroundTask(const QString& name);
 
-        BackgroundTask(const QString& name);
+  const QString taskName() const
+  {
+    return mName;
+  }
 
-        const QString taskName() const
-        {
-            return mName;
-        }
+  void setDescription(const QString& description);
 
-        void setDescription(const QString& description);
+  const QString description() const
+  {
+    return mDescription;
+  }
 
-        const QString description() const
-        {
-            return mDescription;
-        }
+  virtual int progressMinimum() = 0;
+  virtual int progressMaximum() = 0;
 
-        virtual int progressMinimum() = 0;
-        virtual int progressMaximum() = 0;
+public slots:
 
-    public slots:
+  virtual void start()  = 0;
+  virtual void cancel() = 0;
 
-        virtual void start()  = 0;
-        virtual void cancel() = 0;
+signals:
 
-    signals:
+  void taskFinished(BackgroundTask* task);
+  void taskCancelled(BackgroundTask* task);
+  void progressUpdated(int value);
 
-        void taskFinished(BackgroundTask* task);
-        void taskCancelled(BackgroundTask* task);
-        void progressUpdated(int value);
-
-
-    private:
-
-        QString mName;
-        QString mDescription;
+private:
+  QString mName;
+  QString mDescription;
 };
-}
+} // namespace PhotoStage
 
 #endif // BACKGROUNDTASK_H

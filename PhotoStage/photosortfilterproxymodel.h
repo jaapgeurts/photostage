@@ -1,34 +1,30 @@
 #ifndef PHOTOSTAGE_PHOTOSORTFILTERPROXYMODEL_H
 #define PHOTOSTAGE_PHOTOSORTFILTERPROXYMODEL_H
 
-#include <QSortFilterProxyModel>
-#include <QItemSelection>
 #include <QHash>
+#include <QItemSelection>
+#include <QSortFilterProxyModel>
 
 #include "photo.h"
 #include "photofilterinfo.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class PhotoSortFilterProxyModel : public QSortFilterProxyModel
 {
-    public:
+public:
+  PhotoSortFilterProxyModel(QObject* parent = 0);
 
-        PhotoSortFilterProxyModel(QObject* parent = 0);
+  void setFilter(const PhotoFilterInfo& info);
 
-        void setFilter(const PhotoFilterInfo& info);
+  QList<Photo> toList() const;
 
-        QList<Photo> toList() const;
+  QList<Photo> toList(const QItemSelection& selection) const;
 
-        QList<Photo> toList(const QItemSelection& selection) const;
+protected:
+  bool filterAcceptsRow(int source_row, const QModelIndex&) const;
 
-    protected:
-
-        bool filterAcceptsRow(int source_row, const QModelIndex&) const;
-
-    private:
-
-        PhotoFilterInfo mFilterInfo;
+private:
+  PhotoFilterInfo mFilterInfo;
 };
-}
+} // namespace PhotoStage
 #endif // PHOTOSTAGE_PHOTOSORTFILTERPROXYMODEL_H

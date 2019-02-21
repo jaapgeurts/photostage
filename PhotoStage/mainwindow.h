@@ -1,143 +1,140 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
 #include <QActionGroup>
+#include <QMainWindow>
 #include <QPoint>
 
 // modules
-#include "module.h"
-#include "library/library.h"
-#include "develop/develop.h"
-#include "widgets/actionstategroup.h"
+#include "backgroundtaskmanager.h"
 #include "cartography/cartography.h"
 #include "database/databaseaccess.h"
-#include "backgroundtaskmanager.h"
+#include "develop/develop.h"
+#include "library/library.h"
+#include "module.h"
 #include "photosortfilterproxymodel.h"
+#include "widgets/actionstategroup.h"
 
-namespace Ui
-{
+namespace Ui {
 class MainWindow;
 }
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class MainWindow : public QMainWindow
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  explicit MainWindow(QWidget* parent = 0);
+  ~MainWindow();
 
-        explicit MainWindow(QWidget* parent = 0);
-        ~MainWindow();
+public slots:
 
-    public slots:
+  bool selectNext();
+  bool selectPrevious();
+  bool selectUp();
+  bool selectDown();
 
-        bool selectNext();
-        bool selectPrevious();
-        bool selectUp();
-        bool selectDown();
+protected:
+  bool eventFilter(QObject*, QEvent* event);
+  void closeEvent(QCloseEvent* event);
 
-    protected:
+  // bool event(QEvent* event);
 
-        bool eventFilter(QObject*, QEvent* event);
-        void closeEvent(QCloseEvent* event);
+private slots:
 
-        //bool event(QEvent* event);
+  // Modules
+  void onModeLibraryClicked();
+  void onModeDevelopClicked();
+  void onModeMapClicked();
 
-    private slots:
+  // Edit menu
+  void onSelectAll();
+  void onSelectNone();
 
-        // Modules
-        void onModeLibraryClicked();
-        void onModeDevelopClicked();
-        void onModeMapClicked();
+  // Library menu
+  void onActionRegenHashes();
 
-        //Edit menu
-        void onSelectAll();
-        void onSelectNone();
+  // Dialogs
+  void onActionImportTriggered();
+  void onActionAboutTriggered();
+  void onActionEditTimeTriggered();
+  void onActionPreferences();
 
-        //Library menu
-        void onActionRegenHashes();
+  // Photo
+  // Rating
+  void onActionRating1();
+  void onActionRating2();
+  void onActionRating3();
+  void onActionRating4();
+  void onActionRating5();
+  void onActionRatingNone();
 
-        // Dialogs
-        void onActionImportTriggered();
-        void onActionAboutTriggered();
-        void onActionEditTimeTriggered();
-        void onActionPreferences();
+  void onDeletePhotos();
+  void onDeleteRejectedPhotos();
 
-        // Photo
-        // Rating
-        void onActionRating1();
-        void onActionRating2();
-        void onActionRating3();
-        void onActionRating4();
-        void onActionRating5();
-        void onActionRatingNone();
+  void onShowInFileBrowser();
 
-        void onDeletePhotos();
-        void onDeleteRejectedPhotos();
+  // flags
+  void onActionFlagPick();
+  void onActionFlagReject();
+  void onActionFlagNone();
 
-        void onShowInFileBrowser();
+  // color labels
+  void onActionColorNone();
+  void onActionColorRed();
+  void onActionColorGreen();
+  void onActionColorBlue();
+  void onActionColorYellow();
+  void onActionColorOrange();
+  void onActionColorPurple();
+  void onActionLightsOff();
 
-        // flags
-        void onActionFlagPick();
-        void onActionFlagReject();
-        void onActionFlagNone();
+  // called in response to the import thread
+  void onImportFinished(BackgroundTask* task);
+  void onSelectionChanged(const QItemSelection&, const QItemSelection&);
+  void onCurrentChanged(const QModelIndex& current,
+                        const QModelIndex& previous);
 
-        // color labels
-        void onActionColorNone();
-        void onActionColorRed();
-        void onActionColorGreen();
-        void onActionColorBlue();
-        void onActionColorYellow();
-        void onActionColorOrange();
-        void onActionColorPurple();
-        void onActionLightsOff();
+  // model changes
+  void onModelReset();
+  void onPhotoModelRowsInserted(const QModelIndex& parent, int start, int end);
+  void onPhotoModelRowsRemoved(const QModelIndex& parent, int start, int end);
+  void onFilterApplied(const PhotoFilterInfo& info);
+  void onPhotoSourceChanged(PhotoModel::SourceType type, long long id);
+  void onPhotoModelDataChanged(const QModelIndex&, const QModelIndex&,
+                               const QVector<int>&);
 
-        // called in response to the import thread
-        void onImportFinished(BackgroundTask* task);
-        void onSelectionChanged(const QItemSelection&, const QItemSelection&);
-        void onCurrentChanged(const QModelIndex& current, const QModelIndex& previous);
+  void onShowGrid();
+  void onShowLoupe();
 
-        // model changes
-        void onModelReset();
-        void onPhotoModelRowsInserted(const QModelIndex& parent, int start, int end);
-        void onPhotoModelRowsRemoved(const QModelIndex& parent, int start, int end);
-        void onFilterApplied(const PhotoFilterInfo& info);
-        void onPhotoSourceChanged(PhotoModel::SourceType type, long long id);
-        void onPhotoModelDataChanged(const QModelIndex&, const QModelIndex&, const QVector<int>&);
+  void onTileDoubleClicked(const QModelIndex&);
+  void onLibraryContextMenu(const QPoint& pos);
 
-        void onShowGrid();
-        void onShowLoupe();
+private:
+  Ui::MainWindow*        ui;
+  BackgroundTaskManager* mBackgroundTaskManager;
+  DatabaseAccess*        mDatabaseAccess;
+  // module ui pointers
+  Library*                   mLibrary;
+  Develop*                   mDevelop;
+  Cartography*               mMap;
+  Module*                    mCurrentModule;
+  PhotoSortFilterProxyModel* mPhotoModelProxy;
+  PhotoModel*                mSourceModel;
+  PhotoDAO*                  mPhotoWorkUnit;
+  QItemSelectionModel*       mPhotoSelection;
+  ActionStateGroup           mActionStatePhoto;
 
-        void onTileDoubleClicked(const QModelIndex&);
-        void onLibraryContextMenu(const QPoint& pos);
+  //    QList<Photo> mCurrentSelection;
+  void setRating(int rating);
+  void setColorLabel(Photo::ColorLabel color);
+  void setFlag(Photo::Flag flag);
+  void updateInformationBar();
 
-    private:
-
-        Ui::MainWindow*            ui;
-        BackgroundTaskManager*     mBackgroundTaskManager;
-        DatabaseAccess*            mDatabaseAccess;
-        // module ui pointers
-        Library*                   mLibrary;
-        Develop*                   mDevelop;
-        Cartography*               mMap;
-        Module*                    mCurrentModule;
-        PhotoSortFilterProxyModel* mPhotoModelProxy;
-        PhotoModel*                mSourceModel;
-        PhotoDAO*                  mPhotoWorkUnit;
-        QItemSelectionModel*       mPhotoSelection;
-        ActionStateGroup           mActionStatePhoto;
-
-        //    QList<Photo> mCurrentSelection;
-        void setRating(int rating);
-        void setColorLabel(Photo::ColorLabel color);
-        void setFlag(Photo::Flag flag);
-        void updateInformationBar();
-
-        Photo currentPhoto();
-        void setPhotoActionsAvailability(bool enabled);
+  Photo currentPhoto();
+  void  setPhotoActionsAvailability(bool enabled);
 };
-}
+} // namespace PhotoStage
 
 #endif // MAINWINDOW_H

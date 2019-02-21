@@ -5,38 +5,33 @@
 
 #include "photo.h"
 
-namespace Ui
-{
+namespace Ui {
 class TimeAdjustDialog;
 }
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class TimeAdjustDialog : public QDialog
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  explicit TimeAdjustDialog(QWidget* parent = 0);
+  ~TimeAdjustDialog();
 
-        explicit TimeAdjustDialog(QWidget* parent = 0);
-        ~TimeAdjustDialog();
+  void setPhoto(const Photo& photo);
 
-        void setPhoto(const Photo& photo);
+protected:
+  bool eventFilter(QObject* obj, QEvent* event);
 
-    protected:
+private slots:
 
-        bool eventFilter(QObject* obj, QEvent* event);
+  void onHomeTimezoneSelected(const QString& tzName);
+  void onDestinationTimezoneSelected(const QString& tzName);
 
-    private slots:
-
-        void onHomeTimezoneSelected(const QString& tzName);
-        void onDestinationTimezoneSelected(const QString& tzName);
-
-    private:
-
-        Ui::TimeAdjustDialog* ui;
-        Photo                 mPhoto;
+private:
+  Ui::TimeAdjustDialog* ui;
+  Photo                 mPhoto;
 };
-}
+} // namespace PhotoStage
 
-#endif //PHOTOSTAGE_TIMEADJUSTDIALOG_H
+#endif // PHOTOSTAGE_TIMEADJUSTDIALOG_H

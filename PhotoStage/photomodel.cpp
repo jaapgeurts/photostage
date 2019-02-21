@@ -1,6 +1,6 @@
-#include <QImage>
-#include <QDir>
 #include <QDebug>
+#include <QDir>
+#include <QImage>
 #include <QItemSelectionRange>
 
 #include "constants.h"
@@ -8,28 +8,29 @@
 #include "photomodel.h"
 #include "preferences.h"
 
-#include "widgets/tileview.h"
 #include "widgets/mapview/modelindexlayer.h"
+#include "widgets/tileview.h"
 
-#include "jobs/imageloaderjob.h"
 #include "jobs/colortransformjob.h"
+#include "jobs/imageloaderjob.h"
 
-namespace PhotoStage
+namespace PhotoStage {
+PhotoModel::PhotoModel(QObject* parent)
+    : QAbstractListModel(parent), mPreviewThreadQueue(new ThreadQueue()),
+      mOriginalThreadQueue(new ThreadQueue()), mRootId(-1)
 {
-PhotoModel::PhotoModel(QObject* parent) :
-  QAbstractListModel(parent),
-  mPreviewThreadQueue(new ThreadQueue()),
-  mOriginalThreadQueue(new ThreadQueue()),
-  mRootId(-1)
-{
-  mWorkUnit = DatabaseAccess::photoDao();
+  mWorkUnit                = DatabaseAccess::photoDao();
   DatabaseAccess* dbAccess = DatabaseAccess::instance();
 
-  connect(dbAccess, &DatabaseAccess::photosAdded, this, &PhotoModel::onPhotosAdded);
-  connect(dbAccess, &DatabaseAccess::photosDeleted, this, &PhotoModel::onPhotosDeleted);
-  connect(dbAccess, &DatabaseAccess::photosChanged, this, &PhotoModel::onPhotosChanged);
+  connect(dbAccess, &DatabaseAccess::photosAdded, this,
+          &PhotoModel::onPhotosAdded);
+  connect(dbAccess, &DatabaseAccess::photosDeleted, this,
+          &PhotoModel::onPhotosDeleted);
+  connect(dbAccess, &DatabaseAccess::photosChanged, this,
+          &PhotoModel::onPhotosChanged);
 
-  connect(dbAccess, &DatabaseAccess::collectionPhotosRemoved, this,  &PhotoModel::onPhotosDeletedFromCollection);
+  connect(dbAccess, &DatabaseAccess::collectionPhotosRemoved, this,
+          &PhotoModel::onPhotosDeletedFromCollection);
 }
 
 PhotoModel::~PhotoModel()
@@ -59,7 +60,8 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
 
     case Photo::DateTimeRole:
     {
-      Nullable<QDateTime> dt = mPhotoList.at(index.row()).exifInfo().dateTimeOriginal;
+      Nullable<QDateTime> dt =
+          mPhotoList.at(index.row()).exifInfo().dateTimeOriginal;
 
       if (dt != nullptr)
         return QVariant::fromValue<QDateTime>(*dt);
@@ -77,7 +79,8 @@ QVariant PhotoModel::data(const QModelIndex& index, int role) const
 
     case MapView::ModelIndexLayer::GeoCoordinateRole:
     {
-      Nullable<QGeoCoordinate> coord = mPhotoList.at(index.row()).exifInfo().location;
+      Nullable<QGeoCoordinate> coord =
+          mPhotoList.at(index.row()).exifInfo().location;
 
       if (coord != nullptr)
         return QVariant::fromValue<QGeoCoordinate>(*coord);
@@ -103,9 +106,12 @@ void PhotoModel::loadOriginal(Photo& photo)
   photo.setIsDownloadingOriginal(true);
 
   ImageLoaderJob* ilj = new ImageLoaderJob(photo, false);
-  ilj->connect(ilj, &ImageLoaderJob::imageReady, this, &PhotoModel::onOriginalLoaded);
-  ilj->connect(ilj, &ImageLoaderJob::exifUpdated, this, &PhotoModel::onExifUpdated);
-  ilj->connect(ilj, &ImageLoaderJob::saveParams, this, &PhotoModel::onSaveParams);
+  ilj->connect(ilj, &ImageLoaderJob::imageReady, this,
+               &PhotoModel::onOriginalLoaded);
+  ilj->connect(ilj, &ImageLoaderJob::exifUpdated, this,
+               &PhotoModel::onExifUpdated);
+  ilj->connect(ilj, &ImageLoaderJob::saveParams, this,
+               &PhotoModel::onSaveParams);
   uint32_t id = mOriginalThreadQueue->addJob(ilj);
   mOriginalLoadThreads.insert(photo.id(), id);
 }
@@ -120,9 +126,12 @@ void PhotoModel::loadPreview(Photo& photo)
   photo.setIsDownloadingPreview(true);
 
   ImageLoaderJob* ilj = new ImageLoaderJob(photo, true);
-  ilj->connect(ilj, &ImageLoaderJob::previewReady, this, &PhotoModel::onPreviewLoaded);
-  ilj->connect(ilj, &ImageLoaderJob::exifUpdated, this, &PhotoModel::onExifUpdated);
-  ilj->connect(ilj, &ImageLoaderJob::saveParams, this, &PhotoModel::onSaveParams);
+  ilj->connect(ilj, &ImageLoaderJob::previewReady, this,
+               &PhotoModel::onPreviewLoaded);
+  ilj->connect(ilj, &ImageLoaderJob::exifUpdated, this,
+               &PhotoModel::onExifUpdated);
+  ilj->connect(ilj, &ImageLoaderJob::saveParams, this,
+               &PhotoModel::onSaveParams);
   uint32_t id = mPreviewThreadQueue->addJob(ilj);
   mPreviewLoadThreads.insert(photo.id(), id);
 }
@@ -133,10 +142,12 @@ void PhotoModel::onExifUpdated(Photo photo)
   DatabaseAccess::photoDao()->updateExifInfo(photo);
 }
 
-void PhotoModel::onSaveParams(Photo photo, const QSharedPointer<DevelopRawParameters>& params)
+void PhotoModel::onSaveParams(
+    Photo photo, const QSharedPointer<DevelopRawParameters>& params)
 {
   // save to DB
-  DatabaseAccess::developSettingDao()->insertDefaultRawSettings(photo.id(), params);
+  DatabaseAccess::developSettingDao()->insertDefaultRawSettings(photo.id(),
+                                                                params);
 }
 
 void PhotoModel::onPreviewLoaded(Photo photo, const QImage& image)
@@ -154,7 +165,8 @@ void PhotoModel::onPreviewLoaded(Photo photo, const QImage& image)
   photo.setIsDownloadingPreview(false);
   QVector<int> roles;
   roles << Photo::DataRole << MapView::ModelIndexLayer::DataRole;
-  emit dataChanged(mPhotoIndexMap.value(photo.id()), mPhotoIndexMap.value(photo.id()), roles);
+  emit dataChanged(mPhotoIndexMap.value(photo.id()),
+                   mPhotoIndexMap.value(photo.id()), roles);
 }
 
 void PhotoModel::onOriginalLoaded(Photo photo, const Image& image)
@@ -171,7 +183,8 @@ void PhotoModel::onOriginalLoaded(Photo photo, const Image& image)
   mOriginalLoadThreads.remove(photo.id());
   QVector<int> roles;
   roles << Photo::DataRole << MapView::ModelIndexLayer::DataRole;
-  emit         dataChanged(mPhotoIndexMap.value(photo.id()), mPhotoIndexMap.value(photo.id()), roles);
+  emit dataChanged(mPhotoIndexMap.value(photo.id()),
+                   mPhotoIndexMap.value(photo.id()), roles);
 }
 
 void PhotoModel::convertImage(Photo& photo)
@@ -180,10 +193,12 @@ void PhotoModel::convertImage(Photo& photo)
     return;
 
   photo.setIsDownloadingPreview(true);
-  ColorTransformJob* cfj = new ColorTransformJob(photo, ColorTransformJob::Preview);
+  ColorTransformJob* cfj =
+      new ColorTransformJob(photo, ColorTransformJob::Preview);
 
   // convert the image to sRGB
-  cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::onPreviewTranslated);
+  cfj->connect(cfj, &ColorTransformJob::imageReady, this,
+               &PhotoModel::onPreviewTranslated);
   uint32_t id = mPreviewThreadQueue->addJob(cfj);
   mPreviewLoadThreads.insert(photo.id(), id);
 }
@@ -196,10 +211,12 @@ void PhotoModel::convertOriginal(Photo& photo)
   //    qDebug() << "PHOTOMODEL: converting original";
 
   photo.setIsDownloadingOriginal(true);
-  ColorTransformJob* cfj = new ColorTransformJob(photo, ColorTransformJob::Develop);
+  ColorTransformJob* cfj =
+      new ColorTransformJob(photo, ColorTransformJob::Develop);
 
   // convert the image to sRGB
-  cfj->connect(cfj, &ColorTransformJob::imageReady, this, &PhotoModel::onOriginalTranslated);
+  cfj->connect(cfj, &ColorTransformJob::imageReady, this,
+               &PhotoModel::onOriginalTranslated);
   uint32_t id = mOriginalThreadQueue->addJob(cfj);
   mOriginalLoadThreads.insert(photo.id(), id);
 }
@@ -213,7 +230,8 @@ void PhotoModel::onPreviewTranslated(Photo photo, const QImage& image)
     // find the index for this photo.
     QVector<int> roles;
     roles << Photo::DataRole << MapView::ModelIndexLayer::DataRole;
-    emit         dataChanged(mPhotoIndexMap.value(photo.id()), mPhotoIndexMap.value(photo.id()), roles);
+    emit dataChanged(mPhotoIndexMap.value(photo.id()),
+                     mPhotoIndexMap.value(photo.id()), roles);
   }
   mPreviewLoadThreads.remove(photo.id());
   photo.setIsDownloadingPreview(false);
@@ -228,7 +246,8 @@ void PhotoModel::onOriginalTranslated(Photo photo, const QImage& image)
     // find the index for this photo.
     QVector<int> roles;
     roles << Photo::DataRole << MapView::ModelIndexLayer::DataRole;
-    emit         dataChanged(mPhotoIndexMap.value(photo.id()), mPhotoIndexMap.value(photo.id()), roles);
+    emit dataChanged(mPhotoIndexMap.value(photo.id()),
+                     mPhotoIndexMap.value(photo.id()), roles);
   }
   mOriginalLoadThreads.remove(photo.id());
   photo.setIsDownloadingOriginal(false);
@@ -246,22 +265,25 @@ void PhotoModel::setRootSourceId(PhotoModel::SourceType source, long long id)
 
   if (source == SourceFiles)
   {
-    mPhotoList = mWorkUnit->getPhotosByPath(id, Preferences::instance()->library_include_subfolders);
+    mPhotoList = mWorkUnit->getPhotosByPath(
+        id, Preferences::instance()->library_include_subfolders);
     mPhotoIndexMap.clear();
     int i = 0;
-    foreach(Photo p, mPhotoList)
+    foreach (Photo p, mPhotoList)
     {
       p.setOwner(this);
       mPhotoIndexMap.insert(p.id(), index(i));
       i++;
     }
   }
-  else if (source == SourceCollectionUser || source == SourceCollectionImport || source == SourceCollectionWork)
+  else if (source == SourceCollectionUser || source == SourceCollectionImport ||
+           source == SourceCollectionWork)
   {
-    mPhotoList = mWorkUnit->getPhotosByCollectionId(id, Preferences::instance()->library_include_subfolders);
+    mPhotoList = mWorkUnit->getPhotosByCollectionId(
+        id, Preferences::instance()->library_include_subfolders);
     mPhotoIndexMap.clear();
     int i = 0;
-    foreach(Photo p, mPhotoList)
+    foreach (Photo p, mPhotoList)
     {
       p.setOwner(this);
       mPhotoIndexMap.insert(p.id(), index(i));
@@ -300,15 +322,17 @@ QMimeData* PhotoModel::mimeData(const QModelIndexList& indexes) const
   QMimeData* mimeData = new QMimeData();
 
   // tile from which the drag started
-  //    Photo dragPhoto = data(index, Widgets::TileView::ImageRole).value<Photo>();
+  //    Photo dragPhoto = data(index,
+  //    Widgets::TileView::ImageRole).value<Photo>();
 
   //    image = QPixmap::fromImage(dragPhoto.libraryPreview().
-  //            scaled(150, 150, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+  //            scaled(150, 150, Qt::KeepAspectRatio,
+  //            Qt::SmoothTransformation));
   //    hotspot = QPoint(image.width() / 2, image.height() / 2);
 
   // get the id's of all selected items
   QList<long long> idlist;
-  foreach(QModelIndex index, indexes)
+  foreach (QModelIndex index, indexes)
   {
     Photo p = data(index, Photo::DataRole).value<Photo>();
 
@@ -321,14 +345,17 @@ QMimeData* PhotoModel::mimeData(const QModelIndexList& indexes) const
 }
 
 bool PhotoModel::canDropMimeData(const QMimeData* /*data*/,
-                                 Qt::DropAction /*action*/, int /*row*/, int /*column*/, const QModelIndex& /*parent*/) const
+                                 Qt::DropAction /*action*/, int /*row*/,
+                                 int /*column*/,
+                                 const QModelIndex& /*parent*/) const
 {
   // do not support drops for now.
   return false;
 }
 
 bool PhotoModel::dropMimeData(const QMimeData* /*data*/,
-                              Qt::DropAction /*action*/, int /*row*/, int /*column*/, const QModelIndex& /*parent*/)
+                              Qt::DropAction /*action*/, int /*row*/,
+                              int /*column*/, const QModelIndex& /*parent*/)
 {
   return false;
 }
@@ -338,7 +365,8 @@ PhotoModel::SourceType PhotoModel::rootSource() const
   return mPhotoSource;
 }
 
-void PhotoModel::onVisibleTilesChanged(const QModelIndex& start, const QModelIndex& end)
+void PhotoModel::onVisibleTilesChanged(const QModelIndex& start,
+                                       const QModelIndex& end)
 {
   QList<uint32_t> idList;
 
@@ -355,7 +383,8 @@ void PhotoModel::onVisibleTilesChanged(const QModelIndex& start, const QModelInd
     // between the check and reading it.
     uint32_t id = mPreviewLoadThreads.value(p.id());
 
-    if (id > 0)     // if it is 0 it has already completed. 0 is not a valid thread id
+    if (id >
+        0) // if it is 0 it has already completed. 0 is not a valid thread id
       idList.append(id);
   }
 
@@ -366,14 +395,15 @@ void PhotoModel::onVisibleTilesChanged(const QModelIndex& start, const QModelInd
   }
 }
 
-void PhotoModel::onPhotosAdded(long long /*pathid*/, const QList<long long>& idList)
+void PhotoModel::onPhotosAdded(long long /*pathid*/,
+                               const QList<long long>& idList)
 {
-  int          start = rowCount();
+  int start = rowCount();
 
   QList<Photo> list = mWorkUnit->getPhotosById(idList);
 
-  beginInsertRows(QModelIndex(), start, start );
-  foreach(Photo info, list)
+  beginInsertRows(QModelIndex(), start, start);
+  foreach (Photo info, list)
   {
     info.setOwner(this);
     mPhotoList.append(info);
@@ -381,7 +411,8 @@ void PhotoModel::onPhotosAdded(long long /*pathid*/, const QList<long long>& idL
   endInsertRows();
 }
 
-void PhotoModel::onPhotosDeletedFromCollection(long long collectionid, const QList<Photo>& photos)
+void PhotoModel::onPhotosDeletedFromCollection(long long           collectionid,
+                                               const QList<Photo>& photos)
 {
   if (mPhotoSource == SourceCollectionUser && collectionid == mRootId)
     onPhotosDeleted(photos);
@@ -389,7 +420,7 @@ void PhotoModel::onPhotosDeletedFromCollection(long long collectionid, const QLi
 
 void PhotoModel::onPhotosDeleted(const QList<Photo>& photos)
 {
-  foreach(Photo photo, photos)
+  foreach (Photo photo, photos)
   {
     int count = mPhotoList.size();
     int i;
@@ -397,7 +428,6 @@ void PhotoModel::onPhotosDeleted(const QList<Photo>& photos)
     for (i = 0; i < count; i++)
       if (photo.id() == mPhotoList.at(i).id())
         break;
-
 
     beginRemoveRows(QModelIndex(), i, i);
     mPhotoList.removeAt(i);
@@ -407,7 +437,7 @@ void PhotoModel::onPhotosDeleted(const QList<Photo>& photos)
 
 void PhotoModel::onPhotosChanged(const QList<Photo>& photos)
 {
-  foreach(Photo photo, photos)
+  foreach (Photo photo, photos)
   {
     int count = mPhotoList.size();
     int i;
@@ -415,19 +445,20 @@ void PhotoModel::onPhotosChanged(const QList<Photo>& photos)
     for (i = 0; i < count; i++)
       if (photo.id() == mPhotoList.at(i).id())
         emit dataChanged(index(i), index(i));
-
   }
 }
 
 void PhotoModel::refreshData(const QList<Photo>& /*list*/)
 {
-  // for now just emit that all data has changed. the tileview doesnt check anyway
+  // for now just emit that all data has changed. the tileview doesnt check
+  // anyway
   emit dataChanged(index(0), index(rowCount() - 1));
 }
 
 bool PhotoModel::removeRows(int row, int count, const QModelIndex& parent)
 {
-  if (row >= mPhotoList.size() || row + count  > mPhotoList.size() || row < 0 || count < 0)
+  if (row >= mPhotoList.size() || row + count > mPhotoList.size() || row < 0 ||
+      count < 0)
     return false;
 
   emit beginRemoveRows(parent, row, row + count - 1);
@@ -448,14 +479,16 @@ QList<Photo> PhotoModel::toList(const QItemSelection& selection) const
 {
   QList<Photo> list;
 
-  foreach(QModelIndex index, selection.indexes())
+  foreach (QModelIndex index, selection.indexes())
   {
     list.append(mPhotoList.at(index.row()));
   }
   return list;
 }
 
-QVariant PhotoModel::headerData(int /*section*/, Qt::Orientation /*orientation*/, int /*role*/) const
+QVariant PhotoModel::headerData(int /*section*/,
+                                Qt::Orientation /*orientation*/,
+                                int /*role*/) const
 {
   return QVariant();
 }
@@ -464,4 +497,4 @@ int PhotoModel::rowCount(const QModelIndex& /*parent*/) const
 {
   return mPhotoList.size();
 }
-}
+} // namespace PhotoStage

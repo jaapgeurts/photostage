@@ -1,57 +1,54 @@
 #ifndef PHOTOSTAGE_THREADQUEUE_H
 #define PHOTOSTAGE_THREADQUEUE_H
 
+#include <QMutex>
 #include <QObject>
 #include <QQueue>
 #include <QThread>
-#include <QMutex>
 
 #include "runnable.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class ResultForwarder : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public slots:
+public slots:
 
-        void onFinished(Runnable* runnable, const QVariant& result);
+  void onFinished(Runnable* runnable, const QVariant& result);
 };
 
 class ThreadQueue : public QObject
 {
-    Q_OBJECT
+  Q_OBJECT
 
-    public:
+public:
+  explicit ThreadQueue();
+  virtual ~ThreadQueue();
 
-        explicit ThreadQueue();
-        virtual ~ThreadQueue();
+  uint32_t addJob(Runnable* runnable);
 
-        uint32_t addJob(Runnable* runnable);
+  void purgeExcept(const QList<uint32_t>& list);
 
-        void purgeExcept(const QList<uint32_t>& list);
+signals:
 
-    signals:
+  void finished(Runnable* runnable, const QVariant& result);
 
-        void finished(Runnable* runnable, const QVariant& result);
+  // void error(int code, QString error);
 
-        // void error(int code, QString error);
+public slots:
 
-    public slots:
+  void onStarted();
+  void cancel();
 
-        void onStarted();
-        void cancel();
+private:
+  QMutex            mMutexJobs;
+  QQueue<Runnable*> mJobs;
+  QThread           mThread;
+  ResultForwarder   mResultForwarder;
+  uint32_t          mLastId;
 
-    private:
-
-        QMutex            mMutexJobs;
-        QQueue<Runnable*> mJobs;
-        QThread           mThread;
-        ResultForwarder   mResultForwarder;
-        uint32_t          mLastId;
-
-        Runnable* hasMore();
+  Runnable* hasMore();
 };
-}
+} // namespace PhotoStage
 #endif // PHOTOSTAGE_THREADQUEUE_H
