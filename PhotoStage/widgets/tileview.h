@@ -87,6 +87,8 @@ class TileView : public QWidget
 
         void selectAll();
 
+        void toggleSelectionChecked();
+
     private slots:
 
         // slots for slider events

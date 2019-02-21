@@ -118,8 +118,12 @@ ImportDialog::ImportDialog(QWidget* parent) :
 
     // install shortcuts
     QShortcut* scSelectAll = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_A),this);
-    connect(scSelectAll,&QShortcut::activated, this,&ImportDialog::onSelectAllFired);
+    QShortcut* scSelectNone = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_D),this);
+    QShortcut* scInvertSelection = new QShortcut(QKeySequence(Qt::CTRL + Qt::Key_I),this);
 
+    connect(scSelectAll,&QShortcut::activated, this,&ImportDialog::onSelectAllFired);
+    connect(scSelectNone,&QShortcut::activated, this,&ImportDialog::onSelectNoneFired);
+    connect(scInvertSelection,&QShortcut::activated, this,&ImportDialog::onInvertSelectionFired);
 
     // TODO: change to selection model
     connect(ui->mCfvPhotos->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ImportDialog::onFilesSelected);

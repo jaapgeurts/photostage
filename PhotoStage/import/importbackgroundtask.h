@@ -1,38 +1,43 @@
 #ifndef PHOTOSTAGE_IMPORTBACKGROUNDTASK_H
 #define PHOTOSTAGE_IMPORTBACKGROUNDTASK_H
 
-#include <QRunnable>
 #include <QList>
+#include <QRunnable>
 
 #include "backgroundtask.h"
 #include "database/databaseaccess.h"
+#include "importinfo.h"
+#include "importoptions.h"
 
-namespace PhotoStage
-{
+namespace PhotoStage {
 class ImportBackgroundTask : public BackgroundTask, public QRunnable
 {
-    public:
+public:
+  ImportBackgroundTask(const ImportInfo& info);
 
-        ImportBackgroundTask(const ImportInfo& info);
+  int  progressMinimum();
+  int  progressMaximum();
+  void run();
 
-        int progressMinimum();
-        int progressMaximum();
-        void run();
+  const QList<long long>& resultList();
 
-        const QList<long long>& resultList();
+public slots:
 
-    public slots:
+  void start();
+  void cancel();
 
-        void start();
-        void cancel();
+private:
+  QString   mLastPath;
+  long long mLastPathId;
 
-    private:
+  QString    mName;
+  ImportInfo mInfo;
 
-        QString           mName;
-        ImportInfo        mInfo;
+  std::atomic<bool> mRunning;
 
-        std::atomic<bool> mRunning;
+  ExifInfo preparePhotoImport(const QFileInfo&     fileInfo,
+                              const ImportOptions& options);
 };
-}
+} // namespace PhotoStage
 
 #endif // IMPORTBACKGROUNDTASK_H

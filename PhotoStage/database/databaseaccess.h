@@ -13,6 +13,7 @@ namespace PhotoStage
 {
 class DatabaseAccess : public QObject
 {
+
     Q_OBJECT
 
     public:
@@ -21,7 +22,6 @@ class DatabaseAccess : public QObject
 
         ~DatabaseAccess();
 
-        const QSqlDatabase& getDb() const;
 
         static PhotoDAO* photoDao();
         static PathDAO* pathDao();
@@ -56,8 +56,6 @@ class DatabaseAccess : public QObject
 
         static DatabaseAccess*    mInstance;
 
-        QSqlDatabase              mDB;
-
         static PhotoDAO*          mPhotoDAO;
         static PathDAO*           mPathDAO;
         static CollectionDAO*     mCollectionDAO;
@@ -68,6 +66,8 @@ class DatabaseAccess : public QObject
 
         void initDb();
         QString readQuery(QTextStream& ts);
+
+        bool onMainThread();
 };
 }
 #endif // DATABASEACCESS_H

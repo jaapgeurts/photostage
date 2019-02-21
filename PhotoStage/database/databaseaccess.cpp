@@ -1,6 +1,8 @@
 #include <QTextStream>
 #include <QtSql>
 #include <QDebug>
+#include <QApplication>
+#include <QThread>
 
 #include "databaseaccess.h"
 
@@ -54,16 +56,16 @@ DatabaseAccess* DatabaseAccess::instance(QObject* parent)
 DatabaseAccess::DatabaseAccess(QObject* parent) :
     QObject(parent)
 {
-    mDB = QSqlDatabase::addDatabase("QSQLITE");
+    QSqlDatabase dB = QSqlDatabase::addDatabase("QSQLITE");
     QString dbfile =  QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
         + QDir::separator() + "photostage.db";
     qDebug() << "Saving database to" << dbfile;
-    mDB.setDatabaseName(dbfile);
+    dB.setDatabaseName(dbfile);
 
-    if (!mDB.open())
-        qDebug() << mDB.lastError();
+    if (!dB.open())
+        qDebug() << dB.lastError();
 
-    QStringList tables = mDB.tables();
+    QStringList tables = dB.tables();
 
     //    if (tables.contains("photo", Qt::CaseInsensitive)
     //        && tables.contains("path", Qt::CaseInsensitive)
@@ -82,18 +84,14 @@ DatabaseAccess::~DatabaseAccess()
 
 void DatabaseAccess::beginTransaction()
 {
-    mDB.transaction();
+    QSqlDatabase::database().transaction();
 }
 
 void DatabaseAccess::endTransaction()
 {
-    mDB.commit();
+    QSqlDatabase::database().commit();
 }
 
-const QSqlDatabase& DatabaseAccess::getDb() const
-{
-    return mDB;
-}
 
 PathDAO* DatabaseAccess::pathDao()
 {
@@ -184,5 +182,10 @@ QString DatabaseAccess::readQuery(QTextStream& ts)
         line = ts.readLine();
     }
     return query;
+}
+
+bool DatabaseAccess::onMainThread()
+{
+  return QApplication::instance()->thread()->currentThreadId() == QThread::currentThreadId();
 }
 }

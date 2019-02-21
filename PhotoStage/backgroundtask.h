@@ -40,6 +40,7 @@ class BackgroundTask : public QObject
         void taskCancelled(BackgroundTask* task);
         void progressUpdated(int value);
 
+
     private:
 
         QString mName;

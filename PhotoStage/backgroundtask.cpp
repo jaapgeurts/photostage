@@ -11,4 +11,5 @@ void BackgroundTask::setDescription(const QString& description)
 {
     mDescription = description;
 }
+
 }

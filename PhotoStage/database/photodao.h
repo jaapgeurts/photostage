@@ -4,7 +4,6 @@
 #include <QList>
 
 #include "photo.h"
-#include "importinfo.h"
 
 namespace PhotoStage
 {
@@ -23,8 +22,7 @@ class PhotoDAO : public QObject
         void setColorLabel(const QList<Photo>& list, Photo::ColorLabel color);
         void assignGeoCoordinate(const QGeoCoordinate& coord, const QList<Photo>& list);
 
-        void beginImport();
-        void importPhoto(long long collectionid, const QFileInfo& file, const ImportOptions& options);
+        void importPhoto(long long collectionid, int pathId, const QString& fileName, long long hash, const ExifInfo& exifInfo);
 
         // Photo Items are created here.
         // ownership is transferred to the caller who should call delete on the objects
@@ -49,8 +47,6 @@ class PhotoDAO : public QObject
 
     private:
 
-        QString   mLastPath;
-        long long mLastPathId;
 
         explicit PhotoDAO(QObject* parent = 0);
 

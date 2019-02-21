@@ -7,7 +7,7 @@
 #include "availablelocationsmodel.h"
 #include "imagefilesystemmodel.h"
 #include "widgets/tileview.h"
-#include "database/importinfo.h"
+#include "importinfo.h"
 
 namespace Ui
 {

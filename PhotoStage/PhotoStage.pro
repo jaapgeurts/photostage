@@ -9,7 +9,7 @@ lessThan(QT_MAJOR_VERSION, 5): error("requires Qt 5")
 QT       += core gui widgets sql positioning network
 
 
-#greaterThan(QT_MAJOR_VERSION, 4): QT += 
+#greaterThan(QT_MAJOR_VERSION, 4): QT +=
 
 # sub project dependency targets
 rawspeed.target = rawspeed
@@ -19,7 +19,7 @@ rawspeed.commands = \
             cmake .. -DBUILD_TESTING=OFF && \
             make
 
-        
+
 #QMAKE_EXTRA_TARGETS += rawspeed
 #PRE_TARGETDEPS += rawspeed
 
@@ -53,8 +53,6 @@ SOURCES += \
     database/dbutils.cpp \
     database/developitems.cpp \
     database/developsettingdao.cpp \
-    database/importinfo.cpp \
-    database/importoptions.cpp \
     database/keyworddao.cpp \
     database/keyworditem.cpp \
     database/pathdao.cpp \
@@ -87,6 +85,8 @@ SOURCES += \
     import/imagefiletile.cpp \
     import/importbackgroundtask.cpp \
     import/importdialog.cpp \
+    import/importinfo.cpp \
+    import/importoptions.cpp \
     import/previewfileloader.cpp \
     import/previewinfo.cpp \
     io/jpegio.cpp \
@@ -160,8 +160,6 @@ HEADERS  += \
     database/dbutils.h \
     database/developitems.h \
     database/developsettingdao.h \
-    database/importinfo.h \
-    database/importoptions.h \
     database/keyworddao.h \
     database/keyworditem.h \
     database/pathdao.h \
@@ -194,6 +192,8 @@ HEADERS  += \
     import/imagefiletile.h \
     import/importbackgroundtask.h \
     import/importdialog.h \
+    import/importinfo.h \
+    import/importoptions.h \
     import/previewfileloader.h \
     import/previewinfo.h \
     io/jpegio.h \
