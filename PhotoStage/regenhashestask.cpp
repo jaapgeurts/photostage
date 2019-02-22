@@ -42,15 +42,5 @@ void RegenHashesTask::run()
   emit taskFinished(this);
 }
 
-void RegenHashesTask::start()
-{
-  // TODO: consider importing files in parallel, not in sequence
-  mRunning = true;
-  QThreadPool::globalInstance()->start(this);
-}
 
-void RegenHashesTask::cancel()
-{
-  mRunning = false;
-}
 } // namespace PhotoStage

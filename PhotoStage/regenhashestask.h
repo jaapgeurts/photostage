@@ -7,7 +7,7 @@
 #include "database/databaseaccess.h"
 
 namespace PhotoStage {
-class RegenHashesTask : public BackgroundTask, public QRunnable
+class RegenHashesTask : public BackgroundTask
 {
   Q_OBJECT
 
@@ -20,11 +20,6 @@ public:
   int  progressMinimum();
   int  progressMaximum();
   void run();
-
-public slots:
-
-  void start();
-  void cancel();
 
 private:
   std::atomic<bool> mRunning;

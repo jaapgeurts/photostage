@@ -1,5 +1,6 @@
 #include "importbackgroundtask.h"
 #include "utils.h"
+#include <QtConcurrent>
 
 namespace PhotoStage {
 ImportBackgroundTask::ImportBackgroundTask(const ImportInfo& info)
@@ -31,13 +32,21 @@ void ImportBackgroundTask::run()
   mLastPathId = -1;
 
   // create the new Import Collection
-  long long importcollectionid =
-      DatabaseAccess::collectionDao()->addImportCollection(
-          mInfo.sourceFiles.size());
+
+  bool      complete = false;
+  long long importcollectionid;
+  QMetaObject::invokeMethod(qApp, [this, &complete, &importcollectionid]() {
+    importcollectionid = DatabaseAccess::collectionDao()->addImportCollection(
+        mInfo.sourceFiles.size());
+    complete = true;
+  });
+  // wait for the code to have completed
+  while (!complete)
+    ;
 
   QListIterator<QFileInfo> it(mInfo.sourceFiles);
 
-  while (it.hasNext() && mRunning)
+  while (it.hasNext() && running())
   {
     QFileInfo fileInfo = it.next();
 
@@ -46,14 +55,17 @@ void ImportBackgroundTask::run()
       ExifInfo  exifInfo = preparePhotoImport(fileInfo, mInfo.options);
       long long hash     = computeImageFileHash(fileInfo);
 
-      // TODO :run this section on the main thread
-      QMetaObject::invokeMethod(qApp, [=] {
+      complete = false;
+      QMetaObject::invokeMethod(qApp, [exifInfo, importcollectionid,
+                                       this, hash, fileInfo, &complete] {
         qDebug() << "ThreadId in lambda: " << QThread::currentThreadId();
         DatabaseAccess::photoDao()->importPhoto(importcollectionid, mLastPathId,
                                                 fileInfo.fileName(), hash,
                                                 exifInfo);
+        complete = true;
       });
-      // TODO :run this section on the main thread
+      while (!complete)
+        ;
     }
     catch (const std::runtime_error& error)
     {
@@ -65,20 +77,6 @@ void ImportBackgroundTask::run()
   }
 
   emit taskFinished(this);
-}
-
-void ImportBackgroundTask::start()
-{
-  // TODO: consider importing files in parallel, not in sequence
-  mRunning = true;
-  qDebug() << "Importer threadId before:" << this->thread()->currentThreadId();
-  QThreadPool::globalInstance()->start(this);
-  qDebug() << "Importer threadId after:" << this->thread()->currentThreadId();
-}
-
-void ImportBackgroundTask::cancel()
-{
-  mRunning = false;
 }
 
 ExifInfo ImportBackgroundTask::preparePhotoImport(const QFileInfo&     fileInfo,
@@ -130,7 +128,13 @@ ExifInfo ImportBackgroundTask::preparePhotoImport(const QFileInfo&     fileInfo,
     // TODO: find way to prevent this call
     QStringList pathlist =
         dstdir.split(QDir::separator(), QString::KeepEmptyParts);
-    mLastPathId = DatabaseAccess::pathDao()->createPaths(pathlist);
+    bool completed = false;
+    QMetaObject::invokeMethod(qApp,[this,&pathlist,&completed](){
+      mLastPathId = DatabaseAccess::pathDao()->createPaths(pathlist);
+      completed = true;
+    });
+    while (!completed)
+      ;
   }
 
   // read all exif data.

@@ -6,7 +6,7 @@
 
 lessThan(QT_MAJOR_VERSION, 5): error("requires Qt 5")
 
-QT       += core gui widgets sql positioning network
+QT       += core gui widgets sql positioning network concurrent
 
 
 #greaterThan(QT_MAJOR_VERSION, 4): QT +=

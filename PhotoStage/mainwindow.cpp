@@ -617,7 +617,7 @@ void MainWindow::onShowInFileBrowser()
   scriptArgs << QLatin1String("-e")
              << QLatin1String("tell application \"Finder\" to activate");
   QProcess::execute("/usr/bin/osascript", scriptArgs);
-#else
+#elif defined(Q_OS_LINUX)
   // TODO: reveal file in system browser
   // we cannot select a file here, because no file browser really supports it...
 

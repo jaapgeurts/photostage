@@ -2,7 +2,6 @@
 #define PHOTOSTAGE_IMPORTBACKGROUNDTASK_H
 
 #include <QList>
-#include <QRunnable>
 
 #include "backgroundtask.h"
 #include "database/databaseaccess.h"
@@ -10,21 +9,17 @@
 #include "importoptions.h"
 
 namespace PhotoStage {
-class ImportBackgroundTask : public BackgroundTask, public QRunnable
+class ImportBackgroundTask : public BackgroundTask
 {
 public:
   ImportBackgroundTask(const ImportInfo& info);
 
+  // inherit from QRunnable
   int  progressMinimum();
   int  progressMaximum();
   void run();
 
   const QList<long long>& resultList();
-
-public slots:
-
-  void start();
-  void cancel();
 
 private:
   QString   mLastPath;
@@ -32,8 +27,6 @@ private:
 
   QString    mName;
   ImportInfo mInfo;
-
-  std::atomic<bool> mRunning;
 
   ExifInfo preparePhotoImport(const QFileInfo&     fileInfo,
                               const ImportOptions& options);
