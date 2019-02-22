@@ -70,9 +70,18 @@ ColorTransform::ColorTransform(const QByteArray& srcProfile, const QString& to,
     toProfile = to;
     qDebug() << "Loading monitor profile";
   }
-  else
+  else {
+#if defined(Q_OS_UNIX)
+    toProfile = QCoreApplication::applicationDirPath() +
+                "/../../PhotoStage/resources/Profiles/" + to + ".icc";
+#else
     toProfile = QCoreApplication::applicationDirPath() +
                 "/../Resources/Profiles/" + to + ".icc";
+#endif
+  }
+
+  qDebug() << "Source profile supplied as data";
+  qDebug() << "Loaded destination profile: " << toProfile;
 
   hInProfile =
       cmsOpenProfileFromMem(srcProfile.constData(), srcProfile.length());
@@ -124,10 +133,16 @@ ColorTransform::ColorTransform(const QString& from, const QString& to,
 {
   cmsHPROFILE hInProfile, hOutProfile;
 
+#if defined(Q_OS_LINUX)
+  QString fromProfile = QCoreApplication::applicationDirPath() +
+                        "/../../PhotoStage/resources/Profiles/" + from + ".icc";
+#else
   QString fromProfile = QCoreApplication::applicationDirPath() +
                         "/../Resources/Profiles/" + from + ".icc";
-
+#endif
   mProfileName = from;
+
+  qDebug() << "Loaded source profile: " << fromProfile;
 
   QString toProfile;
 
@@ -136,9 +151,16 @@ ColorTransform::ColorTransform(const QString& from, const QString& to,
     toProfile = to;
     qDebug() << "Loading monitor profile";
   }
-  else
-    toProfile = QCoreApplication::applicationDirPath() +
-                "/../Resources/Profiles/" + to + ".icc";
+  else {
+#if defined(Q_OS_LINUX)
+  QString toProfile = QCoreApplication::applicationDirPath() +
+                        "/../../PhotoStage/resources/Profiles/" + to + ".icc";
+#else
+  QString toProfile = QCoreApplication::applicationDirPath() +
+                        "/../Resources/Profiles/" + to + ".icc";
+#endif
+}
+  qDebug() << "Loaded destination profile: " << toProfile;
 
   hInProfile  = cmsOpenProfileFromFile(fromProfile.toLocal8Bit().data(), "r");
   hOutProfile = cmsOpenProfileFromFile(toProfile.toLocal8Bit().data(), "r");
